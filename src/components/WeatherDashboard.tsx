@@ -16,6 +16,7 @@ import {
 import { getWeatherEmoji, getWeatherDescription } from "@/lib/weather";
 import { motion, AnimatePresence } from "framer-motion";
 import WeatherBackground from "./WeatherBackground";
+import AffiliateCard from "./AffiliateCard";
 
 export default function WeatherDashboard() {
   const [city, setCity] = useState<City>(DUTCH_CITIES.find(c => c.name === "Alkmaar") || DUTCH_CITIES[0]);
@@ -275,6 +276,35 @@ export default function WeatherDashboard() {
         </div>
       </div>
 
+      {/* Model Confidence */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.45s" }}>
+        <div className="card p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-lg">
+                {weather.models.agreement >= 70 ? "🎯" : weather.models.agreement >= 40 ? "🤔" : "⚠️"}
+              </div>
+              <div>
+                <div className="text-sm font-bold text-text-primary">{weather.models.label}</div>
+                <div className="text-xs text-text-muted">{weather.models.sources.join(" + ")}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="score-bar w-16">
+                <div
+                  className="score-bar-fill"
+                  style={{
+                    width: `${weather.models.agreement}%`,
+                    background: weather.models.agreement >= 70 ? 'var(--accent-green)' : weather.models.agreement >= 40 ? 'var(--accent-amber)' : 'var(--accent-red)'
+                  }}
+                />
+              </div>
+              <span className="text-xs font-bold text-text-secondary">{weather.models.agreement}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Hourly Forecast */}
       <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
         <div className="flex justify-between items-end mb-3 px-1">
@@ -285,9 +315,10 @@ export default function WeatherDashboard() {
           {weather.hourly.slice(0, 12).map((hour, idx) => {
             const h = new Date(hour.time).getHours();
             const isNow = idx === 0;
+            const confidenceColor = hour.confidence === "high" ? "bg-accent-green" : hour.confidence === "medium" ? "bg-accent-amber" : "bg-accent-red";
             return (
-              <div 
-                key={hour.time} 
+              <div
+                key={hour.time}
                 className={`card p-4 flex flex-col items-center justify-between min-w-[70px] ${isNow ? 'border-accent-orange' : ''}`}
               >
                 <div className={`text-xs font-semibold ${isNow ? 'text-accent-orange' : 'text-text-secondary'}`}>
@@ -297,9 +328,15 @@ export default function WeatherDashboard() {
                   {getWeatherEmoji(hour.weatherCode, h > 6 && h < 21)}
                 </div>
                 <div className="text-sm font-bold">{hour.temperature}°</div>
+                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${confidenceColor}`} title={`Vertrouwen: ${hour.confidence}`} />
               </div>
             );
           })}
+        </div>
+        <div className="flex items-center gap-4 mt-2 px-1">
+          <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-accent-green" /><span className="text-[10px] text-white/50">Zeker</span></div>
+          <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-accent-amber" /><span className="text-[10px] text-white/50">Redelijk</span></div>
+          <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-accent-red" /><span className="text-[10px] text-white/50">Onzeker</span></div>
         </div>
       </div>
 
@@ -405,6 +442,11 @@ export default function WeatherDashboard() {
         </div>
       </div>
 
+      {/* Affiliate Spot 1 */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.85s" }}>
+        <AffiliateCard variant="weather" weather={weather} />
+      </div>
+
       {/* Wat trek je aan? */}
       <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
         <div className="flex justify-between items-end mb-3 px-1">
@@ -468,7 +510,7 @@ export default function WeatherDashboard() {
                   KutWeer
                 </h4>
                 <div className="text-sm font-semibold text-text-primary mb-1">Komende 48 uur</div>
-                <div className="text-xs text-text-muted">Echte data. KNMI modellen. Accuraat tot op de minuut.</div>
+                <div className="text-xs text-text-muted">KNMI HARMONIE + DWD ICON. Multi-model, fijnmazig.</div>
               </div>
               <div className="mt-4 px-3 py-1.5 bg-[rgba(52,211,153,0.1)] text-accent-green text-xs font-bold text-center rounded-lg">
                 Dit klopt gewoon.
@@ -497,6 +539,11 @@ export default function WeatherDashboard() {
         </div>
       </div>
 
+      {/* Affiliate Spot 2 */}
+      <div className="animate-fade-in" style={{ animationDelay: "1.15s" }}>
+        <AffiliateCard variant="generic" weather={weather} />
+      </div>
+
       {/* Footer / Share */}
       <footer className="pt-8 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
         <button className="btn-cta mx-auto">
@@ -507,7 +554,7 @@ export default function WeatherDashboard() {
           KutWeer — Elke dag opnieuw teleurgesteld door het weer.
         </p>
         <p className="text-[10px] text-white/50 mt-1">
-          Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a>. 
+          Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> (KNMI HARMONIE + DWD ICON).
           Geen meteorologen zijn gekwetst bij het maken van deze app. 💔
         </p>
       </footer>

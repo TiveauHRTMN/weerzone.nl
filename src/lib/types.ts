@@ -16,6 +16,7 @@ export interface WeatherData {
   sunrise: string;
   sunset: string;
   uvIndex: number;
+  models: ModelComparison;
 }
 
 export interface HourlyForecast {
@@ -23,6 +24,11 @@ export interface HourlyForecast {
   temperature: number;
   weatherCode: number;
   precipitation: number;
+  confidence: "high" | "medium" | "low";
+  models?: {
+    harmonie?: { temperature: number; precipitation: number; weatherCode: number };
+    icon?: { temperature: number; precipitation: number; weatherCode: number };
+  };
 }
 
 export interface DailyForecast {
@@ -32,6 +38,12 @@ export interface DailyForecast {
   weatherCode: number;
   precipitationSum: number;
   windSpeedMax: number;
+}
+
+export interface ModelComparison {
+  agreement: number; // 0-100 percentage
+  label: string;
+  sources: string[];
 }
 
 export interface City {
