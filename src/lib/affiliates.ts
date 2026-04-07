@@ -15,8 +15,8 @@ export const AFFILIATE_CONFIG = {
     // Publisher ID: je CJ account ID
     // Advertiser CID: Booking.com's CJ advertiser ID (krijg je na goedkeuring)
     cjPublisherId: "7923380",
-    cjAdvertiserCid: "", // Vul in na goedkeuring door Booking.com
-    enabled: false, // Zet op true na goedkeuring
+    cjAdvertiserCid: "4347407", // Booking.com BENELUX
+    enabled: true,
   },
   thuisbezorgd: {
     // Thuisbezorgd via Awin: https://www.awin.com
