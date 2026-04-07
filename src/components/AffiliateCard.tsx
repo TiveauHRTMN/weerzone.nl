@@ -7,201 +7,428 @@ interface Props {
   weather: WeatherData;
 }
 
-interface AffiliateItem {
-  emoji: string;
-  brand: string;
+interface Product {
+  image: string;
   title: string;
-  description: string;
-  cta: string;
+  price: string;
+  oldPrice?: string;
+  brand: string;
   href: string;
+  tag?: string;
 }
 
-// Top spot: Bol.com (weer-producten) vs Booking.com (vakantie bij kutweer)
-// Logic: slecht weer → Booking.com vaker tonen, goed weer → Bol.com producten
-function getTopAffiliate(weather: WeatherData): AffiliateItem {
+interface AffiliateSection {
+  heading: string;
+  subtitle: string;
+  products: Product[];
+}
+
+// Placeholder images using emoji-based colored gradients
+// Replace with real product image URLs when affiliate accounts are set up
+function placeholderImg(emoji: string, hue: number): string {
+  return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" rx="16" fill="hsl(${hue},40%,92%)"/><text x="100" y="115" font-size="64" text-anchor="middle">${emoji}</text></svg>`)}`;
+}
+
+function getTopProducts(weather: WeatherData): AffiliateSection {
   const temp = weather.current.temperature;
   const rain = weather.current.precipitation > 0 || weather.hourly.some(h => h.precipitation > 0.5);
   const cold = temp < 8;
   const hot = temp > 25;
   const kutWeer = rain || cold || weather.current.windSpeed > 35;
 
-  // Rotate between Bol.com and Booking.com — but bias based on weather
   const hour = new Date().getHours();
-  const showBooking = kutWeer
-    ? hour % 3 !== 0  // Kutweer: Booking 2/3 van de tijd
-    : hour % 4 === 0; // Goed weer: Booking 1/4 van de tijd
+  const showBooking = kutWeer ? hour % 3 !== 0 : hour % 4 === 0;
 
   if (showBooking) {
-    // Booking.com — slecht weer = vakantie-drang
-    if (cold && rain) {
-      return {
-        emoji: "✈️",
-        brand: "Booking.com",
-        title: "Koud en nat? Boek een zonvakantie",
-        description: "Weg uit dit kutweer. Zon, zee en strand vanaf €199. Gratis annuleren.",
-        cta: "Bekijk deals",
-        href: "#booking-zon",
-      };
-    }
-    if (rain) {
-      return {
-        emoji: "🏖️",
-        brand: "Booking.com",
-        title: "Regen zat? Vlieg naar de zon",
-        description: "Last-minute zon-deals. Morgen al aan het strand. Gratis annuleren.",
-        cta: "Ontsnap aan de regen",
-        href: "#booking-lastminute",
-      };
-    }
-    if (cold) {
-      return {
-        emoji: "🌴",
-        brand: "Booking.com",
-        title: "Klaar met de kou?",
-        description: "Citytrip of strandvakantie. 30°C in plaats van deze ellende.",
-        cta: "Bekijk bestemmingen",
-        href: "#booking-warm",
-      };
-    }
     return {
-      emoji: "🧳",
-      brand: "Booking.com",
-      title: "Weekendje weg?",
-      description: "Lekker weer nu, maar wie weet morgen. Plan alvast je ontsnapping.",
-      cta: "Bekijk aanbiedingen",
-      href: "#booking-weekend",
+      heading: kutWeer ? "Ontsnap aan dit kutweer" : "Weekendje weg?",
+      subtitle: "Booking.com",
+      products: [
+        {
+          image: placeholderImg("🏖️", 200),
+          title: "Barcelona",
+          price: "vanaf €149",
+          brand: "Booking.com",
+          href: "#booking-barcelona",
+          tag: "Populair",
+        },
+        {
+          image: placeholderImg("🌴", 120),
+          title: "Malaga",
+          price: "vanaf €179",
+          brand: "Booking.com",
+          href: "#booking-malaga",
+        },
+        {
+          image: placeholderImg("☀️", 40),
+          title: "Lissabon",
+          price: "vanaf €159",
+          oldPrice: "€209",
+          brand: "Booking.com",
+          href: "#booking-lissabon",
+          tag: "Deal",
+        },
+        {
+          image: placeholderImg("🏝️", 170),
+          title: "Kreta",
+          price: "vanaf €219",
+          brand: "Booking.com",
+          href: "#booking-kreta",
+        },
+        {
+          image: placeholderImg("🗼", 280),
+          title: "Parijs",
+          price: "vanaf €129",
+          brand: "Booking.com",
+          href: "#booking-parijs",
+          tag: "Citytrip",
+        },
+      ],
     };
   }
 
-  // Bol.com — weer-specifieke producten
   if (rain) {
     return {
-      emoji: "☂️",
-      brand: "Bol.com",
-      title: "Droog blijven vandaag?",
-      description: "Regenjassen, paraplu's en waterdichte tassen. Morgen in huis.",
-      cta: "Bekijk op Bol.com",
-      href: "#bol-regen",
+      heading: "Droog blijven vandaag",
+      subtitle: "Bol.com",
+      products: [
+        {
+          image: placeholderImg("🧥", 210),
+          title: "Regenjas waterdicht",
+          price: "€49,99",
+          oldPrice: "€69,99",
+          brand: "Bol.com",
+          href: "#bol-regenjas",
+          tag: "Aanbieding",
+        },
+        {
+          image: placeholderImg("☂️", 240),
+          title: "Stormparaplu XL",
+          price: "€24,95",
+          brand: "Bol.com",
+          href: "#bol-paraplu",
+          tag: "Bestseller",
+        },
+        {
+          image: placeholderImg("👢", 30),
+          title: "Regenlaarzen",
+          price: "€34,99",
+          brand: "Bol.com",
+          href: "#bol-laarzen",
+        },
+        {
+          image: placeholderImg("🎒", 190),
+          title: "Waterdichte rugzak",
+          price: "€39,95",
+          brand: "Bol.com",
+          href: "#bol-rugzak",
+        },
+      ],
     };
   }
+
   if (cold) {
     return {
-      emoji: "🧣",
-      brand: "Bol.com",
-      title: "Warm blijven vandaag",
-      description: "Thermokleding, handschoenen en mutsen. Morgen in huis.",
-      cta: "Bekijk op Bol.com",
-      href: "#bol-warm",
+      heading: "Warm blijven",
+      subtitle: "Bol.com",
+      products: [
+        {
+          image: placeholderImg("🧣", 0),
+          title: "Merino sjaal",
+          price: "€29,95",
+          brand: "Bol.com",
+          href: "#bol-sjaal",
+        },
+        {
+          image: placeholderImg("🧤", 340),
+          title: "Thermo handschoenen",
+          price: "€19,99",
+          oldPrice: "€27,99",
+          brand: "Bol.com",
+          href: "#bol-handschoenen",
+          tag: "Aanbieding",
+        },
+        {
+          image: placeholderImg("🧥", 20),
+          title: "Winterjas",
+          price: "€89,95",
+          brand: "Bol.com",
+          href: "#bol-winterjas",
+          tag: "Bestseller",
+        },
+        {
+          image: placeholderImg("☕", 30),
+          title: "Thermosfles 500ml",
+          price: "€22,50",
+          brand: "Bol.com",
+          href: "#bol-thermos",
+        },
+      ],
     };
   }
+
   if (hot) {
     return {
-      emoji: "🧴",
-      brand: "Bol.com",
-      title: `UV-index ${weather.uvIndex.toFixed(0)} — smeer je in`,
-      description: "Zonnebrand, zonnebrillen en ventilators. Snel geleverd.",
-      cta: "Bekijk op Bol.com",
-      href: "#bol-zon",
+      heading: `UV ${weather.uvIndex.toFixed(0)} — bescherm jezelf`,
+      subtitle: "Bol.com",
+      products: [
+        {
+          image: placeholderImg("🧴", 40),
+          title: "Zonnebrand SPF50",
+          price: "€12,99",
+          brand: "Bol.com",
+          href: "#bol-zonnebrand",
+          tag: "Noodzaak",
+        },
+        {
+          image: placeholderImg("😎", 200),
+          title: "Polaroid zonnebril",
+          price: "€34,95",
+          oldPrice: "€49,95",
+          brand: "Bol.com",
+          href: "#bol-zonnebril",
+          tag: "Deal",
+        },
+        {
+          image: placeholderImg("🌀", 180),
+          title: "Tafelventilator",
+          price: "€29,99",
+          brand: "Bol.com",
+          href: "#bol-ventilator",
+        },
+        {
+          image: placeholderImg("🧊", 210),
+          title: "Koelbox 24L",
+          price: "€44,95",
+          brand: "Bol.com",
+          href: "#bol-koelbox",
+        },
+      ],
     };
   }
-  // Goed weer fallback
+
   return {
-    emoji: "🚴",
-    brand: "Bol.com",
-    title: "Lekker weer om naar buiten te gaan",
-    description: "Fietsaccessoires, buitenspeelgoed en tuinmeubelen. Morgen in huis.",
-    cta: "Bekijk op Bol.com",
-    href: "#bol-buiten",
+    heading: "Lekker weer? Naar buiten!",
+    subtitle: "Bol.com",
+    products: [
+      {
+        image: placeholderImg("🚴", 150),
+        title: "Fietslamp set LED",
+        price: "€14,95",
+        brand: "Bol.com",
+        href: "#bol-fietslamp",
+        tag: "Populair",
+      },
+      {
+        image: placeholderImg("🎒", 120),
+        title: "Dagrugzak 20L",
+        price: "€29,99",
+        oldPrice: "€39,99",
+        brand: "Bol.com",
+        href: "#bol-rugzak",
+        tag: "Aanbieding",
+      },
+      {
+        image: placeholderImg("⚽", 100),
+        title: "Buitenspeelgoed",
+        price: "vanaf €9,99",
+        brand: "Bol.com",
+        href: "#bol-buiten",
+      },
+      {
+        image: placeholderImg("🪑", 40),
+        title: "Tuinstoel opvouwbaar",
+        price: "€24,95",
+        brand: "Bol.com",
+        href: "#bol-tuinstoel",
+      },
+    ],
   };
 }
 
-// Bottom spot: Thuisbezorgd (slecht weer) vs Bol.com secundair (goed weer)
-function getBottomAffiliate(weather: WeatherData): AffiliateItem {
+function getBottomProducts(weather: WeatherData): AffiliateSection {
   const temp = weather.current.temperature;
   const rain = weather.current.precipitation > 0 || weather.hourly.some(h => h.precipitation > 0.5);
   const cold = temp < 10;
   const kutWeer = rain || cold || weather.current.windSpeed > 35;
 
-  // Kutweer → Thuisbezorgd is king
   if (kutWeer) {
-    if (rain && cold) {
-      return {
-        emoji: "🍕",
-        brand: "Thuisbezorgd",
-        title: "Blijf lekker binnen",
-        description: "Koud, nat, en geen zin om te koken? Bestel je favoriete eten. Binnen 30 min bezorgd.",
-        cta: "Bestel nu",
-        href: "#thuisbezorgd-regen",
-      };
-    }
-    if (rain) {
-      return {
-        emoji: "🍜",
-        brand: "Thuisbezorgd",
-        title: "Regen + bank = bestellen",
-        description: "Waarom zou je naar buiten gaan? Laat je eten bezorgen en geniet van de droogte binnen.",
-        cta: "Bekijk restaurants",
-        href: "#thuisbezorgd-comfort",
-      };
-    }
     return {
-      emoji: "🍔",
-      brand: "Thuisbezorgd",
-      title: "Geen weer om te koken",
-      description: "Kutweer buiten, comfort food binnen. Je favoriete restaurant bezorgt aan de deur.",
-      cta: "Bestel eten",
-      href: "#thuisbezorgd-kutweer",
+      heading: "Blijf binnen, bestel eten",
+      subtitle: "Thuisbezorgd",
+      products: [
+        {
+          image: placeholderImg("🍕", 15),
+          title: "Pizza bezorgd",
+          price: "vanaf €8,50",
+          brand: "Thuisbezorgd",
+          href: "#thuisbezorgd-pizza",
+          tag: "Favoriet",
+        },
+        {
+          image: placeholderImg("🍜", 30),
+          title: "Aziatisch",
+          price: "vanaf €10,–",
+          brand: "Thuisbezorgd",
+          href: "#thuisbezorgd-aziatisch",
+        },
+        {
+          image: placeholderImg("🍔", 40),
+          title: "Burgers",
+          price: "vanaf €9,–",
+          brand: "Thuisbezorgd",
+          href: "#thuisbezorgd-burgers",
+          tag: "Populair",
+        },
+        {
+          image: placeholderImg("🍣", 350),
+          title: "Sushi",
+          price: "vanaf €12,–",
+          brand: "Thuisbezorgd",
+          href: "#thuisbezorgd-sushi",
+        },
+        {
+          image: placeholderImg("🥗", 130),
+          title: "Gezond",
+          price: "vanaf €11,–",
+          brand: "Thuisbezorgd",
+          href: "#thuisbezorgd-gezond",
+        },
+      ],
     };
   }
 
-  // Goed weer → Bol.com BBQ/tuin of Booking.com weekend
   const hour = new Date().getHours();
   if (hour % 2 === 0) {
     return {
-      emoji: "🔥",
-      brand: "Bol.com",
-      title: "BBQ-weer!",
-      description: "Profiteer van het goede weer. BBQ's, tuinmeubelen en buitenverlichting.",
-      cta: "Bekijk op Bol.com",
-      href: "#bol-bbq",
+      heading: "BBQ-weer!",
+      subtitle: "Bol.com",
+      products: [
+        {
+          image: placeholderImg("🔥", 15),
+          title: "Houtskool BBQ",
+          price: "€49,99",
+          oldPrice: "€69,99",
+          brand: "Bol.com",
+          href: "#bol-bbq",
+          tag: "Deal",
+        },
+        {
+          image: placeholderImg("🥩", 0),
+          title: "BBQ gereedschap set",
+          price: "€24,95",
+          brand: "Bol.com",
+          href: "#bol-bbq-set",
+        },
+        {
+          image: placeholderImg("💡", 50),
+          title: "Tuinverlichting LED",
+          price: "€19,99",
+          brand: "Bol.com",
+          href: "#bol-tuinlicht",
+        },
+        {
+          image: placeholderImg("🪑", 40),
+          title: "Loungestoel tuin",
+          price: "€79,95",
+          brand: "Bol.com",
+          href: "#bol-lounge",
+          tag: "Populair",
+        },
+      ],
     };
   }
+
   return {
-    emoji: "📱",
-    brand: "Bol.com",
-    title: "Eigen weerstation?",
-    description: "Meet temperatuur, luchtvochtigheid en wind in je eigen tuin. Realtime op je telefoon.",
-    cta: "Bekijk weerstations",
-    href: "#bol-weerstation",
+    heading: "Slimme weermeters",
+    subtitle: "Bol.com",
+    products: [
+      {
+        image: placeholderImg("📱", 220),
+        title: "Netatmo weerstation",
+        price: "€149,99",
+        oldPrice: "€189,99",
+        brand: "Bol.com",
+        href: "#bol-netatmo",
+        tag: "Tip",
+      },
+      {
+        image: placeholderImg("🌡️", 0),
+        title: "Buiten thermometer",
+        price: "€12,95",
+        brand: "Bol.com",
+        href: "#bol-thermometer",
+      },
+      {
+        image: placeholderImg("💨", 200),
+        title: "Windmeter digitaal",
+        price: "€34,95",
+        brand: "Bol.com",
+        href: "#bol-windmeter",
+      },
+      {
+        image: placeholderImg("🌧️", 210),
+        title: "Regenmeter tuin",
+        price: "€8,99",
+        brand: "Bol.com",
+        href: "#bol-regenmeter",
+        tag: "Bestseller",
+      },
+    ],
   };
 }
 
-export default function AffiliateCard({ variant, weather }: Props) {
-  const item = variant === "top" ? getTopAffiliate(weather) : getBottomAffiliate(weather);
-
+function ProductCard({ product }: { product: Product }) {
   return (
     <a
-      href={item.href}
-      className="card p-5 flex flex-col gap-4 group cursor-pointer border-accent-orange/20 hover:border-accent-orange/40 overflow-hidden relative"
+      href={product.href}
+      className="shrink-0 w-[140px] group/product cursor-pointer"
       target="_blank"
       rel="noopener noreferrer sponsored"
     >
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-orange via-accent-amber to-accent-orange opacity-60" />
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-orange/15 to-accent-amber/15 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
-          {item.emoji}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-base font-bold text-text-primary">{item.title}</span>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange/70 bg-accent-orange/10 px-2 py-0.5 rounded-full">{item.brand}</span>
-          </div>
-          <p className="text-sm text-text-secondary leading-relaxed">{item.description}</p>
-        </div>
+      <div className="relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-black/[0.03] mb-2">
+        <img
+          src={product.image}
+          alt={product.title}
+          className="w-full h-full object-cover group-hover/product:scale-105 transition-transform duration-300"
+        />
+        {product.tag && (
+          <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wide bg-accent-orange text-white px-2 py-0.5 rounded-full">
+            {product.tag}
+          </span>
+        )}
       </div>
-      <div className="flex justify-end">
-        <span className="btn-cta text-sm px-5 py-2.5 group-hover:translate-y-[-1px] transition-transform">{item.cta} →</span>
+      <div className="text-xs font-bold text-text-primary leading-tight line-clamp-2 group-hover/product:text-accent-orange transition-colors">
+        {product.title}
+      </div>
+      <div className="flex items-center gap-1.5 mt-1">
+        <span className="text-sm font-black text-text-primary">{product.price}</span>
+        {product.oldPrice && (
+          <span className="text-[10px] text-text-muted line-through">{product.oldPrice}</span>
+        )}
       </div>
     </a>
+  );
+}
+
+export default function AffiliateCard({ variant, weather }: Props) {
+  const section = variant === "top" ? getTopProducts(weather) : getBottomProducts(weather);
+
+  return (
+    <div className="card p-5 overflow-hidden relative">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-orange via-accent-amber to-accent-orange opacity-60" />
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h4 className="text-sm font-bold text-text-primary">{section.heading}</h4>
+          <span className="text-[10px] text-text-muted">{section.subtitle}</span>
+        </div>
+        <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange/70 bg-accent-orange/10 px-2 py-0.5 rounded-full">Advertentie</span>
+      </div>
+      <div className="horizontal-scroll no-scrollbar gap-3">
+        {section.products.map((product) => (
+          <ProductCard key={product.href} product={product} />
+        ))}
+      </div>
+    </div>
   );
 }
