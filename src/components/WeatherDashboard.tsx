@@ -1,0 +1,518 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { CloudRain, MapPin, Send, RefreshCw, ChevronDown } from "lucide-react";
+import { getWeather } from "@/app/actions";
+import { DUTCH_CITIES, type City, type WeatherData } from "@/lib/types";
+import {
+  getMainCommentary,
+  getKutweerScore,
+  getFietsScore,
+  getOutfitAdvice,
+  getWindComment,
+  getRandomQuote,
+  getUvLabel,
+} from "@/lib/commentary";
+import { getWeatherEmoji, getWeatherDescription } from "@/lib/weather";
+import { motion, AnimatePresence } from "framer-motion";
+import WeatherBackground from "./WeatherBackground";
+
+export default function WeatherDashboard() {
+  const [city, setCity] = useState<City>(DUTCH_CITIES.find(c => c.name === "Alkmaar") || DUTCH_CITIES[0]);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [quote, setQuote] = useState("");
+  const [chatInput, setChatInput] = useState("");
+
+  const fetchWeather = async (targetCity: City) => {
+    setLoading(true);
+    try {
+      const data = await getWeather(targetCity.lat, targetCity.lon);
+      setWeather(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setQuote(getRandomQuote());
+    fetchWeather(city);
+  }, [city]);
+
+  const handleLocationClick = () => {
+    if ("geolocation" in navigator) {
+      setLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const data = await getWeather(position.coords.latitude, position.coords.longitude);
+            setWeather(data);
+            setCity({ name: "Jouw Locatie", lat: position.coords.latitude, lon: position.coords.longitude });
+          } catch (e) {
+            console.error(e);
+          } finally {
+            setLoading(false);
+          }
+        },
+        (error) => {
+          console.error(error);
+          setLoading(false);
+        }
+      );
+    }
+  };
+
+  if (loading || !weather) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center">
+        <CloudRain className="w-16 h-16 text-accent-orange animate-bounce mb-4" />
+        <h2 className="text-xl font-medium">Even geduld, we kijken naar buiten...</h2>
+      </div>
+    );
+  }
+
+  const { score: kutScore, label: kutLabel, emoji: kutEmoji } = getKutweerScore(weather);
+  const { score: fietsScore, label: fietsLabel } = getFietsScore(weather);
+  const { emoji: outfitEmoji, advice: outfitAdvice } = getOutfitAdvice(weather);
+  const uvInfo = getUvLabel(weather.uvIndex);
+
+  return (
+    <>
+    <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
+    <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
+      {/* Header */}
+      <header className="flex items-center justify-between animate-fade-in">
+        <div className="flex items-center gap-2">
+          <CloudRain className="text-[#a89080] w-8 h-8" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-1">
+              KutWeer
+            </h1>
+            <p className="text-xs text-text-muted">Het weer, maar dan eerlijk.</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleLocationClick}
+            className="w-10 h-10 rounded-full border border-[rgba(255,200,150,0.1)] flex items-center justify-center hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+          >
+            <MapPin className="text-accent-red w-4 h-4" />
+          </button>
+          
+          <div className="relative group">
+            <select
+              value={city.name}
+              onChange={(e) => {
+                const selected = DUTCH_CITIES.find(c => c.name === e.target.value);
+                if (selected) setCity(selected);
+              }}
+              className="appearance-none bg-transparent border border-[rgba(255,200,150,0.1)] rounded-full pl-4 pr-10 py-2 text-sm font-medium hover:bg-[rgba(255,255,255,0.05)] transition-colors cursor-pointer focus:outline-none focus:border-accent-orange"
+            >
+              <option value="Jouw Locatie" disabled hidden>Jouw Locatie</option>
+              {DUTCH_CITIES.map(c => (
+                <option key={c.name} value={c.name} className="bg-bg-secondary text-text-primary">
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-text-secondary" />
+          </div>
+        </div>
+      </header>
+
+      {/* Intro AI Chat */}
+      <div className="card p-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="relative flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent-orange to-accent-amber flex items-center justify-center text-sm">🤖</div>
+          <input
+            type="text"
+            placeholder="Stel een vraag... bijv. 'Kan ik om 19:00 droog fietsen?'"
+            className="search-input flex-1"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') setChatInput(''); }}
+          />
+          <button className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-accent-orange text-white flex items-center justify-center hover:bg-orange-600 transition-colors">
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+        
+        <div className="flex overflow-x-auto gap-2 mt-4 pb-1 pl-1 no-scrollbar">
+          <button className="chip flex-shrink-0">🧥 Jas mee?</button>
+          <button className="chip flex-shrink-0">🏃‍♂️ Hardlopen?</button>
+          <button className="chip flex-shrink-0">🗓️ Morgen beter?</button>
+        </div>
+      </div>
+
+      {/* Main Weather Card */}
+      <div className="card overflow-hidden relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <div className="gradient-line absolute top-0 left-0 right-0" />
+        
+        <div className="p-6">
+          <div className="text-sm font-medium text-text-secondary flex items-center gap-1 mb-2">
+            <MapPin className="w-3 h-3 text-accent-red" />
+            {city.name} — {new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </div>
+          
+          <div className="flex justify-between items-start mt-4">
+            <div className="flex items-start">
+              <span className="text-7xl font-bold tracking-tighter leading-none">{weather.current.temperature}</span>
+              <span className="text-4xl font-semibold mt-1">°C</span>
+            </div>
+            
+            <div className="text-7xl leading-none">
+              {getWeatherEmoji(weather.current.weatherCode, weather.current.isDay)}
+            </div>
+          </div>
+          
+          <div className="mt-8 bg-[rgba(232,116,58,0.15)] border-l-4 border-accent-orange p-4 rounded-r-lg">
+            <p className="font-semibold text-lg text-white">
+              {getMainCommentary(weather)}
+            </p>
+          </div>
+          
+          <div className="flex flex-wrap gap-3 mt-6">
+            <span className="badge bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] font-normal px-3 py-1.5">
+              Voelt als <strong className="ml-1 text-white">{weather.current.feelsLike}°</strong>
+            </span>
+            <span className="badge bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] font-normal px-3 py-1.5">
+              {getWeatherDescription(weather.current.weatherCode)}
+            </span>
+            <span className="badge bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] font-normal px-3 py-1.5">
+              Luchtvochtigheid <strong className="ml-1 text-white">{weather.current.humidity}%</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quote section */}
+      <div className="card p-6 flex flex-col items-center justify-center text-center relative overflow-hidden animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-orange to-transparent opacity-50" />
+        <div className="text-4xl mb-4">☀️</div>
+        <AnimatePresence mode="wait">
+          <motion.p 
+            key={quote} 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="text-lg font-medium text-white max-w-md"
+          >
+            {quote}
+          </motion.p>
+        </AnimatePresence>
+        
+        <button 
+          onClick={() => setQuote(getRandomQuote())}
+          className="mt-6 flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(255,255,255,0.1)] text-sm font-medium hover:bg-[rgba(255,255,255,0.05)] transition-colors"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Nog een
+        </button>
+      </div>
+
+      {/* Grid for minor stats */}
+      <div className="grid grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        {/* Voelt Als */}
+        <div className="card p-4">
+          <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="text-accent-amber text-base">🌡️</span> Gevoelstemperatuur
+          </div>
+          <div className="text-3xl font-bold flex items-start">
+            {weather.current.feelsLike}<span className="text-lg mt-1">°</span>
+          </div>
+          <div className="text-sm text-text-muted mt-1">
+            {weather.current.feelsLike < weather.current.temperature ? "Voelt kouder dan het is" : 
+             weather.current.feelsLike > weather.current.temperature ? "Voelt warmer dan het is" : 
+             "Precies wat het is"}
+          </div>
+        </div>
+        
+        {/* Luchtvochtigheid */}
+        <div className="card p-4">
+          <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="text-accent-cyan text-base">💧</span> Luchtvochtigheid
+          </div>
+          <div className="text-3xl font-bold flex items-start">
+            {weather.current.humidity}<span className="text-lg mt-1">%</span>
+          </div>
+          <div className="text-sm text-text-muted mt-1">
+            {weather.current.humidity > 80 ? "Klam en benauwd" : 
+             weather.current.humidity < 40 ? "Lekker droog" : 
+             "Normaal Nederlands zweetweer"}
+          </div>
+        </div>
+        
+        {/* Wind */}
+        <div className="card p-4">
+          <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="text-accent-cyan text-base">🌬️</span> Wind
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold">{weather.current.windSpeed}</span>
+            <span className="text-sm font-bold text-white">km/h</span>
+          </div>
+          <div className="text-sm text-text-muted mt-1">
+             Richting: {weather.current.windDirection} • Stoten: {weather.current.windGusts} km/h
+          </div>
+        </div>
+        
+        {/* Neerslag */}
+        <div className="card p-4">
+          <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="text-accent-cyan text-base">🌧️</span> Neerslag
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold">{weather.current.precipitation}</span>
+            <span className="text-sm font-bold text-white">mm</span>
+          </div>
+          <div className="text-sm text-text-muted mt-1">
+            {weather.current.precipitation > 0 ? "Gewoon nat 💧" : "Droog 👍"}
+          </div>
+        </div>
+      </div>
+
+      {/* Hourly Forecast */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Komende Uren</h3>
+          <span className="text-xs text-text-muted">Swipe →</span>
+        </div>
+        <div className="horizontal-scroll">
+          {weather.hourly.slice(0, 12).map((hour, idx) => {
+            const h = new Date(hour.time).getHours();
+            const isNow = idx === 0;
+            return (
+              <div 
+                key={hour.time} 
+                className={`card p-4 flex flex-col items-center justify-between min-w-[70px] ${isNow ? 'border-accent-orange' : ''}`}
+              >
+                <div className={`text-xs font-semibold ${isNow ? 'text-accent-orange' : 'text-text-secondary'}`}>
+                  {isNow ? 'Nu' : `${h.toString().padStart(2, '0')}:00`}
+                </div>
+                <div className="text-2xl my-2">
+                  {getWeatherEmoji(hour.weatherCode, h > 6 && h < 21)}
+                </div>
+                <div className="text-sm font-bold">{hour.temperature}°</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Vandaag & Morgen */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.6s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Vandaag & Morgen</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4 text-left">
+          <div className="card p-4 border border-accent-orange flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start mb-2">
+              <span className="font-bold text-accent-orange">Vandaag</span>
+              <span className="text-xl">{getWeatherEmoji(weather.daily[0].weatherCode)}</span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-auto">
+              <span className="text-3xl font-bold">{weather.daily[0].tempMax}°</span>
+              <span className="text-sm text-text-muted">{weather.daily[0].tempMin}°</span>
+            </div>
+            <div className="text-xs text-text-muted mt-2">
+              {weather.daily[0].precipitationSum > 0 ? `${weather.daily[0].precipitationSum}mm regen verwacht` : 'Geen regen verwacht'}
+              <br />
+              💨 Max {weather.daily[0].windSpeedMax} km/h
+            </div>
+          </div>
+          
+          <div className="card p-4 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start mb-2">
+              <span className="font-bold text-white">Morgen</span>
+              <span className="text-xl">{getWeatherEmoji(weather.daily[1].weatherCode)}</span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-auto">
+              <span className="text-3xl font-bold">{weather.daily[1].tempMax}°</span>
+              <span className="text-sm text-text-muted">{weather.daily[1].tempMin}°</span>
+            </div>
+            <div className="text-xs text-text-muted mt-2">
+              {weather.daily[1].precipitationSum > 0 ? `${weather.daily[1].precipitationSum}mm regen verwacht` : 'Geen regen verwacht'}
+              <br />
+              💨 Max {weather.daily[1].windSpeedMax} km/h
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* KutWeer-Score */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">KutWeer-Score</h3>
+          <span className="text-xs text-text-muted">Hoe erg is het?</span>
+        </div>
+        <div className="card p-6 overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-green via-accent-amber to-accent-red" />
+          
+          <div className="flex items-end justify-between">
+            <div className="flex items-baseline gap-1">
+              <span className="text-6xl font-black text-accent-green leading-none">{kutScore}</span>
+              <span className="text-xl font-bold text-text-muted">/ 10</span>
+            </div>
+            <div className="text-6xl leading-none">{kutEmoji}</div>
+          </div>
+          
+          <div className="score-bar mt-6">
+            <div 
+              className="score-bar-fill"
+              style={{ 
+                width: `${kutScore * 10}%`,
+                background: kutScore > 7 ? 'var(--accent-red)' : kutScore > 4 ? 'var(--accent-amber)' : 'var(--accent-green)'
+              }}
+            />
+          </div>
+          
+          <p className="mt-4 font-semibold text-white">{kutLabel}</p>
+        </div>
+      </div>
+
+      {/* Fiets-Weer */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Fiets-Weer</h3>
+          <span className="text-xs text-text-muted">Kan ik fietsen?</span>
+        </div>
+        <div className="card p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-[rgba(255,255,255,0.05)] rounded-full flex items-center justify-center text-2xl">
+              🚴
+            </div>
+            <div className="flex-1">
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-2xl font-bold text-white">{fietsScore}</span>
+                <span className="text-sm font-semibold text-text-muted">/10</span>
+              </div>
+              <div className="score-bar">
+                <div 
+                  className="score-bar-fill"
+                  style={{ 
+                    width: `${fietsScore * 10}%`,
+                    background: fietsScore > 7 ? 'var(--accent-green)' : fietsScore > 4 ? 'var(--accent-amber)' : 'var(--accent-red)'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <p className="mt-4 text-sm font-medium">{fietsLabel}</p>
+        </div>
+      </div>
+
+      {/* Wat trek je aan? */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Wat trek je aan?</h3>
+          <span className="text-xs text-text-muted">Outfit advisor</span>
+        </div>
+        <div className="card p-4 flex items-center gap-4">
+          <div className="text-3xl">{outfitEmoji}</div>
+          <div className="font-semibold text-sm">{outfitAdvice}</div>
+        </div>
+      </div>
+
+      {/* Zon */}
+      <div className="animate-fade-in" style={{ animationDelay: "1.0s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Zon</h3>
+        </div>
+        <div className="card p-6">
+          <div className="flex justify-between items-end mb-6">
+            <div className="text-center">
+              <div className="text-xl mb-1 mt-2">🌅</div>
+              <div className="text-[10px] font-bold text-text-secondary uppercase">Opkomst</div>
+              <div className="text-lg font-bold">
+                {new Date(weather.sunrise).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl mb-1 mt-2">🌇</div>
+              <div className="text-[10px] font-bold text-text-secondary uppercase">Ondergang</div>
+              <div className="text-lg font-bold">
+                {new Date(weather.sunset).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          </div>
+          
+          <div className="sun-arc">
+            <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 w-3 h-3 bg-accent-amber rounded-full shadow-[0_0_10px_2px_rgba(240,160,64,0.5)]"></div>
+          </div>
+          
+          <div className="mt-6 flex items-center justify-between border-t border-[rgba(255,255,255,0.05)] pt-4">
+            <span className="text-sm font-medium text-text-secondary">UV-index vandaag</span>
+            <span className="badge" style={{ backgroundColor: `${uvInfo.color}30`, color: uvInfo.color, border: `1px solid ${uvInfo.color}50` }}>
+              {weather.uvIndex.toFixed(1)} — {uvInfo.label}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Eerlijk vs Onzin */}
+      <div className="animate-fade-in" style={{ animationDelay: "1.1s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Eerlijk VS Onzin</h3>
+        </div>
+        <div className="card p-4 overflow-hidden relative border-none bg-transparent">
+          <div className="absolute inset-0 bg-gradient-to-br from-[rgba(52,211,153,0.05)] to-[rgba(239,68,68,0.05)]" />
+          <div className="grid grid-cols-2 gap-4 relative z-10">
+            {/* KutWeer side */}
+            <div className="p-4 border border-[rgba(52,211,153,0.2)] bg-[rgba(52,211,153,0.05)] rounded-xl flex flex-col justify-between">
+              <div>
+                <h4 className="text-accent-green font-bold text-xs uppercase flex items-center gap-1.5 mb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                  KutWeer
+                </h4>
+                <div className="text-sm font-semibold text-white mb-1">Komende 48 uur</div>
+                <div className="text-xs text-text-muted">Echte data. KNMI modellen. Accuraat tot op de minuut.</div>
+              </div>
+              <div className="mt-4 px-3 py-1.5 bg-[rgba(52,211,153,0.1)] text-accent-green text-xs font-bold text-center rounded-lg">
+                Dit klopt gewoon.
+              </div>
+            </div>
+            
+            {/* Onzin side */}
+            <div className="p-4 border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.05)] rounded-xl opacity-80 flex flex-col justify-between">
+              <div>
+                <h4 className="text-accent-red font-bold text-xs uppercase flex items-center gap-1.5 mb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                  Die andere apps
+                </h4>
+                <div className="text-sm font-semibold text-white mb-1">"14-daagse voorspelling"</div>
+                <div className="text-xs text-text-muted opacity-50 filter blur-[0.5px]">
+                  Vr. ☁️ 11°/21°<br />
+                  Za. 🌥️ 8°/16°<br />
+                  Zo. 🌧️ 9°/14°
+                </div>
+              </div>
+              <div className="mt-4 px-3 py-1.5 bg-[rgba(239,68,68,0.1)] text-accent-red text-[10px] font-bold text-center rounded-lg leading-tight">
+                100% verzonnen.<br/>Niemand weet dit.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer / Share */}
+      <footer className="pt-8 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
+        <button className="btn-cta mx-auto">
+          <Send className="w-4 h-4 ml-[-4px]" /> Deel dit kutweer
+        </button>
+        
+        <p className="text-[10px] text-text-muted mt-8 uppercase font-semibold tracking-wider">
+          KutWeer — Elke dag opnieuw teleurgesteld door het weer.
+        </p>
+        <p className="text-[10px] text-text-muted mt-1">
+          Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a>. 
+          Geen meteorologen zijn gekwetst bij het maken van deze app. 💔
+        </p>
+      </footer>
+    </div>
+    </>
+  );
+}
