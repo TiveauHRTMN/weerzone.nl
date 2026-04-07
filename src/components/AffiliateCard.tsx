@@ -1,6 +1,7 @@
 "use client";
 
 import type { WeatherData } from "@/lib/types";
+import { bolUrl, bookingUrl, thuisbezorgdUrl } from "@/lib/affiliates";
 
 interface Props {
   variant: "top" | "bottom";
@@ -49,7 +50,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Barcelona",
           price: "vanaf €149",
           brand: "Booking.com",
-          href: "#booking-barcelona",
+          href: bookingUrl("Barcelona"),
           tag: "Populair",
         },
         {
@@ -57,7 +58,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Malaga",
           price: "vanaf €179",
           brand: "Booking.com",
-          href: "#booking-malaga",
+          href: bookingUrl("Malaga"),
         },
         {
           image: placeholderImg("☀️", 40),
@@ -65,7 +66,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           price: "vanaf €159",
           oldPrice: "€209",
           brand: "Booking.com",
-          href: "#booking-lissabon",
+          href: bookingUrl("Lissabon"),
           tag: "Deal",
         },
         {
@@ -73,14 +74,14 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Kreta",
           price: "vanaf €219",
           brand: "Booking.com",
-          href: "#booking-kreta",
+          href: bookingUrl("Kreta"),
         },
         {
           image: placeholderImg("🗼", 280),
           title: "Parijs",
           price: "vanaf €129",
           brand: "Booking.com",
-          href: "#booking-parijs",
+          href: bookingUrl("Parijs"),
           tag: "Citytrip",
         },
       ],
@@ -98,7 +99,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           price: "€49,99",
           oldPrice: "€69,99",
           brand: "Bol.com",
-          href: "#bol-regenjas",
+          href: bolUrl("/s/regenjas-waterdicht/"),
           tag: "Aanbieding",
         },
         {
@@ -106,7 +107,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Stormparaplu XL",
           price: "€24,95",
           brand: "Bol.com",
-          href: "#bol-paraplu",
+          href: bolUrl("/s/stormparaplu/"),
           tag: "Bestseller",
         },
         {
@@ -114,14 +115,14 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Regenlaarzen",
           price: "€34,99",
           brand: "Bol.com",
-          href: "#bol-laarzen",
+          href: bolUrl("/s/regenlaarzen/"),
         },
         {
           image: placeholderImg("🎒", 190),
           title: "Waterdichte rugzak",
           price: "€39,95",
           brand: "Bol.com",
-          href: "#bol-rugzak",
+          href: bolUrl("/s/waterdichte-rugzak/"),
         },
       ],
     };
@@ -137,7 +138,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Merino sjaal",
           price: "€29,95",
           brand: "Bol.com",
-          href: "#bol-sjaal",
+          href: bolUrl("/s/merino-sjaal/"),
         },
         {
           image: placeholderImg("🧤", 340),
@@ -145,7 +146,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           price: "€19,99",
           oldPrice: "€27,99",
           brand: "Bol.com",
-          href: "#bol-handschoenen",
+          href: bolUrl("/s/thermo-handschoenen/"),
           tag: "Aanbieding",
         },
         {
@@ -153,7 +154,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Winterjas",
           price: "€89,95",
           brand: "Bol.com",
-          href: "#bol-winterjas",
+          href: bolUrl("/s/winterjas/"),
           tag: "Bestseller",
         },
         {
@@ -161,7 +162,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Thermosfles 500ml",
           price: "€22,50",
           brand: "Bol.com",
-          href: "#bol-thermos",
+          href: bolUrl("/s/thermosfles/"),
         },
       ],
     };
@@ -177,7 +178,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Zonnebrand SPF50",
           price: "€12,99",
           brand: "Bol.com",
-          href: "#bol-zonnebrand",
+          href: bolUrl("/s/zonnebrand-spf50/"),
           tag: "Noodzaak",
         },
         {
@@ -186,7 +187,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           price: "€34,95",
           oldPrice: "€49,95",
           brand: "Bol.com",
-          href: "#bol-zonnebril",
+          href: bolUrl("/s/polaroid-zonnebril/"),
           tag: "Deal",
         },
         {
@@ -194,14 +195,14 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Tafelventilator",
           price: "€29,99",
           brand: "Bol.com",
-          href: "#bol-ventilator",
+          href: bolUrl("/s/tafelventilator/"),
         },
         {
           image: placeholderImg("🧊", 210),
           title: "Koelbox 24L",
           price: "€44,95",
           brand: "Bol.com",
-          href: "#bol-koelbox",
+          href: bolUrl("/s/koelbox/"),
         },
       ],
     };
@@ -216,7 +217,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
         title: "Fietslamp set LED",
         price: "€14,95",
         brand: "Bol.com",
-        href: "#bol-fietslamp",
+        href: bolUrl("/s/fietslamp-led/"),
         tag: "Populair",
       },
       {
@@ -225,7 +226,7 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
         price: "€29,99",
         oldPrice: "€39,99",
         brand: "Bol.com",
-        href: "#bol-rugzak",
+        href: bolUrl("/s/dagrugzak/"),
         tag: "Aanbieding",
       },
       {
@@ -233,14 +234,14 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
         title: "Buitenspeelgoed",
         price: "vanaf €9,99",
         brand: "Bol.com",
-        href: "#bol-buiten",
+        href: bolUrl("/s/buitenspeelgoed/"),
       },
       {
         image: placeholderImg("🪑", 40),
         title: "Tuinstoel opvouwbaar",
         price: "€24,95",
         brand: "Bol.com",
-        href: "#bol-tuinstoel",
+        href: bolUrl("/s/tuinstoel-opvouwbaar/"),
       },
     ],
   };
@@ -262,7 +263,7 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
           title: "Pizza bezorgd",
           price: "vanaf €8,50",
           brand: "Thuisbezorgd",
-          href: "#thuisbezorgd-pizza",
+          href: thuisbezorgdUrl(),
           tag: "Favoriet",
         },
         {
@@ -270,14 +271,14 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
           title: "Aziatisch",
           price: "vanaf €10,–",
           brand: "Thuisbezorgd",
-          href: "#thuisbezorgd-aziatisch",
+          href: thuisbezorgdUrl(),
         },
         {
           image: placeholderImg("🍔", 40),
           title: "Burgers",
           price: "vanaf €9,–",
           brand: "Thuisbezorgd",
-          href: "#thuisbezorgd-burgers",
+          href: thuisbezorgdUrl(),
           tag: "Populair",
         },
         {
@@ -285,14 +286,14 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
           title: "Sushi",
           price: "vanaf €12,–",
           brand: "Thuisbezorgd",
-          href: "#thuisbezorgd-sushi",
+          href: thuisbezorgdUrl(),
         },
         {
           image: placeholderImg("🥗", 130),
           title: "Gezond",
           price: "vanaf €11,–",
           brand: "Thuisbezorgd",
-          href: "#thuisbezorgd-gezond",
+          href: thuisbezorgdUrl(),
         },
       ],
     };
@@ -310,7 +311,7 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
           price: "€49,99",
           oldPrice: "€69,99",
           brand: "Bol.com",
-          href: "#bol-bbq",
+          href: bolUrl("/s/houtskool-bbq/"),
           tag: "Deal",
         },
         {
@@ -318,21 +319,21 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
           title: "BBQ gereedschap set",
           price: "€24,95",
           brand: "Bol.com",
-          href: "#bol-bbq-set",
+          href: bolUrl("/s/bbq-gereedschap-set/"),
         },
         {
           image: placeholderImg("💡", 50),
           title: "Tuinverlichting LED",
           price: "€19,99",
           brand: "Bol.com",
-          href: "#bol-tuinlicht",
+          href: bolUrl("/s/tuinverlichting-led/"),
         },
         {
           image: placeholderImg("🪑", 40),
           title: "Loungestoel tuin",
           price: "€79,95",
           brand: "Bol.com",
-          href: "#bol-lounge",
+          href: bolUrl("/s/loungestoel-tuin/"),
           tag: "Populair",
         },
       ],
@@ -349,7 +350,7 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
         price: "€149,99",
         oldPrice: "€189,99",
         brand: "Bol.com",
-        href: "#bol-netatmo",
+        href: bolUrl("/s/netatmo-weerstation/"),
         tag: "Tip",
       },
       {
@@ -357,21 +358,21 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
         title: "Buiten thermometer",
         price: "€12,95",
         brand: "Bol.com",
-        href: "#bol-thermometer",
+        href: bolUrl("/s/buitenthermometer/"),
       },
       {
         image: placeholderImg("💨", 200),
         title: "Windmeter digitaal",
         price: "€34,95",
         brand: "Bol.com",
-        href: "#bol-windmeter",
+        href: bolUrl("/s/windmeter-digitaal/"),
       },
       {
         image: placeholderImg("🌧️", 210),
         title: "Regenmeter tuin",
         price: "€8,99",
         brand: "Bol.com",
-        href: "#bol-regenmeter",
+        href: bolUrl("/s/regenmeter/"),
         tag: "Bestseller",
       },
     ],
