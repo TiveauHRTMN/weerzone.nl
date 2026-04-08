@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CloudRain, MapPin, Send, RefreshCw, ChevronDown } from "lucide-react";
 import { getWeather } from "@/app/actions";
-import { DUTCH_CITIES, type City, type WeatherData } from "@/lib/types";
+import { DUTCH_CITIES, findNearestCity, type City, type WeatherData } from "@/lib/types";
 import {
   getMainCommentary,
   getKutweerScore,
@@ -57,8 +57,12 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     } else if (lower.includes("zon") || lower.includes("zonnig")) {
       const sunset = new Date(weather.sunset);
       setChatAnswer(`Zon onder om ${sunset.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}. UV: ${weather.uvIndex.toFixed(1)}. ${weather.uvIndex > 5 ? 'Smeren. Nu. Je bent geen leguaan. 🧴' : '☀️'}`);
-    } else if (lower.includes("wind")) {
+    } else if (lower.includes("wind") || lower.includes("waai")) {
       setChatAnswer(getWindComment(weather.current.windSpeed, weather.current.windGusts));
+    } else if (lower.includes("station") || lower.includes("waar") || lower.includes("locatie") || lower.includes("dichtbij")) {
+      setChatAnswer(`📍 Je ziet nu het weer bij ${city.name} (${city.lat.toFixed(2)}°N, ${city.lon.toFixed(2)}°O). Klik op 📍 voor je exacte locatie — we snappen naar het dichtstbijzijnde meetpunt.`);
+    } else if (lower.includes("hoe werkt") || lower.includes("nauwkeurig") || lower.includes("betrouwbaar") || lower.includes("model")) {
+      setChatAnswer(`We combineren KNMI HARMONIE + DWD ICON — twee van de beste weermodellen voor Nederland. Modelovereenkomst nu: ${weather.models.agreement}%. ${weather.models.agreement >= 70 ? 'Behoorlijk zeker dus.' : 'Er is wat onzekerheid, we tonen het eerlijk.'}`);
     } else {
       setChatAnswer(`${temp}° in ${city.name}, ${rain ? 'regen' : 'droog'}, wind ${wind} km/h. ${getMainCommentary(weather)}`);
     }
@@ -100,9 +104,10 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
+            const nearest = findNearestCity(position.coords.latitude, position.coords.longitude);
             const data = await getWeather(position.coords.latitude, position.coords.longitude);
             setWeather(data);
-            setCity({ name: "Jouw Locatie", lat: position.coords.latitude, lon: position.coords.longitude });
+            setCity(nearest);
           } catch (e) {
             console.error(e);
           } finally {
@@ -164,12 +169,20 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
               }}
               className="appearance-none bg-white/10 border border-white/30 rounded-full pl-4 pr-10 py-2 text-sm font-medium text-white hover:bg-white/20 transition-colors cursor-pointer focus:outline-none focus:border-accent-orange backdrop-blur-sm"
             >
-              <option value="Jouw Locatie" disabled hidden>Jouw Locatie</option>
-              {DUTCH_CITIES.map(c => (
-                <option key={c.name} value={c.name} className="bg-bg-secondary text-text-primary">
-                  {c.name}
-                </option>
-              ))}
+              <optgroup label="Steden" className="bg-bg-secondary text-text-primary">
+                {DUTCH_CITIES.slice(0, 10).map(c => (
+                  <option key={c.name} value={c.name} className="bg-bg-secondary text-text-primary">
+                    {c.name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="KNMI Weerstations" className="bg-bg-secondary text-text-primary">
+                {DUTCH_CITIES.slice(10).map(c => (
+                  <option key={c.name} value={c.name} className="bg-bg-secondary text-text-primary">
+                    📡 {c.name}
+                  </option>
+                ))}
+              </optgroup>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-white/70" />
           </div>
