@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CloudRain, MapPin, Send, RefreshCw, ChevronDown } from "lucide-react";
+import { MapPin, Send, RefreshCw, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { getWeather } from "@/app/actions";
 import { DUTCH_CITIES, findNearestCity, type City, type WeatherData } from "@/lib/types";
 import {
@@ -125,7 +126,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   if (loading || !weather) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
-        <CloudRain className="w-16 h-16 text-accent-orange animate-bounce mb-4" />
+        <Image
+          src="/logo-white.png"
+          alt="WeerZone"
+          width={200}
+          height={33}
+          priority
+          className="h-8 w-auto animate-pulse mb-6"
+        />
         <h2 className="text-xl font-medium">Even geduld, we kijken naar buiten...</h2>
       </div>
     );
@@ -142,14 +150,15 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header */}
       <header className="flex items-center justify-between animate-fade-in">
-        <div className="flex items-center gap-2">
-          <CloudRain className="text-white/80 w-8 h-8" />
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-1">
-              WeerZone
-            </h1>
-            <p className="text-xs text-white/70">48 uur. De rest is gelul.</p>
-          </div>
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo-white.png"
+            alt="WeerZone"
+            width={160}
+            height={26}
+            priority
+            className="h-7 w-auto drop-shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+          />
         </div>
         
         <div className="flex items-center gap-2">
