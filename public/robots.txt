@@ -1,0 +1,7 @@
+# WeerZone.nl - Robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://weerzone.nl/sitemap.xml

@@ -18,8 +18,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import WeatherBackground from "./WeatherBackground";
 import AffiliateCard from "./AffiliateCard";
 
-export default function WeatherDashboard() {
-  const [city, setCity] = useState<City>(DUTCH_CITIES.find(c => c.name === "Alkmaar") || DUTCH_CITIES[0]);
+interface DashboardProps {
+  initialCity?: City;
+}
+
+export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
+  const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "Alkmaar") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [quote, setQuote] = useState("");
