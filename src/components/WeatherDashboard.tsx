@@ -89,7 +89,7 @@ export default function WeatherDashboard() {
           <CloudRain className="text-white/80 w-8 h-8" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-1">
-              KutWeer
+              WeerZone
             </h1>
             <p className="text-xs text-white/70">Het weer, maar dan eerlijk.</p>
           </div>
@@ -380,10 +380,10 @@ export default function WeatherDashboard() {
         </div>
       </div>
 
-      {/* KutWeer-Score */}
+      {/* WeerZone-Score */}
       <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
         <div className="flex justify-between items-end mb-3 px-1">
-          <h3 className="section-title">KutWeer-Score</h3>
+          <h3 className="section-title">WeerZone-Score</h3>
           <span className="text-xs text-white/60">Hoe erg is het?</span>
         </div>
         <div className="card p-6 overflow-hidden relative">
@@ -502,12 +502,12 @@ export default function WeatherDashboard() {
         </div>
         <div className="card p-4 overflow-hidden relative">
           <div className="grid grid-cols-2 gap-4">
-            {/* KutWeer side */}
+            {/* WeerZone side */}
             <div className="p-4 border border-[rgba(52,211,153,0.2)] bg-[rgba(52,211,153,0.05)] rounded-xl flex flex-col justify-between">
               <div>
                 <h4 className="text-accent-green font-bold text-xs uppercase flex items-center gap-1.5 mb-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  KutWeer
+                  WeerZone
                 </h4>
                 <div className="text-sm font-semibold text-text-primary mb-1">Komende 48 uur</div>
                 <div className="text-xs text-text-muted">KNMI HARMONIE + DWD ICON. Multi-model, fijnmazig.</div>
@@ -547,11 +547,11 @@ export default function WeatherDashboard() {
       {/* Footer / Share */}
       <footer className="pt-8 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
         <button className="btn-cta mx-auto">
-          <Send className="w-4 h-4 ml-[-4px]" /> Deel dit kutweer
+          <Send className="w-4 h-4 ml-[-4px]" /> Deel het weer
         </button>
 
         <p className="text-[10px] text-white/50 mt-8 uppercase font-semibold tracking-wider">
-          KutWeer — Elke dag opnieuw teleurgesteld door het weer.
+          WeerZone — Het weer, maar dan eerlijk.
         </p>
         <p className="text-[10px] text-white/50 mt-1">
           Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> (KNMI HARMONIE + DWD ICON).

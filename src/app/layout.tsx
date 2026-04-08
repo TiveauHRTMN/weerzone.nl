@@ -9,16 +9,16 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KutWeer — Het weer, maar dan eerlijk",
+  title: "WeerZone — Het weer, maar dan eerlijk",
   description:
-    "KutWeer.nl — Het weer in normaal Nederlands. Geen onzin, geen 14-daagse fantasie. Gewoon eerlijk weeradvies met een vleugje sarcasme.",
-  keywords: ["weer", "nederland", "weersverwachting", "kutweer", "regen", "fietsweer"],
+    "WeerZone.nl — Nauwkeurig weer voor Nederland met KNMI HARMONIE en DWD ICON modellen. 48-uurs voorspelling, fietsweer, en eerlijk weeradvies.",
+  keywords: ["weer", "nederland", "weersverwachting", "weerbericht", "weer vandaag", "48 uur weer", "fietsweer", "regen", "weerzone"],
   openGraph: {
-    title: "KutWeer — Het weer, maar dan eerlijk",
-    description: "Het weer in normaal Nederlands. Geen onzin, gewoon eerlijk.",
+    title: "WeerZone — Het weer, maar dan eerlijk",
+    description: "Nauwkeurig weer voor Nederland. KNMI HARMONIE + DWD ICON modellen. 48 uur betrouwbaar.",
     type: "website",
     locale: "nl_NL",
-    url: "https://kutweer.nl",
+    url: "https://weerzone.nl",
   },
 };
 

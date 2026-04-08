@@ -7,7 +7,7 @@ export const AFFILIATE_CONFIG = {
   bol: {
     // Bol.com partnerprogramma: https://partnerprogramma.bol.com
     // Na aanmelding krijg je een partner-id en site-id
-    partnerId: "", // bijv. "KutWeer-21"
+    partnerId: "", // bijv. "WeerZone-21"
     enabled: false, // zet op true zodra je ID hebt
   },
   booking: {
@@ -39,7 +39,7 @@ export function bolUrl(path: string): string {
 }
 
 export function bookingUrl(destination: string): string {
-  const bookingTarget = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination)}&label=kutweer`;
+  const bookingTarget = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination)}&label=weerzone`;
 
   if (!AFFILIATE_CONFIG.booking.enabled || !AFFILIATE_CONFIG.booking.cjAdvertiserCid) {
     return bookingTarget;
