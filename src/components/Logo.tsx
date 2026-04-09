@@ -26,19 +26,12 @@ export default function Logo({ size = 36, className = "", showText = false }: Lo
         <ellipse cx="46" cy="52" rx="38" ry="4" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" fill="none" />
         <ellipse cx="46" cy="69" rx="36" ry="4" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" fill="none" />
 
-        {/* W letter */}
-        <text
-          x="46"
-          y="62"
-          textAnchor="middle"
-          fontFamily="Inter, system-ui, sans-serif"
-          fontWeight="900"
-          fontSize="40"
+        {/* W — correcte outline, 10 punten */}
+        <polygon
+          points="18,30 26,30 34,62 46,42 58,62 66,30 74,30 60,72 46,50 32,72"
           fill="white"
-          style={{ textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}
-        >
-          W
-        </text>
+          opacity="0.95"
+        />
 
         {/* Sun — top right, overlapping globe */}
         <circle cx="76" cy="18" r="14" fill="url(#sunGrad)" />

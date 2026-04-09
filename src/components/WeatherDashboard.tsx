@@ -143,7 +143,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header */}
       <header className="flex items-center justify-between animate-fade-in">
-        <Logo size={38} showText />
+        <Logo size={44} showText />
         
         <div className="flex items-center gap-2">
           <button 
