@@ -125,9 +125,12 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
   if (loading || !weather) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center">
-        <LogoIcon size={80} className="animate-pulse mb-6 drop-shadow-lg" />
-        <h2 className="text-xl font-medium text-white mt-4">Even geduld, we kijken naar buiten...</h2>
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-8">
+        <LogoFull
+          height={64}
+          className="animate-pulse drop-shadow-[0_2px_16px_rgba(0,0,0,0.2)]"
+        />
+        <p className="text-white/70 text-sm mt-4 tracking-wide">Het weer binnen 48 uur</p>
       </div>
     );
   }
@@ -143,7 +146,10 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header */}
       <header className="flex items-center justify-between animate-fade-in">
-        <LogoFull height={28} />
+        <div className="flex flex-col gap-0.5">
+          <LogoFull height={36} />
+          <p className="text-[11px] text-white/60 tracking-wide pl-0.5">Het weer binnen 48 uur</p>
+        </div>
         
         <div className="flex items-center gap-2">
           <button 
