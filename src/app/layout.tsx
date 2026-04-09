@@ -12,10 +12,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://weerzone.nl"),
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    apple: "/favicon.svg",
+    icon: "/favicon-icon.png",
+    apple: "/favicon-icon.png",
   },
   title: "WeerZone — 48 uur. De rest is gelul.",
   description:
