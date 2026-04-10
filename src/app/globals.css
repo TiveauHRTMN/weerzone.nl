@@ -9,12 +9,12 @@
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --text-on-sky: rgba(255, 255, 255, 0.95);
-  --accent-orange: #ff7a2f;
-  --accent-amber: #ffb340;
+  --accent-orange: #f5b800;
+  --accent-amber: #ffd43b;
   --accent-green: #16a34a;
   --accent-red: #ef4444;
   --accent-cyan: #0891b2;
-  --gradient-line: linear-gradient(90deg, #ff7a2f, #ffb340, #0891b2);
+  --gradient-line: linear-gradient(90deg, #f5b800, #ffd43b, #0891b2);
   --card-border: rgba(255, 255, 255, 0.6);
   --card-radius: 18px;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -128,7 +128,7 @@ body {
 }
 .chip:hover {
   background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(255, 122, 47, 0.3);
+  border-color: rgba(245, 184, 0, 0.3);
   transform: translateY(-1px);
 }
 
@@ -325,16 +325,16 @@ body {
   font-weight: 600;
   font-size: 0.95rem;
   background: var(--accent-orange);
-  color: white;
+  color: var(--text-primary);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(255, 122, 47, 0.3);
+  box-shadow: 0 4px 20px rgba(245, 184, 0, 0.3);
 }
 .btn-cta:hover {
-  background: #e8691f;
+  background: #dba600;
   transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(255, 122, 47, 0.4);
+  box-shadow: 0 6px 28px rgba(245, 184, 0, 0.4);
 }
 
 /* Badge */
@@ -365,7 +365,7 @@ body {
   color: var(--text-muted);
 }
 .search-input:focus {
-  border-color: rgba(255, 122, 47, 0.4);
-  box-shadow: 0 0 0 3px rgba(255, 122, 47, 0.1);
+  border-color: rgba(245, 184, 0, 0.4);
+  box-shadow: 0 0 0 3px rgba(245, 184, 0, 0.1);
   background: rgba(255, 255, 255, 0.9);
 }

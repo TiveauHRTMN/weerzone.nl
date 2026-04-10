@@ -15,7 +15,7 @@ const jsonLd = {
   name: "WeerZone",
   url: "https://weerzone.nl",
   description:
-    "De brutale weerdienst van Nederland. KNMI HARMONIE + DWD ICON: 48 uur extreem nauwkeurig. Geen verzonnen voorspellingen.",
+    "Vergeet de 14-daagse. De komende 48 uur op de vierkante meter. KNMI HARMONIE + DWD ICON. De enige weerdienst die niet liegt.",
   potentialAction: {
     "@type": "SearchAction",
     target: "https://weerzone.nl/weer/{city}",
@@ -41,7 +41,7 @@ const faqLd = {
       name: "Wat is WeerZone?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "WeerZone is de brutale weerdienst van Nederland. We combineren twee toonaangevende weermodellen — KNMI HARMONIE en DWD ICON — voor een extreem nauwkeurige voorspelling van maximaal 48 uur.",
+        text: "WeerZone is de weerdienst die niet liegt. We combineren KNMI HARMONIE en DWD ICON — twee supercomputers — voor de enige voorspelling die er toe doet: de komende 48 uur. De rest is ruis.",
       },
     },
     {
@@ -49,7 +49,7 @@ const faqLd = {
       name: "Waarom voorspelt WeerZone maar 48 uur vooruit?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Weermodellen worden na 48 uur steeds onbetrouwbaarder. Een 14-daagse voorspelling is wetenschappelijk onzin. WeerZone toont alleen data waar je op kunt vertrouwen.",
+        text: "Omdat alles na 48 uur wetenschappelijk gezien onbetrouwbaar is. Die 14-daagse van je weer-app? Een random number generator met een zonnetje erop. Wij doen alleen wat bewezen klopt.",
       },
     },
     {
@@ -57,7 +57,7 @@ const faqLd = {
       name: "Welke weermodellen gebruikt WeerZone?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "WeerZone combineert KNMI HARMONIE (het Nederlandse supercomputer-model, gespecialiseerd in lokaal weer) en DWD ICON (het Duitse weermodel). Wanneer beide modellen het eens zijn, weet je dat de voorspelling klopt.",
+        text: "KNMI HARMONIE (het Nederlandse supercomputer-model voor lokaal weer) en DWD ICON (het Duitse weermodel). Wanneer beide het eens zijn, weet je het zeker. Wanneer ze het oneens zijn, vertellen we je dat ook. Eerlijkheid boven alles.",
       },
     },
     {
@@ -65,7 +65,7 @@ const faqLd = {
       name: "Is WeerZone gratis?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Ja, WeerZone is volledig gratis. Geen abonnementen, geen verborgen kosten. Gewoon eerlijk weer.",
+        text: "Het 48-uurs weerbericht is volledig gratis. Met een gratis account krijg je extra features: postcodespecifieke alerts, AI-kledingadvies en de 48-uurs Impact Analyse. Geen creditcard nodig.",
       },
     },
   ],

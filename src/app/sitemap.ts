@@ -25,5 +25,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
+  // Static pages
+  routes.push(
+    { url: `${baseUrl}/zakelijk`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/embed`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
+  );
+
   return routes;
 }

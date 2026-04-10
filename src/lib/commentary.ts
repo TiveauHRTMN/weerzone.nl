@@ -1,8 +1,8 @@
 import type { WeatherData } from "./types";
 
 // ============================================================
-// Commentary engine — WeerZone: brutaal, direct, geen gelul
-// De brutale weerdienst van Nederland.
+// Commentary engine — WeerZone: Roddelpraat-stijl, brutaal, provocerend
+// 48 uur. De rest is ruis.
 // ============================================================
 
 export function getMainCommentary(w: WeatherData): string {
@@ -12,41 +12,41 @@ export function getMainCommentary(w: WeatherData): string {
   const code = w.current.weatherCode;
 
   // Regen
-  if (rain > 5) return "Het regent alsof God een emmer omgooit. Maar je wist het al — wij zeiden het.";
-  if (rain > 1) return "Regen. Verrassing? Niet als je WeerZone checkt.";
-  if (rain > 0) return "Lichte motregen. Net genoeg om je dag te verpesten.";
+  if (rain > 5) return "Het regent alsof Petrus z'n aquarium omgooit. Buienradar had dit niet zien aankomen, wij wel.";
+  if (rain > 1) return "Regen. Andere apps doen alsof het droog is. Wij liegen niet tegen je.";
+  if (rain > 0) return "Motregen. Net genoeg om je humeur en je kapsel naar de klote te helpen.";
 
   // Sneeuw
-  if (code >= 71 && code <= 77) return "Sneeuw. Over 10 minuten staat half Nederland stil.";
+  if (code >= 71 && code <= 77) return "Sneeuw! Over een kwartier staat heel Nederland op z'n gat. Letterlijk.";
 
   // Onweer
-  if (code >= 95) return "Onweer. Bliksem, donder, drama. Binnenblijven.";
+  if (code >= 95) return "Onweer. Bliksem, donder, het hele circus. Ga naar binnen en geniet van het drama.";
 
   // Mist
-  if (code >= 45 && code <= 48) return "Dikke mist. Je ziet geen hand voor ogen. Wij zien wél 48 uur vooruit.";
+  if (code >= 45 && code <= 48) return "Dikke mist. Je ziet geen hand voor ogen. KNMI-nerds zitten weer te puzzelen, wij kijken gewoon 48 uur vooruit.";
 
   // Wind
-  if (wind > 60) return "Storm. Als je nu naar buiten gaat verdien je een Darwin Award.";
-  if (wind > 40) return "Het waait als een malle. Je fiets? Die ligt al om.";
+  if (wind > 60) return "Storm. Ga nu naar buiten en je kunt je eigen begrafenis regelen.";
+  if (wind > 40) return "Het waait de pleuris. Je fiets ligt al in de sloot en je paraplu is van je buurman.";
 
   // Temperatuur extremen
-  if (t >= 30) return "Tropenrooster. Nederland smelt. Airco is geen luxe, het is zelfbehoud.";
-  if (t >= 25) return "Warm. Heel Nederland rent naar de Hema voor een ijsje. Terecht.";
-  if (t <= -5) return "Het vriest dat het kraakt. Geen discussie: alles aan, jas dicht, muts op.";
-  if (t <= 0) return "Onder nul. Je vingers zijn straks decoratie als je geen handschoenen pakt.";
+  if (t >= 30) return "Tropisch. Nederland smelt als een ijsje op het Binnenhof. Airco is geen luxe, het is overleving.";
+  if (t >= 25) return "Warm. Heel Nederland rent naar de Hema voor een raketijsje. En terecht, geniet ervan.";
+  if (t <= -5) return "Het vriest de klauwen van je lijf. Alles aan, jas dicht, muts op, niet lullen.";
+  if (t <= 0) return "Onder nul. Trek die handschoenen aan of je vingers zijn straks souvenirs.";
 
   // Mooi weer
   if (code <= 2 && t >= 15 && wind < 25) {
-    return "Het is prachtweer. Scherm uit, naar buiten, nu.";
+    return "Prachtweer. Telefoon weg, bek dicht, naar buiten. Dit duurt niet lang in Nederland.";
   }
   if (code <= 3 && t >= 10) {
-    return "Prima weer. Niet spectaculair, maar je mag niet klagen.";
+    return "Best aardig weer. Niet om over naar huis te schrijven, maar zeiken mag je niet.";
   }
 
   // Default
-  if (t < 5) return "Koud en grijs. Welkom in Nederland.";
-  if (t < 10) return "Frisjes. Jas aan. Niet onderhandelen.";
-  return "Doorsnee Nederlands weer. Het is wat het is.";
+  if (t < 5) return "Koud en grijs. Welkom in de realiteit. Welkom in Nederland.";
+  if (t < 10) return "Frisjes. Jas aan. Niet onderhandelen, niet zeuren, gewoon doen.";
+  return "Doorsnee Nederlands weer. Niet warm, niet koud, niet droog, niet nat. Saai.";
 }
 
 export function getKutweerScore(w: WeatherData): { score: number; label: string; emoji: string } {
@@ -85,11 +85,11 @@ export function getKutweerScore(w: WeatherData): { score: number; label: string;
   // Clamp
   score = Math.max(0.5, Math.min(10, Math.round(score * 10) / 10));
 
-  if (score <= 2) return { score, label: "Perfect weer. Telefoon weg, naar buiten.", emoji: "😎" };
-  if (score <= 4) return { score, label: "Niks mis mee. Gewoon genieten.", emoji: "🙂" };
-  if (score <= 6) return { score, label: "Mwah. Je overleeft het wel.", emoji: "😐" };
-  if (score <= 8) return { score, label: "Bagger. Netflix en chill.", emoji: "😒" };
-  return { score, label: "Echt dramatisch. Condoleances.", emoji: "💀" };
+  if (score <= 2) return { score, label: "Koningsweer. Telefoon weg, deur uit, nu.", emoji: "😎" };
+  if (score <= 4) return { score, label: "Niks om over te janken. Gewoon genieten.", emoji: "🙂" };
+  if (score <= 6) return { score, label: "Matig. Je overleeft het, maar blij word je er niet van.", emoji: "😐" };
+  if (score <= 8) return { score, label: "Bagger. Bank, Netflix, bezorgen laten komen.", emoji: "😒" };
+  return { score, label: "Compleet waardeloos. Sterkte en gecondoleerd.", emoji: "💀" };
 }
 
 export function getFietsScore(w: WeatherData): { score: number; label: string } {
@@ -106,11 +106,11 @@ export function getFietsScore(w: WeatherData): { score: number; label: string } 
 
   score = Math.max(0, Math.min(10, Math.round(score * 10) / 10));
 
-  if (score >= 8) return { score, label: "Topweer om te fietsen. Geen excuus." };
-  if (score >= 6) return { score, label: "Prima te doen. Jas mee, niet janken." };
-  if (score >= 4) return { score, label: "Kan. Maar je gaat er niet van genieten." };
-  if (score >= 2) return { score, label: "Alleen voor de harde kern. Of masochisten." };
-  return { score, label: "Nee. Gewoon nee. OV. Uber. Kruipen. Alles beter dan fietsen." };
+  if (score >= 8) return { score, label: "Topfietsweer. Wie nu de auto pakt is een aansteller." };
+  if (score >= 6) return { score, label: "Prima te doen. Jasje mee, bek dicht, trappen." };
+  if (score >= 4) return { score, label: "Kan, maar je gaat er niet blij van worden." };
+  if (score >= 2) return { score, label: "Alleen voor de echte diehards. Of gekken." };
+  return { score, label: "Nee. Gewoon nee. OV, Uber, kruipen. Alles beter dan dit." };
 }
 
 export function getOutfitAdvice(w: WeatherData): { emoji: string; advice: string } {
@@ -118,51 +118,51 @@ export function getOutfitAdvice(w: WeatherData): { emoji: string; advice: string
   const rain = w.current.precipitation;
 
   if (t >= 25) {
-    return { emoji: "🩳", advice: rain > 0 ? "Kort, maar paraplu mee tenzij je graag een natte kat speelt." : "Kort en luchtig. Smeer je in, je bent geen krokodil." };
+    return { emoji: "🩳", advice: rain > 0 ? "Kort broekje, maar paraplu mee. Je bent geen eend." : "Kort en luchtig. Smeer die kale kop maar in, je bent geen krokodil." };
   }
   if (t >= 18) {
-    return { emoji: "👕", advice: rain > 0 ? "T-shirt, maar pak die regenjas. Vertrouw ons." : "T-shirt weer. Eindelijk. Geniet ervan, duurt toch niet lang." };
+    return { emoji: "👕", advice: rain > 0 ? "T-shirt, maar pak die regenjas. Vertrouw ons, niet Buienradar." : "T-shirt weer. Eindelijk. Duurt toch geen week in dit land." };
   }
   if (t >= 12) {
-    return { emoji: "🧥", advice: "Jas mee. Niet discussiëren. Je moeder had gelijk." };
+    return { emoji: "🧥", advice: "Jas mee. Niet discussiëren. Je moeder had gelijk en dat weet je." };
   }
   if (t >= 5) {
-    return { emoji: "🧥", advice: "Winterjas. Het voelt kouder dan je denkt. Altijd." };
+    return { emoji: "🧥", advice: "Winterjas. Altijd kouder dan je denkt. Altijd." };
   }
   if (t >= 0) {
-    return { emoji: "🧣", advice: "Sjaal, muts, handschoenen. De hele handel. Geen stoer doen." };
+    return { emoji: "🧣", advice: "Sjaal, muts, handschoenen. De hele rambam. Geen stoer gedoe." };
   }
-  return { emoji: "🥶", advice: "Alles aan. Thermisch ondergoed is geen schande, het is overlevingsstrategie." };
+  return { emoji: "🥶", advice: "Álles aan. Thermisch ondergoed is geen schande, het is zelfbehoud." };
 }
 
 export function getWindComment(wind: number, gusts: number): string {
-  if (gusts > 80) return "Windstoten van boven de 80. Je fiets ligt om. Jij straks ook.";
-  if (gusts > 60) return "Flinke rukwinden. Je paraplu? Die is al van iemand anders.";
-  if (wind > 40) return "Stevig waaiig. Niet te dicht bij het water, niet stoer doen.";
-  if (wind > 25) return "Behoorlijk wat wind. Fietsen wordt cardio.";
-  if (wind > 15) return "Lekker briesje. Fris, maar te doen.";
-  return "Windstil. Zeldzaam. Geniet ervan.";
+  if (gusts > 80) return "Windstoten boven de 80. Je fiets is weg. Jij straks ook als je niet oppast.";
+  if (gusts > 60) return "Heftige rukwinden. Je paraplu? Die is al in Duitsland.";
+  if (wind > 40) return "Stevig waaiig. Niet stoer doen bij het water, niet lullen, naar binnen.";
+  if (wind > 25) return "Behoorlijk wat wind. Fietsen wordt cardio op steroïden.";
+  if (wind > 15) return "Lekker briesje. Fris, maar niks om over te zeiken.";
+  return "Windstil. Zeldzaam in dit kikkerlandje. Geniet ervan.";
 }
 
 const ROTATING_QUOTES = [
-  "Andere apps voorspellen 14 dagen vooruit. Wij noemen dat: liegen.",
-  "Morgen wordt het beter. Dat zeiden ze gisteren ook. Wij niet.",
-  "\"Kans op zon\" is meteorologen-taal voor: we weten het niet. Wij weten het wél.",
-  "48 uur. Meer heb je niet nodig. Meer is ook niet betrouwbaar.",
-  "Je weer-app zegt 22° volgende week? Dat is een random number generator.",
-  "KNMI HARMONIE + DWD ICON. Twee supercomputers. Eén eerlijk antwoord.",
-  "14-daagse voorspelling? Dan kun je net zo goed een muntje opgooien.",
-  "Fietsen in de regen bouwt karakter, zeggen mensen die een auto hebben.",
-  "Het is weer jas-aan-jas-uit-jas-aan weer. Typisch.",
-  "De windmolens draaien. Tenminste iemand die blij is met dit weer.",
-  "Nederland: vier seizoenen op één dag. Soms op één uur.",
-  "WeerZone liegt niet. Nooit. Dat doen die andere apps wel.",
-  "Iedereen is meteoroloog totdat ze de paraplu vergeten.",
-  "Wij beloven niks. Behalve dat de komende 48 uur klopt.",
-  "\"Lekker weertje\" zeggen terwijl het 12 graden is. Dat zijn wij niet.",
-  "De meest eerlijke weerdienst van Nederland. Brutaal? Nee. Eerlijk.",
-  "Regen voorspeld? Dan regent het ook. Daar zijn we vrij stellig in.",
-  "Je horoscoop is betrouwbaarder dan een 10-daagse weersverwachting.",
+  "Buienradar kan de tering krijgen met hun 14-daagse. Wij doen 48 uur en dat klopt.",
+  "Morgen wordt het beter. Dat zeiden ze gisteren ook. Wij zeggen gewoon hoe het zit.",
+  "\"Kans op zon\" is meteorologen-taal voor: we hebben geen flauw idee. Wij weten het wél.",
+  "48 uur. Meer heb je niet nodig. Meer is ook gewoon nep.",
+  "Je weer-app zegt 22° volgende week? Dat is een random number generator met een zonnebloem-icoontje.",
+  "KNMI HARMONIE + DWD ICON. Twee supercomputers. Eén eerlijk antwoord. Geen gelul.",
+  "14-daagse voorspelling? Dan kun je net zo goed een dartpijl naar een kalender gooien.",
+  "Fietsen in de regen bouwt karakter, zeggen mensen die lekker droog in hun auto zitten.",
+  "Jas-aan-jas-uit-jas-aan weer. Typisch Nederlands. Typisch kut.",
+  "De windmolens draaien. Tenminste iemand profiteert van deze ellende.",
+  "Nederland: vier seizoenen op één dag. Soms op één uur. Soms in één straat.",
+  "WeerZone liegt niet. Nooit. Punt. Andere apps wel.",
+  "Iedereen is meteoroloog totdat ze kletsnat op het station staan.",
+  "Wij beloven niks. Behalve dat de komende 48 uur klopt. De rest is ruis.",
+  "\"Lekker weertje\" zeggen terwijl het 12 graden is. Typisch Nederland. Wij doen daar niet aan mee.",
+  "De eerlijkste weerdienst van Nederland. Brutaal? Nee. Gewoon niet bang voor de waarheid.",
+  "Regen voorspeld? Dan regent het ook. Andere apps draaien er omheen, wij niet.",
+  "Je horoscoop is betrouwbaarder dan een 10-daagse weersverwachting. Denk daar maar eens over na.",
 ];
 
 export function getRandomQuote(): string {
@@ -170,9 +170,9 @@ export function getRandomQuote(): string {
 }
 
 export function getUvLabel(uv: number): { label: string; color: string } {
-  if (uv <= 2) return { label: "Laag", color: "#34d399" };
-  if (uv <= 5) return { label: "Matig — smeren", color: "#f0a040" };
-  if (uv <= 7) return { label: "Hoog — echt smeren", color: "#e8743a" };
-  if (uv <= 10) return { label: "Zeer hoog — binnenblijven of factor 50", color: "#ef4444" };
-  return { label: "Extreem — verbrandt in minuten", color: "#a855f7" };
+  if (uv <= 2) return { label: "Laag — chill", color: "#34d399" };
+  if (uv <= 5) return { label: "Matig — smeer je in, malloot", color: "#f0a040" };
+  if (uv <= 7) return { label: "Hoog — factor 30 minimaal", color: "#e8743a" };
+  if (uv <= 10) return { label: "Zeer hoog — binnenblijven of factor 50, geen discussie", color: "#ef4444" };
+  return { label: "Extreem — je verbrandt sneller dan een tosti", color: "#a855f7" };
 }

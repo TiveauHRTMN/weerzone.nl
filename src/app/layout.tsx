@@ -13,24 +13,29 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://weerzone.nl"),
   icons: {
-    icon: "/favicon-icon.png",
+    icon: [
+      { url: "/favicon-icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon-icon.png",
     apple: "/favicon-icon.png",
   },
   title: {
-    default: "WeerZone — 48 uur. De rest is gelul.",
-    template: "%s | WeerZone",
+    default: "WeerZone — 48 uur. De rest is ruis.",
+    template: "%s | WeerZone — 48 uur. De rest is ruis.",
   },
   description:
-    "WeerZone.nl — De brutale weerdienst van Nederland. KNMI HARMONIE + DWD ICON: 48 uur extreem nauwkeurig weer. Geen 14-daagse onzin, gewoon de waarheid.",
+    "WeerZone.nl — Vergeet de 14-daagse. De komende 48 uur, op de vierkante meter. KNMI HARMONIE + DWD ICON gecombineerd. De enige weerdienst die niet liegt.",
   keywords: [
     "weer", "weer nederland", "weerbericht", "weersverwachting", "weer vandaag",
-    "weer morgen", "48 uur weer", "fietsweer", "regen verwachting", "weerzone",
-    "nauwkeurig weer", "KNMI", "KNMI HARMONIE", "DWD ICON", "weerbericht vandaag",
-    "temperatuur nederland", "wind nederland", "neerslag radar", "buienradar alternatief",
+    "weer morgen", "48 uur weer", "weer komende 48 uur", "fietsweer", "regen verwachting",
+    "weerzone", "nauwkeurig weer", "KNMI", "KNMI HARMONIE", "DWD ICON",
+    "weerbericht vandaag", "temperatuur nederland", "wind nederland",
+    "neerslag radar", "buienradar alternatief", "weer per postcode",
+    "weer exact locatie", "hyperlocaal weer", "weerzone.nl",
   ],
   openGraph: {
-    title: "WeerZone — 48 uur. De rest is gelul.",
-    description: "De brutale weerdienst van Nederland. KNMI HARMONIE + DWD ICON. 48 uur extreem nauwkeurig. Geen verzonnen 14-daagse onzin.",
+    title: "WeerZone — 48 uur. De rest is ruis.",
+    description: "Vergeet de 14-daagse. De komende 48 uur, op de vierkante meter. De enige weerdienst die niet liegt.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl",
@@ -38,8 +43,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "WeerZone — 48 uur. De rest is gelul.",
-    description: "De brutale weerdienst van Nederland. KNMI HARMONIE + DWD ICON. 48 uur extreem nauwkeurig.",
+    title: "WeerZone — 48 uur. De rest is ruis.",
+    description: "Vergeet de 14-daagse. De komende 48 uur, op de vierkante meter. KNMI HARMONIE + DWD ICON.",
   },
   robots: {
     index: true,
@@ -63,6 +68,7 @@ export default function RootLayout({
   return (
     <html lang="nl" className={`${inter.variable} antialiased`}>
       <head>
+        <link rel="icon" href="/favicon-icon.png" type="image/png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#4a9ee8" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

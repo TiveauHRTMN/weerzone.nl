@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "WeerZone — 48 uur. De rest is gelul.";
+export const alt = "WeerZone — 48 uur. De rest is ruis.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -89,7 +89,7 @@ export default function OgImage() {
             display: "flex",
           }}
         >
-          48 uur. De rest is gelul.
+          48 uur. De rest is ruis.
         </div>
 
         {/* Tags */}

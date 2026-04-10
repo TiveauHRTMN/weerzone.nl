@@ -127,6 +127,33 @@ export const DUTCH_CITIES: City[] = [
 ];
 
 /**
+ * Reverse geocode via Open-Meteo: geeft de werkelijke plaatsnaam
+ * voor de opgegeven GPS-coördinaten. Valt terug op findNearestCity
+ * als de API geen resultaat geeft.
+ */
+export async function reverseGeocode(lat: number, lon: number): Promise<City> {
+  try {
+    const res = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&count=1&language=nl`
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.results && data.results.length > 0) {
+        const r = data.results[0];
+        return {
+          name: r.name,
+          lat,
+          lon,
+        };
+      }
+    }
+  } catch {
+    // Fall through to nearest city
+  }
+  return findNearestCity(lat, lon);
+}
+
+/**
  * Zoek het dichtstbijzijnde station/stad op basis van coördinaten.
  * Gebruikt Haversine-afstand.
  */

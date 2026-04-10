@@ -110,7 +110,7 @@ export default function PrivacyPage() {
 
           <div className="pt-4 border-t border-gray-200">
             <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} WeerZone.nl — 48 uur. De rest is gelul.
+              © {new Date().getFullYear()} WeerZone.nl — 48 uur. De rest is ruis.
             </p>
           </div>
         </div>

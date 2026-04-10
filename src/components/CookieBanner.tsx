@@ -46,7 +46,7 @@ export default function CookieBanner() {
         <div className="flex gap-2 mt-4">
           <button
             onClick={() => accept("all")}
-            className="flex-1 px-4 py-2.5 bg-accent-orange text-white text-sm font-bold rounded-xl hover:bg-orange-600 transition-colors"
+            className="flex-1 px-4 py-2.5 bg-accent-orange text-text-primary text-sm font-bold rounded-xl hover:brightness-90 transition-colors"
           >
             Prima, alles goed
           </button>

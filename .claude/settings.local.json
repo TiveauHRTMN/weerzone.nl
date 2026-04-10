@@ -3,7 +3,27 @@
     "allow": [
       "Bash(find C:Usersrwnhrkutweernode_modulesnextdistdocs -type f -name *.md)",
       "Bash(npx next:*)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh auth:*)",
+      "Bash(where gh:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr:*)",
+      "Read(//c/Program Files/GitHub CLI//**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(curl -s \"https://open-meteo.com/en/docs/knmi-api\")",
+      "Bash(curl -s \"https://open-meteo.com/en/docs/dwd-api\")",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/knmi?latitude=52.37&longitude=4.89&hourly=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m,cloud_cover,pressure_msl&timezone=Europe/Amsterdam&forecast_days=4\")",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/dwd-icon?latitude=52.37&longitude=4.89&hourly=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m,cloud_cover,pressure_msl&timezone=Europe/Amsterdam&forecast_days=7\")",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/knmi?latitude=52.37&longitude=4.89&hourly=temperature_2m\")",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/knmi?latitude=52.37&longitude=4.89&current=temperature_2m\")",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/harmonie?latitude=52.37&longitude=4.89&hourly=temperature_2m\")",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/knmi-icon?latitude=52.37&longitude=4.89&hourly=temperature_2m\")",
+      "WebSearch",
+      "Bash(nslookup weerzone.nl)"
     ]
   }
 }

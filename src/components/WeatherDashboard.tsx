@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle } from "lucide-react";
 import { LogoFull } from "./Logo";
+import LoadingScreen from "./LoadingScreen";
 import { getWeather } from "@/app/actions";
-import { DUTCH_CITIES, findNearestCity, type City, type WeatherData } from "@/lib/types";
+import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData } from "@/lib/types";
 import {
   getMainCommentary,
   getKutweerScore,
@@ -21,6 +22,7 @@ import WeatherBackground from "./WeatherBackground";
 import WeatherParticles from "./WeatherParticles";
 import WeatherAlarm from "./WeatherAlarm";
 import AffiliateCard from "./AffiliateCard";
+import AuthGate from "./AuthGate";
 
 interface DashboardProps {
   initialCity?: City;
@@ -32,6 +34,10 @@ function getSavedCity(): City | null {
     const saved = localStorage.getItem("wz_city");
     if (saved) {
       const parsed = JSON.parse(saved);
+      // Support custom GPS-based cities (have lat/lon stored)
+      if (parsed.name && typeof parsed.lat === "number" && typeof parsed.lon === "number") {
+        return { name: parsed.name, lat: parsed.lat, lon: parsed.lon };
+      }
       return DUTCH_CITIES.find(c => c.name === parsed.name) || null;
     }
   } catch {}
@@ -142,7 +148,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const handleShare = async () => {
     if (!weather) return;
     const emoji = getWeatherEmoji(weather.current.weatherCode, weather.current.isDay);
-    const text = `${emoji} ${weather.current.temperature}° in ${city.name} — ${getMainCommentary(weather)}\n\nweerzone.nl — 48 uur. De rest is gelul.`;
+    const text = `${emoji} ${weather.current.temperature}° in ${city.name} — ${getMainCommentary(weather)}\n\nweerzone.nl — 48 uur. De rest is ruis.`;
 
     // Try sharing with image first (mobile), fallback to text
     const shareUrl = `/api/share?city=${encodeURIComponent(city.name)}&temp=${weather.current.temperature}&emoji=${encodeURIComponent(emoji)}&desc=${encodeURIComponent(getMainCommentary(weather))}&feels=${weather.current.feelsLike}&wind=${weather.current.windSpeed}&rain=${weather.current.precipitation}`;
@@ -185,7 +191,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
   // Persist city choice
   useEffect(() => {
-    localStorage.setItem("wz_city", JSON.stringify({ name: city.name }));
+    localStorage.setItem("wz_city", JSON.stringify({ name: city.name, lat: city.lat, lon: city.lon }));
   }, [city]);
 
   // On mount: restore saved city or auto-geolocate
@@ -198,17 +204,20 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            const nearest = findNearestCity(position.coords.latitude, position.coords.longitude);
-            const data = await getWeather(position.coords.latitude, position.coords.longitude);
+            const { latitude, longitude } = position.coords;
+            const [geoCity, data] = await Promise.all([
+              reverseGeocode(latitude, longitude),
+              getWeather(latitude, longitude),
+            ]);
             setWeather(data);
-            setCity(nearest);
+            setCity(geoCity);
             setLoading(false);
           } catch {
             fetchWeather(city);
           }
         },
         () => fetchWeather(city),
-        { timeout: 5000 }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
       return; // Don't call fetchWeather below — geolocation will handle it
     }
@@ -231,10 +240,13 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            const nearest = findNearestCity(position.coords.latitude, position.coords.longitude);
-            const data = await getWeather(position.coords.latitude, position.coords.longitude);
+            const { latitude, longitude } = position.coords;
+            const [geoCity, data] = await Promise.all([
+              reverseGeocode(latitude, longitude),
+              getWeather(latitude, longitude),
+            ]);
             setWeather(data);
-            setCity(nearest);
+            setCity(geoCity);
           } catch (e) {
             console.error(e);
           } finally {
@@ -244,20 +256,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         (error) => {
           console.error(error);
           setLoading(false);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     }
   };
 
   if (loading || !weather) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-8" style={{ background: "linear-gradient(160deg, #4a9ee8 0%, #5aafe8 40%, #3b8dd4 100%)" }}>
-        <LogoFull
-          height={220}
-          className="animate-pulse drop-shadow-[0_4px_40px_rgba(255,255,255,0.25)]"
-        />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   const { score: kutScore, label: kutLabel, emoji: kutEmoji } = getKutweerScore(weather);
@@ -272,8 +278,11 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       {/* Header */}
       <header className="animate-fade-in">
         <div className="flex items-center justify-between">
-          <LogoFull height={44} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden" />
-          <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block" />
+          <div className="flex items-center gap-3">
+            <LogoFull height={40} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden" />
+            <LogoFull height={48} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block" />
+            <span className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-widest hidden sm:block">48 uur. De rest is ruis.</span>
+          </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <WeatherAlarm city={city} />
@@ -304,7 +313,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           <button
             onClick={() => { if (chatInput.trim()) { answerQuestion(chatInput); setChatInput(''); } }}
             aria-label="Vraag versturen"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-accent-orange text-white flex items-center justify-center hover:bg-orange-600 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-accent-orange text-text-primary flex items-center justify-center hover:brightness-90 transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -620,7 +629,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 key={key}
                 onClick={() => setHourlyMetric(key)}
                 aria-label={`Toon ${label}`}
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${hourlyMetric === key ? 'bg-accent-orange text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${hourlyMetric === key ? 'bg-accent-orange text-text-primary shadow-sm' : 'text-white/50 hover:text-white/80'}`}
               >
                 {icon}
               </button>
@@ -957,6 +966,46 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         <AffiliateCard variant="bottom" weather={weather} />
       </div>
 
+      {/* Premium: 48-uurs Impact Analyse */}
+      <div className="animate-fade-in" style={{ animationDelay: "1.18s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">48-uurs Impact Analyse</h3>
+          <span className="text-[10px] font-bold text-accent-orange uppercase tracking-wider">Premium</span>
+        </div>
+        <AuthGate>
+          <div className="card p-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <h4 className="font-bold text-text-primary text-sm mb-1">Jouw 48-uurs window</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">
+                  {weather.current.precipitation > 0
+                    ? `Het regent nu in ${city.name}. Verwacht de komende uren ${weather.hourly.filter(h => h.precipitation > 0).length > 6 ? 'langdurige neerslag' : 'buien die overgaan'}. ${weather.daily[1].precipitationSum > 2 ? 'Morgen ook nat — plan binnenshuis.' : 'Morgen wordt het droger.'}`
+                    : weather.hourly.slice(0, 12).some(h => h.precipitation > 0.5)
+                    ? `Nu droog, maar dat verandert. Binnen ${weather.hourly.findIndex(h => h.precipitation > 0.5) + 1} uur valt de eerste bui. Plan je buitenactiviteiten vóór die tijd.`
+                    : `Droge 48 uur in ${city.name}. ${weather.daily[0].tempMax > 20 ? 'Warm genoeg voor buiten. Smeer je in.' : 'Prima weer om dingen gedaan te krijgen buiten.'}`
+                  }
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">👔</span>
+              <div>
+                <h4 className="font-bold text-text-primary text-sm mb-1">Slim kleden vandaag</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">
+                  Ochtend {weather.hourly[0]?.temperature ?? weather.current.temperature}°, middag {weather.daily[0].tempMax}°.
+                  {weather.daily[0].tempMax - (weather.hourly[0]?.temperature ?? weather.current.temperature) > 8
+                    ? ' Groot verschil — laagjes zijn je vriend. Begin warm, strip af na de lunch.'
+                    : ' Stabiele temperatuur — kies op het middagweer en je zit goed.'
+                  }
+                  {weather.hourly.slice(0, 12).some(h => h.precipitation > 0) ? ' Regenjas mee, ook al schijnt nu de zon.' : ''}
+                </p>
+              </div>
+            </div>
+          </div>
+        </AuthGate>
+      </div>
+
       {/* Footer / Share */}
       <footer className="pt-8 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.2s" }}>
         <button onClick={handleShare} className="btn-cta mx-auto">
@@ -964,11 +1013,11 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         </button>
 
         <p className="text-[10px] text-white/50 mt-8 uppercase font-semibold tracking-wider">
-          WeerZone — 48 uur. De rest is gelul.
+          WeerZone — 48 uur. De rest is ruis.
         </p>
         <p className="text-[10px] text-white/50 mt-1">
           Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> · KNMI HARMONIE · DWD ICON.
-          Twee supercomputers, nul gelul.
+          Twee supercomputers, nul ruis.
         </p>
       </footer>
     </div>

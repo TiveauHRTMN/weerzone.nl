@@ -53,7 +53,7 @@ export default function EmbedConfigurator({ cities }: { cities: string[] }) {
           </pre>
           <button
             onClick={handleCopy}
-            className="absolute top-3 right-3 px-3 py-1.5 bg-accent-orange text-white text-xs font-bold rounded-lg hover:bg-orange-600 transition-colors"
+            className="absolute top-3 right-3 px-3 py-1.5 bg-accent-orange text-text-primary text-xs font-bold rounded-lg hover:brightness-90 transition-colors"
           >
             {copied ? "Gekopieerd!" : "Kopieer"}
           </button>

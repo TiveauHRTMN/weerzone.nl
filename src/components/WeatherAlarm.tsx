@@ -72,7 +72,7 @@ export default function WeatherAlarm({ city }: Props) {
       onClick={toggleAlarm}
       className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
         enabled
-          ? "bg-accent-orange text-white shadow-sm"
+          ? "bg-accent-orange text-text-primary shadow-sm"
           : "border border-white/25 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
       }`}
       title={enabled ? "Regen-alarm uit" : "Regen-alarm aan"}
