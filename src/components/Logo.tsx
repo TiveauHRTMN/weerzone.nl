@@ -22,7 +22,7 @@ export function LogoFull({ height = 32, className = "" }: { height?: number; cla
   const width = Math.round(height * (2430 / 645));
   const pad = Math.round(height * 0.12); // ~12% inset compensatie
   return (
-    <div style={{ margin: `-${pad}px` }} className="inline-flex">
+    <div style={{ marginTop: `-${pad}px`, marginBottom: `-${pad}px`, marginLeft: `-${pad}px`, marginRight: `-${pad}px` }} className="inline-flex">
       <Image
         src="/logo-full.png"
         alt="WeerZone"

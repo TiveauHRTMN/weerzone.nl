@@ -24,6 +24,7 @@ export interface HourlyForecast {
   temperature: number;
   weatherCode: number;
   precipitation: number;
+  windSpeed: number;
   confidence: "high" | "medium" | "low";
   models?: {
     harmonie?: { temperature: number; precipitation: number; weatherCode: number };

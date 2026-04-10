@@ -7,6 +7,7 @@ const HOURLY_PARAMS = [
   "temperature_2m",
   "weather_code",
   "precipitation",
+  "wind_speed_10m",
 ].join(",");
 
 const CURRENT_PARAMS = [
@@ -38,6 +39,7 @@ interface RawModelHourly {
   temperature_2m: number[];
   weather_code: number[];
   precipitation: number[];
+  wind_speed_10m: number[];
 }
 
 async function fetchModel(
@@ -71,7 +73,7 @@ async function fetchModel(
 function blendHourly(
   harmonieData: RawModelHourly | null,
   iconData: RawModelHourly | null,
-  fallbackData: { time: string[]; temperature_2m: number[]; weather_code: number[]; precipitation: number[] }
+  fallbackData: { time: string[]; temperature_2m: number[]; weather_code: number[]; precipitation: number[]; wind_speed_10m: number[] }
 ): { hourly: HourlyForecast[]; agreement: number } {
   const times = fallbackData.time;
   let agreeCount = 0;
@@ -134,6 +136,7 @@ function blendHourly(
       temperature,
       weatherCode,
       precipitation,
+      windSpeed: Math.round(fallbackData.wind_speed_10m[i] ?? 0),
       confidence,
       models: Object.keys(models).length > 0 ? models : undefined,
     };

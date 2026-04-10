@@ -2,6 +2,14 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /_next/
 
 # Sitemaps
 Sitemap: https://weerzone.nl/sitemap.xml
+
+# Crawl-delay (be nice to our server)
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 1

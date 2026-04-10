@@ -1,7 +1,7 @@
 "use client";
 
 import type { WeatherData } from "@/lib/types";
-import { bolUrl, bookingUrl, thuisbezorgdUrl } from "@/lib/affiliates";
+import { amazonUrl, bookingUrl } from "@/lib/affiliates";
 
 interface Props {
   variant: "top" | "bottom";
@@ -25,7 +25,6 @@ interface AffiliateSection {
 }
 
 // Placeholder images using emoji-based colored gradients
-// Replace with real product image URLs when affiliate accounts are set up
 function placeholderImg(emoji: string, hue: number): string {
   return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" rx="16" fill="hsl(${hue},40%,92%)"/><text x="100" y="115" font-size="64" text-anchor="middle">${emoji}</text></svg>`)}`;
 }
@@ -91,38 +90,38 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
   if (rain) {
     return {
       heading: "Droog blijven vandaag",
-      subtitle: "Bol.com",
+      subtitle: "Amazon.nl",
       products: [
         {
           image: placeholderImg("🧥", 210),
           title: "Regenjas waterdicht",
           price: "€49,99",
           oldPrice: "€69,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/regenjas-waterdicht/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("regenjas waterdicht heren dames"),
           tag: "Aanbieding",
         },
         {
           image: placeholderImg("☂️", 240),
           title: "Stormparaplu XL",
           price: "€24,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/stormparaplu/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("stormparaplu windproof"),
           tag: "Bestseller",
         },
         {
           image: placeholderImg("👢", 30),
           title: "Regenlaarzen",
           price: "€34,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/regenlaarzen/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("regenlaarzen waterdicht"),
         },
         {
           image: placeholderImg("🎒", 190),
           title: "Waterdichte rugzak",
           price: "€39,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/waterdichte-rugzak/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("waterdichte rugzak"),
         },
       ],
     };
@@ -131,38 +130,38 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
   if (cold) {
     return {
       heading: "Warm blijven",
-      subtitle: "Bol.com",
+      subtitle: "Amazon.nl",
       products: [
         {
           image: placeholderImg("🧣", 0),
           title: "Merino sjaal",
           price: "€29,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/merino-sjaal/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("merino wol sjaal"),
         },
         {
           image: placeholderImg("🧤", 340),
           title: "Thermo handschoenen",
           price: "€19,99",
           oldPrice: "€27,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/thermo-handschoenen/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("thermo handschoenen touchscreen"),
           tag: "Aanbieding",
         },
         {
           image: placeholderImg("🧥", 20),
           title: "Winterjas",
           price: "€89,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/winterjas/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("winterjas heren warm"),
           tag: "Bestseller",
         },
         {
           image: placeholderImg("☕", 30),
           title: "Thermosfles 500ml",
           price: "€22,50",
-          brand: "Bol.com",
-          href: bolUrl("/s/thermosfles/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("thermosfles 500ml"),
         },
       ],
     };
@@ -171,14 +170,14 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
   if (hot) {
     return {
       heading: `UV ${weather.uvIndex.toFixed(0)} — bescherm jezelf`,
-      subtitle: "Bol.com",
+      subtitle: "Amazon.nl",
       products: [
         {
           image: placeholderImg("🧴", 40),
           title: "Zonnebrand SPF50",
           price: "€12,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/zonnebrand-spf50/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("zonnebrand spf50"),
           tag: "Noodzaak",
         },
         {
@@ -186,23 +185,23 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
           title: "Polaroid zonnebril",
           price: "€34,95",
           oldPrice: "€49,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/polaroid-zonnebril/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("polaroid zonnebril gepolariseerd"),
           tag: "Deal",
         },
         {
           image: placeholderImg("🌀", 180),
           title: "Tafelventilator",
           price: "€29,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/tafelventilator/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("tafelventilator stil"),
         },
         {
           image: placeholderImg("🧊", 210),
           title: "Koelbox 24L",
           price: "€44,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/koelbox/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("koelbox 24 liter"),
         },
       ],
     };
@@ -210,14 +209,14 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
 
   return {
     heading: "Lekker weer? Naar buiten!",
-    subtitle: "Bol.com",
+    subtitle: "Amazon.nl",
     products: [
       {
         image: placeholderImg("🚴", 150),
         title: "Fietslamp set LED",
         price: "€14,95",
-        brand: "Bol.com",
-        href: bolUrl("/s/fietslamp-led/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("fietslamp set led oplaadbaar"),
         tag: "Populair",
       },
       {
@@ -225,23 +224,23 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
         title: "Dagrugzak 20L",
         price: "€29,99",
         oldPrice: "€39,99",
-        brand: "Bol.com",
-        href: bolUrl("/s/dagrugzak/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("dagrugzak 20 liter"),
         tag: "Aanbieding",
       },
       {
         image: placeholderImg("⚽", 100),
         title: "Buitenspeelgoed",
         price: "vanaf €9,99",
-        brand: "Bol.com",
-        href: bolUrl("/s/buitenspeelgoed/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("buitenspeelgoed kinderen"),
       },
       {
         image: placeholderImg("🪑", 40),
         title: "Tuinstoel opvouwbaar",
         price: "€24,95",
-        brand: "Bol.com",
-        href: bolUrl("/s/tuinstoel-opvouwbaar/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("tuinstoel opvouwbaar"),
       },
     ],
   };
@@ -255,45 +254,46 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
 
   if (kutWeer) {
     return {
-      heading: "Blijf binnen, bestel eten",
-      subtitle: "Thuisbezorgd",
+      heading: "Binnen blijven = investeren in comfort",
+      subtitle: "Amazon.nl",
       products: [
         {
-          image: placeholderImg("🍕", 15),
-          title: "Pizza bezorgd",
-          price: "vanaf €8,50",
-          brand: "Thuisbezorgd",
-          href: thuisbezorgdUrl(),
+          image: placeholderImg("🛋️", 30),
+          title: "Fleece deken XL",
+          price: "€19,99",
+          brand: "Amazon.nl",
+          href: amazonUrl("fleece deken groot warm"),
           tag: "Favoriet",
         },
         {
-          image: placeholderImg("🍜", 30),
-          title: "Aziatisch",
-          price: "vanaf €10,–",
-          brand: "Thuisbezorgd",
-          href: thuisbezorgdUrl(),
+          image: placeholderImg("☕", 15),
+          title: "Nespresso cups",
+          price: "€24,99",
+          brand: "Amazon.nl",
+          href: amazonUrl("nespresso capsules compatible"),
         },
         {
-          image: placeholderImg("🍔", 40),
-          title: "Burgers",
-          price: "vanaf €9,–",
-          brand: "Thuisbezorgd",
-          href: thuisbezorgdUrl(),
+          image: placeholderImg("🕯️", 40),
+          title: "Geurkaarsen set",
+          price: "€16,95",
+          brand: "Amazon.nl",
+          href: amazonUrl("geurkaarsen set soja"),
           tag: "Populair",
         },
         {
-          image: placeholderImg("🍣", 350),
-          title: "Sushi",
-          price: "vanaf €12,–",
-          brand: "Thuisbezorgd",
-          href: thuisbezorgdUrl(),
+          image: placeholderImg("🎮", 260),
+          title: "Nintendo Switch game",
+          price: "vanaf €39,99",
+          brand: "Amazon.nl",
+          href: amazonUrl("nintendo switch games"),
         },
         {
-          image: placeholderImg("🥗", 130),
-          title: "Gezond",
-          price: "vanaf €11,–",
-          brand: "Thuisbezorgd",
-          href: thuisbezorgdUrl(),
+          image: placeholderImg("📖", 350),
+          title: "Kindle Paperwhite",
+          price: "€149,99",
+          brand: "Amazon.nl",
+          href: amazonUrl("kindle paperwhite"),
+          tag: "Bestseller",
         },
       ],
     };
@@ -303,37 +303,37 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
   if (hour % 2 === 0) {
     return {
       heading: "BBQ-weer!",
-      subtitle: "Bol.com",
+      subtitle: "Amazon.nl",
       products: [
         {
           image: placeholderImg("🔥", 15),
           title: "Houtskool BBQ",
           price: "€49,99",
           oldPrice: "€69,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/houtskool-bbq/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("houtskool bbq"),
           tag: "Deal",
         },
         {
           image: placeholderImg("🥩", 0),
           title: "BBQ gereedschap set",
           price: "€24,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/bbq-gereedschap-set/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("bbq gereedschap set rvs"),
         },
         {
           image: placeholderImg("💡", 50),
           title: "Tuinverlichting LED",
           price: "€19,99",
-          brand: "Bol.com",
-          href: bolUrl("/s/tuinverlichting-led/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("tuinverlichting led solar"),
         },
         {
           image: placeholderImg("🪑", 40),
           title: "Loungestoel tuin",
           price: "€79,95",
-          brand: "Bol.com",
-          href: bolUrl("/s/loungestoel-tuin/"),
+          brand: "Amazon.nl",
+          href: amazonUrl("loungestoel tuin opvouwbaar"),
           tag: "Populair",
         },
       ],
@@ -342,37 +342,37 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
 
   return {
     heading: "Slimme weermeters",
-    subtitle: "Bol.com",
+    subtitle: "Amazon.nl",
     products: [
       {
         image: placeholderImg("📱", 220),
         title: "Netatmo weerstation",
         price: "€149,99",
         oldPrice: "€189,99",
-        brand: "Bol.com",
-        href: bolUrl("/s/netatmo-weerstation/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("netatmo weerstation wifi"),
         tag: "Tip",
       },
       {
         image: placeholderImg("🌡️", 0),
         title: "Buiten thermometer",
         price: "€12,95",
-        brand: "Bol.com",
-        href: bolUrl("/s/buitenthermometer/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("buitenthermometer digitaal"),
       },
       {
         image: placeholderImg("💨", 200),
         title: "Windmeter digitaal",
         price: "€34,95",
-        brand: "Bol.com",
-        href: bolUrl("/s/windmeter-digitaal/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("anemometer windmeter digitaal"),
       },
       {
         image: placeholderImg("🌧️", 210),
         title: "Regenmeter tuin",
         price: "€8,99",
-        brand: "Bol.com",
-        href: bolUrl("/s/regenmeter/"),
+        brand: "Amazon.nl",
+        href: amazonUrl("regenmeter tuin"),
         tag: "Bestseller",
       },
     ],
@@ -417,7 +417,6 @@ export default function AffiliateCard({ variant, weather }: Props) {
 
   return (
     <div className="card p-5 overflow-hidden relative">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-orange via-accent-amber to-accent-orange opacity-60" />
       <div className="flex items-center justify-between mb-4">
         <div>
           <h4 className="text-sm font-bold text-text-primary">{section.heading}</h4>
@@ -426,8 +425,8 @@ export default function AffiliateCard({ variant, weather }: Props) {
         <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange/70 bg-accent-orange/10 px-2 py-0.5 rounded-full">Advertentie</span>
       </div>
       <div className="horizontal-scroll no-scrollbar gap-3">
-        {section.products.map((product) => (
-          <ProductCard key={product.href} product={product} />
+        {section.products.map((product, i) => (
+          <ProductCard key={`${product.title}-${i}`} product={product} />
         ))}
       </div>
     </div>

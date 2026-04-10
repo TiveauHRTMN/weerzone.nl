@@ -1,0 +1,45 @@
+{
+  "name": "WeerZone — De brutale weerdienst",
+  "short_name": "WeerZone",
+  "description": "48 uur extreem nauwkeurig weer. KNMI HARMONIE + DWD ICON. Geen 14-daagse onzin.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#4a9ee8",
+  "theme_color": "#4a9ee8",
+  "orientation": "portrait",
+  "categories": ["weather"],
+  "lang": "nl",
+  "icons": [
+    {
+      "src": "/favicon-icon.png",
+      "sizes": "320x335",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-icon.png",
+      "sizes": "320x335",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Weer Amsterdam",
+      "url": "/weer/amsterdam",
+      "icons": [{ "src": "/favicon-icon.png", "sizes": "320x335" }]
+    },
+    {
+      "name": "Weer Rotterdam",
+      "url": "/weer/rotterdam",
+      "icons": [{ "src": "/favicon-icon.png", "sizes": "320x335" }]
+    },
+    {
+      "name": "Weer Den Haag",
+      "url": "/weer/den-haag",
+      "icons": [{ "src": "/favicon-icon.png", "sizes": "320x335" }]
+    }
+  ]
+}
