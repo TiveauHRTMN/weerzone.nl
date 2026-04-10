@@ -278,10 +278,9 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       {/* Header */}
       <header className="animate-fade-in">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <LogoFull height={40} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden" />
-            <LogoFull height={48} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block" />
-            <span className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-widest hidden sm:block">48 uur. De rest is ruis.</span>
+          <div>
+            <LogoFull height={44} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden" />
+            <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block" />
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

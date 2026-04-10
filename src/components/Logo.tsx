@@ -20,10 +20,9 @@ export function LogoIcon({ size = 40, className = "" }: { size?: number; classNa
  */
 export function LogoFull({ height = 32, className = "" }: { height?: number; className?: string }) {
   const width = Math.round(height * (2430 / 645));
-  const pad = Math.round(height * 0.12); // ~12% top/bottom/right compensatie
-  const padLeft = Math.round(height * 0.22); // links meer compensatie — de "W" begint dieper in de PNG
+  const padY = Math.round(height * 0.12); // verticale compensatie voor PNG transparante padding
   return (
-    <div style={{ marginTop: `-${pad}px`, marginBottom: `-${pad}px`, marginLeft: `-${padLeft}px`, marginRight: `-${pad}px` }} className="inline-flex">
+    <div style={{ marginTop: `-${padY}px`, marginBottom: `-${padY}px` }} className="inline-flex">
       <Image
         src="/logo-full.png"
         alt="WeerZone"
