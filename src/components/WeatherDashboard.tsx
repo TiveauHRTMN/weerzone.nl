@@ -19,7 +19,6 @@ import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/w
 import { getTemperatureComparison } from "@/lib/climate";
 import { motion, AnimatePresence } from "framer-motion";
 import WeatherBackground from "./WeatherBackground";
-import WeatherParticles from "./WeatherParticles";
 import WeatherAlarm from "./WeatherAlarm";
 import AffiliateCard from "./AffiliateCard";
 import AuthGate from "./AuthGate";
@@ -351,7 +350,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* Main Weather Card */}
       <div className="card overflow-hidden relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
-        <WeatherParticles weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
         <div className="p-6 relative z-[2]">
           <div className="text-sm font-medium text-text-secondary flex items-center gap-1 mb-2">
             <MapPin className="w-3 h-3 text-accent-red" />
