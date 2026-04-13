@@ -71,8 +71,14 @@ function buildEmailHtml(city: string, data: Record<string, unknown>): string {
       </a>
     </div>
 
-    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7);margin:16px 0 0;">
-      Laat de buren maar lekker onvoorbereid de deur uit gaan.<br><br>
+    <div style="background:#f8fafc;border-radius:18px;padding:20px;text-align:center;border:1px solid #e2e8f0;">
+      <p style="margin:0;font-size:13px;color:#64748b;font-style:italic;">
+        "De 14-daagse van Buienradar is voor mensen die nog in sprookjes geloven. Wij houden het bij de feiten."
+      </p>
+    </div>
+
+    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7);margin:24px 0 0;">
+      Laat de buren maar lekker onvoorbereid de deur uit gaan. Wij zien je morgen weer.<br><br>
       <a href="https://weerzone.nl/api/unsubscribe?email={{EMAIL}}" style="color:rgba(255,255,255,0.9);text-decoration:underline;">Klaar met de feiten? Schrijf je uit.</a>
     </p>
   </div>
