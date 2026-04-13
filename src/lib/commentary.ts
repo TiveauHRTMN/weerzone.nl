@@ -145,24 +145,25 @@ export function getWindComment(wind: number, gusts: number): string {
 }
 
 const ROTATING_QUOTES = [
-  "Buienradar gokt, wij rekenen. 48 uur messcherp, de rest is koffiedik kijken.",
-  "Morgen wordt het beter? Dat zeiden ze gisteren ook. Geloof de KNMI-app niet blind.",
-  "\"Kans op zon\" is de laffe uitweg van Weerplaza. Wij vertellen je gewoon de realiteit.",
-  "48 uur. Meer heb je niet nodig. Een 14-daagse voorspelling is commerciële clickbait.",
-  "Je weer-app zegt 22° volgende week? Trap er niet in. Puur bedrog om je terug te laten komen.",
-  "KNMI HARMONIE + DWD ICON. Twee supercomputers. Eén brute waarheid. Geen gelul.",
-  "14-daagse voorspelling? Dan kun je net zo goed je horoscoop lezen.",
-  "Weerplaza, NOS, Buienradar... Stuk voor stuk bezig met gokken. Wij doen data.",
+  "Buienradar gokt, wij rekenen. 48 uur messcherp met HARMONIE, ICON en ICON-D2. De rest is koffiedik kijken.",
+  "Morgen wordt het beter? Dat zeiden ze gisteren ook. Geloof die 14-daagse fantasie-apps niet blind.",
+  "\"Kans op zon\" is de laffe uitweg van Weerplaza. Wij vertellen je gewoon de realiteit op de kilometer nauwkeurig.",
+  "48 uur. Meer heb je niet nodig. Een 14-daagse voorspelling is commerciële clickbait voor de massa.",
+  "Je weer-app zegt 22° volgende week? Trap er niet in. Puur bedrog om clicks te genereren.",
+  "KNMI HARMONIE + ICON + ICON-D2. Drie supercomputers. Eén brute waarheid. Geen gelul.",
+  "14-daagse voorspelling? Dan kun je net zo goed je horoscoop of de krant van gisteren lezen.",
+  "Weerplaza, NOS, Buienradar... Stuk voor stuk bezig met nattevingerwerk. Wij doen data.",
   "Jas-aan-jas-uit-jas-aan weer. Typisch Nederlands. Volkomen ruk, maar wij waarschuwen tenminste eerlijk.",
   "\"Lokaal een bui\" is meteorologen-taal voor: we hebben geen flauw idee. Wij wel.",
   "De gevestigde orde zit er weer naast? Logisch, die gebruiken achterhaalde modellen.",
-  "WeerZone liegt niet. Geen valse hoop, geen 'misschien'. Keiharde data over jouw postcodestrook.",
-  "Iedereen is meteoroloog totdat ze kletsnat op het station staan. Vertrouw op de radar, niet je buikgevoel.",
+  "WeerZone liegt niet. Geen valse hoop, geen 'misschien'. Keiharde data over jouw eigen postzegel.",
+  "Iedereen is meteoroloog totdat ze kletsnat op de fiets staan. Vertrouw op de radar, niet je onderbuik.",
   "Wij beloven niks. Behalve dat de komende 48 uur klopt. De rest is commerciële ruis.",
   "\"Lekker weertje\" zeggen terwijl het 12 graden is. Wij doen niet mee aan die massapsychose.",
-  "De enige serieuze weerdienst van Nederland. Geen poespas, gewoon confronterend accuraat.",
-  "Regen voorspeld? Dan regent het ook. De rest draait er omheen om je niet af te schrikken.",
-  "Weerplaza zit qua voorspellingen dichter bij een tarotkaart-lezer dan een meteoroloog.",
+  "De enige weerdienst die niet bang is om je de waarheid te vertellen. Geen poespas.",
+  "Regen voorspeld? Dan regent het ook. De rest draait eromheen om je humeur niet te verpesten.",
+  "Weerplaza zit qua voorspellingen dichter bij een waarzegster dan bij de realiteit.",
+  "Icon-D2 is ingeschakeld. We zien nu zelfs de individuele druppels in jouw straat aankomen.",
 ];
 
 export function getRandomQuote(): string {

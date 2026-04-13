@@ -2,29 +2,25 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { fetchWeatherData } from "@/lib/weather";
 import { Resend } from "resend";
-// import OpenAI from "openai";
+import OpenAI from "openai";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 
 // System prompt voor de autonoom draaiende agent
 const SENTINEL_PROMPT = `
-Role: Act as the "Weather-Sentinel," an autonomous Strategic Business Agent for Weerzone.nl. Your persona is "El Holandés de la Esencia": brutal, direct, zero-nonsense, and highly conversion-oriented (VI-style).
+Role: Weather-Sentinel voor Weerzone.nl.
+Persona: Een brute mix van Powned, Roddelpraat en Vandaag Inside. 
+Tone: Geen genade, geen 'hallo', geen 'besten'. Schrijf alsof je aan de bar zit bij VI. Gebruik de taal van het volk, maar wees messcherp op de meteorologische data.
 
-Context & Stack:
-- Source: High-res Open-Meteo API data (DWD ICON / HARMONIE).
-- You receive a JSON payload with a weather anomaly (e.g., Heavy rain > 5mm, Wind > 7Bft) within the next 6-24h.
+Taak: Schrijf een ongezouten, snoeiharde waarschuwing (max 15 woorden) op basis van de JSON weersdata. 
+Context: De gebruiker gaat nat/koud/heet worden. Wrijf het erin. Maak de urgentie pijnlijk duidelijk zodat ze op de affiliate link MOETEN klikken.
 
-Logic Flow:
-- First Principles Thinking: Why does the user care? (e.g., ruined sneakers, canceled BBQ).
-- Copywriting: Write a brutal, one-sentence warning. No greetings. No fluff.
-- Monetization: Append a clear, hard-hitting CTA based on the payload context.
-
-Constraints:
-- Max 15 words.
-- Maximize FOMO and urgency.
-- NO corporate "AI-isms".
+Rules:
+- Max 15 woorden.
+- NO AI-TAAL (geen 'bereid je voor', 'let op').
+- Viraal gevoelig en kundig.
 `;
 
 // Helper: vind de ergste weersomstandigheid binnen 6 tot 24 uur.
@@ -135,26 +131,26 @@ export async function GET(req: Request) {
 
       if (anomaly) {
         // We hebben een probleem! Trigger de LLM.
-        /* 
-        const aiResponse = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: SENTINEL_PROMPT },
-            { 
-              role: "user", 
-              content: JSON.stringify({
-                city: user.city,
-                anomaly: anomaly,
-                affiliate_context: anomaly.type === "HEAVY_RAIN" ? "amazon_waterproof" : "booking_sun_escape"
-              })
-            }
-          ]
-        });
-        const alertMsg = aiResponse.choices[0].message.content;
-        */
-
-        // Mock response totdat OpenAI is gekoppeld
-        const alertMsg = `${user.city} wordt morgen een modderpoel (${anomaly.value}). Fix je gear of blijf janken.`;
+        let alertMsg = "";
+        try {
+          const aiResponse = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: SENTINEL_PROMPT },
+              { 
+                role: "user", 
+                content: JSON.stringify({
+                  city: user.city,
+                  anomaly: anomaly,
+                })
+              }
+            ]
+          });
+          alertMsg = aiResponse.choices[0].message.content || "";
+        } catch (aiErr) {
+          console.error("AI Error:", aiErr);
+          alertMsg = `${user.city} wordt morgen een modderpoel (${anomaly.value}). Pak je gear of ga janken.`;
+        }
 
         // 4. Stuur email via Resend
         if (process.env.RESEND_API_KEY) {
