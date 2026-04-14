@@ -352,7 +352,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       </div>
 
       {/* ===== 2. Rain Radar — "Gaat het regenen over 15 min?" ===== */}
-      {weather.minutely.length > 0 && (
+      {weather.minutely && weather.minutely.length > 0 && (
         <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
           <RainRadar data={weather.minutely} />
         </div>
