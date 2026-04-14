@@ -12,16 +12,13 @@ import {
   getFietsScore,
   getOutfitAdvice,
   getWindComment,
-  getRandomQuote,
   getUvLabel,
 } from "@/lib/commentary";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
 import { getTemperatureComparison } from "@/lib/climate";
 import { motion, AnimatePresence } from "framer-motion";
 import WeatherBackground from "./WeatherBackground";
-import WeatherAlarm from "./WeatherAlarm";
 import AffiliateCard from "./AffiliateCard";
-import AuthGate from "./AuthGate";
 import EmailSubscribe from "./EmailSubscribe";
 import RainRadar from "./RainRadar";
 
@@ -49,7 +46,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "Alkmaar") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [quote, setQuote] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatAnswer, setChatAnswer] = useState<string | null>(null);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
@@ -751,31 +747,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         </div>
       </div>
 
-      {/* ===== 9. Quote — compact ===== */}
-      <div className="card p-4 animate-fade-in flex items-center gap-3" style={{ animationDelay: "0.55s" }}>
-        <div className="text-2xl shrink-0">💬</div>
-        <div className="flex-1 min-w-0">
-          <AnimatePresence mode="wait">
-            <motion.p 
-              key={quote} 
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.3 }}
-              className="text-sm font-medium text-text-primary leading-snug"
-            >
-              {quote}
-            </motion.p>
-          </AnimatePresence>
-        </div>
-        <button 
-          onClick={() => setQuote(getRandomQuote())}
-          className="w-8 h-8 rounded-full border border-black/10 flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
-          aria-label="Nieuwe quote"
-        >
-          <RefreshCw className="w-3 h-3" />
-        </button>
-      </div>
 
       {/* ===== 10. Detail Grid — wind, vocht, neerslag, temp ===== */}
       <div className="grid grid-cols-2 xs:grid-cols-2 gap-3 sm:gap-4 animate-fade-in" style={{ animationDelay: "0.6s" }}>
