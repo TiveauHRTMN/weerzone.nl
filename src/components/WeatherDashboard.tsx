@@ -298,13 +298,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         </div>
       </header>
 
-      {/* ===== 1. Mails & Ads — E-mail collection & Affiliates (Bovenaan voor conversie) ===== */}
-      <div className="animate-fade-in space-y-4" style={{ animationDelay: "0.1s" }}>
-        <EmailSubscribe city={city} />
-        <AffiliateCard variant="top" weather={weather} />
-      </div>
-
-      {/* ===== 2. Main Weather Card — Kerninformatie ===== */}
+      {/* ===== 1. Main Weather Card — Kerninformatie ===== */}
       <div className="card overflow-hidden relative animate-fade-in" style={{ animationDelay: "0.1s" }}>
         <div className="p-6 relative z-[2]">
           <div className="text-sm font-medium text-text-secondary flex items-center gap-1 mb-2">
@@ -352,7 +346,11 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         </div>
       </div>
 
-      {/* EmailSubscribe moved to top */}
+      {/* ===== 1.5. Mails & Ads — Direct onder de hoofdkaart voor conversie ===== */}
+      <div className="animate-fade-in space-y-4" style={{ animationDelay: "0.12s" }}>
+        <EmailSubscribe city={city} />
+        <AffiliateCard variant="top" weather={weather} />
+      </div>
 
       {/* ===== 2. Rain Radar — "Gaat het regenen over 15 min?" ===== */}
       {weather.minutely && weather.minutely.length > 0 && (
