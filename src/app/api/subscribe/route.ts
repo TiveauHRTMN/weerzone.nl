@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     // Welkomstmail sturen via Resend
     if (process.env.RESEND_API_KEY) {
       try {
-        await resend.emails.send({
+        const { data, error } = await resend.emails.send({
           from: "WeerZone <info@weerzone.nl>",
           to: email,
           subject: "Bevestigd: Je Toegang tot WeerZone.",
@@ -66,9 +66,19 @@ export async function POST(req: Request) {
             </div>
           `,
         });
-      } catch (err) {
-        console.error("Welcome email error:", err);
+
+        if (error) {
+          console.error("Resend API rejected the email:", error);
+          return NextResponse.json({ error: "Email niet verzonden (Resend error)", details: error.message }, { status: 500 });
+        } else {
+          console.log("Welcome email sent successfully:", data);
+        }
+      } catch (err: any) {
+        console.error("Welcome email exception:", err);
+        return NextResponse.json({ error: "Email niet verzonden (Server error)", details: err.message }, { status: 500 });
       }
+    } else {
+       console.error("NO RESEND_API_KEY FOUND IN ENV");
     }
 
     return NextResponse.json({ ok: true });
