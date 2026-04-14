@@ -277,25 +277,17 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header */}
-      <header className="animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <LogoFull height={38} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden" />
-            <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block" />
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <WeatherAlarm city={city} />
-            <button
-              onClick={handleLocationClick}
-              aria-label={`Locatie: ${city.name}`}
-              className="flex items-center gap-1.5 h-9 sm:h-10 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm px-2.5 sm:px-3 hover:bg-white/20 active:scale-[0.97] transition-all max-w-[120px] sm:max-w-none"
-            >
-              <MapPin className="text-white w-3.5 h-3.5" />
-              <span className="text-[11px] sm:text-xs font-semibold text-white truncate">{city.name}</span>
-            </button>
-          </div>
-        </div>
+      <header className="animate-fade-in flex flex-col items-center mb-2">
+        <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden mb-4" />
+        <LogoFull height={64} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block mb-5" />
+        <button
+          onClick={handleLocationClick}
+          aria-label={`Locatie: ${city.name}`}
+          className="flex items-center justify-center gap-2 h-10 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm px-6 hover:bg-white/20 active:scale-[0.97] transition-all"
+        >
+          <MapPin className="text-white w-4 h-4" />
+          <span className="text-sm font-semibold text-white truncate">{city.name}</span>
+        </button>
       </header>
 
       {/* ===== 1. Main Weather Card — Kerninformatie ===== */}
@@ -346,18 +338,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         </div>
       </div>
 
-      {/* ===== 1.5. Mails & Ads — Direct onder de hoofdkaart voor conversie ===== */}
-      <div className="animate-fade-in space-y-4" style={{ animationDelay: "0.12s" }}>
-        <EmailSubscribe city={city} />
-        <AffiliateCard variant="top" weather={weather} />
-      </div>
-
-      {/* ===== 2. Rain Radar — "Gaat het regenen over 15 min?" ===== */}
-      {weather.minutely && weather.minutely.length > 0 && (
-        <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-          <RainRadar data={weather.minutely} />
-        </div>
-      )}
+      {/* Mails & Ads moved below alerts */}
 
       {/* ===== 3. Hourly Forecast — Wat wordt het de komende uren ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
@@ -587,6 +568,19 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           </div>
         );
       })()}
+
+      {/* ===== 2. Rain Radar — direct onder hoofdkaart ===== */}
+      {weather.minutely && weather.minutely.length > 0 && (
+        <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
+          <RainRadar data={weather.minutely} />
+        </div>
+      )}
+
+      {/* ===== 3. Mails & Ads — Na Radar en Alerts, zodat Weer bovenaan blijft ===== */}
+      <div className="animate-fade-in space-y-4" style={{ animationDelay: "0.18s" }}>
+        <EmailSubscribe city={city} />
+        <AffiliateCard variant="top" weather={weather} />
+      </div>
 
       {/* ===== 5. AI Weer Vraag — now below the core weather info ===== */}
       <div className="card p-4 animate-fade-in" style={{ animationDelay: "0.35s" }}>
