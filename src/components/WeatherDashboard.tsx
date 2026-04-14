@@ -648,57 +648,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         <AffiliateCard variant="top" weather={weather} />
       </div>
 
-      {/* ===== 5. AI Weer Vraag — now below the core weather info ===== */}
-      <div className="card p-4 animate-fade-in" style={{ animationDelay: "0.35s" }}>
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-accent-orange to-accent-amber flex items-center justify-center text-sm pointer-events-none">🤖</div>
-          <input
-            type="text"
-            placeholder="Stel een vraag over het weer..."
-            className="w-full py-3 pl-14 pr-12 rounded-full border border-black/10 bg-white/70 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent-orange/40 focus:ring-2 focus:ring-accent-orange/10 focus:bg-white/90 transition-all"
-            value={chatInput}
-            onChange={(e) => { setChatInput(e.target.value); setChatAnswer(null); }}
-            onKeyDown={(e) => { if (e.key === 'Enter' && chatInput.trim()) { answerQuestion(chatInput); setChatInput(''); } }}
-          />
-          <button
-            onClick={() => { if (chatInput.trim()) { answerQuestion(chatInput); setChatInput(''); } }}
-            aria-label="Vraag versturen"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-accent-orange text-text-primary flex items-center justify-center hover:brightness-90 transition-colors"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
 
-        <AnimatePresence mode="wait">
-          {chatAnswer && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="mt-3 flex items-start gap-2.5 px-3 py-2.5 bg-accent-orange/10 rounded-xl border border-accent-orange/20"
-            >
-              <span className="text-base shrink-0 mt-0.5">💬</span>
-              <p className="text-sm font-medium text-text-primary leading-relaxed">{chatAnswer}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="flex overflow-x-auto gap-2 mt-3 pb-1 no-scrollbar">
-          {[
-            { q: "Jas mee?", icon: "🧥" },
-            { q: "Kan ik hardlopen?", icon: "🏃‍♂️" },
-            { q: "Wordt het morgen beter?", icon: "🗓️" },
-            { q: "Gaat het regenen?", icon: "🌧️" },
-            { q: "Kan ik fietsen?", icon: "🚴" },
-            { q: "Hoe hard waait het?", icon: "💨" },
-          ].map(({ q, icon }) => (
-            <button key={q} onClick={() => answerQuestion(q)} className="chip flex-shrink-0">
-              {icon} {q}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* ===== 6. Vandaag & Morgen ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
