@@ -22,8 +22,8 @@ export default function InstallPrompt() {
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show after 30 seconds on site
-      setTimeout(() => setShow(true), 30000);
+      // Show after 3 seconds on site to maximize visibility
+      setTimeout(() => setShow(true), 3000);
     };
 
     window.addEventListener("beforeinstallprompt", handler);
@@ -49,8 +49,8 @@ export default function InstallPrompt() {
   if (!show || dismissed || !deferredPrompt) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 max-w-md mx-auto animate-fade-in">
-      <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-black/10 p-4 flex items-center gap-3">
+    <div className="fixed top-4 left-4 right-4 z-50 max-w-md mx-auto animate-fade-in drop-shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
+      <div className="bg-white/95 backdrop-blur-lg rounded-2xl border-2 border-accent-orange p-4 flex items-center gap-3">
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#4a9ee8] to-[#2980b9] flex items-center justify-center shrink-0">
           <Download className="w-5 h-5 text-white" />
         </div>

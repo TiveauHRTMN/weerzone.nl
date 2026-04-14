@@ -197,7 +197,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
   // On mount: restore saved city or auto-geolocate
   useEffect(() => {
-    setQuote(getRandomQuote());
     const saved = getSavedCity();
     if (saved) {
       setCity(saved);
@@ -230,7 +229,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     if (!mounted) { setMounted(true); return; }
-    setQuote(getRandomQuote());
     fetchWeather(city);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [city]);
@@ -340,9 +338,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* Mails & Ads moved below alerts */}
 
-      {/* ===== 3. Hourly Forecast — Wat wordt het de komende uren ===== */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
-        <div className="flex justify-between items-center mb-3 px-1">
+      {/* Mails & Ads moved below alerts */}
+
+      {/* ===== 2. Rain Radar & Komende Uren (Samengevoegd) ===== */}
+      <div className="animate-fade-in space-y-3" style={{ animationDelay: "0.15s" }}>
+        {weather.minutely && weather.minutely.length > 0 && (
+          <RainRadar data={weather.minutely} />
+        )}
+        <div className="flex justify-between items-center mb-1 px-1">
           <h3 className="section-title">Komende Uren</h3>
           <div className="flex items-center gap-1 bg-white/10 rounded-full p-0.5 border border-white/20">
             {([
@@ -568,13 +571,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           </div>
         );
       })()}
-
-      {/* ===== 2. Rain Radar — direct onder hoofdkaart ===== */}
-      {weather.minutely && weather.minutely.length > 0 && (
-        <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-          <RainRadar data={weather.minutely} />
-        </div>
-      )}
 
       {/* ===== 3. Mails & Ads — Na Radar en Alerts, zodat Weer bovenaan blijft ===== */}
       <div className="animate-fade-in space-y-4" style={{ animationDelay: "0.18s" }}>
@@ -971,46 +967,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       {/* ===== 16. Affiliate Spot 2 ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
         <AffiliateCard variant="bottom" weather={weather} />
-      </div>
-
-      {/* ===== 17. Premium: 48-uurs Impact Analyse ===== */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.95s" }}>
-        <div className="flex justify-between items-end mb-3 px-1">
-          <h3 className="section-title">48-uurs Impact Analyse</h3>
-          <span className="text-[10px] font-bold text-accent-orange uppercase tracking-wider">Premium</span>
-        </div>
-        <AuthGate>
-          <div className="card p-5 space-y-4">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl shrink-0">🎯</span>
-              <div className="min-w-0">
-                <h4 className="font-bold text-text-primary text-sm mb-1">Jouw 48-uurs window</h4>
-                <p className="text-sm text-text-secondary leading-relaxed break-words">
-                  {weather.current.precipitation > 0
-                    ? `Het regent nu in ${city.name}. Verwacht de komende uren ${weather.hourly.filter(h => h.precipitation > 0).length > 6 ? 'langdurige neerslag' : 'buien die overgaan'}. ${weather.daily[1].precipitationSum > 2 ? 'Morgen ook nat — plan binnenshuis.' : 'Morgen wordt het droger.'}`
-                    : weather.hourly.slice(0, 12).some(h => h.precipitation > 0.5)
-                    ? `Nu droog, maar dat verandert. Binnen ${weather.hourly.findIndex(h => h.precipitation > 0.5) + 1} uur valt de eerste bui. Plan je buitenactiviteiten vóór die tijd.`
-                    : `Droge 48 uur in ${city.name}. ${weather.daily[0].tempMax > 20 ? 'Warm genoeg voor buiten. Smeer je in.' : 'Prima weer om dingen gedaan te krijgen buiten.'}`
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl shrink-0">👔</span>
-              <div className="min-w-0">
-                <h4 className="font-bold text-text-primary text-sm mb-1">Slim kleden vandaag</h4>
-                <p className="text-sm text-text-secondary leading-relaxed break-words">
-                  Ochtend {weather.hourly[0]?.temperature ?? weather.current.temperature}°, middag {weather.daily[0].tempMax}°.
-                  {weather.daily[0].tempMax - (weather.hourly[0]?.temperature ?? weather.current.temperature) > 8
-                    ? ' Groot verschil — laagjes zijn je vriend. Begin warm, strip af na de lunch.'
-                    : ' Stabiele temperatuur — kies op het middagweer en je zit goed.'
-                  }
-                  {weather.hourly.slice(0, 12).some(h => h.precipitation > 0) ? ' Regenjas mee, ook al schijnt nu de zon.' : ''}
-                </p>
-              </div>
-            </div>
-          </div>
-        </AuthGate>
       </div>
 
       {/* ===== 18. E-mail Weerrapport (Moved to top) ===== */}
