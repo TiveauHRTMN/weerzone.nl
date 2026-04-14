@@ -157,6 +157,7 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       hourly: HOURLY_PARAMS,
       daily: DAILY_PARAMS,
       minutely_15: "precipitation",
+      forecast_minutely_15: "24",
       timezone: "Europe/Amsterdam",
       forecast_days: "2",
       forecast_hours: "48",
@@ -175,15 +176,16 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
   // Blend hourly data from models
   const { hourly, agreement } = blendHourly(harmonieData, iconData, data.hourly);
 
-  // Parse minutely_15 precipitation data (next 2 hours = 8 intervals)
+  // Parse minutely_15 precipitation data (next ~6 hours of 15-min intervals)
+  // NOTE: API returns times in Europe/Amsterdam timezone. We use the API's own
+  // current.time for comparison (same timezone), NOT Date.now() (which is UTC on Vercel).
   const minutely: MinutelyPrecipitation[] = [];
   if (data.minutely_15?.time && data.minutely_15?.precipitation) {
-    const nowMs = Date.now();
-    const twoHoursMs = 2 * 60 * 60 * 1000;
+    // The current.time from the API is in the same timezone as minutely_15.time
+    const currentApiTime = data.current?.time ?? data.minutely_15.time[0];
     for (let i = 0; i < data.minutely_15.time.length; i++) {
-      const t = new Date(data.minutely_15.time[i]).getTime();
-      // Only include data from now to +2 hours
-      if (t >= nowMs - 15 * 60 * 1000 && t <= nowMs + twoHoursMs) {
+      // String comparison works because both are in the same ISO format + timezone
+      if (data.minutely_15.time[i] >= currentApiTime) {
         minutely.push({
           time: data.minutely_15.time[i],
           precipitation: data.minutely_15.precipitation[i] ?? 0,

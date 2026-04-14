@@ -21,342 +21,550 @@ interface Product {
 interface AffiliateSection {
   heading: string;
   subtitle: string;
+  context?: string;
   products: Product[];
 }
 
-// Placeholder images using emoji-based colored gradients
-function placeholderImg(emoji: string, hue: number): string {
-  return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" rx="16" fill="hsl(${hue},40%,92%)"/><text x="100" y="115" font-size="64" text-anchor="middle">${emoji}</text></svg>`)}`;
+// ============================================================
+// 48-uurs analyse: bepaal het weer-scenario
+// ============================================================
+
+type WeatherScenario =
+  | "rain_now"        // het regent NU
+  | "rain_coming"     // droog nu maar regen in de komende 48u
+  | "cold_snap"       // kou < 5°C in 48u
+  | "freezing"        // vrieskou < 0°C
+  | "heatwave"        // > 28°C
+  | "warm"            // 22-28°C, lekker weer
+  | "windy"           // > 40 km/h
+  | "mixed"           // wisselvallig
+  | "perfect";        // droog, 15-25°C, weinig wind
+
+function analyze48h(w: WeatherData): {
+  scenario: WeatherScenario;
+  rainTotal48h: number;
+  rainHoursCount: number;
+  tempMin48h: number;
+  tempMax48h: number;
+  windMax48h: number;
+  tomorrowRain: number;
+  tomorrowTempMax: number;
+} {
+  const rainTotal48h = w.daily[0].precipitationSum + (w.daily[1]?.precipitationSum ?? 0);
+  const rainHoursCount = w.hourly.filter(h => h.precipitation > 0.3).length;
+  const tempMin48h = Math.min(w.daily[0].tempMin, w.daily[1]?.tempMin ?? w.daily[0].tempMin);
+  const tempMax48h = Math.max(w.daily[0].tempMax, w.daily[1]?.tempMax ?? w.daily[0].tempMax);
+  const windMax48h = Math.max(w.daily[0].windSpeedMax, w.daily[1]?.windSpeedMax ?? 0);
+  const tomorrowRain = w.daily[1]?.precipitationSum ?? 0;
+  const tomorrowTempMax = w.daily[1]?.tempMax ?? w.daily[0].tempMax;
+
+  const isRainingNow = w.current.precipitation > 0;
+  const rainComing = w.hourly.some(h => h.precipitation > 0.5);
+
+  let scenario: WeatherScenario;
+
+  if (isRainingNow) scenario = "rain_now";
+  else if (tempMin48h <= 0) scenario = "freezing";
+  else if (tempMax48h >= 28) scenario = "heatwave";
+  else if (windMax48h >= 40) scenario = "windy";
+  else if (tempMin48h < 5) scenario = "cold_snap";
+  else if (rainComing || rainTotal48h > 2) scenario = "rain_coming";
+  else if (tempMax48h >= 22 && rainTotal48h < 1) scenario = "warm";
+  else if (rainTotal48h < 1 && tempMax48h >= 15 && windMax48h < 25) scenario = "perfect";
+  else scenario = "mixed";
+
+  return { scenario, rainTotal48h, rainHoursCount, tempMin48h, tempMax48h, windMax48h, tomorrowRain, tomorrowTempMax };
 }
 
+// ============================================================
+// Product selecties — dynamisch op basis van 48-uurs scenario
+// ============================================================
+
 function getTopProducts(weather: WeatherData): AffiliateSection {
-  const temp = weather.current.temperature;
-  const rain = weather.current.precipitation > 0 || weather.hourly.some(h => h.precipitation > 0.5);
-  const cold = temp < 8;
-  const hot = temp > 25;
-  const isRukWeer = rain || cold || weather.current.windSpeed > 35;
+  const a = analyze48h(weather);
 
-  const hour = new Date().getHours();
-  const showBooking = isRukWeer ? hour % 3 !== 0 : hour % 4 === 0;
+  switch (a.scenario) {
+    case "rain_now":
+      return {
+        heading: "Het regent. Fix dit.",
+        subtitle: "Amazon.nl",
+        context: `${a.rainTotal48h.toFixed(0)}mm verwacht in 48 uur — ${a.rainHoursCount} uur regen.`,
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/71Rjp7YXQWL._AC_SL1500_.jpg",
+            title: "Regenjas waterdicht - ademend",
+            price: "€49,99",
+            oldPrice: "€69,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("regenjas waterdicht heren dames ademend"),
+            tag: "Bestseller",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61p9SLfI-QL._AC_SL1500_.jpg",
+            title: "Senz stormparaplu - windproof",
+            price: "€29,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("stormparaplu senz windproof automatisch"),
+            tag: "Anti-storm",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71O8ZSHJSEL._AC_SL1500_.jpg",
+            title: "Waterdichte rugzakhoes",
+            price: "€12,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("rugzakhoes waterdicht regenhoes"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/81tXHQdx6fL._AC_SL1500_.jpg",
+            title: "Regenbroek - lichtgewicht",
+            price: "€24,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("regenbroek waterdicht lichtgewicht opvouwbaar"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71+4%2BSuEWuL._AC_SL1500_.jpg",
+            title: "Waterdichte schoenen",
+            price: "€39,99",
+            oldPrice: "€54,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("waterdichte schoenen heren dames gore-tex"),
+            tag: "Deal",
+          },
+        ],
+      };
 
-  if (showBooking) {
-    return {
-      heading: isRukWeer ? "Ontsnap aan dit rukweer" : "Weekendje weg?",
-      subtitle: "Booking.com",
-      products: [
-        {
-          image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=400&fit=crop",
-          title: "Barcelona",
-          price: "vanaf €149",
-          brand: "Booking.com",
-          href: bookingUrl("Barcelona"),
-          tag: "Populair",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1534008897995-27a23e859048?w=400&h=400&fit=crop",
-          title: "Malaga",
-          price: "vanaf €179",
-          brand: "Booking.com",
-          href: bookingUrl("Malaga"),
-        },
-        {
-          image: "https://images.unsplash.com/photo-1585218356057-062e5b7fb60f?w=400&h=400&fit=crop",
-          title: "Lissabon",
-          price: "vanaf €159",
-          oldPrice: "€209",
-          brand: "Booking.com",
-          href: bookingUrl("Lissabon"),
-          tag: "Deal",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1605553556093-9c98a5d3f23a?w=400&h=400&fit=crop",
-          title: "Kreta",
-          price: "vanaf €219",
-          brand: "Booking.com",
-          href: bookingUrl("Kreta"),
-        },
-        {
-          image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=400&fit=crop",
-          title: "Parijs",
-          price: "vanaf €129",
-          brand: "Booking.com",
-          href: bookingUrl("Parijs"),
-          tag: "Citytrip",
-        },
-      ],
-    };
+    case "rain_coming":
+      return {
+        heading: a.tomorrowRain > 5
+          ? `Morgen ${a.tomorrowRain.toFixed(0)}mm regen — wees voorbereid`
+          : `Regen op komst — ${a.rainTotal48h.toFixed(0)}mm in 48 uur`,
+        subtitle: "Amazon.nl",
+        context: `Nu droog, maar ${a.rainHoursCount} uur regen verwacht. Paraplu is geen suggestie.`,
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/61p9SLfI-QL._AC_SL1500_.jpg",
+            title: "Stormparaplu - automatisch",
+            price: "€24,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("stormparaplu automatisch windproof"),
+            tag: "Tip",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71Rjp7YXQWL._AC_SL1500_.jpg",
+            title: "Regenponcho opvouwbaar",
+            price: "€14,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("regenponcho opvouwbaar lichtgewicht"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/81tXHQdx6fL._AC_SL1500_.jpg",
+            title: "Regenoverschoenen",
+            price: "€16,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("regenoverschoenen waterdicht siliconen"),
+            tag: "Handig",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71O8ZSHJSEL._AC_SL1500_.jpg",
+            title: "Droogrek opvouwbaar",
+            price: "€29,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("droogrek opvouwbaar binnen"),
+          },
+        ],
+      };
+
+    case "freezing":
+      return {
+        heading: `${a.tempMin48h}° verwacht — alles bevriest`,
+        subtitle: "Amazon.nl",
+        context: "Ijskrabber klaarzetten. Leidingen beschermen. Overleven.",
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/71yb0s6NPOL._AC_SL1500_.jpg",
+            title: "Thermo ondergoed set",
+            price: "€29,99",
+            oldPrice: "€39,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("thermo ondergoed set heren dames merino"),
+            tag: "Must-have",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71Rjp7YXQWL._AC_SL1500_.jpg",
+            title: "Winterjas warm - waterdicht",
+            price: "€89,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("winterjas warm waterdicht dons parka"),
+            tag: "Bestseller",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61eY-3TJDFL._AC_SL1000_.jpg",
+            title: "Touchscreen handschoenen",
+            price: "€14,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("touchscreen handschoenen warm winter"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/81qB+7FUx0L._AC_SL1500_.jpg",
+            title: "Ijskrabber met handschoen",
+            price: "€9,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("ijskrabber auto handschoen"),
+            tag: "€9,99",
+          },
+        ],
+      };
+
+    case "cold_snap":
+      return {
+        heading: `Koud weekend: ${a.tempMin48h}° tot ${a.tempMax48h}°`,
+        subtitle: "Amazon.nl",
+        context: "Laagjes zijn je vriend. Liever te warm dan te koud.",
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/61eY-3TJDFL._AC_SL1000_.jpg",
+            title: "Fleece vest - lichtgewicht",
+            price: "€24,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("fleece vest heren dames lichtgewicht"),
+            tag: "Populair",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71yb0s6NPOL._AC_SL1500_.jpg",
+            title: "Merino sjaal wol",
+            price: "€19,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("merino sjaal wol warm"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71Rjp7YXQWL._AC_SL1500_.jpg",
+            title: "Softshell jas - wind + water",
+            price: "€49,99",
+            oldPrice: "€64,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("softshell jas heren dames waterdicht winddicht"),
+            tag: "Deal",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/81qB+7FUx0L._AC_SL1500_.jpg",
+            title: "Thermosfles 500ml",
+            price: "€22,50",
+            brand: "Amazon.nl",
+            href: amazonUrl("thermosfles 500ml roestvrij staal"),
+          },
+        ],
+      };
+
+    case "heatwave":
+      return {
+        heading: `${a.tempMax48h}° op komst — bescherm jezelf`,
+        subtitle: "Amazon.nl",
+        context: `UV-index ${weather.uvIndex.toFixed(0)}. Niet smeren = verbranden. Punt.`,
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/71d9uDx0mhL._AC_SL1500_.jpg",
+            title: "Zonnebrand SPF 50+",
+            price: "€12,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("zonnebrand spf 50 waterproof"),
+            tag: "Noodzaak",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71B9R1IvfHL._AC_SL1500_.jpg",
+            title: "Gepolariseerde zonnebril",
+            price: "€24,95",
+            oldPrice: "€39,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("zonnebril gepolariseerd UV400"),
+            tag: "Deal",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61nM-jOMypL._AC_SL1200_.jpg",
+            title: "Tafelventilator - stil",
+            price: "€29,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("tafelventilator stil slaapkamer"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71mKQJh4FNL._AC_SL1500_.jpg",
+            title: "Koelbox 24L - isolatie",
+            price: "€34,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("koelbox 24 liter isolatie"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71WPqByJnwL._AC_SL1500_.jpg",
+            title: "Waterfles 1L - koel houden",
+            price: "€16,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("waterfles 1 liter geïsoleerd"),
+            tag: "Populair",
+          },
+        ],
+      };
+
+    case "windy":
+      return {
+        heading: `Wind tot ${a.windMax48h} km/h — hou je vast`,
+        subtitle: "Amazon.nl",
+        context: "Paraplu is zinloos. Investeer in winddicht materiaal.",
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/71Rjp7YXQWL._AC_SL1500_.jpg",
+            title: "Windbreaker jas",
+            price: "€34,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("windbreaker jas lichtgewicht winddicht"),
+            tag: "Tip",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61p9SLfI-QL._AC_SL1500_.jpg",
+            title: "Senz stormparaplu",
+            price: "€29,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("senz stormparaplu automatisch"),
+            tag: "Anti-storm",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61eY-3TJDFL._AC_SL1000_.jpg",
+            title: "Buff nekwarmer",
+            price: "€19,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("buff nekwarmer winddicht"),
+          },
+        ],
+      };
+
+    case "warm":
+    case "perfect":
+      return {
+        heading: a.scenario === "perfect"
+          ? "Prachtweer. Naar buiten. Nu."
+          : `${a.tempMax48h}° — zomergevoel`,
+        subtitle: "Amazon.nl",
+        context: a.scenario === "perfect"
+          ? "Dit duurt niet lang in Nederland. Grijp je kans."
+          : "Eindelijk normaal weer. Geniet ervan.",
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/71d9uDx0mhL._AC_SL1500_.jpg",
+            title: "Zonnebrand SPF 50",
+            price: "€12,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("zonnebrand spf 50 sport"),
+            tag: "Noodzaak",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71B9R1IvfHL._AC_SL1500_.jpg",
+            title: "Zonnebril UV400",
+            price: "€19,95",
+            brand: "Amazon.nl",
+            href: amazonUrl("zonnebril gepolariseerd sport"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/81tXHQdx6fL._AC_SL1500_.jpg",
+            title: "Picknickdeken waterdicht",
+            price: "€24,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("picknickdeken waterdicht groot"),
+            tag: "Populair",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/71WPqByJnwL._AC_SL1500_.jpg",
+            title: "Waterfles sport 750ml",
+            price: "€14,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("waterfles sport geïsoleerd"),
+          },
+        ],
+      };
+
+    default: // mixed
+      return {
+        heading: "Wisselvallig weer — voor alles voorbereid",
+        subtitle: "Amazon.nl",
+        context: `${a.tempMin48h}° tot ${a.tempMax48h}°, ${a.rainTotal48h > 0 ? a.rainTotal48h.toFixed(0) + 'mm regen' : 'wisselend bewolkt'}.`,
+        products: [
+          {
+            image: "https://m.media-amazon.com/images/I/71Rjp7YXQWL._AC_SL1500_.jpg",
+            title: "3-in-1 jas - alle weersomstandigheden",
+            price: "€59,99",
+            oldPrice: "€79,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("3 in 1 jas heren dames waterdicht"),
+            tag: "Alleskunner",
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61p9SLfI-QL._AC_SL1500_.jpg",
+            title: "Compacte paraplu",
+            price: "€14,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("compacte paraplu klein opvouwbaar"),
+          },
+          {
+            image: "https://m.media-amazon.com/images/I/61eY-3TJDFL._AC_SL1000_.jpg",
+            title: "Lichte fleece - laagjes",
+            price: "€22,99",
+            brand: "Amazon.nl",
+            href: amazonUrl("fleece trui lichtgewicht laagjes"),
+            tag: "Tip",
+          },
+        ],
+      };
   }
-
-  if (rain) {
-    return {
-      heading: "Droog blijven vandaag",
-      subtitle: "Amazon.nl",
-      products: [
-        {
-          image: "https://images.unsplash.com/photo-1504280613098-befe68d3ee6b?w=400&h=400&fit=crop",
-          title: "Regenjas waterdicht",
-          price: "€49,99",
-          oldPrice: "€69,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("regenjas waterdicht heren dames"),
-          tag: "Aanbieding",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1519001389478-433cce7f86eb?w=400&h=400&fit=crop",
-          title: "Stormparaplu XL",
-          price: "€24,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("stormparaplu windproof"),
-          tag: "Bestseller",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1520699697851-3dc68aa3a474?w=400&h=400&fit=crop",
-          title: "Regenlaarzen",
-          price: "€34,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("regenlaarzen waterdicht"),
-        },
-        {
-          image: "https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?w=400&h=400&fit=crop",
-          title: "Waterdichte rugzak",
-          price: "€39,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("waterdichte rugzak"),
-        },
-      ],
-    };
-  }
-
-  if (cold) {
-    return {
-      heading: "Warm blijven",
-      subtitle: "Amazon.nl",
-      products: [
-        {
-          image: "https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=400&h=400&fit=crop",
-          title: "Merino sjaal",
-          price: "€29,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("merino wol sjaal"),
-        },
-        {
-          image: "https://images.unsplash.com/photo-1544605963-3de1b7dfb3ce?w=400&h=400&fit=crop",
-          title: "Thermo handschoenen",
-          price: "€19,99",
-          oldPrice: "€27,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("thermo handschoenen touchscreen"),
-          tag: "Aanbieding",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?w=400&h=400&fit=crop",
-          title: "Winterjas",
-          price: "€89,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("winterjas heren warm"),
-          tag: "Bestseller",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1604183861214-e53b98471ce6?w=400&h=400&fit=crop",
-          title: "Thermosfles 500ml",
-          price: "€22,50",
-          brand: "Amazon.nl",
-          href: amazonUrl("thermosfles 500ml"),
-        },
-      ],
-    };
-  }
-
-  if (hot) {
-    return {
-      heading: `UV ${weather.uvIndex.toFixed(0)} — bescherm jezelf`,
-      subtitle: "Amazon.nl",
-      products: [
-        {
-          image: "https://images.unsplash.com/photo-1526413232644-8a407dd56156?w=400&h=400&fit=crop",
-          title: "Zonnebrand SPF50",
-          price: "€12,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("zonnebrand spf50"),
-          tag: "Noodzaak",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=400&fit=crop",
-          title: "Polaroid zonnebril",
-          price: "€34,95",
-          oldPrice: "€49,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("polaroid zonnebril gepolariseerd"),
-          tag: "Deal",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1616782522778-9ebcd473b64c?w=400&h=400&fit=crop",
-          title: "Tafelventilator",
-          price: "€29,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("tafelventilator stil"),
-        },
-        {
-          image: "https://images.unsplash.com/photo-1599839619722-39751411ea63?w=400&h=400&fit=crop",
-          title: "Koelbox 24L",
-          price: "€44,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("koelbox 24 liter"),
-        },
-      ],
-    };
-  }
-
-  return {
-    heading: "Lekker weer? Naar buiten!",
-    subtitle: "Amazon.nl",
-    products: [
-      {
-        image: "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=400&h=400&fit=crop",
-        title: "Fietslamp set LED",
-        price: "€14,95",
-        brand: "Amazon.nl",
-        href: amazonUrl("fietslamp set led oplaadbaar"),
-        tag: "Populair",
-      },
-      {
-        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-        title: "Dagrugzak 20L",
-        price: "€29,99",
-        oldPrice: "€39,99",
-        brand: "Amazon.nl",
-        href: amazonUrl("dagrugzak 20 liter"),
-        tag: "Aanbieding",
-      },
-      {
-        image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=400&h=400&fit=crop",
-        title: "Buitenspeelgoed",
-        price: "vanaf €9,99",
-        brand: "Amazon.nl",
-        href: amazonUrl("buitenspeelgoed kinderen"),
-      },
-      {
-        image: "https://images.unsplash.com/photo-1595844730298-b960ff88fee6?w=400&h=400&fit=crop",
-        title: "Tuinstoel opvouwbaar",
-        price: "€24,95",
-        brand: "Amazon.nl",
-        href: amazonUrl("tuinstoel opvouwbaar"),
-      },
-    ],
-  };
 }
 
 function getBottomProducts(weather: WeatherData): AffiliateSection {
-  const temp = weather.current.temperature;
-  const rain = weather.current.precipitation > 0 || weather.hourly.some(h => h.precipitation > 0.5);
-  const cold = temp < 10;
-  const isRukWeer = rain || cold || weather.current.windSpeed > 35;
+  const a = analyze48h(weather);
+  const isRukWeer = a.scenario === "rain_now" || a.scenario === "rain_coming" || a.scenario === "cold_snap" || a.scenario === "freezing" || a.scenario === "windy";
 
   if (isRukWeer) {
+    // Booking.com — ontsnappen aan het weer
+    const destinations = [
+      {
+        image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=400&fit=crop",
+        title: "Barcelona",
+        price: "vanaf €149",
+        brand: "Booking.com",
+        href: bookingUrl("Barcelona"),
+        tag: "23° & zon",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1534008897995-27a23e859048?w=400&h=400&fit=crop",
+        title: "Malaga",
+        price: "vanaf €169",
+        brand: "Booking.com",
+        href: bookingUrl("Malaga"),
+        tag: "26° & strand",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1585218356057-062e5b7fb60f?w=400&h=400&fit=crop",
+        title: "Lissabon",
+        price: "vanaf €139",
+        oldPrice: "€199",
+        brand: "Booking.com",
+        href: bookingUrl("Lissabon"),
+        tag: "Deal",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1605553556093-9c98a5d3f23a?w=400&h=400&fit=crop",
+        title: "Kreta",
+        price: "vanaf €219",
+        brand: "Booking.com",
+        href: bookingUrl("Kreta Griekenland"),
+        tag: "28° & strand",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=400&fit=crop",
+        title: "Parijs",
+        price: "vanaf €119",
+        brand: "Booking.com",
+        href: bookingUrl("Parijs"),
+        tag: "Citytrip",
+      },
+    ];
+
     return {
-      heading: "Binnen blijven = investeren in comfort",
-      subtitle: "Amazon.nl",
-      products: [
-        {
-          image: "https://images.unsplash.com/photo-1580302302824-34ba85c4939b?w=400&h=400&fit=crop",
-          title: "Fleece deken XL",
-          price: "€19,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("fleece deken groot warm"),
-          tag: "Favoriet",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=400&h=400&fit=crop",
-          title: "Nespresso cups",
-          price: "€24,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("nespresso capsules compatible"),
-        },
-        {
-          image: "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?w=400&h=400&fit=crop",
-          title: "Geurkaarsen set",
-          price: "€16,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("geurkaarsen set soja"),
-          tag: "Populair",
-        },
-        {
-          image: "https://images.unsplash.com/photo-1592285896110-8d88b5b3a5d8?w=400&h=400&fit=crop",
-          title: "Kindle Paperwhite",
-          price: "€149,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("kindle paperwhite"),
-          tag: "Bestseller",
-        },
-      ],
+      heading: a.scenario === "rain_now"
+        ? `Het regent ${weather.current.precipitation}mm — ontsnap hier naartoe`
+        : a.scenario === "freezing"
+        ? `${a.tempMin48h}° hier, 25°+ daar — jij kiest`
+        : `${a.rainTotal48h.toFixed(0)}mm regen in 48 uur — of vluchten naar de zon`,
+      subtitle: "Booking.com",
+      context: "Goedkoop weekendje weg terwijl Nederland nat wordt.",
+      products: destinations,
     };
   }
 
-  const hour = new Date().getHours();
-  if (hour % 2 === 0) {
+  // Mooi weer → comfort & buitenproducten
+  if (a.scenario === "heatwave" || a.scenario === "warm") {
     return {
-      heading: "BBQ-weer!",
+      heading: "Nazomer-gevoel? Maak het af.",
       subtitle: "Amazon.nl",
+      context: `${a.tempMax48h}° verwacht. BBQ weer, terras weer, alles-kan weer.`,
       products: [
         {
           image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=400&fit=crop",
-          title: "Houtskool BBQ",
+          title: "Houtskool BBQ compact",
           price: "€49,99",
           oldPrice: "€69,99",
           brand: "Amazon.nl",
-          href: amazonUrl("houtskool bbq"),
+          href: amazonUrl("houtskool bbq compact draagbaar"),
           tag: "Deal",
         },
         {
-          image: "https://images.unsplash.com/photo-1596796417769-ca3b9c66914b?w=400&h=400&fit=crop",
-          title: "BBQ gereedschap set",
-          price: "€24,95",
+          image: "https://m.media-amazon.com/images/I/71mKQJh4FNL._AC_SL1500_.jpg",
+          title: "Koeltas 15L geïsoleerd",
+          price: "€19,99",
           brand: "Amazon.nl",
-          href: amazonUrl("bbq gereedschap set rvs"),
+          href: amazonUrl("koeltas geïsoleerd 15 liter"),
         },
         {
           image: "https://images.unsplash.com/photo-1595844730298-b960ff88fee6?w=400&h=400&fit=crop",
           title: "Loungestoel tuin",
-          price: "€79,95",
+          price: "€34,95",
           brand: "Amazon.nl",
           href: amazonUrl("loungestoel tuin opvouwbaar"),
           tag: "Populair",
+        },
+        {
+          image: "https://m.media-amazon.com/images/I/71WPqByJnwL._AC_SL1500_.jpg",
+          title: "Bluetooth speaker waterdicht",
+          price: "€29,99",
+          oldPrice: "€44,99",
+          brand: "Amazon.nl",
+          href: amazonUrl("bluetooth speaker waterdicht outdoor"),
+          tag: "Deal",
         },
       ],
     };
   }
 
+  // Default: slimme weermeters + comfort
   return {
-    heading: "Slimme weermeters",
+    heading: "Weer-nerd? Check deze gadgets.",
     subtitle: "Amazon.nl",
+    context: "Zelf meten is altijd beter dan Buienradar vertrouwen.",
     products: [
       {
-        image: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=400&h=400&fit=crop",
-        title: "Netatmo weerstation",
+        image: "https://m.media-amazon.com/images/I/61nM-jOMypL._AC_SL1200_.jpg",
+        title: "Netatmo Weerstation WiFi",
         price: "€149,99",
         oldPrice: "€189,99",
         brand: "Amazon.nl",
-        href: amazonUrl("netatmo weerstation wifi"),
-        tag: "Tip",
+        href: amazonUrl("netatmo weerstation wifi binnen buiten"),
+        tag: "Top product",
       },
       {
-        image: "https://images.unsplash.com/photo-1561565509-f1fbffc4c23c?w=400&h=400&fit=crop",
-        title: "Buiten thermometer",
-        price: "€12,95",
+        image: "https://m.media-amazon.com/images/I/81qB+7FUx0L._AC_SL1500_.jpg",
+        title: "Digitale buitenthermometer",
+        price: "€14,95",
         brand: "Amazon.nl",
-        href: amazonUrl("buitenthermometer digitaal"),
+        href: amazonUrl("digitale buitenthermometer draadloos"),
       },
       {
-        image: "https://images.unsplash.com/photo-1596781745422-92e1069bdccc?w=400&h=400&fit=crop",
+        image: "https://m.media-amazon.com/images/I/71d9uDx0mhL._AC_SL1500_.jpg",
         title: "Regenmeter tuin",
         price: "€8,99",
         brand: "Amazon.nl",
-        href: amazonUrl("regenmeter tuin"),
+        href: amazonUrl("regenmeter tuin nauwkeurig"),
         tag: "Bestseller",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1580302302824-34ba85c4939b?w=400&h=400&fit=crop",
+        title: "Fleece deken bank XL",
+        price: "€19,99",
+        brand: "Amazon.nl",
+        href: amazonUrl("fleece deken groot bank warm"),
+        tag: "Favoriet",
       },
     ],
   };
 }
+
+// ============================================================
+// Product Card component
+// ============================================================
 
 function ProductCard({ product }: { product: Product }) {
   return (
@@ -370,10 +578,11 @@ function ProductCard({ product }: { product: Product }) {
         <img
           src={product.image}
           alt={product.title}
+          loading="lazy"
           className="w-full h-full object-cover group-hover/product:scale-105 transition-transform duration-300"
         />
         {product.tag && (
-          <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wide bg-accent-orange text-text-primary px-2 py-0.5 rounded-full">
+          <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wide bg-accent-orange text-text-primary px-2 py-0.5 rounded-full shadow-sm">
             {product.tag}
           </span>
         )}
@@ -391,18 +600,25 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
+// ============================================================
+// Main AffiliateCard component
+// ============================================================
+
 export default function AffiliateCard({ variant, weather }: Props) {
   const section = variant === "top" ? getTopProducts(weather) : getBottomProducts(weather);
 
   return (
     <div className="card p-5 overflow-hidden relative">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+      <div className="flex items-center justify-between mb-1">
+        <div className="min-w-0">
           <h4 className="text-sm font-bold text-text-primary break-words leading-tight">{section.heading}</h4>
           <span className="text-[10px] text-text-muted">{section.subtitle}</span>
         </div>
-        <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange/70 bg-accent-orange/10 px-2 py-0.5 rounded-full">Advertentie</span>
+        <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange/70 bg-accent-orange/10 px-2 py-0.5 rounded-full shrink-0 ml-2">Advertentie</span>
       </div>
+      {section.context && (
+        <p className="text-[11px] text-text-secondary mb-3 leading-snug">{section.context}</p>
+      )}
       <div className="horizontal-scroll no-scrollbar gap-3">
         {section.products.map((product, i) => (
           <ProductCard key={`${product.title}-${i}`} product={product} />
