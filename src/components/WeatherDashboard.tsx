@@ -46,185 +46,43 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "Alkmaar") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [chatInput, setChatInput] = useState("");
-  const [chatAnswer, setChatAnswer] = useState<string | null>(null);
-  const [chatLoading, setChatLoading] = useState(false);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
 
-  const answerQuestion = async (q: string) => {
-    if (!weather || chatLoading) return;
-    setChatLoading(true);
-    setChatAnswer(null);
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, weather, city: city.name }),
-      });
-      const data = await res.json();
-      setChatAnswer(data.answer || data.error || "Geen antwoord.");
-    } catch {
-      setChatAnswer("Verbinding mislukt. Probeer het opnieuw.");
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  // Legacy: keep for reference but unused now — Haiku handles all questions
-  const _legacyAnswerQuestion = (q: string) => {
-    if (!weather) return;
-    const lower = q.toLowerCase();
-    const rain = weather.current.precipitation > 0;
-    const rainMm = weather.current.precipitation;
-    const rainSoon = weather.hourly.slice(0, 6).some(h => h.precipitation > 0.5);
-    const firstRainHour = weather.hourly.slice(0, 12).find(h => h.precipitation > 0.1);
-    const firstDryHour = rain ? weather.hourly.slice(0, 12).find(h => h.precipitation === 0) : null;
-    const temp = weather.current.temperature;
-    const feelsLike = weather.current.feelsLike;
-    const wind = weather.current.windSpeed;
-    const gusts = weather.current.windGusts;
-    const humidity = weather.current.humidity;
-    const tomorrow = weather.daily[1];
-    const today = weather.daily[0];
-    const sunset = new Date(weather.sunset);
-    const sunrise = new Date(weather.sunrise);
-    const sunsetStr = sunset.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-    const sunriseStr = sunrise.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-    const fmt = (d: Date) => d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-    const beaufort = getWindBeaufort(wind);
-
-    if (lower.includes("jas") || lower.includes("jacket") || lower.includes("kou")) {
-      if (temp < 5) {
-        setChatAnswer(`${temp}°, voelt als ${feelsLike}°. Winterjas. Sjaal. Handschoenen. De hele rambam. Dit is geen grapje — je bevriest binnen 10 minuten als je stoer gaat doen. Wind: ${wind} km/h, dat maakt het nóg erger. 🧥❄️`);
-      } else if (temp < 12 || rain) {
-        setChatAnswer(`${temp}° (voelt als ${feelsLike}°)${rain ? `, en het regent ${rainMm}mm` : ''}. Ja, jas mee. ${wind > 25 ? `Met die ${wind} km/h wind wil je er eentje die dicht kan.` : ''} ${rain ? 'Waterdicht is geen luxe, het is een vereiste.' : 'Een stevig jack is genoeg.'} ${humidity > 75 ? 'Bonus: die luchtvochtigheid van ' + humidity + '% maakt alles klammer dan het klinkt.' : ''} 🧥`);
-      } else if (temp < 18) {
-        setChatAnswer(`${temp}°, best aangenaam eigenlijk. Een licht jasje of vest is handig voor als de zon wegvalt — na ${sunsetStr} koelt het snel af. Maar nu? Lekker. ${wind > 20 ? `Let op: ${wind} km/h wind, dus het voelt als ${feelsLike}°.` : ''} 😎`);
-      } else {
-        setChatAnswer(`${temp}°. Jas? Nee joh. T-shirtje, zonnebril op, de wereld is mooi. ${weather.uvIndex > 5 ? `Wél smeren: UV ${weather.uvIndex.toFixed(1)}. Je huid is geen leer.` : ''} ${temp > 25 ? 'Eigenlijk is zelfs een T-shirt al te veel, maar we houden het netjes.' : ''} ☀️`);
-      }
-    } else if (lower.includes("hardlop") || lower.includes("rennen") || lower.includes("joggen") || lower.includes("sporten")) {
-      const ok = !rain && wind < 35 && temp > 2 && temp < 32;
-      if (ok) {
-        const ideal = temp >= 8 && temp <= 18 && wind < 20;
-        setChatAnswer(`${temp}°, ${rain ? 'nat' : 'droog'}, wind ${wind} km/h (Bft ${beaufort.scale}). ${ideal ? 'Dit zijn perfecte hardloopomstandigheden. Serieus. Geen excuus. Je schoenen staan al bij de deur.' : `Kan prima, maar ${temp > 25 ? 'drink extra — bij deze temperatuur droog je sneller uit dan je denkt' : wind > 20 ? `die ${wind} km/h wind ga je merken in je rondetijden` : 'let op de zon'}.`} ${weather.uvIndex > 4 ? `UV ${weather.uvIndex.toFixed(1)} — pet op of zonnebrand.` : ''} Zon onder om ${sunsetStr}, plan daar omheen. 🏃‍♂️`);
-      } else {
-        const reason = rain ? `Het regent ${rainMm}mm en ${firstDryHour ? `het wordt pas droog rond ${fmt(new Date(firstDryHour.time))}` : 'er zit geen droog moment aan te komen'}` : wind > 35 ? `${wind} km/h wind (Bft ${beaufort.scale}) — je staat stil op de heenweg en vliegt terug` : temp <= 2 ? `${temp}° (voelt als ${feelsLike}°). Je longen bevriezen en je spieren haten je` : `${temp}°. Je lichaam is geen radiator`;
-        setChatAnswer(`Niet doen. ${reason}. ${rain && !firstDryHour ? 'Binnensport, yoga, of gewoon Netflix.' : rain && firstDryHour ? `Wacht tot ${fmt(new Date(firstDryHour.time))} — dan heb je een droog venster.` : 'De bank is ook een bestemming.'} Morgen: ${tomorrow.tempMax}°${tomorrow.precipitationSum > 0 ? `, ${tomorrow.precipitationSum}mm regen` : ', droog'}. ${tomorrow.precipitationSum === 0 && tomorrow.tempMax > 5 && tomorrow.tempMax < 28 ? 'Betere kans.' : 'Ook niet geweldig eerlijk gezegd.'} 🛋️`);
-      }
-    } else if (lower.includes("morgen") || lower.includes("beter") || lower.includes("overmorgen")) {
-      const betterTemp = tomorrow.tempMax > today.tempMax;
-      const lessRain = tomorrow.precipitationSum < today.precipitationSum;
-      const tomorrowWind = tomorrow.windSpeedMax;
-      const diff = tomorrow.tempMax - today.tempMax;
-      if (betterTemp && lessRain) {
-        setChatAnswer(`Ja! Morgen wordt beter. ${tomorrow.tempMax}° (${diff > 0 ? '+' : ''}${diff}° vs vandaag), ${tomorrow.precipitationSum === 0 ? 'helemaal droog' : `minder regen (${tomorrow.precipitationSum}mm vs ${today.precipitationSum}mm)`}. Wind max ${tomorrowWind} km/h. ${diff >= 5 ? 'Dat is een serieus verschil — plan je buitenactiviteiten voor morgen.' : 'Niet spectaculair, maar de trend is goed.'} 📈`);
-      } else if (betterTemp) {
-        setChatAnswer(`Morgen wordt warmer (${tomorrow.tempMax}°, nu ${today.tempMax}°), maar ${tomorrow.precipitationSum > 0 ? `er valt ${tomorrow.precipitationSum}mm regen` : `qua weer verder vergelijkbaar`}. Wind tot ${tomorrowWind} km/h. ${tomorrow.precipitationSum > today.precipitationSum ? 'Eerlijk? Vandaag is droger. Ga nu.' : 'Maakt niet veel uit welke dag je kiest.'} 🤷`);
-      } else if (lessRain) {
-        setChatAnswer(`Morgen wordt kouder (${tomorrow.tempMax}° vs ${today.tempMax}°), maar wél droger${tomorrow.precipitationSum === 0 ? ' — geen druppel verwacht' : ` (${tomorrow.precipitationSum}mm vs ${today.precipitationSum}mm)`}. Wat je prioriteit is bepaalt je keuze. Warmte? Ga vandaag. Droog? Wacht op morgen. 📊`);
-      } else {
-        setChatAnswer(`Nee. Morgen wordt ${tomorrow.tempMax}° (vandaag ${today.tempMax}°) met ${tomorrow.precipitationSum}mm neerslag en wind tot ${tomorrowWind} km/h. ${tomorrow.tempMax < today.tempMax && tomorrow.precipitationSum > today.precipitationSum ? 'Kouder én natter. Vandaag is letterlijk je beste optie.' : 'Vergelijkbaar, maar de trend zit niet mee.'} Tip: als je iets buiten moet doen, doe het vandaag. 📉`);
-      }
-    } else if (lower.includes("fiets") || lower.includes("fietsen") || lower.includes("ebike") || lower.includes("e-bike")) {
-      const { score, label } = getFietsScore(weather);
-      const headwind = wind > 25;
-      setChatAnswer(`Fietsscore: ${score}/10 — ${label} ${rain ? `Het regent (${rainMm}mm). Je wordt nat. Punt.` : ''} ${headwind ? `Wind: ${wind} km/h (Bft ${beaufort.scale}). Tegenwind is gratis conditietraining, zeggen ze. Wij zeggen: neem de bus.` : wind > 15 ? `Wind: ${wind} km/h, merkbaar maar te doen.` : 'Nauwelijks wind, prima fietsomstandigheden.'} ${temp < 5 ? `Bij ${temp}° worden je handen gevoelloos na 15 minuten. Handschoenen.` : temp > 28 ? `Bij ${temp}° wil je water meenemen. Niet optioneel.` : ''} ${score >= 8 ? 'Geniet ervan — dit soort fietsweer is zeldzaam in Nederland. 🚴' : score <= 3 ? 'Eerlijk advies? Neem vandaag de auto. Of werk thuis. 🚗' : '🚴'}`);
-    } else if (lower.includes("regen") || lower.includes("nat") || lower.includes("droog") || lower.includes("bui")) {
-      if (rain) {
-        setChatAnswer(`Ja, het regent nu. ${rainMm}mm neerslag op dit moment. ${firstDryHour ? `Droog venster verwacht rond ${fmt(new Date(firstDryHour.time))} — als je iets buiten moet doen, wacht tot dan.` : 'En eerlijk? We zien de komende uren geen droog moment. Paraplu of accepteer je lot.'} Vandaag totaal: ${today.precipitationSum}mm verwacht. ${today.precipitationSum > 10 ? 'Dat is flink. Houd rekening met plassen op straat.' : today.precipitationSum > 5 ? 'Gemiddelde regendag voor Nederland.' : 'Valt mee qua hoeveelheid.'} ☔`);
-      } else if (rainSoon) {
-        setChatAnswer(`Nu droog, maar niet lang meer. ${firstRainHour ? `Eerste regen verwacht om ${fmt(new Date(firstRainHour.time))}.` : 'In de komende uren wordt het nat.'} Vandaag totaal: ${today.precipitationSum}mm. ${today.precipitationSum > 0 ? 'Paraplu meenemen is geen suggestie, het is een order.' : ''} Morgen: ${tomorrow.precipitationSum > 0 ? `${tomorrow.precipitationSum}mm, ook nat` : 'droog! Houd vol'}. 🌦️`);
-      } else {
-        setChatAnswer(`Droog. Nu, en de komende uren. Vandaag: ${today.precipitationSum > 0 ? `later valt er nog ${today.precipitationSum}mm, dus geniet van het droge venster` : 'de hele dag geen druppel verwacht'}. Morgen: ${tomorrow.precipitationSum > 0 ? `${tomorrow.precipitationSum}mm regen verwacht — vandaag is de dag om buiten te zijn` : 'ook droog. Luxe.'}. Ga naar buiten. Nu. ☀️`);
-      }
-    } else if (lower.includes("zon") || lower.includes("zonnig") || lower.includes("uv") || lower.includes("zonnebrand")) {
-      const uvVal = weather.uvIndex;
-      const cloudCover = weather.current.cloudCover;
-      setChatAnswer(`Zon op om ${sunriseStr}, onder om ${sunsetStr}. UV-index: ${uvVal.toFixed(1)}. ${uvVal >= 8 ? 'EXTREEM. Smeren met SPF50, hoed op, zonnebril. Geen discussie. Je huid onthoudt elke verbranding.' : uvVal >= 6 ? 'Hoog. Zonnebrand is verplicht. Elke 2 uur opnieuw aanbrengen, ook als je denkt dat het meevalt.' : uvVal >= 3 ? 'Matig. Bij langdurig buiten zijn toch smeren — je merkt het pas als het te laat is.' : 'Laag. Je overleeft het zonder zonnebrand, maar het kan altijd.'} Bewolking nu: ${cloudCover}%. ${cloudCover < 25 ? 'Strakblauwe lucht.' : cloudCover < 50 ? 'Half bewolkt, zon breekt geregeld door.' : cloudCover < 80 ? 'Overwegend bewolkt, af en toe een glimp zon.' : 'Dichtbewolkt. De zon is er, maar je ziet hem niet.'} ☀️`);
-    } else if (lower.includes("onweer") || lower.includes("bliksem") || lower.includes("donder") || lower.includes("cape") || lower.includes("thunder") || lower.includes("bui")) {
-      // CAPE-based thunderstorm analysis
-      const thunderHours = weather.hourly.filter(h => h.weatherCode >= 95);
-      const highCapeHours = weather.hourly.filter(h => h.cape >= 500);
-      const maxCape = Math.max(...weather.hourly.map(h => h.cape));
-      const maxCapeHour = weather.hourly.find(h => h.cape === maxCape);
-      const maxCapeTime = maxCapeHour ? new Date(maxCapeHour.time).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : '';
-
-      let capeLabel: string;
-      if (maxCape >= 2500) capeLabel = 'EXTREEM — zwaar onweer, hagel en windstoten zeer waarschijnlijk';
-      else if (maxCape >= 1500) capeLabel = 'HOOG — krachtig onweer verwacht, grote kans op hagel';
-      else if (maxCape >= 1000) capeLabel = 'AANZIENLIJK — onweer goed mogelijk, lokaal heftig';
-      else if (maxCape >= 500) capeLabel = 'MATIG — buien kunnen onweerachtig worden';
-      else if (maxCape >= 200) capeLabel = 'LAAG — kleine kans op onweer';
-      else capeLabel = 'MINIMAAL — nauwelijks instabiliteit';
-
-      const thunderTiming = thunderHours.length > 0
-        ? `Onweer verwacht: ${thunderHours.map(h => new Date(h.time).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })).slice(0, 4).join(', ')}${thunderHours.length > 4 ? ` (+${thunderHours.length - 4} uur)` : ''}.`
-        : 'Op dit moment geen onweer in het model.';
-
-      setChatAnswer(`⛈️ Onweersanalyse ${city.name}:\n\nCAPE-piek: ${maxCape} J/kg ${maxCapeTime ? `(rond ${maxCapeTime})` : ''}. Risico: ${capeLabel}.\n\n${thunderTiming} ${highCapeHours.length > 0 ? `Instabiele uren (CAPE ≥500): ${highCapeHours.length} van de komende 48 uur.` : 'Atmosfeer is stabiel — geen significante buienactiviteit verwacht.'} ${maxCape >= 1000 ? 'Bij CAPE boven 1000: zoek schuilplaats bij donkere wolken, vermijd open water en alleenstaande bomen. Ontkoppel elektronica.' : maxCape >= 500 ? 'Houd de lucht in de gaten als het bewolkt wordt. Bij donkere stapelwolken: naar binnen.' : 'Geen speciale maatregelen nodig.'}`);
-    } else if (lower.includes("wind") || lower.includes("waai") || lower.includes("storm")) {
-      setChatAnswer(`Wind: ${wind} km/h (Beaufort ${beaufort.scale}: ${beaufort.label}). Windstoten tot ${gusts} km/h — dat is het getal waar je je aan vast moet houden. Richting: ${weather.current.windDirection}. ${gusts > 60 ? 'Bij deze windstoten waait alles om wat niet vastgebonden is. Tuinmeubels naar binnen, fiets op slot in de schuur, en niet onder bomen lopen.' : gusts > 40 ? 'Flink. Fietsen wordt een avontuur, paraplu is zinloos (waait binnenstebuiten), en je kapsel is sowieso naar de klote.' : wind > 20 ? 'Merkbaar, maar je overleeft het. Jas dicht, en verwacht dat alles 2 graden kouder aanvoelt.' : 'Rustig. Wind is nauwelijks een factor vandaag.'} 💨`);
-    } else if (lower.includes("station") || lower.includes("waar") || lower.includes("locatie") || lower.includes("dichtbij") || lower.includes("meetpunt")) {
-      setChatAnswer(`📍 Je bekijkt nu het weer bij ${city.name} (${city.lat.toFixed(2)}°N, ${city.lon.toFixed(2)}°O). Dit is ${city.name.includes("Airport") || city.name.includes("Meetstation") ? 'een KNMI weerstation' : 'gekoppeld aan het dichtstbijzijnde KNMI meetpunt'}. Klik op het 📍 icoontje linksboven voor je exacte locatie — we koppelen je automatisch aan het dichtstbijzijnde station. We hebben ${DUTCH_CITIES.length} meetpunten door heel Nederland. Altijd een in de buurt.`);
-    } else if (lower.includes("hoe werkt") || lower.includes("nauwkeurig") || lower.includes("betrouwbaar") || lower.includes("model") || lower.includes("weerzone")) {
-      setChatAnswer(`WeerZone draait op onze favoriete supercomputer-modellen: KNMI HARMONIE (2.5km resolutie), DWD ICON en het ultra-nauwkeurige ICON-D2. We tonen maximaal 48 uur — langer is wetenschappelijk gezien klinkklare onzin. Modelovereenkomst nu: ${weather.models.agreement}%. ${weather.models.agreement >= 80 ? 'De modellen zijn het roerend eens. Dit gaat zo gebeuren.' : weather.models.agreement >= 60 ? 'Redelijke overeenstemming. De grote lijn klopt, details kunnen afwijken.' : 'De modellen twijfelen. Wij tonen dat eerlijk — andere apps verbergen die onzekerheid.'} We updaten elk uur. Geen 14-daagse fantasie. Gewoon data. 🎯`);
-    } else if (lower.includes("wat trek") || lower.includes("kleding") || lower.includes("aantrekken") || lower.includes("outfit")) {
-      const { emoji, advice } = getOutfitAdvice(weather);
-      setChatAnswer(`${emoji} ${advice} Details: ${temp}° (voelt als ${feelsLike}°), ${rain ? `regen (${rainMm}mm)` : 'droog'}, wind ${wind} km/h. ${temp < 5 ? 'Laagjes. Thermo ondergoed als je lang buiten bent.' : temp < 12 ? 'Trui + jas, de klassieke Nederlandse combo.' : temp < 20 ? 'Licht jasje of vest, eventueel in je tas.' : 'Zo min mogelijk. Maar zonnebrand wél.'} ${rain ? 'Waterdichte laag is verplicht, niet optioneel.' : ''}`);
-    } else if (lower.includes("bbq") || lower.includes("barbecue") || lower.includes("grill")) {
-      const bbqOk = !rain && wind < 30 && temp > 12;
-      setChatAnswer(bbqOk ? `${temp}°, ${rain ? 'nat' : 'droog'}, wind ${wind} km/h. Ja, BBQ is een go! ${wind > 15 ? 'Let op met aansteken — die wind blaast je briketten uit.' : 'Perfect BBQ-weer.'} ${temp > 25 ? 'Biertje koud houden, het is warm.' : 'Zet die BBQ aan en geniet.'} Zon onder om ${sunsetStr}, dus begin op tijd als je bij daglicht wilt eten. 🔥🥩` : `Nee. ${rain ? `Het regent ${rainMm}mm. Tenzij je een overkapping hebt, wordt het niks.` : wind > 30 ? `${wind} km/h wind. Je BBQ waait om en je buurman belt 112.` : `${temp}°. Dan sta je te kleumen bij je grill. Oven aan, bevroren pizza erin.`} 🚫`);
-    } else if (lower.includes("was") || lower.includes("droger") || lower.includes("waslijn") || lower.includes("buiten hangen")) {
-      const wasOk = !rain && !rainSoon && wind > 5 && humidity < 75;
-      setChatAnswer(wasOk ? `Ja! ${temp}°, ${humidity}% luchtvochtigheid, wind ${wind} km/h. ${humidity < 50 ? 'Perfecte wasdag — je kleren zijn binnen een paar uur droog.' : 'Prima, maar met deze luchtvochtigheid duurt het wat langer. Dunne was droogt snel, handdoeken hebben de middag nodig.'} ${rainSoon ? 'Let op: later kans op regen. Haal het op tijd binnen.' : `Droog tot ${sunsetStr}.`} 👕` : `Nee. ${rain ? 'Het regent — je was wordt natter dan hij was.' : rainSoon ? 'Het gaat zo regenen. Begin er niet aan.' : humidity > 75 ? `${humidity}% luchtvochtigheid. Je was droogt niet, het wordt gewoon vochtig en gaat stinken.` : 'Geen wind. Alles blijft nat hangen.'} De droger maar aan. 🫧`);
-    } else {
-      // Fallback: geef een compleet overzicht
-      setChatAnswer(`${temp}° in ${city.name} (voelt als ${feelsLike}°). ${rain ? `Regen: ${rainMm}mm` : 'Droog'}. Wind: ${wind} km/h (Bft ${beaufort.scale}), stoten ${gusts} km/h. Luchtvochtigheid: ${humidity}%. UV: ${weather.uvIndex.toFixed(1)}. ${getMainCommentary(weather)} Morgen: ${tomorrow.tempMax}°/${tomorrow.tempMin}°, ${tomorrow.precipitationSum > 0 ? `${tomorrow.precipitationSum}mm regen` : 'droog'}. Vraag gerust specifieker — jas, fietsen, hardlopen, BBQ, was ophangen, je kunt het zo gek niet bedenken. 🌤️`);
-    }
-  };
-
   const handleShare = async () => {
-    if (!weather) return;
-    const emoji = getWeatherEmoji(weather.current.weatherCode, weather.current.isDay);
-    const text = `${emoji} ${weather.current.temperature}° in ${city.name} — ${getMainCommentary(weather)}\n\nweerzone.nl — 48 uur. De rest is ruis.`;
-
-    // Try sharing with image first (mobile), fallback to text
-    const shareUrl = `/api/share?city=${encodeURIComponent(city.name)}&temp=${weather.current.temperature}&emoji=${encodeURIComponent(emoji)}&desc=${encodeURIComponent(getMainCommentary(weather))}&feels=${weather.current.feelsLike}&wind=${weather.current.windSpeed}&rain=${weather.current.precipitation}`;
-
-    try {
-      if (navigator.share) {
-        // Try share with image on supporting browsers
-        try {
-          const res = await fetch(shareUrl);
-          const blob = await res.blob();
-          const file = new File([blob], `weerzone-${city.name.toLowerCase()}.png`, { type: "image/png" });
-          await navigator.share({
-            title: `Weer in ${city.name}`,
-            text,
-            url: "https://weerzone.nl",
-            files: [file],
-          });
-        } catch {
-          // Fallback: share without image
-          await navigator.share({ title: `Weer in ${city.name}`, text, url: "https://weerzone.nl" });
-        }
-      } else {
-        await navigator.clipboard.writeText(text);
-        alert("Weer gekopieerd naar klembord! 📋");
+    if (typeof navigator.share !== 'undefined') {
+      try {
+        const text = `🌧️ ${weather?.current.temperature}° in ${city.name} — ${weather?.aiVerdict || getMainCommentary(weather!)}\n\nweerzone.nl — 48 uur. De rest is ruis.`;
+        await navigator.share({
+          title: `Weerzone ${city.name}`,
+          text: text,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log("Share skipped/failed", err);
       }
-    } catch {}
+    }
   };
 
-  const fetchWeather = async (targetCity: City) => {
-    setLoading(true);
-    try {
-      const data = await getWeather(targetCity.lat, targetCity.lon);
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const data = await getWeather(city.lat, city.lon);
       setWeather(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
       setLoading(false);
+    }
+    load();
+    const interval = setInterval(load, 10 * 60000); // 10 min refresh
+    return () => clearInterval(interval);
+  }, [city]);
+
+  const handleLocationClick = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        const geoCity = await reverseGeocode(lat, lon);
+        setCity(geoCity);
+        localStorage.setItem("wz_city", JSON.stringify(geoCity));
+      });
     }
   };
 
@@ -233,75 +91,13 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     localStorage.setItem("wz_city", JSON.stringify({ name: city.name, lat: city.lat, lon: city.lon }));
   }, [city]);
 
-  // On mount: restore saved city or auto-geolocate
-  useEffect(() => {
-    const saved = getSavedCity();
-    if (saved) {
-      setCity(saved);
-    } else if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const [geoCity, data] = await Promise.all([
-              reverseGeocode(latitude, longitude),
-              getWeather(latitude, longitude),
-            ]);
-            setWeather(data);
-            setCity(geoCity);
-            setLoading(false);
-          } catch {
-            fetchWeather(city);
-          }
-        },
-        () => fetchWeather(city),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-      return; // Don't call fetchWeather below — geolocation will handle it
-    }
-    fetchWeather(saved || city);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Refetch when city changes (but not on mount — handled above)
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    if (!mounted) { setMounted(true); return; }
-    fetchWeather(city);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [city]);
-
-  const handleLocationClick = () => {
-    if ("geolocation" in navigator) {
-      setLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const [geoCity, data] = await Promise.all([
-              reverseGeocode(latitude, longitude),
-              getWeather(latitude, longitude),
-            ]);
-            setWeather(data);
-            setCity(geoCity);
-          } catch (e) {
-            console.error(e);
-          } finally {
-            setLoading(false);
-          }
-        },
-        (error) => {
-          console.error(error);
-          setLoading(false);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-  };
-
   if (loading || !weather) {
     return <LoadingScreen />;
   }
+
+
+
+
 
   const { score: misereScore, label: misereLabel, emoji: misereEmoji } = getMisereScore(weather);
   const { score: fietsScore, label: fietsLabel } = getFietsScore(weather);
@@ -313,65 +109,19 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header */}
-      <header className="animate-fade-in flex flex-col items-center mb-2">
+      <header className="animate-fade-in flex flex-col items-center mb-6">
         <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden mb-4" />
         <LogoFull height={64} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block mb-5" />
-        <div className="flex flex-row items-center justify-center gap-2 w-full max-w-lg">
+        <div className="flex flex-row items-center justify-center gap-2 w-full max-w-sm">
           <button
             onClick={handleLocationClick}
             aria-label={`Locatie: ${city.name}`}
-            className="flex items-center justify-center gap-2 h-10 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm px-3 sm:px-5 hover:bg-white/20 active:scale-[0.97] transition-all shrink-0"
+            className="flex items-center justify-center gap-2 h-11 w-full rounded-2xl border border-white/25 bg-white/10 backdrop-blur-md px-5 hover:bg-white/20 active:scale-[0.97] transition-all shadow-lg"
           >
             <MapPin className="text-white w-4 h-4" />
-            <span className="text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-none">{city.name}</span>
+            <span className="text-base font-bold text-white truncate">{city.name}</span>
           </button>
-
-          {/* AI Chat Input - altijd naast GPS */}
-          <div className="relative flex-1 min-w-0">
-            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-accent-orange flex items-center justify-center text-[10px] pointer-events-none shadow-sm">🤖</div>
-            <input
-              type="text"
-              placeholder="Wat is je vraag?"
-              className="w-full h-10 pl-9 pr-10 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm text-sm text-white placeholder:text-white/70 outline-none focus:border-accent-orange/60 focus:bg-white/20 transition-all font-medium"
-              value={chatInput}
-              onChange={(e) => { setChatInput(e.target.value); setChatAnswer(null); }}
-              onKeyDown={(e) => { if (e.key === 'Enter' && chatInput.trim()) { answerQuestion(chatInput); setChatInput(''); } }}
-            />
-            <button
-              onClick={() => { if (chatInput.trim()) { answerQuestion(chatInput); setChatInput(''); } }}
-              aria-label="Vraag versturen"
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full text-white flex items-center justify-center hover:bg-white/20 transition-colors"
-            >
-              <Send className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
-
-        {/* AI Answer Dropdown */}
-        <AnimatePresence mode="wait">
-          {(chatAnswer || chatLoading) && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="w-full max-w-lg mt-3 relative z-50"
-            >
-              <div className="card px-4 py-3 bg-white/95 backdrop-blur-md border border-white/40 shadow-xl flex items-start gap-3 rounded-2xl">
-                <span className="text-lg shrink-0 mt-0.5">{chatLoading ? "⏳" : "💬"}</span>
-                <p className="text-sm font-medium text-text-primary leading-relaxed whitespace-pre-wrap">
-                  {chatLoading ? "Even denken..." : chatAnswer}
-                </p>
-                <button 
-                  onClick={() => { setChatAnswer(null); setChatLoading(false); }}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-text-primary text-white rounded-full flex items-center justify-center text-xs border border-white/20 hover:scale-110 shadow-md transition-transform"
-                >
-                  ✕
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
       {/* ===== 1. Main Weather Card — Kerninformatie ===== */}
@@ -399,18 +149,25 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
             </div>
           </div>
           
-          <div className="mt-8 bg-accent-orange/15 border-l-4 border-accent-orange p-4 rounded-r-lg">
-            <p className="font-semibold text-lg text-text-primary break-words leading-snug">
-              {getMainCommentary(weather)}
+          <div className="mt-8 bg-accent-orange/15 border-l-4 border-accent-orange p-4 rounded-r-lg relative overflow-hidden">
+            {weather.aiVerdict && (
+              <div className="absolute -top-1 -right-1 opacity-10 rotate-12">
+                <span className="text-4xl">🤖</span>
+              </div>
+            )}
+            <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10">
+              {weather.aiVerdict || getMainCommentary(weather)}
             </p>
             {/* FOMO urgentie-trigger */}
-            <p className="text-xs text-text-muted mt-2 italic">
+            <p className="text-xs text-text-muted mt-2 italic relative z-10">
               {weather.hourly.slice(0, 6).some(h => h.precipitation > 0.5)
                 ? `⚡ Verandering binnen ${weather.hourly.findIndex(h => h.precipitation > 0.5) + 1} uur — wie dit niet leest, staat straks in de regen.`
                 : weather.daily[1] && Math.abs(weather.daily[1].tempMax - weather.daily[0].tempMax) >= 4
                 ? `📉 Morgen ${weather.daily[1].tempMax > weather.daily[0].tempMax ? "stuk warmer" : "flink kouder"} — ${Math.abs(weather.daily[1].tempMax - weather.daily[0].tempMax)}° verschil. Pas je plannen aan.`
                 : weather.current.windSpeed > 30
                 ? "💨 Dit is niet het moment om dingen op hun beloop te laten."
+                : weather.aiVerdict 
+                ? "📊 Real-time AI analyse van KNMI-data compleet."
                 : `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — ${weather.models.sources.length} supercomputers bevestigen dit.`}
             </p>
           </div>
@@ -434,6 +191,59 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 </span>
               ) : null;
             })()}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== 2. Supercomputer Verificatie — Waarom dit klopt ===== */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
+        <div className="flex justify-between items-end mb-2 px-1">
+          <h3 className="section-title">Supercomputer Verificatie</h3>
+          <span className="text-[10px] text-white/60">Live feed: HARMONIE + ICON</span>
+        </div>
+        <div className="card p-4">
+          <div className="flex items-center gap-4">
+            <div className="relative w-14 h-14 shrink-0">
+              <svg className="w-full h-full" viewBox="0 0 36 36">
+                <path
+                  className="text-black/5"
+                  strokeDasharray="100, 100"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                />
+                <path
+                  className="text-accent-cyan"
+                  strokeDasharray={`${weather.models.agreement}, 100`}
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                {weather.models.agreement}%
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-text-primary mb-1">
+                {weather.models.label}
+              </div>
+              <p className="text-[11px] text-text-secondary leading-snug">
+                {weather.models.agreement >= 80 
+                  ? "Alle modellen zitten op één lijn. De kans dat deze voorspelling uitkomt is maximaal."
+                  : weather.models.agreement >= 60
+                  ? "Goede onderlinge overeenstemming. De details kunnen nog iets schuiven, maar de lijn staat."
+                  : "De modellen twijfelen over de details. Houd rekening met onverwachte wendingen."}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3 pt-3 border-t border-black/5">
+            {weather.models.sources.map(s => (
+              <span key={s} className="px-2 py-0.5 bg-black/5 rounded text-[9px] font-bold text-text-muted uppercase">{s}</span>
+            ))}
           </div>
         </div>
       </div>
@@ -524,9 +334,8 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         </div>
       </div>
 
-      {/* ===== 4. Wanneer wordt het droog? + Alerts — urgent info ===== */}
-      {weather.current.precipitation > 0 || weather.hourly.slice(0, 12).some(h => h.precipitation > 0) ? (() => {
-        const now = new Date();
+      {/* ===== 4. Wanneer wordt het droog? — Cruciale info ===== */}
+      {(() => {
         const upcoming = weather.hourly.slice(0, 24);
         let dryStart: Date | null = null;
         let dryHours = 0;
@@ -547,32 +356,35 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           if (firstRain) rainStart = new Date(firstRain.time);
         }
         const fmt = (d: Date) => d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+        
         return (
           <div className="animate-fade-in" style={{ animationDelay: "0.25s" }}>
-            <div className="card p-4 flex items-center gap-4">
-              <div className="w-12 h-12 bg-accent-cyan/15 rounded-full flex items-center justify-center text-2xl shrink-0">
-                {isCurrentlyDry ? "🌦️" : dryStart && dryHours >= 2 ? "🌤️" : "🌧️"}
-              </div>
-              <div>
-                <div className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">
-                  {isCurrentlyDry ? "Wanneer regent het?" : "Wanneer droog?"}
+            <div className={`card p-5 border-l-8 ${isCurrentlyDry && !rainStart ? 'border-accent-green' : isCurrentlyDry ? 'border-accent-amber' : 'border-accent-red shadow-[0_0_20px_rgba(239,68,68,0.1)]'}`}>
+              <div className="flex items-center gap-5">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 ${isCurrentlyDry ? 'bg-accent-green/10' : 'bg-accent-red/10'}`}>
+                  {isCurrentlyDry ? "🏃" : "☕"}
                 </div>
-                <div className="text-sm font-semibold text-text-primary break-words leading-snug">
-                  {isCurrentlyDry && rainStart
-                    ? `Nu droog. Regen verwacht om ${fmt(rainStart)}. Pak je kans.`
-                    : isCurrentlyDry
-                    ? "Voorlopig droog. Geniet ervan."
-                    : dryStart && dryHours >= 2
-                    ? `Droog vanaf ${fmt(dryStart)} — venster van ${dryHours} uur. Wees er snel bij.`
-                    : dryStart
-                    ? `Korte droge pauze rond ${fmt(dryStart)}. Sprint-tempo.`
-                    : "Geen droog moment in zicht. Accepteer het."}
+                <div className="flex-1">
+                  <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-1">
+                    {isCurrentlyDry ? "PLAN JE MOMENT" : "WANNEER NAAR BUITEN?"}
+                  </div>
+                  <div className="text-base sm:text-lg font-bold text-text-primary leading-tight">
+                    {isCurrentlyDry && rainStart
+                      ? `Geniet ervan. Over ${Math.round((rainStart.getTime() - Date.now()) / 3600000)} uur (${fmt(rainStart)}) wordt het nat.`
+                      : isCurrentlyDry
+                      ? "De kust is veilig. Er wordt de komende uren geen neerslag verwacht."
+                      : dryStart && dryHours >= 2
+                      ? `Wacht tot ${fmt(dryStart)}. Dan heb je een droog venster van ${dryHours} uur.`
+                      : dryStart
+                      ? `Korte pauze rond ${fmt(dryStart)}. Ideaal voor een snelle boodschap.`
+                      : "Slecht nieuws: de komende uren blijft het zeiken van de regen."}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         );
-      })() : null}
+      })()}
 
       {/* ===== Extremiteiten-index ===== */}
       {(() => {

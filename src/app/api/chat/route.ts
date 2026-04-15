@@ -24,14 +24,17 @@ export async function POST(req: Request) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
+    console.log("Chat API Key Check:", apiKey ? "FOUND (masked)" : "NOT FOUND");
+    console.log("Environment:", process.env.NODE_ENV);
+
     if (!apiKey) {
       return NextResponse.json({
-        answer: `${weather.current.temperature}° in ${city}. ${weather.current.precipitation > 0 ? "Het regent, paraplu mee." : "Droog."} Stel GEMINI_API_KEY in voor slimmere antwoorden. 🤷`
+        answer: `${weather.current.temperature}° in ${city}. ${weather.current.precipitation > 0 ? "Het regent, paraplu mee." : "Droog."} Stel GEMINI_API_KEY in voor slimmere antwoorden. (Env: ${process.env.NODE_ENV}) 🤷`
       });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const weatherContext = JSON.stringify({
       stad: city,
@@ -77,8 +80,12 @@ export async function POST(req: Request) {
     const answer = result.response.text()?.trim() || "Geen antwoord. Probeer het opnieuw.";
 
     return NextResponse.json({ answer });
-  } catch (e) {
+  } catch (e: any) {
     console.error("Chat error:", e);
-    return NextResponse.json({ error: "Chat mislukt" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Chat mislukt", 
+      details: e.message || String(e),
+      type: e.constructor?.name 
+    }, { status: 500 });
   }
 }

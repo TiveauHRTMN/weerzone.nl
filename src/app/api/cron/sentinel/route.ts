@@ -138,7 +138,7 @@ export async function GET(req: Request) {
         let alertMsg = "";
         try {
           if (genAI) {
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent({
               contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nDATA: ${JSON.stringify({ city: user.city, anomaly })}` }] }],
               generationConfig: { maxOutputTokens: 60, temperature: 0.9 },

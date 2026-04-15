@@ -23,6 +23,7 @@ export interface WeatherData {
   sunset: string;
   uvIndex: number;
   models: ModelComparison;
+  aiVerdict?: string;
 }
 
 export interface HourlyForecast {
