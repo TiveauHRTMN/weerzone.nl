@@ -27,7 +27,8 @@
       "Bash(npm install:*)",
       "WebFetch(domain:weerzone.nl)",
       "WebFetch(domain:api.open-meteo.com)",
-      "WebFetch(domain:supabase.com)"
+      "WebFetch(domain:supabase.com)",
+      "Bash(npm info:*)"
     ]
   }
 }
