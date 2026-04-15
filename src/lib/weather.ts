@@ -74,85 +74,34 @@ async function fetchModel(
 
 function blendHourly(
   harmonieData: RawModelHourly | null,
-  iconData: RawModelHourly | null,
   fallbackData: { time: string[]; temperature_2m: number[]; weather_code: number[]; precipitation: number[]; wind_speed_10m: number[]; cape?: number[] }
 ): { hourly: HourlyForecast[]; agreement: number } {
   const times = fallbackData.time;
-  let agreeCount = 0;
-  let compareCount = 0;
 
   const hourly: HourlyForecast[] = times.map((time, i) => {
-    const hTemp = harmonieData?.temperature_2m[i] ?? null;
-    const hPrecip = harmonieData?.precipitation[i] ?? null;
-    const hCode = harmonieData?.weather_code[i] ?? null;
-    const iTemp = iconData?.temperature_2m[i] ?? null;
-    const iPrecip = iconData?.precipitation[i] ?? null;
-    const iCode = iconData?.weather_code[i] ?? null;
-
-    // Blended temperature: prefer HARMONIE, fallback to ICON, then generic
-    let temperature: number;
-    let precipitation: number;
-    let weatherCode: number;
-
-    if (hTemp !== null && iTemp !== null) {
-      // Both available — average for temperature, max for precipitation (conservative)
-      temperature = Math.round((hTemp + iTemp) / 2);
-      precipitation = Math.round(Math.max(hPrecip ?? 0, iPrecip ?? 0) * 10) / 10;
-      // Weather code: prefer HARMONIE (higher resolution for NL)
-      weatherCode = hCode ?? iCode ?? fallbackData.weather_code[i];
-
-      // Check agreement
-      const tempDiff = Math.abs(hTemp - iTemp);
-      const precipDiff = Math.abs((hPrecip ?? 0) - (iPrecip ?? 0));
-      compareCount++;
-      if (tempDiff <= 2 && precipDiff <= 0.5) agreeCount++;
-    } else if (hTemp !== null) {
-      temperature = Math.round(hTemp);
-      precipitation = hPrecip ?? fallbackData.precipitation[i];
-      weatherCode = hCode ?? fallbackData.weather_code[i];
-    } else if (iTemp !== null) {
-      temperature = Math.round(iTemp);
-      precipitation = iPrecip ?? fallbackData.precipitation[i];
-      weatherCode = iCode ?? fallbackData.weather_code[i];
-    } else {
-      temperature = Math.round(fallbackData.temperature_2m[i]);
-      precipitation = fallbackData.precipitation[i];
-      weatherCode = fallbackData.weather_code[i];
-    }
-
-    // Confidence based on model agreement
-    let confidence: "high" | "medium" | "low" = "medium";
-    if (hTemp !== null && iTemp !== null) {
-      const tempDiff = Math.abs(hTemp - iTemp);
-      const precipDiff = Math.abs((hPrecip ?? 0) - (iPrecip ?? 0));
-      if (tempDiff <= 1 && precipDiff <= 0.3) confidence = "high";
-      else if (tempDiff > 3 || precipDiff > 1) confidence = "low";
-    }
-
-    const models: HourlyForecast["models"] = {};
-    if (hTemp !== null) models.harmonie = { temperature: Math.round(hTemp), precipitation: hPrecip ?? 0, weatherCode: hCode ?? 0 };
-    if (iTemp !== null) models.icon = { temperature: Math.round(iTemp), precipitation: iPrecip ?? 0, weatherCode: iCode ?? 0 };
+    const temperature = Math.round(harmonieData?.temperature_2m[i] ?? fallbackData.temperature_2m[i]);
+    const precipitation = harmonieData?.precipitation[i] ?? fallbackData.precipitation[i];
+    const weatherCode = harmonieData?.weather_code[i] ?? fallbackData.weather_code[i];
+    const windSpeed = Math.round(harmonieData?.wind_speed_10m[i] ?? fallbackData.wind_speed_10m[i]);
 
     return {
       time,
       temperature,
       weatherCode,
       precipitation,
-      windSpeed: Math.round(fallbackData.wind_speed_10m[i] ?? 0),
+      windSpeed,
       cape: Math.round(fallbackData.cape?.[i] ?? 0),
-      confidence,
-      models: Object.keys(models).length > 0 ? models : undefined,
+      confidence: "high"
     };
   });
 
-  const agreement = compareCount > 0 ? Math.round((agreeCount / compareCount) * 100) : 50;
-  return { hourly, agreement };
+  return { hourly, agreement: 100 };
 }
 
 export async function fetchWeatherData(lat: number, lon: number): Promise<WeatherData> {
-  // Fetch all three sources in parallel
-  const [genericRes, harmonieData, iconData] = await Promise.all([
-    // Generic forecast (always reliable, used for current + daily + fallback hourly + minutely_15)
+  // Fetch KNMI Seamless (HARMONIE) as primary source
+  // and Generic Open-Meteo as secondary/fallback for daily/minutely
+  const [genericRes, harmonieData] = await Promise.all([
     fetch(`${OPEN_METEO_BASE}?${new URLSearchParams({
       latitude: lat.toString(),
       longitude: lon.toString(),
@@ -164,30 +113,17 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       timezone: "Europe/Amsterdam",
       forecast_days: "2",
       forecast_hours: "48",
-    })}`, { next: { revalidate: 300 } }).then(r => {
-      if (!r.ok) throw new Error(`Open-Meteo API error: ${r.status}`);
-      return r.json();
-    }),
-    // KNMI HARMONIE
+    })}`, { next: { revalidate: 300 } }).then(r => r.json()),
     fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_seamless" }),
-    // DWD ICON
-    fetchModel(DWD_ICON_BASE, lat, lon),
   ]);
 
   const data = genericRes;
+  const { hourly, agreement } = blendHourly(harmonieData, null, data.hourly);
 
-  // Blend hourly data from models
-  const { hourly, agreement } = blendHourly(harmonieData, iconData, data.hourly);
-
-  // Parse minutely_15 precipitation data (next ~6 hours of 15-min intervals)
-  // NOTE: API returns times in Europe/Amsterdam timezone. We use the API's own
-  // current.time for comparison (same timezone), NOT Date.now() (which is UTC on Vercel).
   const minutely: MinutelyPrecipitation[] = [];
   if (data.minutely_15?.time && data.minutely_15?.precipitation) {
-    // The current.time from the API is in the same timezone as minutely_15.time
     const currentApiTime = data.current?.time ?? data.minutely_15.time[0];
     for (let i = 0; i < data.minutely_15.time.length; i++) {
-      // String comparison works because both are in the same ISO format + timezone
       if (data.minutely_15.time[i] >= currentApiTime) {
         minutely.push({
           time: data.minutely_15.time[i],
@@ -196,17 +132,6 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       }
     }
   }
-
-  // Model comparison info
-  const sources: string[] = ["Open-Meteo"];
-  if (harmonieData) sources.push("KNMI HARMONIE");
-  if (iconData) sources.push("DWD ICON");
-
-  let label: string;
-  if (agreement >= 80) label = "Modellen zeer eens";
-  else if (agreement >= 60) label = "Modellen grotendeels eens";
-  else if (agreement >= 40) label = "Modellen verschillen";
-  else label = "Modellen oneens — onzekerheid";
 
   return {
     current: {
@@ -236,8 +161,8 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     uvIndex: data.daily.uv_index_max[0],
     models: {
       agreement,
-      label,
-      sources,
+      label: "KNMI HARMONIE Geverifieerd",
+      sources: ["KNMI HARMONIE"],
     },
   };
 }

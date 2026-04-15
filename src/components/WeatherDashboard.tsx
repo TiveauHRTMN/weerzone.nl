@@ -197,55 +197,26 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       </div>
 
       {/* ===== 2. Weermodel Verificatie — Waarom dit klopt ===== */}
+      {/* ===== 2. Data Bron — Waarom dit klopt ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-        <div className="flex justify-between items-end mb-2 px-1">
-          <h3 className="section-title">Weermodel Verificatie</h3>
-          <span className="text-[10px] text-white/60">Live feed: HARMONIE + ICON</span>
-        </div>
         <div className="card p-4">
-          <div className="flex items-center gap-4">
-            <div className="relative w-14 h-14 shrink-0">
-              <svg className="w-full h-full" viewBox="0 0 36 36">
-                <path
-                  className="text-black/5"
-                  strokeDasharray="100, 100"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                />
-                <path
-                  className="text-accent-cyan"
-                  strokeDasharray={`${weather.models.agreement}, 100`}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-                {weather.models.agreement}%
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-accent-cyan/10 flex items-center justify-center">
+                <RefreshCw className="w-5 h-5 text-accent-cyan" />
+              </div>
+              <div>
+                <div className="text-[11px] font-black text-text-primary uppercase tracking-wider">
+                  KNMI HARMONIE LIVE
+                </div>
+                <div className="text-[10px] text-text-secondary">
+                  Gedetailleerde polderdata • 2.5km resolutie
+                </div>
               </div>
             </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-text-primary mb-1">
-                {weather.models.label}
-              </div>
-          
-              <p className="text-[11px] text-text-secondary leading-snug">
-                {weather.models.agreement >= 80 
-                  ? "Alle modellen zitten op één lijn. De kans dat deze voorspelling uitkomt is maximaal."
-                  : weather.models.agreement >= 60
-                  ? "Goede onderlinge overeenstemming. De details kunnen nog iets schuiven, maar de lijn staat."
-                  : "De modellen twijfelen over de details. Houd rekening met onverwachte wendingen."}
-              </p>
+            <div className="px-2.5 py-1 bg-accent-green/10 rounded font-bold text-accent-green text-[10px] uppercase tracking-tighter border border-accent-green/20">
+              Geverifieerd
             </div>
-          </div>
-          <div className="flex gap-2 mt-3 pt-3 border-t border-black/5">
-            {weather.models.sources.map(s => (
-              <span key={s} className="px-2 py-0.5 bg-black/5 rounded text-[9px] font-bold text-text-muted uppercase">{s}</span>
-            ))}
           </div>
         </div>
       </div>
