@@ -265,7 +265,7 @@ function buildEmailHtml(city: string, data: Record<string, unknown>): string {
     <!-- FOOTER -->
     <div style="padding:20px 24px;text-align:center;">
       <p style="margin:0;font-size:11px;color:#94a3b8;">
-        ${dateStr} · HARMONIE + ICON data · WeerZone.nl<br>
+        ${dateStr} · KNMI HARMONIE data · WeerZone.nl<br>
         <span style="font-size:10px;">48 uur. De rest is ruis.</span>
       </p>
       <p style="margin:12px 0 0;font-size:11px;">

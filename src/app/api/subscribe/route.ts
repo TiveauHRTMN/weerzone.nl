@@ -92,8 +92,8 @@ export async function POST(req: Request) {
           <td style="width:4%;"></td>
           <td style="width:48%;background:#f8fafc;border-radius:12px;padding:20px;vertical-align:top;">
             <p style="margin:0;font-size:28px;line-height:1;">🧠</p>
-            <p style="margin:8px 0 4px;font-size:14px;font-weight:800;color:#1e293b;">3 Weermodellen</p>
-            <p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">HARMONIE + ICON + ICON-D2. Geen enkele weer-app in NL doet dit.</p>
+            <p style="margin:8px 0 4px;font-size:14px;font-weight:800;color:#1e293b;">KNMI HARMONIE</p>
+            <p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">Direct van het KNMI supercomputer. 2.5km resolutie. Zo nauwkeurig als het kan.</p>
           </td>
         </tr>
       </table>
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
     <!-- FOOTER -->
     <div style="padding:24px;text-align:center;">
       <p style="margin:0;font-size:11px;color:#94a3b8;">
-        WeerZone.nl — HARMONIE + ICON data<br>
+        WeerZone.nl — KNMI HARMONIE data<br>
         <span style="font-size:10px;">48 uur. De rest is ruis.</span>
       </p>
       <p style="margin:12px 0 0;font-size:11px;">

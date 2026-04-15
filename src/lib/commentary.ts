@@ -242,7 +242,7 @@ const ROTATING_QUOTES = [
   "\"Kans op zon\" is de laffe uitweg van Weerplaza. Wij vertellen je gewoon de realiteit op de kilometer nauwkeurig.",
   "48 uur. Meer heb je niet nodig. Een 14-daagse voorspelling is commerciële clickbait voor de massa.",
   "Je weer-app zegt 22° volgende week? Trap er niet in. Puur bedrog om clicks te genereren.",
-  "KNMI HARMONIE + ICON + ICON-D2. Drie weermodellen. Eén brute waarheid. Geen gelul.",
+  "KNMI HARMONIE op volle sterkte. 2.5km resolutie. Eén brute waarheid. Geen gelul.",
   "14-daagse voorspelling? Dan kun je net zo goed je horoscoop of de krant van gisteren lezen.",
   "Weerplaza, NOS, Buienradar... Stuk voor stuk bezig met nattevingerwerk. Wij doen data.",
   "Jas-aan-jas-uit-jas-aan weer. Typisch Nederlands. Volkomen ruk, maar wij waarschuwen tenminste eerlijk.",

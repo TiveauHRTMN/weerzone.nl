@@ -214,7 +214,7 @@ export async function GET(req: Request) {
       <a href="https://weerzone.nl/weer/amsterdam" style="display:inline-block;padding:14px 40px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:14px;border-radius:999px;text-decoration:none;text-transform:uppercase;box-shadow:0 4px 12px rgba(245,158,11,0.3);">Bekijk Live Radar →</a>
     </div>
     <div style="padding:20px 24px;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#94a3b8;">${dateStr} · HARMONIE + ICON data · WeerZone.nl<br><span style="font-size:10px;">48 uur. De rest is ruis.</span></p>
+      <p style="margin:0;font-size:11px;color:#94a3b8;">${dateStr} · KNMI HARMONIE data · WeerZone.nl<br><span style="font-size:10px;">48 uur. De rest is ruis.</span></p>
       <p style="margin:12px 0 0;font-size:11px;"><a href="https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(to)}" style="color:#94a3b8;text-decoration:underline;">Uitschrijven</a></p>
     </div>
   </div>
