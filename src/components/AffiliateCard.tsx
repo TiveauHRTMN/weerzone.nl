@@ -608,21 +608,29 @@ export default function AffiliateCard({ variant, weather }: Props) {
   const section = variant === "top" ? getTopProducts(weather) : getBottomProducts(weather);
 
   return (
-    <div className="card p-5 overflow-hidden relative">
-      <div className="flex items-center justify-between mb-1">
-        <div className="min-w-0">
-          <h4 className="text-sm font-bold text-text-primary break-words leading-tight">{section.heading}</h4>
-          <span className="text-[10px] text-text-muted">{section.subtitle}</span>
+    <div className="rounded-2xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(255,229,0,0.08) 0%, rgba(255,255,255,0.85) 60%)", border: "1px solid rgba(255,229,0,0.3)", backdropFilter: "blur(12px)" }}>
+      {/* Header stripe */}
+      <div className="px-5 pt-4 pb-3 border-b border-black/[0.06]">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h4 className="text-[15px] font-black text-text-primary break-words leading-snug">{section.heading}</h4>
+            {section.context && (
+              <p className="text-xs text-text-secondary mt-0.5 leading-snug">{section.context}</p>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange bg-accent-orange/15 px-2 py-0.5 rounded-full">Advertentie</span>
+            <span className="text-[9px] text-text-muted">{section.subtitle}</span>
+          </div>
         </div>
-        <span className="text-[9px] font-bold uppercase tracking-wider text-accent-orange/70 bg-accent-orange/10 px-2 py-0.5 rounded-full shrink-0 ml-2">Advertentie</span>
       </div>
-      {section.context && (
-        <p className="text-[11px] text-text-secondary mb-3 leading-snug">{section.context}</p>
-      )}
-      <div className="horizontal-scroll no-scrollbar gap-3">
-        {section.products.map((product, i) => (
-          <ProductCard key={`${product.title}-${i}`} product={product} />
-        ))}
+      {/* Products scroll */}
+      <div className="px-5 py-4">
+        <div className="horizontal-scroll no-scrollbar gap-3">
+          {section.products.map((product, i) => (
+            <ProductCard key={`${product.title}-${i}`} product={product} />
+          ))}
+        </div>
       </div>
     </div>
   );
