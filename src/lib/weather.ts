@@ -123,45 +123,45 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     const data = genericRes;
     const { hourly, agreement } = blendHourly(harmonieData, data.hourly);
 
-  const minutely: MinutelyPrecipitation[] = [];
-  if (data.minutely_15?.time && data.minutely_15?.precipitation) {
-    const currentApiTime = data.current?.time ?? data.minutely_15.time[0];
-    for (let i = 0; i < data.minutely_15.time.length; i++) {
-      if (data.minutely_15.time[i] >= currentApiTime) {
-        minutely.push({
-          time: data.minutely_15.time[i],
-          precipitation: data.minutely_15.precipitation[i] ?? 0,
-        });
+    const minutely: MinutelyPrecipitation[] = [];
+    if (data.minutely_15?.time && data.minutely_15?.precipitation) {
+      const currentApiTime = data.current?.time ?? data.minutely_15.time[0];
+      for (let i = 0; i < data.minutely_15.time.length; i++) {
+        if (data.minutely_15.time[i] >= currentApiTime) {
+          minutely.push({
+            time: data.minutely_15.time[i],
+            precipitation: data.minutely_15.precipitation[i] ?? 0,
+          });
+        }
       }
     }
-  }
 
-  return {
-    current: {
-      temperature: Math.round(data.current.temperature_2m),
-      feelsLike: Math.round(data.current.apparent_temperature),
-      humidity: data.current.relative_humidity_2m,
-      windSpeed: Math.round(data.current.wind_speed_10m),
-      windDirection: degreesToDirection(data.current.wind_direction_10m),
-      windGusts: Math.round(data.current.wind_gusts_10m),
-      precipitation: data.current.precipitation,
-      weatherCode: data.current.weather_code,
-      isDay: data.current.is_day === 1,
-      cloudCover: data.current.cloud_cover,
-    },
-    minutely,
-    hourly,
-    daily: data.daily.time.map((date: string, i: number) => ({
-      date,
-      tempMax: Math.round(data.daily.temperature_2m_max[i]),
-      tempMin: Math.round(data.daily.temperature_2m_min[i]),
-      weatherCode: data.daily.weather_code[i],
-      precipitationSum: data.daily.precipitation_sum[i],
-      windSpeedMax: Math.round(data.daily.wind_speed_10m_max[i]),
-    })),
-    sunrise: data.daily.sunrise[0],
-    sunset: data.daily.sunset[0],
-    uvIndex: data.daily.uv_index_max[0],
+    return {
+      current: {
+        temperature: Math.round(data.current.temperature_2m),
+        feelsLike: Math.round(data.current.apparent_temperature),
+        humidity: data.current.relative_humidity_2m,
+        windSpeed: Math.round(data.current.wind_speed_10m),
+        windDirection: degreesToDirection(data.current.wind_direction_10m),
+        windGusts: Math.round(data.current.wind_gusts_10m),
+        precipitation: data.current.precipitation,
+        weatherCode: data.current.weather_code,
+        isDay: data.current.is_day === 1,
+        cloudCover: data.current.cloud_cover,
+      },
+      minutely,
+      hourly,
+      daily: data.daily.time.map((date: string, i: number) => ({
+        date,
+        tempMax: Math.round(data.daily.temperature_2m_max[i]),
+        tempMin: Math.round(data.daily.temperature_2m_min[i]),
+        weatherCode: data.daily.weather_code[i],
+        precipitationSum: data.daily.precipitation_sum[i],
+        windSpeedMax: Math.round(data.daily.wind_speed_10m_max[i]),
+      })),
+      sunrise: data.daily.sunrise[0],
+      sunset: data.daily.sunset[0],
+      uvIndex: data.daily.uv_index_max[0],
       models: {
         agreement,
         label: "KNMI HARMONIE Geverifieerd",
