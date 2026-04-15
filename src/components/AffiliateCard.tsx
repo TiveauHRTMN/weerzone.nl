@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { WeatherData } from "@/lib/types";
 import { amazonUrl, amazonProductUrl, bookingUrl } from "@/lib/affiliates";
+import { getConditionTag } from "@/lib/affiliate-orchestrator";
 
 interface Props {
   variant: "top" | "bottom";
@@ -629,13 +631,20 @@ function getBottomProducts(weather: WeatherData): AffiliateSection {
 // Product Card component
 // ============================================================
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({
+  product,
+  onClickTrack,
+}: {
+  product: Product;
+  onClickTrack?: () => void;
+}) {
   return (
     <a
       href={product.href}
       className="shrink-0 w-[140px] group/product cursor-pointer"
       target="_blank"
       rel="noopener noreferrer sponsored"
+      onClick={onClickTrack}
     >
       <div className="relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-black/[0.03] mb-2">
         <img
@@ -669,6 +678,47 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function AffiliateCard({ variant, weather }: Props) {
   const section = variant === "top" ? getTopProducts(weather) : getBottomProducts(weather);
+  const [sessionId] = useState(() => Math.random().toString(36).slice(2));
+  const impressionFired = useRef(false);
+
+  const tag = getConditionTag(weather);
+  const weatherContext = {
+    temp: weather.current.temperature,
+    rain: weather.current.precipitation,
+    wind: weather.current.windSpeed,
+    code: weather.current.weatherCode,
+  };
+
+  useEffect(() => {
+    if (impressionFired.current) return;
+    impressionFired.current = true;
+    fetch("/api/affiliate/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "IMPRESSION",
+        tag,
+        weatherContext,
+        platform: "SITE",
+        sessionId,
+      }),
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handleClick() {
+    fetch("/api/affiliate/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "CLICK",
+        tag,
+        weatherContext,
+        platform: "SITE",
+        sessionId,
+      }),
+    }).catch(() => {});
+  }
 
   return (
     <div className="rounded-2xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(255,255,255,0.85) 60%)", border: "1px solid rgba(245,158,11,0.3)", backdropFilter: "blur(12px)" }}>
@@ -691,7 +741,7 @@ export default function AffiliateCard({ variant, weather }: Props) {
       <div className="px-5 py-4">
         <div className="horizontal-scroll no-scrollbar gap-3">
           {section.products.map((product, i) => (
-            <ProductCard key={`${product.title}-${i}`} product={product} />
+            <ProductCard key={`${product.title}-${i}`} product={product} onClickTrack={handleClick} />
           ))}
         </div>
       </div>

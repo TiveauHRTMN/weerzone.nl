@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getSupabase } from "@/lib/supabase";
 import { getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
+import { getConditionTag, getAffiliateUrl, trackEvent, ConditionTag } from "@/lib/affiliate-orchestrator";
+import { WeatherData } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +69,50 @@ function buildHourBlock(hour: string, temp: number, code: number, precipProb: nu
     </td>`;
 }
 
-function buildEmailHtml(city: string, data: Record<string, unknown>): string {
+function buildAffiliateBlock(tag: ConditionTag, city: string, sessionId: string): string {
+  const affiliate = getAffiliateUrl(tag, city);
+  let icon = "🛒";
+  let headline = "Passend bij het weer van vandaag";
+  switch (tag) {
+    case "RAIN":
+      icon = "🍕";
+      headline = "Vandaag thuisbezorgd laten bezorgen?";
+      break;
+    case "HEAT":
+      icon = "☀️";
+      headline = "Mooi weer — boek een dagje weg";
+      break;
+    case "COLD":
+    case "WIND":
+      icon = "🧥";
+      headline = "Bescherm je tegen het weer";
+      break;
+    case "PERFECT":
+      icon = "🌿";
+      headline = "Perfect weer voor een dagje uit";
+      break;
+  }
+
+  // Fire MAIL impression (fire-and-forget, no await — this is called inside a sync function)
+  // Tracking is done outside in the async flow
+  const trackingPixel = `https://bhguergqkyiejyxsiwdu.supabase.co/rest/v1/rpc/noop?session=${encodeURIComponent(sessionId)}`;
+  void trackingPixel; // not used directly — tracking handled separately
+
+  return `
+    <!-- AFFILIATE BLOCK -->
+    <div style="background:#ffffff;padding:24px;border-bottom:1px solid #e2e8f0;text-align:center;">
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:20px 24px;">
+        <p style="margin:0;font-size:22px;line-height:1;">${icon}</p>
+        <p style="margin:8px 0 4px;font-size:15px;font-weight:800;color:#1e293b;">${headline}</p>
+        <a href="${affiliate.url}" style="display:inline-block;margin-top:12px;padding:12px 32px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:13px;border-radius:999px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(245,158,11,0.25);">
+          ${affiliate.label} →
+        </a>
+        <p style="margin:10px 0 0;font-size:10px;color:#94a3b8;">Gesponsord · ${affiliate.platform}</p>
+      </div>
+    </div>`;
+}
+
+function buildEmailHtml(city: string, data: Record<string, unknown>, affiliateBlock: string): string {
   const current = data.current as Record<string, number>;
   const hourly = data.hourly as Record<string, (number | string)[]>;
   const daily = data.daily as Record<string, (number | string)[]>;
@@ -262,6 +307,8 @@ function buildEmailHtml(city: string, data: Record<string, unknown>): string {
       </a>
     </div>
 
+    ${affiliateBlock}
+
     <!-- FOOTER -->
     <div style="padding:20px 24px;text-align:center;">
       <p style="margin:0;font-size:11px;color:#94a3b8;">
@@ -329,9 +376,64 @@ export async function GET(req: Request) {
     }
 
     const current = weatherData.current as Record<string, number>;
+    const hourly = weatherData.hourly as Record<string, (number | string)[]>;
+    const daily = weatherData.daily as Record<string, (number | string)[]>;
     const emoji = getWeatherEmoji(current.weather_code, true);
     const temp = Math.round(current.temperature_2m);
-    const html = buildEmailHtml(city, weatherData);
+
+    // Build minimal WeatherData for orchestrator
+    const weatherForOrchestrator: WeatherData = {
+      current: {
+        temperature: current.temperature_2m,
+        feelsLike: current.apparent_temperature,
+        humidity: current.relative_humidity_2m,
+        windSpeed: current.wind_speed_10m,
+        windDirection: "N",
+        windGusts: current.wind_gusts_10m ?? current.wind_speed_10m,
+        precipitation: current.precipitation,
+        weatherCode: current.weather_code,
+        isDay: true,
+        cloudCover: 0,
+      },
+      minutely: [],
+      hourly: (hourly.temperature_2m as number[]).map((t, i) => ({
+        time: String(hourly.time?.[i] ?? i),
+        temperature: t,
+        weatherCode: (hourly.weather_code as number[])[i] ?? 0,
+        precipitation: (hourly.precipitation as number[])[i] ?? 0,
+        windSpeed: (hourly.wind_speed_10m as number[])[i] ?? 0,
+        cape: 0,
+        confidence: "medium" as const,
+      })),
+      daily: (daily.temperature_2m_max as number[]).map((max, i) => ({
+        date: String(daily.time?.[i] ?? i),
+        tempMax: max,
+        tempMin: (daily.temperature_2m_min as number[])[i] ?? max,
+        weatherCode: (daily.weather_code as number[])[i] ?? 0,
+        precipitationSum: (daily.precipitation_sum as number[])[i] ?? 0,
+        windSpeedMax: (daily.wind_speed_10m_max as number[])?.[i] ?? 0,
+        sunHours: 0,
+      })),
+      sunrise: String((daily.sunrise as string[])?.[0] ?? ""),
+      sunset: String((daily.sunset as string[])?.[0] ?? ""),
+      uvIndex: (daily.uv_index_max as number[])?.[0] ?? 0,
+      models: { agreement: 100, label: "Open-Meteo", sources: ["open-meteo"] },
+    };
+
+    const emailSessionId = Math.random().toString(36).slice(2);
+    const conditionTag = getConditionTag(weatherForOrchestrator);
+    const affiliateBlock = buildAffiliateBlock(conditionTag, city, emailSessionId);
+
+    // Track MAIL impression async (fire-and-forget)
+    trackEvent(
+      "IMPRESSION",
+      conditionTag,
+      { temp: current.temperature_2m, rain: current.precipitation, wind: current.wind_speed_10m, code: current.weather_code, city },
+      "MAIL",
+      emailSessionId
+    ).catch(() => {});
+
+    const html = buildEmailHtml(city, weatherData, affiliateBlock);
 
     for (const sub of group.subscribers) {
       try {

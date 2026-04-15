@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
+import { getConditionTag, getAffiliateUrl, trackEvent, ConditionTag } from "@/lib/affiliate-orchestrator";
+import { WeatherData } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +58,43 @@ function buildHourBlock(hour: string, temp: number, code: number, precipProb: nu
     </td>`;
 }
 
+function buildAffiliateBlock(tag: ConditionTag, city: string): string {
+  const affiliate = getAffiliateUrl(tag, city);
+  let icon = "🛒";
+  let headline = "Passend bij het weer van vandaag";
+  switch (tag) {
+    case "RAIN":
+      icon = "🍕";
+      headline = "Vandaag thuisbezorgd laten bezorgen?";
+      break;
+    case "HEAT":
+      icon = "☀️";
+      headline = "Mooi weer — boek een dagje weg";
+      break;
+    case "COLD":
+    case "WIND":
+      icon = "🧥";
+      headline = "Bescherm je tegen het weer";
+      break;
+    case "PERFECT":
+      icon = "🌿";
+      headline = "Perfect weer voor een dagje uit";
+      break;
+  }
+  return `
+    <!-- AFFILIATE BLOCK -->
+    <div style="background:#ffffff;padding:24px;border-bottom:1px solid #e2e8f0;text-align:center;">
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:20px 24px;">
+        <p style="margin:0;font-size:22px;line-height:1;">${icon}</p>
+        <p style="margin:8px 0 4px;font-size:15px;font-weight:800;color:#1e293b;">${headline}</p>
+        <a href="${affiliate.url}" style="display:inline-block;margin-top:12px;padding:12px 32px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:13px;border-radius:999px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(245,158,11,0.25);">
+          ${affiliate.label} →
+        </a>
+        <p style="margin:10px 0 0;font-size:10px;color:#94a3b8;">Gesponsord · ${affiliate.platform}</p>
+      </div>
+    </div>`;
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const to = searchParams.get("to");
@@ -67,6 +106,8 @@ export async function GET(req: Request) {
   const city = "Amsterdam";
   const weatherData = await fetchWeather(52.37, 4.89);
   const current = weatherData.current as Record<string, number>;
+  const hourlyRaw = weatherData.hourly as Record<string, (number | string)[]>;
+  const dailyRaw = weatherData.daily as Record<string, (number | string)[]>;
   const hourly = weatherData.hourly as Record<string, (number | string)[]>;
   const daily = weatherData.daily as Record<string, (number | string)[]>;
 
@@ -94,6 +135,58 @@ export async function GET(req: Request) {
 
   const { bg, textAccent } = getWeatherGradient(code);
   const oneLiner = getOneLiner(temp, totalPrecip, wind, code);
+
+  // Build minimal WeatherData for orchestrator
+  const weatherForOrchestrator: WeatherData = {
+    current: {
+      temperature: current.temperature_2m,
+      feelsLike: current.apparent_temperature,
+      humidity: current.relative_humidity_2m,
+      windSpeed: current.wind_speed_10m,
+      windDirection: "N",
+      windGusts: current.wind_gusts_10m ?? current.wind_speed_10m,
+      precipitation: current.precipitation,
+      weatherCode: current.weather_code,
+      isDay: true,
+      cloudCover: 0,
+    },
+    minutely: [],
+    hourly: (hourlyRaw.temperature_2m as number[]).map((t, i) => ({
+      time: String(hourlyRaw.time?.[i] ?? i),
+      temperature: t,
+      weatherCode: (hourlyRaw.weather_code as number[])[i] ?? 0,
+      precipitation: (hourlyRaw.precipitation as number[])[i] ?? 0,
+      windSpeed: (hourlyRaw.wind_speed_10m as number[])[i] ?? 0,
+      cape: 0,
+      confidence: "medium" as const,
+    })),
+    daily: (dailyRaw.temperature_2m_max as number[]).map((max, i) => ({
+      date: String(dailyRaw.time?.[i] ?? i),
+      tempMax: max,
+      tempMin: (dailyRaw.temperature_2m_min as number[])[i] ?? max,
+      weatherCode: (dailyRaw.weather_code as number[])[i] ?? 0,
+      precipitationSum: (dailyRaw.precipitation_sum as number[])[i] ?? 0,
+      windSpeedMax: (dailyRaw.wind_speed_10m_max as number[])?.[i] ?? 0,
+      sunHours: 0,
+    })),
+    sunrise: String((dailyRaw.sunrise as string[])?.[0] ?? ""),
+    sunset: String((dailyRaw.sunset as string[])?.[0] ?? ""),
+    uvIndex: (dailyRaw.uv_index_max as number[])?.[0] ?? 0,
+    models: { agreement: 100, label: "Open-Meteo", sources: ["open-meteo"] },
+  };
+
+  const emailSessionId = Math.random().toString(36).slice(2);
+  const conditionTag = getConditionTag(weatherForOrchestrator);
+  const affiliateBlock = buildAffiliateBlock(conditionTag, city);
+
+  // Track MAIL impression (fire-and-forget)
+  trackEvent(
+    "IMPRESSION",
+    conditionTag,
+    { temp: current.temperature_2m, rain: current.precipitation, wind: current.wind_speed_10m, code: current.weather_code, city },
+    "MAIL",
+    emailSessionId
+  ).catch(() => {});
 
   const now = new Date();
   const currentHourIndex = now.getHours();
@@ -213,6 +306,7 @@ export async function GET(req: Request) {
     <div style="background:#ffffff;padding:24px;text-align:center;">
       <a href="https://weerzone.nl/weer/amsterdam" style="display:inline-block;padding:14px 40px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:14px;border-radius:999px;text-decoration:none;text-transform:uppercase;box-shadow:0 4px 12px rgba(245,158,11,0.3);">Bekijk Live Radar →</a>
     </div>
+    ${affiliateBlock}
     <div style="padding:20px 24px;text-align:center;">
       <p style="margin:0;font-size:11px;color:#94a3b8;">${dateStr} · KNMI HARMONIE data · WeerZone.nl<br><span style="font-size:10px;">48 uur. De rest is ruis.</span></p>
       <p style="margin:12px 0 0;font-size:11px;"><a href="https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(to)}" style="color:#94a3b8;text-decoration:underline;">Uitschrijven</a></p>

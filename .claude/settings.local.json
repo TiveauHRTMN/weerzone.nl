@@ -37,7 +37,9 @@
       "Bash(curl -s \"https://bhguergqkyiejyxsiwdu.supabase.co/rest/v1/subscribers?select=*&limit=0\" -H \"apikey: sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Authorization: Bearer sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -v)",
       "Bash(curl -s -X OPTIONS \"https://bhguergqkyiejyxsiwdu.supabase.co/rest/v1/subscribers\" -H \"apikey: sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\")",
       "Bash(curl -s -X POST \"https://bhguergqkyiejyxsiwdu.supabase.co/rest/v1/subscribers\" -H \"apikey: sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Authorization: Bearer sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Content-Type: application/json\" -H \"Prefer: return=minimal\" -d '{\"email\":\"test@test.nl\"}')",
-      "Bash(curl -s -X POST \"https://bhguergqkyiejyxsiwdu.supabase.co/rest/v1/subscribers\" -H \"apikey: sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Authorization: Bearer sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Content-Type: application/json\" -H \"Prefer: return=representation\" -d '{\"email\":\"rwnhrtmn@gmail.com\",\"city\":\"Amsterdam\",\"lat\":52.37,\"lon\":4.89,\"active\":true}')"
+      "Bash(curl -s -X POST \"https://bhguergqkyiejyxsiwdu.supabase.co/rest/v1/subscribers\" -H \"apikey: sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Authorization: Bearer sb_publishable_kSGZWyZvFqQuxDkkMSwJNQ_T7z6Gc2E\" -H \"Content-Type: application/json\" -H \"Prefer: return=representation\" -d '{\"email\":\"rwnhrtmn@gmail.com\",\"city\":\"Amsterdam\",\"lat\":52.37,\"lon\":4.89,\"active\":true}')",
+      "Bash(curl -s -X POST \"https://weerzone.nl/api/subscribe\" -H \"Content-Type: application/json\" -d '{\"email\":\"rwnhrtmn@gmail.com\",\"city\":\"Amsterdam\",\"lat\":52.37,\"lon\":4.89}')",
+      "Bash(npx tsc:*)"
     ]
   }
 }
