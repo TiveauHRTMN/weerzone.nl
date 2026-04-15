@@ -731,8 +731,8 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           WeerZone — 48 uur. De rest is ruis.
         </p>
         <p className="text-[10px] text-white/50 mt-1">
-          Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> · KNMI HARMONIE · DWD ICON · ICON-D2.
-          Twee weermodellen, nul ruis.
+          Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> · KNMI HARMONIE.
+          De absolute bron, nul ruis.
         </p>
         <div className="mt-8 pt-6 border-t border-white/10 opacity-100">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
