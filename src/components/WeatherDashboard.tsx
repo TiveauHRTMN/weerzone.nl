@@ -48,9 +48,30 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const [loading, setLoading] = useState(true);
   const [chatInput, setChatInput] = useState("");
   const [chatAnswer, setChatAnswer] = useState<string | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
 
-  const answerQuestion = (q: string) => {
+  const answerQuestion = async (q: string) => {
+    if (!weather || chatLoading) return;
+    setChatLoading(true);
+    setChatAnswer(null);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q, weather, city: city.name }),
+      });
+      const data = await res.json();
+      setChatAnswer(data.answer || data.error || "Geen antwoord.");
+    } catch {
+      setChatAnswer("Verbinding mislukt. Probeer het opnieuw.");
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Legacy: keep for reference but unused now — Haiku handles all questions
+  const _legacyAnswerQuestion = (q: string) => {
     if (!weather) return;
     const lower = q.toLowerCase();
     const rain = weather.current.precipitation > 0;
@@ -310,7 +331,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
             <div className="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-accent-orange flex items-center justify-center text-[10px] pointer-events-none shadow-sm">🤖</div>
             <input
               type="text"
-              placeholder="Claude AI Weer-Vraag..."
+              placeholder="Wat is je vraag?"
               className="w-full h-10 pl-9 pr-10 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm text-sm text-white placeholder:text-white/70 outline-none focus:border-accent-orange/60 focus:bg-white/20 transition-all font-medium"
               value={chatInput}
               onChange={(e) => { setChatInput(e.target.value); setChatAnswer(null); }}
@@ -328,7 +349,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
         {/* AI Answer Dropdown */}
         <AnimatePresence mode="wait">
-          {chatAnswer && (
+          {(chatAnswer || chatLoading) && (
             <motion.div
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -337,10 +358,12 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
               className="w-full max-w-lg mt-3 relative z-50"
             >
               <div className="card px-4 py-3 bg-white/95 backdrop-blur-md border border-white/40 shadow-xl flex items-start gap-3 rounded-2xl">
-                <span className="text-lg shrink-0 mt-0.5">💬</span>
-                <p className="text-sm font-medium text-text-primary leading-relaxed whitespace-pre-wrap">{chatAnswer}</p>
+                <span className="text-lg shrink-0 mt-0.5">{chatLoading ? "⏳" : "💬"}</span>
+                <p className="text-sm font-medium text-text-primary leading-relaxed whitespace-pre-wrap">
+                  {chatLoading ? "Even denken..." : chatAnswer}
+                </p>
                 <button 
-                  onClick={() => setChatAnswer(null)}
+                  onClick={() => { setChatAnswer(null); setChatLoading(false); }}
                   className="absolute -top-2 -right-2 w-6 h-6 bg-text-primary text-white rounded-full flex items-center justify-center text-xs border border-white/20 hover:scale-110 shadow-md transition-transform"
                 >
                   ✕

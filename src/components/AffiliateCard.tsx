@@ -416,111 +416,174 @@ function getTopProducts(weather: WeatherData): AffiliateSection {
 
 function getBottomProducts(weather: WeatherData): AffiliateSection {
   const a = analyze48h(weather);
+  const month = new Date().getMonth(); // 0-11
+  const isWinter = month <= 1 || month >= 10; // nov-feb
+  const isSummer = month >= 4 && month <= 8; // mei-sep
   const isRukWeer = a.scenario === "rain_now" || a.scenario === "rain_coming" || a.scenario === "cold_snap" || a.scenario === "freezing" || a.scenario === "windy";
 
-  if (isRukWeer) {
-    // Booking.com — ontsnappen aan het weer
-    const destinations = [
-      {
-        image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=400&fit=crop",
-        title: "Barcelona",
-        price: "vanaf €149",
-        brand: "Booking.com",
-        href: bookingUrl("Barcelona"),
-        tag: "23° & zon",
-      },
-      {
-        image: "https://images.unsplash.com/photo-1534008897995-27a23e859048?w=400&h=400&fit=crop",
-        title: "Malaga",
-        price: "vanaf €169",
-        brand: "Booking.com",
-        href: bookingUrl("Malaga"),
-        tag: "26° & strand",
-      },
-      {
-        image: "https://images.unsplash.com/photo-1585218356057-062e5b7fb60f?w=400&h=400&fit=crop",
-        title: "Lissabon",
-        price: "vanaf €139",
-        oldPrice: "€199",
-        brand: "Booking.com",
-        href: bookingUrl("Lissabon"),
-        tag: "Deal",
-      },
-      {
-        image: "https://images.unsplash.com/photo-1605553556093-9c98a5d3f23a?w=400&h=400&fit=crop",
-        title: "Kreta",
-        price: "vanaf €219",
-        brand: "Booking.com",
-        href: bookingUrl("Kreta Griekenland"),
-        tag: "28° & strand",
-      },
-      {
-        image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=400&fit=crop",
-        title: "Parijs",
-        price: "vanaf €119",
-        brand: "Booking.com",
-        href: bookingUrl("Parijs"),
-        tag: "Citytrip",
-      },
-    ];
-
+  // ===== MOOI WEER: Dagjes uit in Nederland =====
+  if (!isRukWeer && (a.scenario === "warm" || a.scenario === "perfect" || a.scenario === "heatwave")) {
     return {
-      heading: a.scenario === "rain_now"
-        ? `Het regent ${weather.current.precipitation}mm — ontsnap hier naartoe`
-        : a.scenario === "freezing"
-        ? `${a.tempMin48h}° hier, 25°+ daar — jij kiest`
-        : `${a.rainTotal48h.toFixed(0)}mm regen in 48 uur — of vluchten naar de zon`,
+      heading: a.scenario === "heatwave"
+        ? `${a.tempMax48h}° — dagje strand of bos?`
+        : "Prachtig weer — ga eropuit in Nederland",
       subtitle: "Booking.com",
-      context: "Goedkoop weekendje weg terwijl Nederland nat wordt.",
-      products: destinations,
-    };
-  }
-
-  // Mooi weer → comfort & buitenproducten
-  if (a.scenario === "heatwave" || a.scenario === "warm") {
-    return {
-      heading: "Nazomer-gevoel? Maak het af.",
-      subtitle: "Amazon.nl",
-      context: `${a.tempMax48h}° verwacht. BBQ weer, terras weer, alles-kan weer.`,
+      context: isSummer
+        ? "Dit soort weer duurt niet lang. Grijp het. Nu."
+        : "Onverwacht mooi weer? Pak je kans voor een dagje weg.",
       products: [
         {
-          image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=400&fit=crop",
-          title: "Houtskool BBQ compact",
-          price: "€49,99",
-          oldPrice: "€69,99",
-          brand: "Amazon.nl",
-          href: amazonUrl("houtskool bbq compact draagbaar"),
-          tag: "Deal",
+          image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop",
+          title: "Strandhuisje Zeeland",
+          price: "vanaf €89",
+          brand: "Booking.com",
+          href: bookingUrl("Zeeland strand"),
+          tag: `${a.tempMax48h}° & zon`,
         },
         {
-          image: "https://m.media-amazon.com/images/I/71tONXZG4VL._AC_UL320_.jpg",
-          title: "Koeltas 15L geïsoleerd",
-          price: "€19,99",
-          brand: "Amazon.nl",
-          href: amazonProductUrl("B0GLFFKWT4"),
+          image: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=400&h=400&fit=crop",
+          title: "Bungalow Veluwe",
+          price: "vanaf €79",
+          brand: "Booking.com",
+          href: bookingUrl("Veluwe bungalow"),
+          tag: "Natuur",
         },
         {
-          image: "https://images.unsplash.com/photo-1595844730298-b960ff88fee6?w=400&h=400&fit=crop",
-          title: "Loungestoel tuin",
-          price: "€34,95",
-          brand: "Amazon.nl",
-          href: amazonUrl("loungestoel tuin opvouwbaar"),
-          tag: "Populair",
+          image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=400&fit=crop",
+          title: "B&B Texel",
+          price: "vanaf €99",
+          brand: "Booking.com",
+          href: bookingUrl("Texel"),
+          tag: "Eilandgevoel",
         },
         {
-          image: "https://m.media-amazon.com/images/I/71tONXZG4VL._AC_UL320_.jpg",
-          title: "Bluetooth speaker waterdicht",
-          price: "€29,99",
-          oldPrice: "€44,99",
-          brand: "Amazon.nl",
-          href: amazonProductUrl("B0GLFFKWT4"),
-          tag: "Deal",
+          image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=400&fit=crop",
+          title: "Hotel Maastricht",
+          price: "vanaf €69",
+          brand: "Booking.com",
+          href: bookingUrl("Maastricht hotel"),
+          tag: "Citytrip",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1543489822-c49534f3271f?w=400&h=400&fit=crop",
+          title: "Glamping Drenthe",
+          price: "vanaf €59",
+          brand: "Booking.com",
+          href: bookingUrl("Drenthe glamping"),
+          tag: "Uniek",
         },
       ],
     };
   }
 
-  // Default: slimme weermeters + comfort
+  // ===== SLECHT WEER + WINTER: Vluchten naar de zon =====
+  if (isRukWeer && (isWinter || a.tempMax48h < 10)) {
+    return {
+      heading: a.scenario === "freezing"
+        ? `${a.tempMin48h}° hier, 25°+ daar — jij kiest`
+        : `${a.rainTotal48h > 0 ? a.rainTotal48h.toFixed(0) + "mm regen" : "Grijs en koud"} — vluchten naar de zon`,
+      subtitle: "Booking.com",
+      context: "Terwijl Nederland grijs is, schijnt de zon ergens anders wél.",
+      products: [
+        {
+          image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=400&fit=crop",
+          title: "Barcelona",
+          price: "vanaf €149",
+          brand: "Booking.com",
+          href: bookingUrl("Barcelona"),
+          tag: "23° & zon",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1534008897995-27a23e859048?w=400&h=400&fit=crop",
+          title: "Malaga",
+          price: "vanaf €169",
+          brand: "Booking.com",
+          href: bookingUrl("Malaga"),
+          tag: "26° & strand",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1585218356057-062e5b7fb60f?w=400&h=400&fit=crop",
+          title: "Lissabon",
+          price: "vanaf €139",
+          oldPrice: "€199",
+          brand: "Booking.com",
+          href: bookingUrl("Lissabon"),
+          tag: "Deal",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1605553556093-9c98a5d3f23a?w=400&h=400&fit=crop",
+          title: "Kreta",
+          price: "vanaf €219",
+          brand: "Booking.com",
+          href: bookingUrl("Kreta Griekenland"),
+          tag: "28° & strand",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=400&h=400&fit=crop",
+          title: "Marrakech",
+          price: "vanaf €129",
+          brand: "Booking.com",
+          href: bookingUrl("Marrakech"),
+          tag: "30° & cultuur",
+        },
+      ],
+    };
+  }
+
+  // ===== SLECHT WEER MAAR NIET WINTER: Indoor dagjes uit + citytrips =====
+  if (isRukWeer) {
+    return {
+      heading: a.scenario === "rain_now"
+        ? `Het regent — indoor dagje uit of citytrip?`
+        : `Regenachtige 48 uur — tijd voor een plan B`,
+      subtitle: "Booking.com",
+      context: `${a.rainTotal48h > 0 ? a.rainTotal48h.toFixed(0) + "mm verwacht. " : ""}Niet zeuren, maar slim plannen.`,
+      products: [
+        {
+          image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=400&fit=crop",
+          title: "Parijs",
+          price: "vanaf €119",
+          brand: "Booking.com",
+          href: bookingUrl("Parijs"),
+          tag: "Citytrip",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=400&fit=crop",
+          title: "Spa & Wellness hotel",
+          price: "vanaf €89",
+          brand: "Booking.com",
+          href: bookingUrl("spa wellness Nederland"),
+          tag: "Ontspannen",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1555992336-fb0d29498b13?w=400&h=400&fit=crop",
+          title: "Antwerpen",
+          price: "vanaf €79",
+          brand: "Booking.com",
+          href: bookingUrl("Antwerpen hotel"),
+          tag: "Citytrip",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=400&h=400&fit=crop",
+          title: "Brugge",
+          price: "vanaf €99",
+          brand: "Booking.com",
+          href: bookingUrl("Brugge"),
+          tag: "Romantisch",
+        },
+        {
+          image: "https://images.unsplash.com/photo-1543489822-c49534f3271f?w=400&h=400&fit=crop",
+          title: "Thermen & baden",
+          price: "vanaf €49",
+          brand: "Booking.com",
+          href: bookingUrl("thermen Nederland"),
+          tag: "Indoor",
+        },
+      ],
+    };
+  }
+
+  // ===== DEFAULT: wisselvallig weer — mix van Amazon + activiteiten =====
   return {
     heading: "Weer-nerd? Check deze gadgets.",
     subtitle: "Amazon.nl",
