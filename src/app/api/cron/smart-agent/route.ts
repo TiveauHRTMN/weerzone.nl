@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { fetchWeatherData } from "@/lib/weather";
 import { Resend } from "resend";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
   if (error || !users) return NextResponse.json({ error: "DB Fetch failed" });
 
   const emailsSent = [];
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || "" });
+  const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
   const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
 
   for (const user of users as any[]) {
@@ -53,14 +53,19 @@ export async function GET(req: Request) {
       // Wow, zware regen voorspeld! Laat de Agent los!
       const timeStr = new Date(upcomingRain.time).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
       
-      const aiResponse = await anthropic.messages.create({
-        model: "claude-3-5-haiku-20241022",
-        max_tokens: 250,
-        system: AGENT_PROMPT,
-        messages: [{ role: "user", content: `De gebruiker in ${user.city} krijgt een bui van ${upcomingRain.precipitation}mm/u om ${timeStr}. Waarschuw ze en upsell iets nuttigs.` }]
-      });
-
-      const aiText = (aiResponse.content[0] as any).text;
+      let aiText = `${user.city} krijgt zo meteen ${upcomingRain.precipitation}mm op z'n dak. Succes ermee.`;
+      if (genAI) {
+        try {
+          const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+          const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: `${AGENT_PROMPT}\n\nDe gebruiker in ${user.city} krijgt een bui van ${upcomingRain.precipitation}mm/u om ${timeStr}. Waarschuw ze en upsell iets nuttigs.` }] }],
+            generationConfig: { maxOutputTokens: 250, temperature: 0.9 },
+          });
+          aiText = result.response.text()?.trim() || aiText;
+        } catch (e) {
+          console.error("Gemini error:", e);
+        }
+      }
       
       const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-top: 5px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">

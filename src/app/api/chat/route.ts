@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const dynamic = "force-dynamic";
 
@@ -23,17 +23,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Vraag en weerdata vereist" }, { status: 400 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      // Fallback: geef een generiek antwoord als er geen API key is
       return NextResponse.json({
-        answer: `${weather.current.temperature}° in ${city}. ${weather.current.precipitation > 0 ? "Het regent, paraplu mee." : "Droog."} Meer kan ik niet zeggen zonder mijn brein — stel de ANTHROPIC_API_KEY in. 🤷`
+        answer: `${weather.current.temperature}° in ${city}. ${weather.current.precipitation > 0 ? "Het regent, paraplu mee." : "Droog."} Stel GEMINI_API_KEY in voor slimmere antwoorden. 🤷`
       });
     }
 
-    const anthropic = new Anthropic({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // Compact weather context
     const weatherContext = JSON.stringify({
       stad: city,
       nu: {
@@ -62,21 +61,20 @@ export async function POST(req: Request) {
       uv: weather.uvIndex,
     });
 
-    const result = await anthropic.messages.create({
-      model: "claude-haiku-4-20250414",
-      max_tokens: 200,
-      temperature: 0.8,
-      system: SYSTEM_PROMPT,
-      messages: [
+    const result = await model.generateContent({
+      contents: [
         {
           role: "user",
-          content: `WEERDATA: ${weatherContext}\n\nVRAAG: ${question}`,
+          parts: [{ text: `${SYSTEM_PROMPT}\n\nWEERDATA: ${weatherContext}\n\nVRAAG: ${question}` }],
         },
       ],
+      generationConfig: {
+        maxOutputTokens: 200,
+        temperature: 0.8,
+      },
     });
 
-    const textBlock = result.content.find((b) => b.type === "text");
-    const answer = (textBlock as { type: "text"; text: string })?.text?.trim() || "Geen antwoord. Probeer het opnieuw.";
+    const answer = result.response.text()?.trim() || "Geen antwoord. Probeer het opnieuw.";
 
     return NextResponse.json({ answer });
   } catch (e) {

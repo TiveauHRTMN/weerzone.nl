@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { fetchWeatherData } from "@/lib/weather";
 import { Resend } from "resend";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 
 // System prompt voor de autonoom draaiende agent
@@ -125,7 +125,7 @@ export async function GET(req: Request) {
     if (error || !users) throw error;
 
     const emailsSent = [];
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || "" });
+    const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
     const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
 
     for (const user of users as any[]) {
@@ -137,19 +137,18 @@ export async function GET(req: Request) {
       if (anomaly) {
         let alertMsg = "";
         try {
-          const result = await anthropic.messages.create({
-            model: "claude-haiku-4-20250414",
-            max_tokens: 60,
-            temperature: 0.9,
-            system: SENTINEL_PROMPT.trim(),
-            messages: [
-              { role: "user", content: `DATA: ${JSON.stringify({ city: user.city, anomaly })}` },
-            ],
-          });
-          const textBlock = result.content.find((b: any) => b.type === "text");
-          alertMsg = (textBlock as any)?.text?.trim().replace(/^"|"$/g, '') || "";
+          if (genAI) {
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const result = await model.generateContent({
+              contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nDATA: ${JSON.stringify({ city: user.city, anomaly })}` }] }],
+              generationConfig: { maxOutputTokens: 60, temperature: 0.9 },
+            });
+            alertMsg = result.response.text()?.trim().replace(/^"|"$/g, '') || "";
+          } else {
+            alertMsg = `${user.city} wordt een teringzooi morgen. Succes ermee.`;
+          }
         } catch (aiErr) {
-          console.error("Claude Haiku Error:", aiErr);
+          console.error("Gemini Error:", aiErr);
           alertMsg = `${user.city} wordt een teringzooi morgen. Succes ermee.`;
         }
 

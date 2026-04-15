@@ -110,7 +110,7 @@ export default function RainRadar({ data }: RainRadarProps) {
   const hasRain = data.some((d) => d.precipitation > 0);
 
   return (
-    <div className="card p-4 overflow-hidden">
+    <div className="overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full bg-accent-cyan/15 flex items-center justify-center text-xl shrink-0">
