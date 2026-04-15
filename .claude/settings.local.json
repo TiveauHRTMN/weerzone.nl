@@ -26,7 +26,8 @@
       "Bash(nslookup weerzone.nl)",
       "Bash(npm install:*)",
       "WebFetch(domain:weerzone.nl)",
-      "WebFetch(domain:api.open-meteo.com)"
+      "WebFetch(domain:api.open-meteo.com)",
+      "WebFetch(domain:supabase.com)"
     ]
   }
 }
