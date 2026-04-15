@@ -110,8 +110,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header — Nu zonder stadskeuze, puur persoonlijk */}
       <header className="animate-fade-in flex flex-col items-center mb-6">
-        <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden mb-1" />
-        <LogoFull height={64} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block mb-2" />
+        <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden mb-4" />
+        <LogoFull height={64} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block mb-5" />
+        <div className="flex flex-row items-center justify-center gap-2 w-full max-w-sm px-4">
+          <div className="flex items-center justify-center gap-2 h-11 w-full rounded-2xl border border-white/25 bg-white/10 backdrop-blur-md px-5 shadow-lg">
+            <MapPin className="text-white w-4 h-4" />
+            <span className="text-base font-bold text-white truncate">{city.name}</span>
+          </div>
+        </div>
       </header>
 
       {/* Email Promo — Prominent direct onder de header voor maximale conversie */}
