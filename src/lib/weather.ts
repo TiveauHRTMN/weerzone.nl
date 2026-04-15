@@ -33,6 +33,7 @@ const DAILY_PARAMS = [
   "sunrise",
   "sunset",
   "uv_index_max",
+  "sunshine_duration",
 ].join(",");
 
 interface RawModelHourly {
@@ -158,6 +159,7 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         weatherCode: data.daily.weather_code[i],
         precipitationSum: data.daily.precipitation_sum[i],
         windSpeedMax: Math.round(data.daily.wind_speed_10m_max[i]),
+        sunHours: Number((data.daily.sunshine_duration[i] / 3600).toFixed(1)),
       })),
       sunrise: data.daily.sunrise[0],
       sunset: data.daily.sunset[0],

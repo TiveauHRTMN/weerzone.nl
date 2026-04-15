@@ -207,6 +207,46 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       </div>
 
       {/* ===== 2. Weermodel Verificatie — Waarom dit klopt ===== */}
+      {/* ===== 14. Zon & UV — compact ===== */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.18s" }}>
+        <div className="card p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1 text-[9px] sm:text-[10px]">Zonlicht</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🌅</span>
+                    <span className="text-xs font-bold text-text-primary truncate">
+                      {new Date(weather.sunrise).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🌇</span>
+                    <span className="text-xs font-bold text-text-primary truncate">
+                      {new Date(weather.sunset).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col border-l border-black/5 pl-4 sm:pl-6">
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1 text-[9px] sm:text-[10px]">Zonuren</span>
+                <div className="flex items-center gap-1.5">
+                  <Sun className="w-3.5 h-3.5 text-accent-orange" />
+                  <span className="text-xs font-bold text-text-primary whitespace-nowrap">{weather.daily[0].sunHours} uur</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1 text-right text-[9px] sm:text-[10px]">Straling</span>
+              <span className="badge text-[9px] sm:text-[10px] whitespace-nowrap" style={{ backgroundColor: `${uvInfo.color}20`, color: uvInfo.color, border: `1px solid ${uvInfo.color}40` }}>
+                UV {weather.uvIndex.toFixed(0)} — {uvInfo.label.split("—")[0].trim()}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ===== 2. Data Bron — Waarom dit klopt ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
         <div className="card p-4">
@@ -347,8 +387,10 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           { icon: "🌧️", label: "Neerslag", score: regenScore, detail: maxPrecip > 0 ? `${maxPrecip.toFixed(0)}mm` : "Droog" },
           { icon: "💨", label: "Storm", score: stormScore, detail: `${maxWind} km/h` },
           { icon: extremeScore === hitteScore && hitteScore > 0 ? "🔥" : "❄️", label: extremeScore === hitteScore && hitteScore > 0 ? "Hitte" : "Vorst", score: extremeScore, detail: extremeScore === hitteScore && hitteScore > 0 ? `${maxTemp}°` : extremeScore > 0 ? `${minTemp}°` : "Geen" },
-          { icon: "☀️", label: "UV", score: uvScore, detail: uvScore > 0 ? `Index ${weather.uvIndex.toFixed(0)}` : "Laag" },
         ];
+
+        // Alleen tonen als er daadwerkelijk een extremiteit (score >= 1) aanwezig is
+        if (items.every(item => item.score === 0)) return null;
 
         const scoreColor = (s: number) => s === 3 ? "text-accent-red" : s === 2 ? "text-amber-500" : s === 1 ? "text-accent-amber" : "text-text-muted/50";
         const scoreDot = (s: number, i: number) => (
@@ -362,7 +404,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
               <span className="text-[10px] text-white/60">48 uur vooruit</span>
             </div>
             <div className="card p-4">
-              <div className="grid grid-cols-5 gap-2 text-center">
+              <div className="grid grid-cols-4 gap-2 text-center">
                 {items.map(({ icon, label, score, detail }) => (
                   <div key={label} className="flex flex-col items-center gap-1.5">
                     <span className="text-xl leading-none">{icon}</span>
@@ -682,31 +724,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* Affiliate Spot 1 moved to top */}
 
-
-      {/* ===== 14. Zon & UV — compact ===== */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
-        <div className="card p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm">🌅</span>
-                <span className="text-xs font-bold text-text-primary">
-                  {new Date(weather.sunrise).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm">🌇</span>
-                <span className="text-xs font-bold text-text-primary">
-                  {new Date(weather.sunset).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            </div>
-            <span className="badge text-[10px]" style={{ backgroundColor: `${uvInfo.color}20`, color: uvInfo.color, border: `1px solid ${uvInfo.color}40` }}>
-              UV {weather.uvIndex.toFixed(0)} — {uvInfo.label.split("—")[0].trim()}
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* ===== Affiliate Spot 2 — onderaan ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
