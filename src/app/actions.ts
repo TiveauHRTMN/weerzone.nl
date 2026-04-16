@@ -9,31 +9,55 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (apiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    let attempts = 0;
+    while (attempts < 3) {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ 
+          model: "gemini-3-flash-preview",
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+          ]
+        });
 
-      const prompt = `
-        Analyseer deze weerdata en geef een kort, krachtig verdict (max 15 woorden).
-        Stijl: Cynisch, direct, Nederlands en een tikkeltje droog (zoals de app).
-        Niet het weer voorlezen, maar de CONSEQUENTIE benadrukken.
-        
-        DATA: 
-        Temp: ${weather.current.temperature}°
-        Wind: ${weather.current.windSpeed} km/h
-        Regen nu: ${weather.current.precipitation} mm
-        Regen komende 48u: ${weather.hourly.reduce((acc, h) => acc + h.precipitation, 0).toFixed(1)} mm
-        Code: ${weather.current.weatherCode}
-      `.trim();
+        const prompt = `
+          Analyseer deze weerdata en geef een kort, krachtig verdict (max 15 woorden).
+          Stijl: Cynisch, direct, Nederlands en een tikkeltje droog (zoals de app).
+          Niet het weer voorlezen, maar de CONSEQUENTIE benadrukken.
+          
+          DATA: 
+          Temp: ${weather.current.temperature}°
+          Wind: ${weather.current.windSpeed} km/h
+          Regen nu: ${weather.current.precipitation} mm
+          Regen komende 48u: ${weather.hourly.reduce((acc, h) => acc + h.precipitation, 0).toFixed(1)} mm
+          Code: ${weather.current.weatherCode}
+        `.trim();
 
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 30, temperature: 0.8 },
-      });
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 30, temperature: 0.9, topP: 0.8 },
+        });
 
-      weather.aiVerdict = result.response.text().trim();
-    } catch (e) {
-      console.error("AI Verdict error:", e);
+        const text = result.response.text().trim().replace(/^"|"$/g, '');
+        if (text) {
+          weather.aiVerdict = text;
+          break; // Succes!
+        }
+      } catch (e) {
+        attempts++;
+        console.error(`AI Verdict attempt ${attempts} failed:`, e);
+        if (attempts === 3) {
+          // Laatste fallback: Geen AI melding, maar een slimme data-conclusie
+          if (weather.current.precipitation > 2) weather.aiVerdict = "Het is gewoon hondenweer. Blijf binnen.";
+          else if (weather.current.windSpeed > 40) weather.aiVerdict = "Windkracht waar je niet vrolijk van wordt.";
+          else if (weather.current.temperature > 25) weather.aiVerdict = "Warm. Te warm. Succes met zweten.";
+          else weather.aiVerdict = "Prima polderweer. Niks te klagen (of juichen).";
+        }
+        await new Promise(r => setTimeout(r, 500)); // Wacht even voor de volgende poging
+      }
     }
   }
 
