@@ -62,13 +62,9 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
       } catch (e) {
         attempts++;
         console.error(`AI Verdict attempt ${attempts} failed:`, e);
-        if (attempts === 3) {
-          // Laatste fallback: Geen AI melding, maar een slimme data-conclusie
-          if (weather.current.precipitation > 2) weather.aiVerdict = "Het is gewoon hondenweer. Blijf binnen.";
-          else if (weather.current.windSpeed > 40) weather.aiVerdict = "Windkracht waar je niet vrolijk van wordt.";
-          else if (weather.current.temperature > 25) weather.aiVerdict = "Warm. Te warm. Succes met zweten.";
-          else weather.aiVerdict = "Prima polderweer. Niks te klagen (of juichen).";
-        }
+          if (attempts === 3) {
+            weather.aiVerdict = getMainCommentary(weather);
+          }
         await new Promise(r => setTimeout(r, 500)); // Wacht even voor de volgende poging
       }
     }

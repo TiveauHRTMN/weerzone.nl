@@ -5,131 +5,34 @@ import type { WeatherData } from "./types";
 // 48 uur. De rest is ruis.
 // Kijkt naar CURRENT + komende uren + morgen voor slimme context
 // ============================================================
-
 export function getMainCommentary(w: WeatherData): string {
-  const t = w.current.temperature;
-  const rain = w.current.precipitation;
-  const wind = w.current.windSpeed;
-  const gusts = w.current.windGusts;
-  const code = w.current.weatherCode;
-  const feelsLike = w.current.feelsLike;
-  const humidity = w.current.humidity;
-
-  // Komende uren analyse
-  const next6h = w.hourly.slice(0, 6);
-  const next12h = w.hourly.slice(0, 12);
-  const rainNext6h = next6h.filter(h => h.precipitation > 0.3);
-  const rainNext12h = next12h.filter(h => h.precipitation > 0.3);
-  const firstRainHour = next12h.find(h => h.precipitation > 0.3);
-  const firstDryHour = rain > 0 ? next12h.find(h => h.precipitation === 0) : null;
-  const maxTempToday = w.daily[0].tempMax;
-  const minTempToday = w.daily[0].tempMin;
-  const tempRange = maxTempToday - minTempToday;
-
-  // Morgen
+  const currentDesc = getWeatherDescription(w.current.weatherCode);
   const tomorrow = w.daily[1];
-  const tomorrowDiff = tomorrow ? tomorrow.tempMax - maxTempToday : 0;
-  const tomorrowRain = tomorrow?.precipitationSum ?? 0;
-
-  // Onweer in de komende uren
-  const thunderHours = next12h.filter(h => h.weatherCode >= 95);
-
-  // ===== EXTREME SITUATIES =====
-
-  // Zwaar onweer actief of op komst
-  if (code >= 95) return "Onweer, bliksem, het hele circus. Ga naar binnen, weg bij ramen, en geniet van het drama. Dat zagen we van ver aankomen.";
-  if (thunderHours.length >= 3) {
-    const firstT = new Date(thunderHours[0].time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
-    return `Onweer op komst vanaf ${firstT}. ${thunderHours.length} uur lang. Houd je telefoon geladen en je binnen. Andere apps slapen waarschijnlijk nog.`;
-  }
-  if (thunderHours.length > 0) {
-    const firstT = new Date(thunderHours[0].time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
-    return `Rond ${firstT} kans op onweer. Niet paniekeren, maar ook niet onder een boom gaan staan. Even slim plannen.`;
+  const rainNext6h = w.hourly.slice(0, 6).reduce((acc, h) => acc + h.precipitation, 0).toFixed(1);
+  
+  let report = `Op dit moment is het ${currentDesc.toLowerCase()} in de omgeving. De thermometer wijst ${w.current.temperature}° aan, `;
+  
+  if (w.current.feelsLike < w.current.temperature - 2) {
+    report += `maar door de wind voelt het aan als een schrale ${w.current.feelsLike}°. `;
+  } else {
+    report += `en dat voelt buiten ook daadwerkelijk zo aan. `;
   }
 
-  // Storm
-  if (wind > 60 || gusts > 90) return `Storm: ${wind} km/h met stoten tot ${gusts}. Alles wat niet vastzit waait weg. Jij ook als je niet oppast. Blijf binnen.`;
-  if (wind > 40 || gusts > 65) return `Het waait stevig: ${wind} km/h, stoten tot ${gusts}. Je fiets ligt al in de sloot. Fietsen = gokken met je leven.`;
-
-  // Sneeuw
-  if (code >= 71 && code <= 77) return `Sneeuw! Over een kwartier staat heel Nederland op z'n gat. ${t}°, het blijft liggen. Geniet ervan of vloek erop, maar het is er.`;
-
-  // Extreme hitte
-  if (t >= 33) return `${t}° — tropisch alarm. Airco is geen luxe, het is overleving. Drink water, zoek schaduw. Je buurman gelooft zijn 14-daagse-app nog steeds.`;
-  if (t >= 30) return `${t}° en dat voelt als ${feelsLike}°. Nederland smelt. Smeer je in (UV!), drink genoeg, en laat die BBQ maar staan — je bent zelf al gaar.`;
-
-  // Extreme kou
-  if (t <= -8) return `${t}°. Poolkou. Leidingen beschermen, auto voorverwarmen, en onder geen beding die handschoenen vergeten. Dit is geen grapje.`;
-  if (t <= -3) return `${t}° (voelt als ${feelsLike}°). Het vriest stevig. Gladheid op de weg, ijskrabber klaarzetten. Fietsers: roekeloos.`;
-  if (t <= 0) return `Onder nul: ${t}°. Trek die handschoenen aan. ${tomorrow && tomorrowDiff > 3 ? `Morgen wordt het wél ${tomorrow.tempMax}°, nog even volhouden.` : "En het wordt er morgen niet beter op."}`;
-
-  // Mist
-  if (code >= 45 && code <= 48) return `Dikke mist. Zicht onder de 200 meter. Rij voorzichtig, doe je lichten aan, en vertrouw niet op je gevoel. ${rainNext6h.length > 0 ? "Plus: straks ook regen erbij. Geweldig." : ""}`;
-
-  // ===== REGEN SITUATIES =====
-
-  // Het regent NU
-  if (rain > 5) {
-    return `Het giet: ${rain}mm nu. ${firstDryHour ? `Droog venster rond ${new Date(firstDryHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — markeer het in je agenda.` : "Geen droog moment in zicht. Accepteer het."} Andere apps lopen achter de feiten aan.`;
-  }
-  if (rain > 1) {
-    return `Regen: ${rain}mm op dit moment. ${firstDryHour ? `Het stopt rond ${new Date(firstDryHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}.` : "Blijft nog even aanhouden."} ${wind > 20 ? `Plus ${wind} km/h wind — paraplu is zinloos, regenjas verplicht.` : "Paraplu mee, geen discussie."}`;
-  }
-  if (rain > 0) {
-    return `Motregen. ${feelsLike < t - 2 ? `Voelt als ${feelsLike}° door de wind.` : ""} ${firstDryHour ? "Het trekt zo weg." : "Blijft nog even hangen."} ${tomorrowRain === 0 ? "Morgen wél droog — hou vol." : ""}`.trim();
+  if (w.current.precipitation > 0) {
+    report += `Het regent momenteel aardig door met ${w.current.precipitation}mm nu. `;
+  } else if (parseFloat(rainNext6h) > 0.5) {
+    report += `Het is nu nog droog, maar houd rekening met zo'n ${rainNext6h}mm aan nattigheid in de komende uren. `;
+  } else {
+    report += `Voorlopig houden we het droog, dus daar hoef je je geen zorgen over te maken. `;
   }
 
-  // Droog NU maar regen op komst
-  if (firstRainHour && rainNext6h.length >= 2) {
-    const rainTime = new Date(firstRainHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
-    const totalMm = next12h.reduce((sum, h) => sum + h.precipitation, 0).toFixed(1);
-    return `Nu droog, maar om ${rainTime} begint het. ${rainNext6h.length} uur regen verwacht (${totalMm}mm). ${t > 15 ? "Pak nu je kans om naar buiten te gaan." : "Paraplu meenemen, niet onderhandelen."}`;
-  }
-  if (firstRainHour) {
-    const rainTime = new Date(firstRainHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
-    return `Droog tot ${rainTime}, daarna een bui. ${w.daily[0].precipitationSum > 5 ? `Vandaag in totaal ${w.daily[0].precipitationSum}mm — dat merk je.` : "Valt mee qua hoeveelheid, maar je wordt er toch nat van."}`;
+  if (tomorrow) {
+    report += `Morgen schakelen we over naar ${getWeatherDescription(tomorrow.weatherCode).toLowerCase()} met een maximumtemperatuur van rond de ${tomorrow.tempMax}°. `;
   }
 
-  // ===== MOOI WEER =====
-
-  // Echt prachtweer
-  if (code <= 1 && t >= 20 && wind < 20 && rain === 0) {
-    return `${t}° (voelt als ${feelsLike}°), strakblauwe lucht, amper wind. Telefoon weg, naar buiten. ${tomorrowRain > 2 ? `Morgen regent het (${tomorrowRain}mm) — dit is je kans.` : "Dit duurt zelden lang in Nederland."} De rest van Europa is jaloers.`;
-  }
-  if (code <= 2 && t >= 15 && wind < 25 && rain === 0) {
-    const extraContext = tomorrowDiff <= -3
-      ? `Morgen ${Math.abs(tomorrowDiff)}° kouder — geniet er vandaag van.`
-      : tomorrowRain > 3
-      ? `Morgen ${tomorrowRain}mm regen. Vandaag is de dag.`
-      : "Niet spectaculair, maar echt genieten.";
-    return `${t}°, ${code === 0 ? "onbewolkt" : "half bewolkt"}, wind ${wind} km/h. ${extraContext}`;
-  }
-
-  // Redelijk weer
-  if (code <= 3 && t >= 10 && rain === 0) {
-    if (tempRange >= 8) {
-      return `${t}° nu, maar vanmiddag ${maxTempToday}°. Groot verschil — begin met een jas, strip af na de lunch. ${wind > 20 ? `Die ${wind} km/h wind maakt het frisser dan het lijkt.` : ""}`.trim();
-    }
-    if (humidity > 80) {
-      return `${t}° maar ${humidity}% luchtvochtigheid — klammer dan het klinkt. Droog wél, dus zeuren mag niet. ${tomorrowRain > 0 ? "Morgen wordt het nat, vandaag is beter." : ""}`.trim();
-    }
-    if (feelsLike < t - 3) {
-      return `${t}° op papier, maar voelt als ${feelsLike}° door de wind. Jas mee, ook al lijkt het fatsoenlijk weer.`;
-    }
-    return `${t}°, bewolkt, droog. Niet spectaculair, niet dramatisch. ${tomorrowDiff >= 3 ? `Morgen wél ${tomorrow.tempMax}° — dat wordt beter.` : tomorrowDiff <= -3 ? `Morgen ${Math.abs(tomorrowDiff)}° kouder — vandaag is de betere dag.` : "Gewoon een doorsnee dag."} Terwijl anderen nog gokken, weten wij de feiten.`;
-  }
-
-  // ===== KOEL / GRIJS =====
-
-  if (t < 5 && rain === 0) {
-    return `${t}° (voelt als ${feelsLike}°). Koud, maar droog. ${wind > 20 ? `Die ${wind} km/h wind snijdt door alles heen.` : "Jas dicht, muts op."} ${tomorrowDiff >= 4 ? `Morgen wordt het ${tomorrow.tempMax}° — licht aan het einde van de tunnel.` : "Morgen niet veel beter. Sorry."}`;
-  }
-  if (t < 10) {
-    return `${t}° in de buitenlucht. Fris. ${feelsLike < t - 2 ? `Voelt als ${feelsLike}° door de wind.` : ""} ${rain === 0 ? "In ieder geval droog." : ""} ${tomorrowDiff >= 3 ? `Goed nieuws: morgen ${tomorrow.tempMax}°.` : "Morgen vergelijkbaar."} Jas aan, niet onderhandelen.`.replace(/\s+/g, " ").trim();
-  }
-
-  // ===== DEFAULT =====
-  return `${t}° in de lucht, voelt als ${feelsLike}°. ${code <= 3 ? "Bewolkt" : "Wisselend"}. ${wind > 20 ? `Wind ${wind} km/h — frisser dan je denkt.` : ""} ${rain === 0 ? "Droog." : `${rain}mm neerslag.`} ${tomorrowDiff >= 3 ? `Morgen stuk beter: ${tomorrow.tempMax}°.` : tomorrowDiff <= -3 ? `Morgen kouder: ${tomorrow.tempMax}°.` : "Morgen vergelijkbaar."} Zo is het gewoon.`.replace(/\s+/g, " ").trim();
+  report += "Dit is de situatie zoals het KNMI het bevestigt. Geen ruis, gewoon de feiten.";
+  
+  return report;
 }
 
 export function getMisereScore(w: WeatherData): { score: number; label: string; emoji: string } {
