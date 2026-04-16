@@ -14,7 +14,7 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ 
-          model: "gemini-3-flash-preview",
+          model: "gemini-1.5-pro",
           safetySettings: [
             { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
             { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -51,7 +51,7 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
 
         const result = await model.generateContent({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 30, temperature: 0.9, topP: 0.8 },
+          generationConfig: { maxOutputTokens: 400, temperature: 0.8, topP: 0.95 },
         });
 
         const text = result.response.text().trim().replace(/^"|"$/g, '');

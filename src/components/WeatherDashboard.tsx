@@ -172,11 +172,9 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
             <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10 mb-3">
               {weather.aiVerdict || getMainCommentary(weather)}
             </p>
-            <div className="pt-2 border-t border-accent-orange/10">
-              <p className="text-[12px] font-bold text-text-primary leading-snug opacity-80">
-                {weather 
-                  ? `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — KNMI bevestigt dit.`
-                  : "📊 Checkt de weersituatie..."}
+            <div className="pt-4 border-t border-white/5">
+              <p className="text-[11px] font-bold text-text-secondary uppercase tracking-widest opacity-80">
+                📊 {new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — KNMI bevestigt dit.
               </p>
             </div>
           </div>
