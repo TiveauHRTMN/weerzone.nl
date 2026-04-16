@@ -749,9 +749,9 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 });
               }
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-4 bg-slate-900/80 backdrop-blur-md hover:bg-slate-800 text-white font-black text-[11px] rounded-2xl border border-blue-500/20 transition-all active:scale-95 uppercase tracking-wider"
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#3ABEFF] hover:bg-[#2da9e6] text-slate-900 font-black text-[11px] rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-wider"
           >
-            <Users className="w-3.5 h-3.5 text-blue-400" /> Deel WEERZONE
+            <Users className="w-3.5 h-3.5" /> Deel WEERZONE
           </button>
           <button 
             onClick={async () => {
@@ -763,7 +763,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 });
               }
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-4 bg-accent-orange hover:brightness-110 text-black font-black text-[11px] rounded-2xl shadow-lg shadow-accent-orange/20 transition-all active:scale-95 uppercase tracking-wider"
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#FFB400] hover:bg-[#e6a200] text-slate-950 font-black text-[11px] rounded-2xl shadow-lg shadow-yellow-500/10 transition-all active:scale-95 uppercase tracking-wider"
           >
             <Send className="w-3.5 h-3.5" /> Deel Weerbericht
           </button>

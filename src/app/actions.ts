@@ -14,19 +14,14 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ 
-          model: "gemini-3-flash-preview",
-          safetySettings: [
-            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-          ]
+          model: "gemini-1.5-flash",
         });
 
         const tomorrow = weather.daily[1];
         const prompt = `
           Schrijf een volledig, nuchter Nederlands weerbericht (geen AI-jargon!) op basis van deze feiten.
           Focus op de komende 48 uur. Vertel wat mensen buiten gaan merken.
+          Schrijf precies 4 tot 5 zinnen.
           
           FEITEN NU:
           Lucht: ${getWeatherDescription(weather.current.weatherCode)}
