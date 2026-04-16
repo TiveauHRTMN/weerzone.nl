@@ -169,11 +169,6 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
           </div>
           
           <div className="mt-8 bg-accent-orange/15 border-l-4 border-accent-orange p-4 rounded-r-lg relative overflow-hidden">
-            {weather.aiVerdict && (
-              <div className="absolute -top-1 -right-1 opacity-10 rotate-12">
-                <span className="text-4xl">🤖</span>
-              </div>
-            )}
             <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10 mb-3">
               {weather.aiVerdict || getMainCommentary(weather)}
             </p>

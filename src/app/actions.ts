@@ -24,10 +24,10 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
         });
 
         const prompt = `
-          Vertel wat het weer NU voor impact heeft (max 15 woorden).
-          GEBRUIK GEEN AI-JARGON (geen woorden als 'analyse', 'data', 'verdict', 'verwachting', 'model').
-          STIJL: Direct, nuchter, typisch Nederlands (geen poeha). 
-          Niet het weer voorlezen, maar vertellen of je een jas aan moet of dat het gewoon ruk is.
+          Vertel in één krachtige, nuchtere en menselijke zin (max 15 woorden) wat het weer nu betekent voor de gebruiker. 
+          GEEN ÉÉN-WOORD-ANTWOORDEN (zoals alleen 'Jas'). Maak er een echte zin van.
+          GEBRUIK GEEN AI-JARGON (geen 'analyse', 'data', 'verdict', 'verwachting').
+          STIJL: Ongezouten de waarheid, typisch Nederlands nuchter.
           
           WEER-FACTS: 
           Temp: ${weather.current.temperature}°
