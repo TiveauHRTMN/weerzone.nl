@@ -75,15 +75,20 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     return () => clearInterval(interval);
   }, [city]);
 
+  const [isLocating, setIsLocating] = useState(false);
+
   const handleLocationClick = () => {
     if ("geolocation" in navigator) {
+      setIsLocating(true);
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
         const geoCity = await reverseGeocode(lat, lon);
         setCity(geoCity);
         localStorage.setItem("wz_city", JSON.stringify(geoCity));
+        setIsLocating(false);
       }, (err) => {
         console.error("GPS Error:", err);
+        setIsLocating(false);
       }, {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -121,11 +126,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         <div className="flex flex-row items-center justify-center gap-2 w-full max-w-sm px-4">
           <button 
             onClick={handleLocationClick}
-            className="flex items-center justify-center gap-2 h-11 w-full rounded-2xl border border-white/25 bg-white/10 backdrop-blur-md px-5 shadow-lg active:scale-95 transition-all outline-none"
+            disabled={isLocating}
+            className={`flex items-center justify-center gap-2 h-11 w-full rounded-2xl border border-white/25 bg-white/10 backdrop-blur-md px-5 shadow-lg active:scale-95 transition-all outline-none ${isLocating ? 'opacity-80' : ''}`}
           >
-            <MapPin className="text-white w-4 h-4" />
-            <span className="text-base font-bold text-white truncate">{city.name}</span>
-            <RefreshCw className="w-3 h-3 text-white/40 ml-1" />
+            <MapPin className={`text-white w-4 h-4 ${isLocating ? 'animate-pulse' : ''}`} />
+            <span className="text-base font-bold text-white truncate">
+              {isLocating ? 'Locatie bepalen...' : city.name}
+            </span>
+            <RefreshCw className={`w-3 h-3 text-white/40 ml-1 ${isLocating ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </header>
