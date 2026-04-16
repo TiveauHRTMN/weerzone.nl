@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun } from "lucide-react";
+import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users } from "lucide-react";
 import { LogoFull } from "./Logo";
 import LoadingScreen from "./LoadingScreen";
 import { getWeather } from "@/app/actions";
