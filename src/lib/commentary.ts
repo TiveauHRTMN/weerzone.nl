@@ -37,10 +37,10 @@ export function getMainCommentary(w: WeatherData): string {
   // ===== EXTREME SITUATIES =====
 
   // Zwaar onweer actief of op komst
-  if (code >= 95) return "Onweer, bliksem, het hele circus. Ga naar binnen, weg bij ramen, en geniet van het drama. De modellen zagen dit uren geleden al.";
+  if (code >= 95) return "Onweer, bliksem, het hele circus. Ga naar binnen, weg bij ramen, en geniet van het drama. Dat zagen we van ver aankomen.";
   if (thunderHours.length >= 3) {
     const firstT = new Date(thunderHours[0].time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
-    return `Onweer op komst vanaf ${firstT}. ${thunderHours.length} uur lang. Houd je telefoon geladen en je binnen. Andere apps waarschuwen je straks pas.`;
+    return `Onweer op komst vanaf ${firstT}. ${thunderHours.length} uur lang. Houd je telefoon geladen en je binnen. Andere apps slapen waarschijnlijk nog.`;
   }
   if (thunderHours.length > 0) {
     const firstT = new Date(thunderHours[0].time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
@@ -55,7 +55,7 @@ export function getMainCommentary(w: WeatherData): string {
   if (code >= 71 && code <= 77) return `Sneeuw! Over een kwartier staat heel Nederland op z'n gat. ${t}°, het blijft liggen. Geniet ervan of vloek erop, maar het is er.`;
 
   // Extreme hitte
-  if (t >= 33) return `${t}° — tropisch alarm. Airco is geen luxe, het is overleving. Drink water, zoek schaduw. De 14-daagse-app van je buurman zag dit niet aankomen.`;
+  if (t >= 33) return `${t}° — tropisch alarm. Airco is geen luxe, het is overleving. Drink water, zoek schaduw. Je buurman gelooft zijn 14-daagse-app nog steeds.`;
   if (t >= 30) return `${t}° en dat voelt als ${feelsLike}°. Nederland smelt. Smeer je in (UV!), drink genoeg, en laat die BBQ maar staan — je bent zelf al gaar.`;
 
   // Extreme kou
@@ -70,7 +70,7 @@ export function getMainCommentary(w: WeatherData): string {
 
   // Het regent NU
   if (rain > 5) {
-    return `Het giet: ${rain}mm nu. ${firstDryHour ? `Droog venster rond ${new Date(firstDryHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — markeer het in je agenda.` : "Geen droog moment in zicht. Accepteer het."} Buienradar past z'n voorspelling nu pas aan.`;
+    return `Het giet: ${rain}mm nu. ${firstDryHour ? `Droog venster rond ${new Date(firstDryHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — markeer het in je agenda.` : "Geen droog moment in zicht. Accepteer het."} Andere apps lopen achter de feiten aan.`;
   }
   if (rain > 1) {
     return `Regen: ${rain}mm op dit moment. ${firstDryHour ? `Het stopt rond ${new Date(firstDryHour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}.` : "Blijft nog even aanhouden."} ${wind > 20 ? `Plus ${wind} km/h wind — paraplu is zinloos, regenjas verplicht.` : "Paraplu mee, geen discussie."}`;
@@ -116,7 +116,7 @@ export function getMainCommentary(w: WeatherData): string {
     if (feelsLike < t - 3) {
       return `${t}° op papier, maar voelt als ${feelsLike}° door de wind. Jas mee, ook al lijkt het fatsoenlijk weer.`;
     }
-    return `${t}°, bewolkt, droog. Niet spectaculair, niet dramatisch. ${tomorrowDiff >= 3 ? `Morgen wél ${tomorrow.tempMax}° — dat wordt beter.` : tomorrowDiff <= -3 ? `Morgen ${Math.abs(tomorrowDiff)}° kouder — vandaag is de betere dag.` : "Gewoon een doorsnee dag. Maar wél met correcte data."} De 14-daagse voorspelling van je buurman is ondertussen alweer bijgesteld.`;
+    return `${t}°, bewolkt, droog. Niet spectaculair, niet dramatisch. ${tomorrowDiff >= 3 ? `Morgen wél ${tomorrow.tempMax}° — dat wordt beter.` : tomorrowDiff <= -3 ? `Morgen ${Math.abs(tomorrowDiff)}° kouder — vandaag is de betere dag.` : "Gewoon een doorsnee dag."} Terwijl anderen nog gokken, weten wij de feiten.`;
   }
 
   // ===== KOEL / GRIJS =====
@@ -129,7 +129,7 @@ export function getMainCommentary(w: WeatherData): string {
   }
 
   // ===== DEFAULT =====
-  return `${t}° in de lucht, voelt als ${feelsLike}°. ${code <= 3 ? "Bewolkt" : "Wisselend"}. ${wind > 20 ? `Wind ${wind} km/h — frisser dan je denkt.` : ""} ${rain === 0 ? "Droog." : `${rain}mm neerslag.`} ${tomorrowDiff >= 3 ? `Morgen stuk beter: ${tomorrow.tempMax}°.` : tomorrowDiff <= -3 ? `Morgen kouder: ${tomorrow.tempMax}°.` : "Morgen vergelijkbaar."} Twee weermodellen bevestigen dit.`.replace(/\s+/g, " ").trim();
+  return `${t}° in de lucht, voelt als ${feelsLike}°. ${code <= 3 ? "Bewolkt" : "Wisselend"}. ${wind > 20 ? `Wind ${wind} km/h — frisser dan je denkt.` : ""} ${rain === 0 ? "Droog." : `${rain}mm neerslag.`} ${tomorrowDiff >= 3 ? `Morgen stuk beter: ${tomorrow.tempMax}°.` : tomorrowDiff <= -3 ? `Morgen kouder: ${tomorrow.tempMax}°.` : "Morgen vergelijkbaar."} Zo is het gewoon.`.replace(/\s+/g, " ").trim();
 }
 
 export function getMisereScore(w: WeatherData): { score: number; label: string; emoji: string } {
@@ -242,9 +242,9 @@ const ROTATING_QUOTES = [
   "\"Kans op zon\" is de laffe uitweg van Weerplaza. Wij vertellen je gewoon de realiteit op de kilometer nauwkeurig.",
   "48 uur. Meer heb je niet nodig. Een 14-daagse voorspelling is commerciële clickbait voor de massa.",
   "Je weer-app zegt 22° volgende week? Trap er niet in. Puur bedrog om clicks te genereren.",
-  "KNMI HARMONIE op volle sterkte. 2.5km resolutie. Eén brute waarheid. Geen gelul.",
+  "KNMI HARMONIE op volle sterkte. Eén brute waarheid. Geen gelul.",
   "14-daagse voorspelling? Dan kun je net zo goed je horoscoop of de krant van gisteren lezen.",
-  "Weerplaza, NOS, Buienradar... Stuk voor stuk bezig met nattevingerwerk. Wij doen data.",
+  "Weerplaza, NOS, Buienradar... Stuk voor stuk bezig met nattevingerwerk. Wij vertellen je de feiten.",
   "Jas-aan-jas-uit-jas-aan weer. Typisch Nederlands. Volkomen ruk, maar wij waarschuwen tenminste eerlijk.",
   "\"Lokaal een bui\" is meteorologen-taal voor: we hebben geen flauw idee. Wij wel.",
   "De gevestigde orde zit er weer naast? Logisch, die gebruiken achterhaalde modellen.",
@@ -255,7 +255,7 @@ const ROTATING_QUOTES = [
   "De enige weerdienst die niet bang is om je de waarheid te vertellen. Geen poespas.",
   "Regen voorspeld? Dan regent het ook. De rest draait eromheen om je humeur niet te verpesten.",
   "Weerplaza zit qua voorspellingen dichter bij een waarzegster dan bij de realiteit.",
-  "Icon-D2 is ingeschakeld. We zien nu zelfs de individuele druppels in jouw straat aankomen.",
+  "We zien nu zelfs elke druppel in jouw straat aankomen. Geen verrassingen meer.",
 ];
 
 export function getRandomQuote(): string {

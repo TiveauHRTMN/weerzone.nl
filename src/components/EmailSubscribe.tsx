@@ -65,7 +65,7 @@ export default function EmailSubscribe({ city }: Props) {
       </div>
 
       <p className="text-xs text-text-secondary break-words leading-snug">
-        Ontvang elke ochtend de keiharde data van Piet en laat je alleen door Reed waarschuwen als het écht menens is. 
+        Ontvang elke ochtend de keiharde feiten van Piet en laat je alleen door Reed waarschuwen als het écht menens is. 
       </p>
 
       <form onSubmit={handleSubmit} className="flex gap-2">

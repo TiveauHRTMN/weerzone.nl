@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchWeatherData } from "@/lib/weather";
+import { fetchWeatherData, getWeatherDescription } from "@/lib/weather";
 import type { WeatherData } from "@/lib/types";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
@@ -24,16 +24,17 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
         });
 
         const prompt = `
-          Analyseer deze weerdata en geef een kort, krachtig verdict (max 15 woorden).
-          Stijl: Cynisch, direct, Nederlands en een tikkeltje droog (zoals de app).
-          Niet het weer voorlezen, maar de CONSEQUENTIE benadrukken.
+          Vertel wat het weer NU voor impact heeft (max 15 woorden).
+          GEBRUIK GEEN AI-JARGON (geen woorden als 'analyse', 'data', 'verdict', 'verwachting', 'model').
+          STIJL: Direct, nuchter, typisch Nederlands (geen poeha). 
+          Niet het weer voorlezen, maar vertellen of je een jas aan moet of dat het gewoon ruk is.
           
-          DATA: 
+          WEER-FACTS: 
           Temp: ${weather.current.temperature}°
           Wind: ${weather.current.windSpeed} km/h
           Regen nu: ${weather.current.precipitation} mm
           Regen komende 48u: ${weather.hourly.reduce((acc, h) => acc + h.precipitation, 0).toFixed(1)} mm
-          Code: ${weather.current.weatherCode}
+          Lucht: ${getWeatherDescription(weather.current.weatherCode)}
         `.trim();
 
         const result = await model.generateContent({

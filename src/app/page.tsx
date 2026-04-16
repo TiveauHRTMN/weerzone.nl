@@ -41,7 +41,7 @@ const faqLd = {
       name: "Wat is WEERZONE?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "WEERZONE is de weerdienst die niet liegt. We combineren KNMI HARMONIE en DWD ICON-D2 — voor de enige voorspelling die ertoe doet: de komende 48 uur op de kilometer nauwkeurig. De rest is ruis.",
+        text: "WEERZONE vertelt je de werkelijkheid. We gebruiken de scherpste bronnen die er zijn (zoals KNMI HARMONIE) voor de enige voorspelling die ertoe doet: de komende 48 uur op je eigen postzegel nauwkeurig. De rest is ruis.",
       },
     },
     {
@@ -57,7 +57,7 @@ const faqLd = {
       name: "Welke weermodellen gebruikt WEERZONE?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "KNMI HARMONIE (het Nederlandse weermodel) en DWD ICON-D2 (het ultra-high-resolution geneste model). Wanneer de modellen het eens zijn, weet je het zeker. Wanneer ze het oneens zijn, vertellen we je dat ook. Eerlijkheid boven alles.",
+        text: "We gebruiken de meest geavanceerde technieken van het KNMI en Duitsland die op je eigen postzegel nauwkeurig zijn. Wanneer de bronnen het eens zijn, weet je het zeker. Wanneer ze het oneens zijn, vertellen we je dat ook. Eerlijkheid boven alles.",
       },
     },
     {

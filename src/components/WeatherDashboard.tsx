@@ -181,7 +181,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
               <p className="text-[12px] font-bold text-text-primary leading-snug opacity-80">
                 {weather 
                   ? `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — KNMI bevestigt dit.`
-                  : "📊 Analyseert marktdata..."}
+                  : "📊 Checkt de weersituatie..."}
               </p>
             </div>
           </div>
