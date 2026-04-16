@@ -744,30 +744,43 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* ===== 18. E-mail Weerrapport (Moved to top) ===== */}
 
-      {/* ===== 20. Viral Sharing — Laat je vrienden niet staan ===== */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.95s" }}>
-        <div className="card bg-gradient-to-br from-green-500/10 to-emerald-500/5 border-emerald-500/20 p-6 text-center relative overflow-hidden">
-          <div className="absolute -top-4 -right-4 text-6xl opacity-10 rotate-12">🚀</div>
-          <h3 className="text-lg font-black text-emerald-700 mb-2 uppercase tracking-tight">Deel de Weermacht met Vrienden</h3>
-          <p className="text-sm text-emerald-800/70 mb-6 leading-snug">
-            Niet de enige zijn die altijd 48 uur vooruit kijkt? Nodig je vrienden uit voor de WEERZONE revolutie.
-          </p>
-          <a 
-            href="https://api.whatsapp.com/send?text=Check%20WEERZONE.nl%20%E2%80%94%20eindelijk%20weer-data%20die%20wel%20klopt.%20Piet%20en%20Reed%20houden%20je%20scherp.%20%F0%9F%8C%A4%EF%B8%8F%F0%9F%9A%80"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-sm rounded-2xl transition-all shadow-lg active:scale-95 uppercase tracking-wider"
+      {/* ===== 20. Dual Viral Sharing — Merk vs Data ===== */}
+      <div className="animate-fade-in space-y-4" style={{ animationDelay: "0.95s" }}>
+        <div className="flex gap-3 px-1">
+          <button 
+            onClick={async () => {
+              if (typeof navigator.share !== 'undefined') {
+                await navigator.share({
+                  title: `WEERZONE | 48 uur vooruit. De rest is ruis.`,
+                  text: `Check WEERZONE.nl 🌪️ Eindelijk weer-data die wel klopt. 48 uur vooruit. De rest is ruis. 🚀`,
+                  url: "https://weerzone.nl"
+                });
+              }
+            }}
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-white/10 hover:bg-white/20 text-white font-black text-[11px] rounded-2xl border border-white/20 transition-all active:scale-95 uppercase tracking-wider"
           >
-            <Send className="w-4 h-4" /> Deel via WhatsApp
-          </a>
+            <Users className="w-3.5 h-3.5" /> Deel WEERZONE
+          </button>
+          <button 
+            onClick={async () => {
+              if (typeof navigator.share !== 'undefined') {
+                await navigator.share({
+                  title: `WEERZONE | Weer in ${city.name}`,
+                  text: `${getWeatherEmoji(weather.current.weatherCode, weather.current.isDay)} ${weather.current.temperature}° in ${city.name} — "${weather.aiVerdict || "WEERZONE bevestigt dit."}"\n\n48 uur vooruit. De rest is ruis. 🌪️`,
+                  url: window.location.href
+                });
+              }
+            }}
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-accent-orange hover:brightness-110 text-white font-black text-[11px] rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-wider"
+          >
+            <Send className="w-3.5 h-3.5" /> Deel Weerbericht
+          </button>
         </div>
       </div>
 
-      {/* ===== Footer / Share ===== */}
-      <footer className="pt-8 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.0s" }}>
-        <button onClick={handleShare} className="btn-cta mx-auto">
-          <Send className="w-4 h-4 ml-[-4px]" /> Deel het weer
-        </button>
-
-        <p className="text-[12px] text-white font-black uppercase tracking-[0.2em] mt-8">
+      {/* ===== Footer ===== */}
+      <footer className="pt-12 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.0s" }}>
+        <p className="text-[12px] text-white font-black uppercase tracking-[0.2em]">
           48 uur vooruit. De rest is ruis.
         </p>
         <p className="text-[10px] text-white/40 mt-2">
