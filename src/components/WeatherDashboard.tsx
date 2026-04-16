@@ -185,9 +185,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 ? `📉 Morgen ${weather.daily[1].tempMax > weather.daily[0].tempMax ? "stuk warmer" : "flink kouder"} — ${Math.abs(weather.daily[1].tempMax - weather.daily[0].tempMax)}° verschil. Pas je plannen aan.`
                 : weather.current.windSpeed > 30
                 ? "💨 Dit is niet het moment om dingen op hun beloop te laten."
-                : weather.aiVerdict 
-                ? "📊 Real-time AI analyse van KNMI-data compleet."
-                : `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — ${weather.models.sources.length} weermodellen bevestigen dit.`}
+                : `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — WEERZONE bevestigt dit.`}
             </p>
           </div>
           
