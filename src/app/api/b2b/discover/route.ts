@@ -7,16 +7,17 @@ export const dynamic = "force-dynamic";
 const INDUSTRY_QUERIES: Record<string, string[]> = {
   glazenwasser:     ["glazenwasserbedrijf", "gevelreiniging bedrijf"],
   bouw:             ["aannemersbedrijf", "bouwbedrijf"],
-  horeca:           ["restaurant terras", "café horecabedrijf"],
-  evenementen:      ["evenementenbureau", "feestorganisatie"],
+  horeca:           ["restaurant terras", "strandpaviljoen", "horecabedrijf met terras"],
+  evenementen:      ["evenementenbureau", "festival organisator", "outdoor events"],
   agrarisch:        ["loonbedrijf agrarisch", "tuinbouw bedrijf"],
   transport:        ["transportbedrijf logistiek", "koeriersdienst"],
-  sport:            ["voetbalvereniging", "sportvereniging"],
+  sport:            ["voetbalvereniging", "openlucht sportvereniging"],
   schoonmaak:       ["schoonmaakbedrijf", "facilitaire diensten"],
-  schildersbedrijf: ["schildersbedrijf", "schilder buitenwerk"],
+  schildersbedrijf: ["schildersbedrijf", "restauratieschilder"],
   dakdekker:        ["dakdekker bedrijf", "dakbedekkingsbedrijf"],
-  tuinonderhoud:    ["hovenier", "groenvoorziening bedrijf"],
+  tuinonderhoud:    ["hovenier", "tuinonderhoud bedrijf", "tuinaanleg"],
   bezorging:        ["bezorgdienst", "fietskoerier"],
+  strandpaviljoen:  ["strandpaviljoen", "strandtent", "beach club nederland"],
 };
 
 // Haal email op van website via eenvoudige scrape
@@ -89,7 +90,36 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const { industry, city } = body as { industry?: string; city?: string };
+  return await runDiscovery(industry, city);
+}
 
+export async function GET(req: Request) {
+  // Auth check
+  const authHeader = req.headers.get("authorization");
+  const secret = process.env.CRON_SECRET;
+  if (secret && authHeader !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  let industry = searchParams.get("industry");
+  let city = searchParams.get("city");
+
+  // Als er geen industry/city is (bijv via cron), kies een willekeurige
+  if (!industry) {
+    const industries = Object.keys(INDUSTRY_QUERIES);
+    industry = industries[Math.floor(Math.random() * industries.length)];
+  }
+  
+  if (!city) {
+    const cities = ["Amsterdam", "Rotterdam", "Utrecht", "Eindhoven", "Groningen", "Tilburg", "Almere", "Breda", "Nijmegen", "Apeldoorn", "Haarlem", "Arnhem"];
+    city = cities[Math.floor(Math.random() * cities.length)];
+  }
+
+  return await runDiscovery(industry, city);
+}
+
+async function runDiscovery(industry?: string, city?: string) {
   if (!industry || !city) {
     return NextResponse.json({ error: "industry en city zijn verplicht" }, { status: 400 });
   }

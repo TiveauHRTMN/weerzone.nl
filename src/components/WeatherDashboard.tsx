@@ -51,9 +51,9 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const handleShare = async () => {
     if (typeof navigator.share !== 'undefined') {
       try {
-        const text = `🌧️ ${weather?.current.temperature}° in ${city.name} — ${weather?.aiVerdict || getMainCommentary(weather!)}\n\nweerzone.nl — 48 uur. De rest is ruis.`;
+        const text = `Check WEERZONE.nl 🌪️ 48 uur vooruit. De rest is ruis. Eindelijk weer-data die wel klopt. Piet en Reed houden je scherp. 🚀`;
         await navigator.share({
-          title: `Weerzone ${city.name}`,
+          title: `WEERZONE | 48 uur vooruit. De rest is ruis.`,
           text: text,
           url: window.location.href,
         });
@@ -738,18 +738,34 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* ===== 18. E-mail Weerrapport (Moved to top) ===== */}
 
+      {/* ===== 20. Viral Sharing — Laat je vrienden niet staan ===== */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.95s" }}>
+        <div className="card bg-gradient-to-br from-green-500/10 to-emerald-500/5 border-emerald-500/20 p-6 text-center relative overflow-hidden">
+          <div className="absolute -top-4 -right-4 text-6xl opacity-10 rotate-12">🚀</div>
+          <h3 className="text-lg font-black text-emerald-700 mb-2 uppercase tracking-tight">Deel de Weermacht met Vrienden</h3>
+          <p className="text-sm text-emerald-800/70 mb-6 leading-snug">
+            Niet de enige zijn die altijd 48 uur vooruit kijkt? Nodig je vrienden uit voor de WEERZONE revolutie.
+          </p>
+          <a 
+            href="https://api.whatsapp.com/send?text=Check%20WEERZONE.nl%20%E2%80%94%20eindelijk%20weer-data%20die%20wel%20klopt.%20Piet%20en%20Reed%20houden%20je%20scherp.%20%F0%9F%8C%A4%EF%B8%8F%F0%9F%9A%80"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-sm rounded-2xl transition-all shadow-lg active:scale-95 uppercase tracking-wider"
+          >
+            <Send className="w-4 h-4" /> Deel via WhatsApp
+          </a>
+        </div>
+      </div>
+
       {/* ===== Footer / Share ===== */}
       <footer className="pt-8 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.0s" }}>
         <button onClick={handleShare} className="btn-cta mx-auto">
           <Send className="w-4 h-4 ml-[-4px]" /> Deel het weer
         </button>
 
-        <p className="text-[10px] text-white/50 mt-8 uppercase font-semibold tracking-wider">
-          WeerZone — 48 uur. De rest is ruis.
+        <p className="text-[12px] text-white font-black uppercase tracking-[0.2em] mt-8">
+          48 uur vooruit. De rest is ruis.
         </p>
-        <p className="text-[10px] text-white/50 mt-1">
-          Data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> · KNMI HARMONIE.
-          De absolute bron, nul ruis.
+        <p className="text-[10px] text-white/40 mt-2">
+          Harde data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> & KNMI HARMONIE.
         </p>
         <div className="mt-8 pt-6 border-t border-white/10 opacity-100">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">

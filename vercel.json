@@ -15,6 +15,10 @@
     {
       "path": "/api/b2b/outreach",
       "schedule": "0 9 * * 1-5"
+    },
+    {
+      "path": "/api/b2b/discover",
+      "schedule": "0 8 * * 1-5"
     }
   ]
 }

@@ -21,39 +21,36 @@ export const metadata: Metadata = {
     apple: "/favicon-icon.png",
   },
   title: {
-    default: "WeerZone — 48 uur. De rest is ruis.",
-    template: "%s | WeerZone — 48 uur. De rest is ruis.",
+    default: "WEERZONE | 48 uur vooruit. De rest is ruis.",
+    template: "%s | WEERZONE | 48 uur vooruit. De rest is ruis.",
   },
   description:
-    "WeerZone.nl — Vergeet de 14-daagse. De komende 48 uur op de vierkante meter. KNMI HARMONIE + ICON + ICON-D2. De enige weerdienst die de waarheid durft te vertellen.",
+    "WEERZONE.nl — Vergeet de 14-daagse. De komende 48 uur vooruit. De rest is ruis. KNMI HARMONIE data op de vierkante meter.",
   keywords: [
     "weer", "weer nederland", "weerbericht", "weersverwachting", "weer vandaag",
     "weer morgen", "48 uur weer", "weer komende 48 uur", "fietsweer", "regen verwachting",
-    "weerzone", "nauwkeurig weer", "KNMI", "KNMI HARMONIE", "DWD ICON", "ICON-D2",
-    "weerbericht vandaag", "temperatuur nederland", "wind nederland",
-    "neerslag radar", "buienradar alternatief", "weer per postcode",
-    "weer exact locatie", "hyperlocaal weer", "weerzone.nl",
+    "WEERZONE", "nauwkeurig weer", "KNMI", "KNMI HARMONIE", "weerzone.nl",
   ],
   openGraph: {
-    title: "WeerZone — 48 uur. De rest is ruis.",
-    description: "Vergeet de 14-daagse. De komende 48 uur, op de vierkante meter. De enige weerdienst die niet liegt.",
+    title: "WEERZONE | 48 uur vooruit. De rest is ruis.",
+    description: "Vergeet de 14-daagse. De komende 48 uur vooruit. De rest is ruis. De enige weerdienst die de waarheid deelt.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl",
-    siteName: "WeerZone",
+    siteName: "WEERZONE",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "WeerZone",
+        alt: "WEERZONE",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "WeerZone — 48 uur. De rest is ruis.",
-    description: "Vergeet de 14-daagse. De komende 48 uur op de vierkante meter. KNMI HARMONIE + ICON + ICON-D2.",
+    title: "WEERZONE | 48 uur vooruit. De rest is ruis.",
+    description: "Vergeet de 14-daagse. De komende 48 uur vooruit. De rest is ruis.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -71,7 +68,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "WeerZone",
+    title: "WEERZONE",
   },
   verification: {},
 };

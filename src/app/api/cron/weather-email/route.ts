@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getSupabase } from "@/lib/supabase";
 import { getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Vercel Cron: elke ochtend om 06:30 NL tijd
 export const dynamic = "force-dynamic";
@@ -13,6 +14,21 @@ interface Subscriber {
   lon: number;
 }
 
+const PIET_PROMPT = `
+Role: Piet van WeerZone.nl.
+Persona: Een vriendelijke, deskundige lokale gids. Nooit schreeuwerig, altijd behulpzaam. 
+Stijl:
+1. Analyseer de weerdata voor vandaag en geef een nuchtere, deskundige conclusie.
+2. Deel een interessant of uniek feitje over de STAD die je doorkrijgt (geschiedenis, architectuur of sfeer).
+3. Geef kort advies voor de dag (kleding, vervoer).
+
+REGELS:
+- Max 50 woorden.
+- Gebruik GEEN catchphrases zoals 'oant moarn'. 
+- Spreek als 'Piet', niet als een AI.
+- Houd de toon warm maar zakelijk.
+`;
+
 async function fetchWeather(lat: number, lon: number) {
   const res = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
@@ -22,7 +38,7 @@ async function fetchWeather(lat: number, lon: number) {
   return res.json();
 }
 
-function buildEmailHtml(city: string, data: Record<string, unknown>): string {
+function buildEmailHtml(city: string, data: Record<string, unknown>, pietCommentary: string): string {
   const current = data.current as Record<string, number>;
   const daily = data.daily as Record<string, number[]>;
   const temp = Math.round(current.temperature_2m);
@@ -43,43 +59,59 @@ function buildEmailHtml(city: string, data: Record<string, unknown>): string {
   <div style="max-width:480px;margin:0 auto;padding:32px 24px;">
 
     <div style="text-align:center;padding:12px 0 32px;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height: 50px; width: auto; margin-bottom: 8px;" />
-      <p style="color:#ffffff;font-size:11px;margin:4px 0 0;letter-spacing:2px;text-transform:uppercase;font-weight:700;">De Komende 48 Uur In ${city}</p>
+      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height: 42px; width: auto; margin-bottom: 4px;" />
+      <p style="color:rgba(255,255,255,0.6);font-size:10px;margin:0;letter-spacing:1px;text-transform:uppercase;font-weight:700;">Ochtend-update van Piet</p>
     </div>
 
-    <div style="background:#ffffff;border-radius:18px;padding:24px;margin-bottom:16px;box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-      <div style="display:flex;align-items:center;gap:16px;">
-        <span style="font-size:48px;">${emoji}</span>
-        <div>
-          <p style="margin:0;font-size:36px;font-weight:800;color:#1e293b;">${temp}°</p>
-          <p style="margin:4px 0 0;font-size:15px;color:#475569;">${desc}</p>
+    <div style="background:#ffffff;border-radius:24px;overflow:hidden;box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
+      <!-- PIET'S LOCAL VERDICT -->
+      <div style="background:#f1f5f9;padding:24px;border-bottom:1px solid #e2e8f0;">
+        <p style="margin:0 0 12px;font-size:12px;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Piet's Verdict voor ${city} 📍</p>
+        <p style="margin:0;font-size:15px;color:#1e293b;line-height:1.6;font-weight:500;">
+          ${pietCommentary}
+        </p>
+      </div>
+
+      <!-- MAIN DATA -->
+      <div style="padding:32px 24px;">
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px;">
+          <span style="font-size:56px;">${emoji}</span>
+          <div>
+            <p style="margin:0;font-size:42px;font-weight:900;color:#1e293b;line-height:1;">${temp}°</p>
+            <p style="margin:4px 0 0;font-size:16px;color:#475569;font-weight:600;">${desc}</p>
+          </div>
+        </div>
+
+        <div style="padding-top:24px;border-top:1px solid #f1f5f9;">
+          <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">De komende 48 uur:</p>
+          <ul style="margin:0;padding-left:20px;color:#475569;line-height:1.7;font-size:15px;">
+            <li>Kwik tussen <strong style="color:#1e293b;">${dailyTempMin}°</strong> en <strong style="color:#1e293b;">${dailyTempMax}°</strong></li>
+            ${wind > 20 ? `<li>Winddruk: <strong style="color:#ef4444;">${wind} km/u</strong></li>` : `<li>Wind: Matig (${wind} km/u)</li>`}
+            ${totalPrecip > 0 ? `<li>Verwachte neerslag: <strong style="color:#2563eb;">${totalPrecip.toFixed(1)}mm</strong></li>` : `<li>Neerslag: Geen druppel.</li>`}
+          </ul>
         </div>
       </div>
-      <div style="margin-top:24px;padding-top:20px;border-top:1px solid #f1f5f9;">
-        <p style="margin:0 0 8px;font-size:14px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Jouw Lokale Vooruitzicht (48u):</p>
-        <ul style="margin:0;padding-left:20px;color:#475569;line-height:1.6;font-size:15px;">
-          <li>Temperatuur schommelt tussen <strong style="color:#1e293b;">${dailyTempMin}°</strong> en <strong style="color:#1e293b;">${dailyTempMax}°</strong></li>
-          ${wind > 20 ? `<li>Windstoten tot <strong style="color:#ef4444;">${wind} km/u</strong></li>` : `<li>Windvlagen rond de ${wind} km/u</li>`}
-          ${totalPrecip > 0 ? `<li style="color:#ef4444;font-weight:600;">Totale regen verwacht: ${totalPrecip.toFixed(1)}mm</li>` : `<li>Geen druppel regen verwacht.</li>`}
-        </ul>
-      </div>
     </div>
 
-    <div style="text-align:center;padding:24px 0;">
-      <a href="https://weerzone.nl/weer/${city.toLowerCase().replace(/\s+/g, '-')}" style="display:inline-block;padding:14px 32px;background:#f59e0b;color:#1e293b;font-weight:700;font-size:14px;border-radius:999px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(245,158,11,0.3);">
-        BEKIJK RADAR & IMPACT →
+    <div style="text-align:center;padding:32px 0;">
+      <a href="https://weerzone.nl/weer/${city.toLowerCase().replace(/\s+/g, '-')}" style="display:inline-block;padding:16px 40px;background:#1e293b;color:#ffffff;font-weight:700;font-size:14px;border-radius:12px;text-decoration:none;letter-spacing:1px;box-shadow:0 4px 20px rgba(30,41,59,0.2);">
+        BEKIJK VOLLEDIGE IMPACT →
       </a>
     </div>
 
-    <div style="background:#f8fafc;border-radius:18px;padding:20px;text-align:center;border:1px solid #e2e8f0;">
-      <p style="margin:0;font-size:13px;color:#64748b;font-style:italic;">
-        "De 14-daagse van Buienradar is voor mensen die nog in sprookjes geloven. Wij houden het bij de feiten."
-      </p>
+    <!-- VIRAL SHARE -->
+    <div style="background:#f0f9ff;border-radius:24px;padding:32px;margin:32px 0;text-align:center;border:1px solid #bae6fd;">
+      <p style="margin:0 0 12px;font-size:16px;color:#0369a1;font-weight:800;">NIET DE ENIGE ZIJN DIE HET WEET? 🌤️</p>
+      <p style="margin:0 0 24px;font-size:14px;color:#0ea5e9;line-height:1.5;">Deel WEERZONE met je vrienden zodat zij ook hun voordeel kunnen doen met de beste weerdata van Nederland.</p>
+      <a href="https://api.whatsapp.com/send?text=Krijg%20je%20ook%20nog%20steeds%20van%20die%20vage%20weer-berichten?%20Check%20WEERZONE.nl.%20Echte%20data,%2048%20uur%20vooruit.%20%F0%9F%9A%80" style="display:inline-block;padding:14px 28px;background:#25d366;color:white;font-weight:800;font-size:14px;border-radius:12px;text-decoration:none;box-shadow:0 4px 15px rgba(37,211,102,0.3);">
+        DEEL VIA WHATSAPP →
+      </a>
     </div>
 
     <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7);margin:24px 0 0;">
-      Laat de buren maar lekker onvoorbereid de deur uit gaan. Wij zien je morgen weer.<br><br>
-      <a href="https://weerzone.nl/api/unsubscribe?email={{EMAIL}}" style="color:rgba(255,255,255,0.9);text-decoration:underline;">Klaar met de feiten? Schrijf je uit.</a>
+      <strong>48 uur vooruit. De rest is ruis.</strong><br>
+      Team WEERZONE<br><br>
+      <a href="https://weerzone.nl/api/unsubscribe?email={{EMAIL}}" style="color:rgba(255,255,255,0.9);text-decoration:underline;">Afmelden voor dagelijkse updates</a>
     </p>
   </div>
 </body>
@@ -87,7 +119,6 @@ function buildEmailHtml(city: string, data: Record<string, unknown>): string {
 }
 
 export async function GET(req: Request) {
-  // Verify cron secret (Vercel sends this header)
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
@@ -95,68 +126,62 @@ export async function GET(req: Request) {
   }
 
   const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    return NextResponse.json({ error: "RESEND_API_KEY niet geconfigureerd" }, { status: 500 });
-  }
-
+  const geminiKey = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  if (!resendKey) return NextResponse.json({ error: "RESEND_API_KEY missing" }, { status: 500 });
+  
   const resend = new Resend(resendKey);
+  const genAI = geminiKey ? new GoogleGenerativeAI(geminiKey) : null;
   const supabase = getSupabase();
+  if (!supabase) return NextResponse.json({ error: "Supabase missing" }, { status: 500 });
 
-  if (!supabase) {
-    return NextResponse.json({ error: "Supabase niet geconfigureerd" }, { status: 500 });
-  }
-
-  // Haal actieve subscribers op
-  const { data: subscribers, error } = await supabase
-    .from("subscribers")
-    .select("email, city, lat, lon")
-    .eq("active", true);
-
-  if (error || !subscribers?.length) {
-    return NextResponse.json({ sent: 0, error: error?.message });
-  }
+  const { data: subscribers, error } = await supabase.from("subscribers").select("*").eq("active", true);
+  if (error || !subscribers?.length) return NextResponse.json({ sent: 0 });
 
   let sent = 0;
   const errors: string[] = [];
 
-  // Groepeer op stad voor efficiëntie
-  const cityGroups = new Map<string, { subscribers: Subscriber[]; lat: number; lon: number }>();
+  const cityGroups = new Map<string, Subscriber[]>();
   for (const sub of subscribers as Subscriber[]) {
     const key = `${sub.lat.toFixed(2)},${sub.lon.toFixed(2)}`;
-    if (!cityGroups.has(key)) {
-      cityGroups.set(key, { subscribers: [], lat: sub.lat, lon: sub.lon });
-    }
-    cityGroups.get(key)!.subscribers.push(sub);
+    if (!cityGroups.has(key)) cityGroups.set(key, []);
+    cityGroups.get(key)!.push(sub);
   }
 
-  for (const [, group] of cityGroups) {
+  for (const [, groupSubscribers] of cityGroups) {
     try {
-      const weatherData = await fetchWeather(group.lat, group.lon);
-      const city = group.subscribers[0].city;
-      const html = buildEmailHtml(city, weatherData);
-
-      // Batch verstuur per stad
-      for (const sub of group.subscribers) {
+      const first = groupSubscribers[0];
+      const weatherData = await fetchWeather(first.lat, first.lon);
+      
+      // Genereer Piet's commentaar via AI
+      let pietCommentary = "De 14-daagse van Buienradar is voor mensen die nog in sprookjes geloven. Wij houden het bij de feiten.";
+      
+      if (genAI) {
         try {
-          const emailPayload = {
-            to: sub.email,
-            subject: `${getWeatherEmoji(weatherData.current.weather_code, true)} ${Math.round(weatherData.current.temperature_2m)}° in ${sub.city} — WeerZone`,
-            html: html.replace("{{EMAIL}}", encodeURIComponent(sub.email)),
-          };
-          // Probeer eigen domein, fallback naar resend.dev
-          let result = await resend.emails.send({ from: "WeerZone <info@weerzone.nl>", ...emailPayload });
-          if (result.error && (result.error.message?.includes("not verified") || result.error.message?.includes("domain"))) {
-            result = await resend.emails.send({ from: "WeerZone <onboarding@resend.dev>", ...emailPayload });
-          }
-          if (!result.error) sent++; else errors.push(`${sub.email}: ${result.error.message}`);
+          const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+          const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: `${PIET_PROMPT}\n\nSTAD: ${first.city}\nWEER: ${JSON.stringify(weatherData.current)}` }] }]
+          });
+          pietCommentary = result.response.text()?.trim().replace(/^"|"$/g, '') || pietCommentary;
         } catch (e) {
-          errors.push(`${sub.email}: ${e}`);
+          console.error("AI error:", e);
         }
       }
+
+      const html = buildEmailHtml(first.city, weatherData, pietCommentary);
+
+      for (const sub of groupSubscribers) {
+        const emailPayload = {
+          to: sub.email,
+          subject: `${getWeatherEmoji(weatherData.current.weather_code, true)} ${Math.round(weatherData.current.temperature_2m)}° in ${sub.city} — WeerZone`,
+          html: html.replace("{{EMAIL}}", encodeURIComponent(sub.email)),
+        };
+        const result = await resend.emails.send({ from: "Piet | WeerZone <info@weerzone.nl>", ...emailPayload });
+        if (!result.error) sent++; else errors.push(result.error.message);
+      }
     } catch (e) {
-      errors.push(`Weather fetch failed: ${e}`);
+      errors.push(`Group fetch failed: ${e}`);
     }
   }
 
-  return NextResponse.json({ sent, total: subscribers.length, errors: errors.slice(0, 5) });
+  return NextResponse.json({ sent, errors: errors.slice(0, 5) });
 }

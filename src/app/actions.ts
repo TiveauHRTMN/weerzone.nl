@@ -11,7 +11,7 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
   if (apiKey) {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
       const prompt = `
         Analyseer deze weerdata en geef een kort, krachtig verdict (max 15 woorden).
@@ -38,4 +38,48 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
   }
 
   return weather;
+}
+
+export async function findBusinessLeads(query: string) {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("GOOGLE_MAPS_API_KEY is not set in environment variables");
+  }
+
+  try {
+    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.types",
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        languageCode: "nl",
+        maxResultCount: 20, // Maximaal 20 per keer voor overzicht
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Places API error:", errorData);
+      throw new Error(`Google Places API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Transformeren naar een cleaner formaat
+    return (data.places || []).map((place: any) => ({
+      name: place.displayName?.text || "Onbekend",
+      address: place.formattedAddress,
+      website: place.websiteUri,
+      phone: place.nationalPhoneNumber,
+      types: place.types,
+    }));
+  } catch (error) {
+    console.error("Lead finding error:", error);
+    return [];
+  }
 }

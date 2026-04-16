@@ -61,11 +61,11 @@ export default function EmailSubscribe({ city }: Props) {
 
       <div className="flex items-center gap-2">
         <Mail className="w-4 h-4 text-accent-orange" />
-        <h3 className="text-sm font-bold text-text-primary">Krijg 48u weerupdates</h3>
+        <h3 className="text-sm font-black text-text-primary uppercase tracking-tight">48 uur vooruit. De rest is ruis.</h3>
       </div>
 
       <p className="text-xs text-text-secondary break-words leading-snug">
-        Elke ochtend om 08:00 weet jij wat {city.name} te wachten staat. Je buren niet. Dat is het verschil.
+        Ontvang elke ochtend de keiharde data van Piet en laat je alleen door Reed waarschuwen als het écht menens is. 
       </p>
 
       <form onSubmit={handleSubmit} className="flex gap-2">

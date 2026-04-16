@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       let aiText = `${user.city} krijgt zo meteen ${upcomingRain.precipitation}mm op z'n dak. Succes ermee.`;
       if (genAI) {
         try {
-          const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+          const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
           const result = await model.generateContent({
             contents: [{ role: "user", parts: [{ text: `${AGENT_PROMPT}\n\nDe gebruiker in ${user.city} krijgt een bui van ${upcomingRain.precipitation}mm/u om ${timeStr}. Waarschuw ze en upsell iets nuttigs.` }] }],
             generationConfig: { maxOutputTokens: 250, temperature: 0.9 },

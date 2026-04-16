@@ -195,7 +195,7 @@ export function getB2BEmailHtml(
     <!-- HEADER -->
     <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:32px 24px 28px;text-align:center;">
       <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:32px;width:auto;margin-bottom:6px;opacity:0.9;" />
-      <p style="color:rgba(255,255,255,0.5);font-size:9px;margin:0 0 24px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Zakelijk · 48-uurs weerdata</p>
+      <p style="color:rgba(255,255,255,0.5);font-size:9px;margin:0 0 24px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Data Intelligence · 48-uurs Impact Monitor</p>
       <h1 style="color:#ffffff;font-size:24px;font-weight:900;margin:0;line-height:1.3;">${hook.headline}</h1>
     </div>
 
@@ -212,18 +212,26 @@ export function getB2BEmailHtml(
 
       <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">${hook.solution}</p>
 
+      <!-- EXCLUSIVE OFFER BOX -->
+      <div style="background:#fff7ed;border:2px dashed #f59e0b;border-radius:12px;padding:20px;margin:24px 0;text-align:center;">
+        <p style="margin:0 0 8px;font-size:12px;color:#c2410c;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Founding Member Actie 🚀</p>
+        <p style="margin:0 0 16px;font-size:14px;color:#7c2d12;font-weight:600;line-height:1.4;">
+          We zoeken de eerste 10 ${industry}bedrijven die WeerZone willen helpen perfect te worden. Jij test, wij leren.
+        </p>
+        <div style="background:#f59e0b;color:#1e293b;padding:8px 12px;border-radius:6px;display:inline-block;font-weight:800;font-size:13px;">
+          GRATIS TOEGANG — Geen factuur, nooit.
+        </div>
+      </div>
+
       <!-- WAT JE KRIJGT -->
       <div style="background:#f8fafc;border-radius:12px;padding:20px;margin:20px 0;border:1px solid #e2e8f0;">
         <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Wat je krijgt voor ${location}</p>
         <ul style="margin:0;padding-left:20px;list-style:none;">
           ${bulletsHtml}
         </ul>
-        <div style="margin-top:12px;padding:8px 12px;background:#dcfce7;border-radius:8px;display:inline-block;">
-          <span style="font-size:12px;font-weight:800;color:#166534;">✓ GRATIS — geen kosten, geen verplichtingen</span>
-        </div>
       </div>
 
-      <p style="margin:0 0 8px;font-size:14px;color:#475569;line-height:1.6;">Aanmelden duurt 30 seconden. Morgenochtend om 08:00 heb je je eerste weerrapport.</p>
+      <p style="margin:0 0 8px;font-size:14px;color:#475569;line-height:1.6;">Aanmelden duurt 30 seconden. Claim je plek voordat de 10 Founding Member-slots in ${location} vol zijn.</p>
     </div>
 
     <!-- CTA -->
@@ -231,6 +239,7 @@ export function getB2BEmailHtml(
       <a href="https://weerzone.nl/zakelijk" style="display:block;padding:16px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:15px;border-radius:12px;text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(245,158,11,0.3);">
         Gratis aanmelden →
       </a>
+      <p style="margin:20px 0 0;font-size:13px;color:#475569;"><strong>Team WeerZone</strong></p>
     </div>
 
     <!-- TRUST -->

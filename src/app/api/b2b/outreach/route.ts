@@ -59,7 +59,7 @@ export async function GET(req: Request) {
       const html = getB2BEmailHtml(industry, lead.business_name, lead.city);
 
       const result = await resend.emails.send({
-        from: "WeerZone Zakelijk <info@weerzone.nl>",
+        from: "WeerZone <info@weerzone.nl>",
         to: lead.email,
         subject,
         html,
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
       const html = getB2BEmailHtml(typedIndustry, businessName, city);
 
       const result = await resend.emails.send({
-        from: "WeerZone Zakelijk <info@weerzone.nl>",
+        from: "WeerZone <info@weerzone.nl>",
         to: email.toLowerCase().trim(),
         subject,
         html,

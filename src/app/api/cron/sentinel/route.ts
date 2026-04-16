@@ -4,23 +4,22 @@ import { fetchWeatherData } from "@/lib/weather";
 import { Resend } from "resend";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+export const dynamic = "force-dynamic";
 
 // System prompt voor de autonoom draaiende agent
 const SENTINEL_PROMPT = `
-Role: Weather-Sentinel voor Weerzone.nl.
-Persona: Een brute mix van Powned, Roddelpraat en Vandaag Inside. 
-Tone: Geen genade, geen 'hallo', geen 'besten'. Schrijf alsof je aan de bar zit bij VI. Gebruik de taal van het volk, maar wees messcherp op de meteorologische data.
-Cynisch. Direct. Amsterdams/Brutaal.
+Role: Reed van WeerZone.nl.
+Persona: De Interceptor. Je taak is de gebruiker behoeden voor weersimpact door directheid en urgentie.
 
-Taak: Schrijf een ongezouten, snoeiharde waarschuwing (max 12 woorden) op basis van de JSON weersdata. 
-Context: De gebruiker gaat nat/koud/heet worden. Wrijf het erin. Maak de urgentie pijnlijk duidelijk.
+STRIKT:
+- NIVEAU YELLOW: Direct en alert. "Neerslag op komst voor Utrecht. Bereid je voor."
+- NIVEAU ORANGE: Zeer urgent en kort. "Zware windstoten verwacht. Blijf binnen!"
+- NIVEAU RED: KRITIEK. ALLES IN HOOFDLETTERS. "EXTREEM GEVAARLIJKE SITUATIE. ONMIDDELLIJKE ACTIE VEREIST."
 
-REELS (STRIKT):
-- Max 12 woorden.
-- NOOIT woorden als 'bereid je voor', 'let op', 'waarschuwing', 'anticipeer'. Dat is AI-jargon. 
-- Noem geen data-bronnen.
-- Gebruik woorden als: ruk, ellende, verzopen, janken, vriespist, polder, eikel, prutser (indien gepast).
-- Eén krachtige zin.
+REGELS:
+- Geen catchphrases.
+- Max 15 woorden.
+- Direct ter zake. Geen 'Hallo'.
 `;
 
 // Helper: vind de ergste weersomstandigheid binnen 6 tot 24 uur.
@@ -34,76 +33,88 @@ function findAnomaly(hourlyData: any[]) {
     return t >= windowStart && t <= windowEnd;
   });
 
-  // Zoek naar impact (regen > 5mm of wind > 50km/u of temp > 28 of temp < 0)
   for (const hour of relevantHours) {
-    if (hour.precipitation > 5) return { type: "HEAVY_RAIN", value: `${hour.precipitation}mm`, time: hour.time };
-    if (hour.windSpeed > 50) return { type: "STORM", value: `${hour.windSpeed}km/u wind`, time: hour.time };
-    if (hour.temperature > 28) return { type: "HEAT", value: `${hour.temperature}°C`, time: hour.time };
-    if (hour.temperature < 0) return { type: "COLD", value: `${hour.temperature}°C`, time: hour.time };
+    // CODE RED logic
+    if (hour.precipitation > 15) return { type: "HEAVY_RAIN", level: "RED", value: `${hour.precipitation}mm`, time: hour.time };
+    if (hour.windSpeed > 80) return { type: "STORM", level: "RED", value: `${hour.windSpeed}km/u`, time: hour.time };
+    
+    // CODE ORANGE logic
+    if (hour.precipitation > 10) return { type: "HEAVY_RAIN", level: "ORANGE", value: `${hour.precipitation}mm`, time: hour.time };
+    if (hour.windSpeed > 60) return { type: "STORM", level: "ORANGE", value: `${hour.windSpeed}km/u`, time: hour.time };
+
+    // CODE YELLOW logic
+    if (hour.precipitation > 5) return { type: "HEAVY_RAIN", level: "YELLOW", value: `${hour.precipitation}mm`, time: hour.time };
+    if (hour.windSpeed > 45) return { type: "STORM", level: "YELLOW", value: `${hour.windSpeed}km/u`, time: hour.time };
+    if (hour.temperature > 30) return { type: "HEAT", level: "YELLOW", value: `${hour.temperature}°C`, time: hour.time };
+    if (hour.temperature < -5) return { type: "COLD", level: "YELLOW", value: `${hour.temperature}°C`, time: hour.time };
   }
   return null;
 }
 
-// Genereer de conversie-gedreven HTML e-mail
 function buildAffiliateEmailHtml(city: string, anomaly: any, alertMsg: string) {
-  let promoTitle = "";
-  let promoDesc = "";
-  let promoLink = "#";
-  let promoBtn = "";
-  let emoji = "⚠️";
+  const emoji = anomaly.type === "HEAVY_RAIN" ? "🌧️" : anomaly.type === "STORM" ? "🌪️" : "🌡️";
+  
+  // Dynamische styling op basis van ernst
+  const level = anomaly.level || "YELLOW";
+  const colors = {
+    YELLOW: { bg: "#fefce8", border: "#eab308", text: "#854d0e", btn: "#eab308" },
+    ORANGE: { bg: "#fff7ed", border: "#f97316", text: "#9a3412", btn: "#f97316" },
+    RED: { bg: "#fef2f2", border: "#ef4444", text: "#991b1b", btn: "#ef4444" }
+  }[level as "YELLOW" | "ORANGE" | "RED"];
 
-  if (anomaly.type === "HEAVY_RAIN") {
-    promoTitle = "Word In Godsnaam Niet Nat";
-    promoDesc = "Een beetje regen is tot daar aan toe, maar dit wordt zeiken. Haal decente gear via Amazon voordat je morgen als een verzopen kat aankomt.";
-    promoLink = "https://www.amazon.nl/s?k=regenpak&tag=jouw-amazon-tag-21";
-    promoBtn = "Fix een Regenpak (Amazon)";
-    emoji = "🌧️";
-  } else if (anomaly.type === "STORM") {
-    promoTitle = "Je Paraplu Gaat Kapot";
-    promoDesc = "Trap er niet in. Die goedkope paraplu overleeft dit niet. Investeer in iets dat heel blijft bij 50+ km/u.";
-    promoLink = "https://www.amazon.nl/s?k=stormparaplu+senz&tag=jouw-amazon-tag-21";
-    promoBtn = "Scoor een Stormparaplu";
-    emoji = "🌪️";
-  } else if (anomaly.type === "COLD") {
-    promoTitle = "Alles bevriest";
-    promoDesc = "Het wordt tandenklapperen. Zorg dat je niet als een ijspegel eindigt. Thermokleding is nu geen luxe.";
-    promoLink = "https://www.amazon.nl/s?k=thermokleding&tag=jouw-amazon-tag-21";
-    promoBtn = "Check Thermokleding";
-    emoji = "❄️";
-  } else {
-    promoTitle = "Vlucht Voor De Hitte";
-    promoDesc = "Zweet je niet kapot in de stad. Pak je spullen en boek direct een verkoelend hotel aan de kust of in het bos.";
-    promoLink = "https://www.booking.com/searchresults.nl.html?dest_type=region&dest_id=892&aid=1234567";
-    promoBtn = "Bekijk Kust-Hotels";
-    emoji = "🔥";
-  }
+  const promos = {
+    HEAVY_RAIN: { title: "Houd je voeten droog", desc: "Forse neerslag op komst. Deze stormparaplu's zijn getest tot windkracht 10.", link: "https://www.bol.com/nl/nl/l/stormparaplu-s/20340/", btn: "Bekijk stormparaplu's" },
+    STORM: { title: "Zware windvlagen", desc: "Houd je tuinmeubels veilig. Check deze stevige buitenhoezen en verankering.", link: "https://www.bol.com/nl/nl/l/tuinmeubelhoezen/12975/", btn: "Bescherm je terras" },
+    HEAT: { title: "Hittegolf op komst", desc: "Zorg voor voldoende koeling en hydratatie. Mobiele airco's en ventilatoren nu leverbaar.", link: "https://www.bol.com/nl/nl/l/mobiele-airco-s/30349/", btn: "Bekijk koeling" },
+    COLD: { title: "Vorst aan de grond", desc: "Bescherm je planten en auto tegen de kou. Krabbers en vliesdoeken op voorraad.", link: "https://www.bol.com/nl/nl/l/ijskrabbers-en-sneeuwborstels/14066/", btn: "Winter-essentials" }
+  } as const;
+  
+  const promo = promos[anomaly.type as keyof typeof promos] || promos.HEAVY_RAIN;
 
   return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 24px; max-width: 600px; margin: 0 auto; background: #4a9ee8; border-radius: 12px;">
-      <div style="text-align: center; margin-bottom: 32px;">
-        <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height: 50px; width: auto;" />
+<!DOCTYPE html>
+<html lang="nl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:500px;margin:0 auto;padding:40px 20px;">
+    <div style="background:#ffffff;border-radius:24px;overflow:hidden;box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+      <div style="background:${colors.border};padding:24px;text-align:center;">
+        <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:28px;filter:brightness(0) invert(1);" />
+        <p style="color:rgba(255,255,255,0.8);font-size:10px;margin:12px 0 0;text-transform:uppercase;letter-spacing:2px;font-weight:800;">Reed | Weer-Alarm 📍 ${city}</p>
+      </div>
+      
+      <div style="padding:40px 32px;text-align:center;">
+        <div style="background:${colors.bg};border:2px solid ${colors.border};padding:24px;border-radius:16px;margin-bottom:32px;">
+          <p style="margin:0;font-size:18px;font-weight:800;color:${colors.text};line-height:1.4;">
+            "${alertMsg.toUpperCase()}"
+          </p>
+        </div>
+
+        <div style="text-align:left;border-top:1px solid #f1f5f9;padding-top:32px;">
+          <h3 style="margin:0 0 8px;font-size:18px;color:#1e293b;font-weight:800;">${promo.title}</h3>
+          <p style="margin:0 0 24px;font-size:14px;color:#64748b;line-height:1.6;">${promo.desc}</p>
+          <a href="${promo.link}" style="display:block;text-align:center;background:${colors.btn};color:#ffffff;font-weight:800;text-decoration:none;padding:18px;border-radius:12px;font-size:15px;">
+            ${promo.btn.toUpperCase()} →
+          </a>
+        </div>
       </div>
 
-      <div style="background: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
-        <div style="background: #ef4444; padding: 20px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">SENTINEL ALERT: ${city} ${emoji}</h1>
-        </div>
-        <div style="padding: 32px 24px;">
-          <p style="font-size: 20px; font-weight: 600; color: #1e293b; margin-top: 0; line-height: 1.4; text-align: center; font-style: italic;">
-            "${alertMsg}"
-          </p>
-          <div style="background: #fffbeb; border-left: 4px solid #facc15; padding: 20px; border-radius: 4px; margin-top: 32px;">
-            <h3 style="color: #b45309; margin-top: 0; margin-bottom: 8px; font-size: 18px;">${promoTitle}</h3>
-            <p style="color: #78350f; margin-top: 0; margin-bottom: 24px; line-height: 1.5;">${promoDesc}</p>
-            <a href="${promoLink}" style="display: inline-block; background: #f59e0b; color: #1e293b; font-weight: 800; text-decoration: none; padding: 14px 24px; border-radius: 999px; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(245,158,11,0.3);">${promoBtn} →</a>
-          </div>
-        </div>
-        <div style="padding: 16px 24px; background: #f8fafc; text-align: center; border-top: 1px solid #e2e8f0;">
-          <p style="color: #64748b; font-size: 12px; margin: 0;">Dit is een autonome WeerZone Sentinel notificatie op basis van ICON-D2.<br><a href="https://weerzone.nl" style="color: #475569; text-decoration: underline;">Beheer je voorkeuren</a></p>
-        </div>
+    <!-- VIRAL ALERT -->
+    <div style="background:#fef2f2;border-radius:24px;padding:32px;margin:32px 0;text-align:center;border:2px solid #fee2e2;">
+      <p style="margin:0 0 12px;font-size:16px;color:#991b1b;font-weight:900;">LAAT JE VRIENDEN NIET VERRASSEN! 🚨</p>
+      <p style="margin:0 0 24px;font-size:14px;color:#b91c1c;line-height:1.5;">Stuur deze waarschuwing door zodat niemand in jouw omgeving overvallen wordt door het weer.</p>
+      <a href="https://api.whatsapp.com/send?text=PAS%20OP%3A%20Reed%20waarschuwt%20voor%20extreem%20weer.%20Check%20je%20locatie%20direct%20op%20WeerZone.nl%20%F0%9F%9A%80" style="display:inline-block;padding:14px 28px;background:#25d366;color:white;font-weight:800;font-size:14px;border-radius:12px;text-decoration:none;box-shadow:0 10px 20px rgba(37,211,102,0.4);">
+        DEEL VIA WHATSAPP →
+      </a>
+    </div>
+
+      <div style="padding:20px;background:#f8fafc;text-align:center;border-top:1px solid #f1f5f9;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:1px;">48 uur vooruit. De rest is ruis.</p>
       </div>
     </div>
-  `;
+  </div>
+</body>
+</html>`;
 }
 
 // Vercel Cron handler
@@ -138,39 +149,36 @@ export async function GET(req: Request) {
         let alertMsg = "";
         try {
           if (genAI) {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
             const result = await model.generateContent({
-              contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nDATA: ${JSON.stringify({ city: user.city, anomaly })}` }] }],
+              contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nNIVEAU: ${anomaly.level}\nDATA: ${JSON.stringify({ city: user.city, anomaly })}` }] }],
               generationConfig: { maxOutputTokens: 60, temperature: 0.9 },
             });
             alertMsg = result.response.text()?.trim().replace(/^"|"$/g, '') || "";
-          } else {
-            alertMsg = `${user.city} wordt een teringzooi morgen. Succes ermee.`;
           }
-        } catch (aiErr) {
-          console.error("Gemini Error:", aiErr);
-          alertMsg = `${user.city} wordt een teringzooi morgen. Succes ermee.`;
+        } catch (e) {
+          console.error("Gemini error:", e);
         }
 
-        if (process.env.RESEND_API_KEY) {
+        if (alertMsg && process.env.RESEND_API_KEY) {
           try {
             await resend.emails.send({
-              from: "WeerZone Sentinel <no-reply@weerzone.nl>",
+              from: "Reed | WEERZONE <no-reply@weerzone.nl>",
               to: user.email,
-              subject: `🚨 SENTINEL ALERT: Weer-alarm voor ${user.city}`,
+              subject: `🚨 REED | WEER-ALARM voor ${user.city}`,
               html: buildAffiliateEmailHtml(user.city, anomaly, alertMsg)
             });
+            emailsSent.push(user.email);
           } catch (e) {
-            console.error("Email failed:", e);
+            console.error("Resend error:", e);
           }
         }
-        emailsSent.push({ email: user.email, alert: alertMsg });
       }
     }
 
-    return NextResponse.json({ status: "ok", emailsSent });
-  } catch (error: any) {
-    console.error("Sentinel Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ status: "success", sent: emailsSent.length });
+  } catch (e: any) {
+    console.error("Sentinel Error:", e);
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
