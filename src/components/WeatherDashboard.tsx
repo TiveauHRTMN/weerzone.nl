@@ -174,19 +174,19 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 <span className="text-4xl">🤖</span>
               </div>
             )}
-            <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10">
+            <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10 mb-3">
               {weather.aiVerdict || getMainCommentary(weather)}
             </p>
-            {/* FOMO urgentie-trigger */}
-            <p className="text-xs text-text-muted mt-2 italic relative z-10">
-              {weather.hourly.slice(0, 6).some(h => h.precipitation > 0.5)
-                ? `⚡ Verandering binnen ${weather.hourly.findIndex(h => h.precipitation > 0.5) + 1} uur — wie dit niet leest, staat straks in de regen.`
-                : weather.daily[1] && Math.abs(weather.daily[1].tempMax - weather.daily[0].tempMax) >= 4
-                ? `📉 Morgen ${weather.daily[1].tempMax > weather.daily[0].tempMax ? "stuk warmer" : "flink kouder"} — ${Math.abs(weather.daily[1].tempMax - weather.daily[0].tempMax)}° verschil. Pas je plannen aan.`
-                : weather.current.windSpeed > 30
-                ? "💨 Dit is niet het moment om dingen op hun beloop te laten."
-                : `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — WEERZONE bevestigt dit.`}
-            </p>
+            <div className="pt-2 border-t border-accent-orange/10">
+              <p className="text-[10px] font-black uppercase tracking-[0.15em] opacity-40 mb-1 text-text-primary">
+                Status Verdict
+              </p>
+              <p className="text-[12px] font-bold text-text-primary leading-snug opacity-80">
+                {weather 
+                  ? `📊 ${new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — WEERZONE bevestigt dit.`
+                  : "📊 Analyseert marktdata..."}
+              </p>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-2 sm:gap-3 mt-6">
