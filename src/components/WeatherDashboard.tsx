@@ -744,14 +744,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
               if (typeof navigator.share !== 'undefined') {
                 await navigator.share({
                   title: `WEERZONE | 48 uur vooruit. De rest is ruis.`,
-                  text: `Check WEERZONE.nl 🌪️ Puur KNMI HARMONIE data op de vierkante meter. Geen ruis meer. 🚀`,
+                  text: `Check WEERZONE.nl 🌪️ Puur KNMI HARMONIE data op de vierkante meter. 🚀`,
                   url: "https://weerzone.nl"
                 });
               }
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#004494] hover:bg-[#003370] text-white font-black text-[11px] rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-wider border border-white/10"
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-slate-900/80 backdrop-blur-md hover:bg-slate-800 text-white font-black text-[11px] rounded-2xl border border-blue-500/20 transition-all active:scale-95 uppercase tracking-wider"
           >
-            <Users className="w-3.5 h-3.5" /> Deel WEERZONE
+            <Users className="w-3.5 h-3.5 text-blue-400" /> Deel WEERZONE
           </button>
           <button 
             onClick={async () => {
@@ -763,7 +763,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
                 });
               }
             }}
-            className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#25D366] hover:bg-[#20ba59] text-white font-black text-[11px] rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-wider"
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-accent-orange hover:brightness-110 text-black font-black text-[11px] rounded-2xl shadow-lg shadow-accent-orange/20 transition-all active:scale-95 uppercase tracking-wider"
           >
             <Send className="w-3.5 h-3.5" /> Deel Weerbericht
           </button>
