@@ -410,7 +410,7 @@ export function getB2BEmailHtml(
       <a href="https://weerzone.nl/zakelijk" style="display:block;padding:16px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:15px;border-radius:12px;text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(245,158,11,0.3);">
         ${stage === 3 ? "Zie wat je mist →" : stage === 2 ? "Aanmelden (30 sec) →" : "Gratis aanmelden →"}
       </a>
-      <p style="margin:20px 0 0;font-size:13px;color:#475569;"><strong>Tive · WeerZone</strong><br><span style="font-size:11px;color:#94a3b8;font-weight:400;">Reply werkt — ik lees mee.</span></p>
+      <p style="margin:20px 0 0;font-size:13px;color:#475569;"><strong>Steve · WeerZone Zakelijk</strong><br><span style="font-size:11px;color:#94a3b8;font-weight:400;">Reply werkt — ik lees mee.</span></p>
     </div>
 
     <!-- TRUST -->
