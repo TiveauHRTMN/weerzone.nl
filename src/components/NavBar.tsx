@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { MapPin, Briefcase, MessageSquare, AlertTriangle, Mail } from "lucide-react";
 
 type Props = {
@@ -21,10 +20,9 @@ type Props = {
  * - Contact → mailto:info@weerzone.nl
  */
 export default function NavBar({ activeCity, isLocating }: Props) {
-  const pathname = usePathname() || "/";
-  const onDashboard = pathname === "/" || pathname.startsWith("/weer/");
-  const pietHref = onDashboard ? "#piet" : "/#piet";
-  const reedHref = onDashboard ? "#reed" : "/#reed";
+  // Piet en Reed hebben dedicated pagina's met uitgebreide content
+  const pietHref = "/piet";
+  const reedHref = "/reed";
 
   const triggerLocate = () => {
     window.dispatchEvent(new CustomEvent("wz:locate"));
@@ -42,7 +40,9 @@ export default function NavBar({ activeCity, isLocating }: Props) {
             aria-label={activeCity ? `Locatie: ${activeCity} — wijzig` : "Bepaal mijn locatie"}
           >
             <MapPin className="w-3.5 h-3.5 shrink-0" />
-            <span className="label">{isLocating ? "…" : "Locatie"}</span>
+            <span className="label truncate max-w-[80px] sm:max-w-[140px]">
+              {isLocating ? "…" : (activeCity || "Locatie")}
+            </span>
           </button>
         </li>
         <li className="flex-1">
@@ -52,16 +52,16 @@ export default function NavBar({ activeCity, isLocating }: Props) {
           </Link>
         </li>
         <li className="flex-1">
-          <a href={pietHref} className="nav-item w-full">
+          <Link href={pietHref} className="nav-item w-full">
             <MessageSquare className="w-3.5 h-3.5 shrink-0" />
             <span className="label">Piet</span>
-          </a>
+          </Link>
         </li>
         <li className="flex-1">
-          <a href={reedHref} className="nav-item w-full">
+          <Link href={reedHref} className="nav-item w-full">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             <span className="label">Reed</span>
-          </a>
+          </Link>
         </li>
         <li className="flex-1">
           <Link href="/contact" className="nav-item w-full">

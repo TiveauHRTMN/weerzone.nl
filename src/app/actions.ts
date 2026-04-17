@@ -77,15 +77,17 @@ Geef nu het weerbericht (4 zinnen: nu → rest vandaag → vanavond/vannacht →
 
         const text = result.response.text().trim().replace(/^"|"$/g, '');
         const wordCount = text.split(/\s+/).filter(Boolean).length;
-        // Accept 40-90 woorden (4 zinnen range)
-        if (text && wordCount >= 40 && wordCount <= 90) {
+        // Accept: 40-90 woorden EN eindigt op . ! of ? (niet afgekapt)
+        const endsCleanly = /[.!?]["')\]]?\s*$/.test(text);
+        if (text && wordCount >= 40 && wordCount <= 90 && endsCleanly) {
           weather.aiVerdict = text;
           break;
         }
-        console.warn(`AI output buiten range (${wordCount} woorden), retry...`);
+        console.warn(`AI output ongeldig (${wordCount}w, endsCleanly=${endsCleanly}), retry...`);
         attempts++;
         if (attempts === 3) {
-          weather.aiVerdict = text && wordCount > 10 ? text : getMainCommentary(weather);
+          // Val terug op deterministische commentary — géén halve Gemini-tekst tonen
+          weather.aiVerdict = getMainCommentary(weather);
         }
       } catch (e) {
         attempts++;

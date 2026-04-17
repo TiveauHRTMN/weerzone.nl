@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -39,6 +40,11 @@ export default function ContactPage() {
           <p className="text-xs text-white/50 mt-3">
             Klik op het adres of kopieer het naar je mail-app.
           </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xl font-black text-white mb-3">Of stuur direct een bericht</h2>
+          <ContactForm />
         </section>
 
         <section className="space-y-4 text-sm text-white/70 leading-relaxed">
