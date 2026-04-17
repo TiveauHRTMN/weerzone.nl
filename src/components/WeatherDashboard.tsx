@@ -85,23 +85,36 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
   const [isLocating, setIsLocating] = useState(false);
 
   const handleLocationClick = () => {
-    if ("geolocation" in navigator) {
-      setIsLocating(true);
-      navigator.geolocation.getCurrentPosition(async (pos) => {
+    if (!("geolocation" in navigator)) return;
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
-        const geoCity = await reverseGeocode(lat, lon);
-        setCity(geoCity);
-        localStorage.setItem("wz_city", JSON.stringify(geoCity));
+        // Start weer-fetch METEEN met coördinaten — reverseGeocode mag
+        // parallel lopen en update de naam zodra hij binnen is.
+        const provisional: City = { name: "Jouw locatie", lat, lon };
+        setCity(provisional);
+        localStorage.setItem("wz_city", JSON.stringify(provisional));
         setIsLocating(false);
-      }, (err) => {
+
+        // Naam ophalen op de achtergrond — blokkeert niks.
+        reverseGeocode(lat, lon)
+          .then((geoCity) => {
+            setCity(geoCity);
+            localStorage.setItem("wz_city", JSON.stringify(geoCity));
+          })
+          .catch(() => { /* provisional naam blijft staan — geen drama */ });
+      },
+      (err) => {
         console.error("GPS Error:", err);
         setIsLocating(false);
-      }, {
+      },
+      {
         enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 5 * 60 * 1000
-      });
-    }
+        timeout: 6000,
+        maximumAge: 15 * 60 * 1000,
+      }
+    );
   };
 
   // Persist city choice
