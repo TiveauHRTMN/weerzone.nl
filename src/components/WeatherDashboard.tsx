@@ -81,12 +81,16 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     let cancelled = false;
     async function load() {
       // Cache-first: als we dit al hebben binnen TTL → instant render
-      const data = await loadWeather(city.lat, city.lon, (verdict) => {
-        // AI komt later binnen, patch dan alleen aiVerdict
-        if (!cancelled) {
-          setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev));
+      const data = await loadWeather(
+        city.lat,
+        city.lon,
+        (verdict) => {
+          if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev));
+        },
+        (fresh) => {
+          if (!cancelled) setWeather(fresh);
         }
-      });
+      );
       if (!cancelled) {
         setWeather(data);
         setLoading(false);
@@ -130,8 +134,8 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
       },
       {
         enableHighAccuracy: false,
-        timeout: 6000,
-        maximumAge: 15 * 60 * 1000,
+        timeout: 8000,
+        maximumAge: 60 * 60 * 1000,
       }
     );
   };

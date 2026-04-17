@@ -33,9 +33,12 @@ export default function PietExtended() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    loadWeather(city.lat, city.lon, (verdict) => {
-      if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev));
-    })
+    loadWeather(
+      city.lat,
+      city.lon,
+      (verdict) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev)); },
+      (fresh) => { if (!cancelled) setWeather(fresh); }
+    )
       .then((w) => {
         if (!cancelled) {
           setWeather(w);
@@ -64,7 +67,7 @@ export default function PietExtended() {
         }).catch(() => {});
       },
       () => setLocating(false),
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 15 * 60 * 1000 }
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60 * 60 * 1000 }
     );
   };
 

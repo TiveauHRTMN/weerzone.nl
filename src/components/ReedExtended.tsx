@@ -68,9 +68,12 @@ export default function ReedExtended() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    loadWeather(city.lat, city.lon, (verdict) => {
-      if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev));
-    })
+    loadWeather(
+      city.lat,
+      city.lon,
+      (verdict) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev)); },
+      (fresh) => { if (!cancelled) setWeather(fresh); }
+    )
       .then((w) => !cancelled && (setWeather(w), setLoading(false)))
       .catch(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
@@ -92,7 +95,7 @@ export default function ReedExtended() {
         }).catch(() => {});
       },
       () => setLocating(false),
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 15 * 60 * 1000 }
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60 * 60 * 1000 }
     );
   };
 
