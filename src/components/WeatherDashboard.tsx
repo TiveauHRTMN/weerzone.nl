@@ -122,6 +122,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     localStorage.setItem("wz_city", JSON.stringify({ name: city.name, lat: city.lat, lon: city.lon }));
   }, [city]);
 
+  // Navbar "Locatie"-knop vuurt dit event af
+  useEffect(() => {
+    const fn = () => handleLocationClick();
+    window.addEventListener("wz:locate", fn);
+    return () => window.removeEventListener("wz:locate", fn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (loading || !weather) {
     return <LoadingScreen />;
   }
@@ -188,7 +196,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
             </div>
           </div>
           
-          <div className="mt-8 bg-accent-orange/15 border-l-4 border-accent-orange p-4 rounded-r-lg relative overflow-hidden">
+          <div id="piet" className="mt-8 bg-accent-orange/15 border-l-4 border-accent-orange p-4 rounded-r-lg relative overflow-hidden scroll-mt-24">
             <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10 mb-3">
               {weather.aiVerdict || getMainCommentary(weather)}
             </p>
@@ -508,7 +516,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
         if (alerts.length === 0) return null;
 
         return (
-          <div className="animate-fade-in space-y-2" style={{ animationDelay: "0.3s" }}>
+          <div id="reed" className="animate-fade-in space-y-2 scroll-mt-24" style={{ animationDelay: "0.3s" }}>
             {alerts.map((alert, i) => (
               <div
                 key={i}
