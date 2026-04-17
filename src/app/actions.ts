@@ -25,29 +25,41 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
 
         const tomorrow = weather.daily[1];
         const prompt = `
-          Schrijf een volledig, nuchter Nederlands weerbericht (geen AI-jargon!) op basis van deze feiten.
-          Focus op de komende 48 uur. Vertel wat mensen buiten gaan merken.
-          VERPLICHT: minimaal 4 zinnen, maximaal 5 zinnen. Eén of twee zinnen is NIET toegestaan.
-          Begin met de situatie nu, dan verloop vandaag, dan morgen, dan korte conclusie.
-          
-          FEITEN NU:
-          Lucht: ${getWeatherDescription(weather.current.weatherCode)}
-          Temp: ${weather.current.temperature}° (voelt als ${weather.current.feelsLike}°)
-          Wind: ${weather.current.windSpeed} km/h
-          Regen nu: ${weather.current.precipitation} mm
-          
-          VERLOOP VANDAAG/AVOND:
-          Regen totaal: ${weather.hourly.slice(0, 12).reduce((acc, h) => acc + h.precipitation, 0).toFixed(1)} mm
-          
-          MORGEN (${tomorrow.date}):
-          Max: ${tomorrow.tempMax}°, Min: ${tomorrow.tempMin}°
-          Lucht: ${getWeatherDescription(tomorrow.weatherCode)}
-          Regen: ${tomorrow.precipitationSum} mm
-          
-          STIJLREGELS:
-          1. GEEN woorden als 'analyse', 'data', 'verdict', 'verwachting', 'significant'.
-          2. Praat als een nuchtere kenner. Recht door zee.
-          3. Tussen de 50 en 90 woorden. Korter is geen optie.
+Je bent de weerverteller van WeerZone. Schrijf een uitgebreid, nuchter Nederlands weerbericht.
+
+LENGTE-EIS (HARDE REGEL):
+- Exact 4 of 5 volle zinnen.
+- Tussen de 55 en 90 woorden.
+- Eén of twee zinnen is een foute output en wordt afgewezen.
+
+STRUCTUUR (in deze volgorde):
+1. Situatie nu (temp, lucht, gevoelstemp)
+2. Verloop vandaag/avond (regen, wind, wat mensen buiten merken)
+3. Morgen (wat te verwachten)
+4. Korte, nuchtere afsluiter
+
+VOORBEELD (qua lengte/toon — NIET kopiëren):
+"Het is 12° in de stad met een bewolkte lucht die maar weinig licht doorlaat. De wind trekt vanmiddag aan en dan voelt het eerder als een schrale 9° op de fiets. Later op de dag kan er nog een buitje vallen, dus neem voor de zekerheid een jasje mee. Morgen draait het door met 14° en wisselend bewolkt, regen blijft grotendeels weg. Kortom: typisch Nederlands aprilweer, niks schokkends."
+
+STIJL:
+- Geen AI-jargon: geen 'analyse', 'data', 'verdict', 'verwachting', 'significant', 'conform'.
+- Spreektaal, recht door zee, zoals een nuchtere kenner op een terras.
+
+FEITEN NU:
+Lucht: ${getWeatherDescription(weather.current.weatherCode)}
+Temp: ${weather.current.temperature}° (voelt als ${weather.current.feelsLike}°)
+Wind: ${weather.current.windSpeed} km/h
+Regen nu: ${weather.current.precipitation} mm
+
+VERLOOP VANDAAG/AVOND:
+Regen komende 12u: ${weather.hourly.slice(0, 12).reduce((acc, h) => acc + h.precipitation, 0).toFixed(1)} mm
+
+MORGEN (${tomorrow.date}):
+Max: ${tomorrow.tempMax}°, Min: ${tomorrow.tempMin}°
+Lucht: ${getWeatherDescription(tomorrow.weatherCode)}
+Regen: ${tomorrow.precipitationSum} mm
+
+Geef nu het volledige weerbericht (4-5 zinnen, 55-90 woorden).
         `.trim();
 
         const result = await model.generateContent({
@@ -56,9 +68,16 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
         });
 
         const text = result.response.text().trim().replace(/^"|"$/g, '');
-        if (text) {
+        const wordCount = text.split(/\s+/).filter(Boolean).length;
+        // Reject te korte output — dan opnieuw proberen
+        if (text && wordCount >= 40) {
           weather.aiVerdict = text;
           break; // Succes!
+        }
+        console.warn(`AI output te kort (${wordCount} woorden), retry...`);
+        attempts++;
+        if (attempts === 3) {
+          weather.aiVerdict = text && wordCount > 10 ? text : getMainCommentary(weather);
         }
       } catch (e) {
         attempts++;
