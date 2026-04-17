@@ -37,6 +37,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
+  // Topic pages — hoge prioriteit, mikken op generieke queries
+  routes.push(
+    { url: `${baseUrl}/weer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.95 },
+    { url: `${baseUrl}/weer/onweer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/weer/regen`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/weer/48-uur`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
+  );
+
   // Static pages
   routes.push(
     { url: `${baseUrl}/zakelijk`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
