@@ -6,6 +6,41 @@ import { matchProducts, markSeen } from "@/lib/amazon-matcher";
 import { productHref, parseEmojiImage, type CatalogProduct } from "@/lib/amazon-catalog";
 import { getConditionTag } from "@/lib/affiliate-orchestrator";
 
+type LiveShape = {
+  title?: string;
+  image?: string;
+  price?: string;
+  oldPrice?: string;
+  savings?: string;
+  url?: string;
+  inStock?: boolean;
+  primeEligible?: boolean;
+};
+type EnrichedProduct = CatalogProduct & { live?: LiveShape };
+
+// Module-level cache van live data — 1 fetch per tab-sessie, herbruikt over mounts
+let liveCache: { products: EnrichedProduct[]; ts: number } | null = null;
+let liveInflight: Promise<EnrichedProduct[]> | null = null;
+
+async function fetchLive(): Promise<EnrichedProduct[]> {
+  if (liveCache && Date.now() - liveCache.ts < 10 * 60 * 1000) return liveCache.products;
+  if (liveInflight) return liveInflight;
+  liveInflight = (async () => {
+    try {
+      const res = await fetch("/api/amazon/live", { cache: "force-cache" });
+      if (!res.ok) return [];
+      const data = await res.json() as { products: EnrichedProduct[] };
+      liveCache = { products: data.products ?? [], ts: Date.now() };
+      return liveCache.products;
+    } catch {
+      return [];
+    } finally {
+      liveInflight = null;
+    }
+  })();
+  return liveInflight;
+}
+
 interface Props {
   weather: WeatherData;
 }
@@ -41,9 +76,35 @@ export default function AffiliateCard({ weather }: Props) {
   const impressionFired = useRef<Set<string>>(new Set());
   const tag = getConditionTag(weather);
 
-  // Match loopt opnieuw zodra weather verandert (SWR-update uit cache)
+  // Live-data ophalen (PA-API cache via /api/amazon/live)
+  const [live, setLive] = useState<Map<string, LiveShape>>(new Map());
+  useEffect(() => {
+    fetchLive().then((items) => {
+      const m = new Map<string, LiveShape>();
+      for (const it of items) if (it.live) m.set(it.id, it.live);
+      if (m.size) setLive(m);
+    });
+  }, []);
+
+  // Match loopt opnieuw zodra weather of live data verandert
   const { products, ctx } = useMemo(() => matchProducts(weather, 3), [weather]);
-  const [hero, mini1, mini2] = products;
+
+  // Merge live over static — waar live.inStock=false, skippen we in rotatie
+  const enriched = products.map((p) => {
+    const l = live.get(p.id);
+    if (!l) return { p, image: p.image, title: p.title, price: p.priceHint, oldPrice: p.oldPrice, savings: undefined as string | undefined, inStock: true };
+    return {
+      p,
+      image: l.image || p.image,
+      title: l.title || p.title,
+      price: l.price || p.priceHint,
+      oldPrice: l.oldPrice || p.oldPrice,
+      savings: l.savings,
+      inStock: l.inStock !== false,
+    };
+  }).filter(x => x.inStock);
+
+  const [hero, mini1, mini2] = enriched;
 
   const weatherContext = {
     temp: weather.current.temperature,
@@ -124,10 +185,10 @@ export default function AffiliateCard({ weather }: Props) {
 
       {/* HERO */}
       <a
-        href={productHref(hero)}
+        href={productHref(hero.p)}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        onClick={() => click(hero)}
+        onClick={() => click(hero.p)}
         className="block rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
         style={{
           background: "rgba(255,255,255,0.85)",
@@ -138,9 +199,9 @@ export default function AffiliateCard({ weather }: Props) {
         <div className="flex gap-4 p-4">
           <div className="relative w-[100px] h-[100px] rounded-xl overflow-hidden bg-black/[0.03] shrink-0">
             <ProductImage src={hero.image} alt={hero.title} size={100} />
-            {hero.badge && (
+            {(hero.savings || hero.p.badge) && (
               <span className="absolute top-1.5 left-1.5 text-[9px] font-bold uppercase tracking-wide bg-accent-orange text-text-primary px-2 py-0.5 rounded-full shadow-sm">
-                {hero.badge}
+                {hero.savings || hero.p.badge}
               </span>
             )}
           </div>
@@ -150,12 +211,12 @@ export default function AffiliateCard({ weather }: Props) {
                 {hero.title}
               </p>
               <p className="text-[11px] text-text-secondary mt-1 leading-snug line-clamp-2">
-                {hero.subtitle}
+                {hero.p.subtitle}
               </p>
             </div>
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-[15px] font-black text-text-primary">{hero.priceHint}</span>
+                <span className="text-[15px] font-black text-text-primary">{hero.price}</span>
                 {hero.oldPrice && (
                   <span className="text-[11px] text-text-muted line-through">{hero.oldPrice}</span>
                 )}
@@ -169,13 +230,13 @@ export default function AffiliateCard({ weather }: Props) {
       {/* MINIS */}
       {(mini1 || mini2) && (
         <div className="grid grid-cols-2 gap-2">
-          {[mini1, mini2].filter(Boolean).map((p) => (
+          {[mini1, mini2].filter(Boolean).map((x) => (
             <a
-              key={p!.id}
-              href={productHref(p!)}
+              key={x!.p.id}
+              href={productHref(x!.p)}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              onClick={() => click(p!)}
+              onClick={() => click(x!.p)}
               className="flex gap-2.5 p-2.5 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5"
               style={{
                 background: "rgba(255,255,255,0.72)",
@@ -184,13 +245,13 @@ export default function AffiliateCard({ weather }: Props) {
               }}
             >
               <div className="w-[52px] h-[52px] rounded-lg overflow-hidden bg-black/[0.03] shrink-0">
-                <ProductImage src={p!.image} alt={p!.title} size={52} />
+                <ProductImage src={x!.image} alt={x!.title} size={52} />
               </div>
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <p className="text-[11px] font-bold text-text-primary leading-tight line-clamp-2">
-                  {p!.title}
+                  {x!.title}
                 </p>
-                <p className="text-[10px] font-black text-text-primary mt-0.5">{p!.priceHint}</p>
+                <p className="text-[10px] font-black text-text-primary mt-0.5">{x!.price}</p>
               </div>
             </a>
           ))}

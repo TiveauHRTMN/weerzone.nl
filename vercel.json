@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/smart-agent",
       "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/amazon-refresh",
+      "schedule": "0 4 * * *"
     }
   ]
 }
