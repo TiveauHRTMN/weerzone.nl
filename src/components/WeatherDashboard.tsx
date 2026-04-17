@@ -148,34 +148,20 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <>
     <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
-      {/* Header — Nu zonder stadskeuze, puur persoonlijk */}
-      <header className="animate-fade-in flex flex-col items-center mb-6">
-        <LogoFull height={52} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] sm:hidden mb-4" />
-        <LogoFull height={64} className="drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)] hidden sm:block mb-5" />
-        <div className="flex flex-row items-center justify-center gap-2 w-full max-w-sm px-4">
-          <button 
-            onClick={handleLocationClick}
-            disabled={isLocating}
-            className={`flex items-center justify-center gap-2 h-11 w-full rounded-2xl border border-white/25 bg-white/10 backdrop-blur-md px-5 shadow-lg active:scale-95 transition-all outline-none ${isLocating ? 'opacity-80' : ''}`}
-          >
-            <MapPin className={`text-white w-4 h-4 ${isLocating ? 'animate-pulse' : ''}`} />
-            <span className="text-base font-bold text-white truncate">
-              {isLocating ? 'Locatie bepalen...' : city.name}
-            </span>
-            <RefreshCw className={`w-3 h-3 text-white/40 ml-1 ${isLocating ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+      {/* Header — puur logo, groot en prominent bovenaan */}
+      <header className="animate-fade-in flex flex-col items-center mb-4 pt-2">
+        <LogoFull height={88} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] sm:hidden" />
+        <LogoFull height={112} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] hidden sm:block" />
       </header>
 
-      {/* Email Promo — Prominent direct onder de header voor maximale conversie */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
-        <EmailSubscribe city={city} />
+      {/* NavBar — één grote glass-bar in kaartstijl, GPS zit in "Locatie"-pill */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.05s" }}>
+        <NavBar activeCity={city.name} isLocating={isLocating} />
       </div>
 
-      {/* NavBar — onder logo + subscribe, zelfde breedte als de kaarten.
-          Zakelijk = B2B mail-funnel, Piet = dagelijkse 08:00-mail, Reed = extreem-weer-alert */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-        <NavBar />
+      {/* Email Promo — Prominent direct onder de nav voor maximale conversie */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <EmailSubscribe city={city} />
       </div>
 
       {/* ===== 1. Main Weather Card — Kerninformatie ===== */}
