@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import { Providers } from "./providers";
@@ -73,6 +74,9 @@ export const metadata: Metadata = {
     title: "WEERZONE",
   },
   verification: {},
+  other: {
+    "google-adsense-account": ADSENSE_CLIENT,
+  },
 };
 
 export default function RootLayout({
@@ -84,12 +88,6 @@ export default function RootLayout({
     <html lang="nl" className={`${inter.variable} antialiased`}>
       <head>
         <meta name="theme-color" content="#4a9ee8" />
-        <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-          crossOrigin="anonymous"
-        />
       </head>
       <body className="min-h-screen">
         <Providers>
@@ -97,6 +95,13 @@ export default function RootLayout({
           <CookieBanner />
           <InstallPrompt />
         </Providers>
+        <Script
+          id="adsense-loader"
+          async
+          strategy="afterInteractive"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+        />
       </body>
     </html>
   );
