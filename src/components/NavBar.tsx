@@ -52,13 +52,13 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href={pietHref} className="nav-item w-full">
-            <span className="label">Piet</span>
+            <span className="label">48 uur</span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href={reedHref} className="nav-item w-full">
-            <span className="label">Reed</span>
+            <span className="label">Waarschuwing</span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
