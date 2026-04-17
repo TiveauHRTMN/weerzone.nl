@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Briefcase, MessageSquare, AlertTriangle, Mail } from "lucide-react";
 
 type Props = {
   /** Toont de huidige stad in de Locatie-pill (optioneel) */
@@ -31,7 +30,7 @@ export default function NavBar({ activeCity, isLocating }: Props) {
 
   return (
     <nav aria-label="Hoofdnavigatie" className="card p-1 sm:p-2">
-      <ul className="flex items-stretch justify-between gap-0.5 sm:gap-1.5">
+      <ul className="flex items-stretch justify-between">
         <li className="flex-1">
           <button
             type="button"
@@ -39,33 +38,32 @@ export default function NavBar({ activeCity, isLocating }: Props) {
             className={`nav-item w-full ${isLocating ? "animate-pulse" : ""}`}
             aria-label={activeCity ? `Locatie: ${activeCity} — wijzig` : "Bepaal mijn locatie"}
           >
-            <MapPin className="w-3.5 h-3.5 shrink-0" />
             <span className="label truncate max-w-[64px] sm:max-w-[140px]">
               {isLocating ? "…" : (activeCity || "Locatie")}
             </span>
           </button>
         </li>
+        <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href="/zakelijk" className="nav-item w-full">
-            <Briefcase className="w-3.5 h-3.5 shrink-0" />
             <span className="label">Zakelijk</span>
           </Link>
         </li>
+        <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href={pietHref} className="nav-item w-full">
-            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
             <span className="label">Piet</span>
           </Link>
         </li>
+        <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href={reedHref} className="nav-item w-full">
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             <span className="label">Reed</span>
           </Link>
         </li>
+        <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href="/contact" className="nav-item w-full">
-            <Mail className="w-3.5 h-3.5 shrink-0" />
             <span className="label">Contact</span>
           </Link>
         </li>

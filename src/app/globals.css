@@ -106,6 +106,13 @@ body {
   border-color: rgba(0, 0, 0, 0.06);
 }
 .nav-item:active { transform: scale(0.97); }
+.nav-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 0.35rem 0;
+  background: rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
 .nav-item .label { font-size: 0.62rem; min-width: 0; }
 @media (min-width: 640px) {
   .nav-item {
