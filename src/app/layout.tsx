@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import { Providers } from "./providers";
@@ -86,11 +85,10 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#4a9ee8" />
         <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-        <Script
+        <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
       </head>
       <body className="min-h-screen">
