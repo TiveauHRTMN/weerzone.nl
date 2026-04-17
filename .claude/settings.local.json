@@ -62,7 +62,8 @@
       "Bash(curl -s https://api.github.com/repos/TiveauHRTMN/weerzone.nl/commits/master)",
       "Bash(npx vercel *)",
       "Bash(curl -s https://weerzone.nl/ -o /tmp/wz3.html)",
-      "Bash(curl -s https://weerzone.nl/weer/amsterdam -o /tmp/ams.html)"
+      "Bash(curl -s https://weerzone.nl/weer/amsterdam -o /tmp/ams.html)",
+      "Bash(grep -rn \"WeerZone\\\\|Logo\\\\|NavBar\" C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\components\\\\\\\\WeatherDashboard.tsx)"
     ]
   }
 }

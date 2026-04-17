@@ -173,7 +173,7 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header — puur logo, groot en prominent bovenaan */}
       <header className="animate-fade-in flex flex-col items-center mb-4 pt-2">
-        <LogoFull height={88} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] sm:hidden" />
+        <LogoFull height={72} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] sm:hidden max-w-full h-auto" />
         <LogoFull height={112} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] hidden sm:block" />
       </header>
 

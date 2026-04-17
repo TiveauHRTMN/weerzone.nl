@@ -30,8 +30,8 @@ export default function NavBar({ activeCity, isLocating }: Props) {
   };
 
   return (
-    <nav aria-label="Hoofdnavigatie" className="card p-1.5 sm:p-2">
-      <ul className="flex items-stretch justify-between gap-1 sm:gap-1.5">
+    <nav aria-label="Hoofdnavigatie" className="card p-1 sm:p-2">
+      <ul className="flex items-stretch justify-between gap-0.5 sm:gap-1.5">
         <li className="flex-1">
           <button
             type="button"
@@ -40,7 +40,7 @@ export default function NavBar({ activeCity, isLocating }: Props) {
             aria-label={activeCity ? `Locatie: ${activeCity} — wijzig` : "Bepaal mijn locatie"}
           >
             <MapPin className="w-3.5 h-3.5 shrink-0" />
-            <span className="label truncate max-w-[80px] sm:max-w-[140px]">
+            <span className="label truncate max-w-[64px] sm:max-w-[140px]">
               {isLocating ? "…" : (activeCity || "Locatie")}
             </span>
           </button>

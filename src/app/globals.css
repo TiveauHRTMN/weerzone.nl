@@ -87,25 +87,26 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
-  padding: 0.7rem 0.35rem;
-  font-size: 0.7rem;
+  padding: 0.55rem 0.2rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   color: var(--text-primary);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   transition: all 0.18s ease;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
+  min-width: 0;
 }
 .nav-item:hover {
   background: rgba(0, 0, 0, 0.04);
   border-color: rgba(0, 0, 0, 0.06);
 }
 .nav-item:active { transform: scale(0.97); }
-.nav-item .label { font-size: 0.7rem; }
+.nav-item .label { font-size: 0.62rem; min-width: 0; }
 @media (min-width: 640px) {
   .nav-item {
     flex-direction: row;
