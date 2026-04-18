@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import FounderBanner from "@/components/FounderBanner";
+import GlobalPersonaModal from "@/components/GlobalPersonaModal";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -101,6 +102,7 @@ export default function RootLayout({
           <CookieBanner />
           <InstallPrompt />
           <FounderBanner />
+          <GlobalPersonaModal />
         </Providers>
       </body>
     </html>

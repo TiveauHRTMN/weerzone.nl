@@ -67,7 +67,8 @@
       "Bash(grep -E \"vercel\" C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\package.json)",
       "Bash(ls C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\app\\\\\\\\api\\\\\\\\b2b\\\\\\\\)",
       "Bash(curl -sS -X POST https://weerzone.nl/api/b2b/outreach -H \"Authorization: Bearer weerzone-cron-2026-djaelito\" -H \"Content-Type: application/json\" -d \"{\\\\\"businessName\\\\\":\\\\\"Test Dakdekker BV\\\\\",\\\\\"email\\\\\":\\\\\"rwnhrtmn@gmail.com\\\\\",\\\\\"city\\\\\":\\\\\"Amsterdam\\\\\",\\\\\"industry\\\\\":\\\\\"dakdekker\\\\\"}\")",
-      "Bash(echo \"EXIT=$?\")"
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(echo \"TSC=$?\")"
     ]
   }
 }

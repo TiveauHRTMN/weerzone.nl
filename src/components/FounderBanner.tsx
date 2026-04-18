@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X, Sparkles } from "lucide-react";
 import PersonaModal from "./PersonaModal";
 import { daysUntilLaunch } from "@/lib/personas";
+import { useSession } from "@/lib/session-context";
 
 const STORAGE_KEY = "wz-founder-banner-dismissed";
 const IDLE_MS = 10_000;
@@ -17,15 +18,18 @@ export default function FounderBanner() {
   const [visible, setVisible] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const days = daysUntilLaunch();
+  const { tier } = useSession();
 
   useEffect(() => {
     // Check of gebruiker 'm al weggeklikt heeft deze sessie
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem(STORAGE_KEY) === "1") return;
+    // Abonnees hoeven de banner niet te zien
+    if (tier) return;
 
     const timer = setTimeout(() => setVisible(true), IDLE_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [tier]);
 
   const dismiss = () => {
     setVisible(false);

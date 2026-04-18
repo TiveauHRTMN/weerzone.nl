@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users } from "lucide-react";
 import { LogoFull } from "./Logo";
+import PersonaBadge from "./PersonaBadge";
+import { useSession } from "@/lib/session-context";
 import LoadingScreen from "./LoadingScreen";
 import { loadWeather } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData } from "@/lib/types";
@@ -107,7 +109,14 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
   const [isLocating, setIsLocating] = useState(false);
 
+  const { tier } = useSession();
+
   const handleLocationClick = () => {
+    // GPS is een betaalde feature — non-subs krijgen de persona-modal.
+    if (!tier) {
+      window.dispatchEvent(new CustomEvent("wz:open-persona-modal"));
+      return;
+    }
     if (!("geolocation" in navigator)) return;
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -173,8 +182,11 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
     <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header — puur logo, groot en prominent bovenaan */}
       <header className="animate-fade-in flex flex-col items-center mb-8 sm:mb-10 pt-2">
-        <LogoFull height={72} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] sm:hidden max-w-full h-auto" />
-        <LogoFull height={112} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] hidden sm:block" />
+        <div className="flex items-center justify-center">
+          <LogoFull height={72} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] sm:hidden max-w-full h-auto" />
+          <LogoFull height={112} className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.18)] hidden sm:block" />
+          {tier && <PersonaBadge tier={tier} />}
+        </div>
       </header>
 
       {/* NavBar — één grote glass-bar in kaartstijl, GPS zit in "Locatie"-pill */}
