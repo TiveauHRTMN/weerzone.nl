@@ -147,7 +147,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<City> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=nl&zoom=14`,
-      { headers: { "User-Agent": "WeerZone/1.0 (weerzone.nl)" } }
+      { headers: { "User-Agent": "WEERZONE/1.0 (weerzone.nl)" } }
     );
     if (res.ok) {
       const data = await res.json();

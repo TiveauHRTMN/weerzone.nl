@@ -3,9 +3,9 @@ import Link from "next/link";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "48 uur weer — waarom langer voorspellen onzin is | WeerZone",
+  title: "48 uur weer — waarom langer voorspellen onzin is | WEERZONE",
   description:
-    "Waarom WeerZone maximaal 48 uur vooruit voorspelt en geen 14-daagse toont. De wetenschap achter weersvoorspelling, chaostheorie, en waarom twee dagen vooruit de harde grens is.",
+    "Waarom WEERZONE maximaal 48 uur vooruit voorspelt en geen 14-daagse toont. De wetenschap achter weersvoorspelling, chaostheorie, en waarom twee dagen vooruit de harde grens is.",
   keywords: [
     "48 uur weer",
     "48 uur weerbericht",
@@ -19,12 +19,12 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "https://weerzone.nl/weer/48-uur" },
   openGraph: {
-    title: "48 uur weer — de enige eerlijke horizon | WeerZone",
+    title: "48 uur weer — de enige eerlijke horizon | WEERZONE",
     description: "Waarom wij geen 14-daagse tonen. Dit is de wetenschap achter de 48-uurs horizon.",
     url: "https://weerzone.nl/weer/48-uur",
     type: "website",
     locale: "nl_NL",
-    siteName: "WeerZone",
+    siteName: "WEERZONE",
   },
 };
 
@@ -37,7 +37,7 @@ export default function FortyEightPage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "Waarom toont WeerZone maximaal 48 uur?",
+        name: "Waarom toont WEERZONE maximaal 48 uur?",
         acceptedAnswer: {
           "@type": "Answer",
           text: "Voorbij 48 uur daalt de nauwkeurigheid van elk hoge-resolutie weermodel drastisch. De atmosfeer is chaotisch — kleine meetfouten groeien exponentieel. Wij tonen liever 48 uur messcherp dan 14 dagen onzin.",
@@ -61,7 +61,7 @@ export default function FortyEightPage() {
       },
       {
         "@type": "Question",
-        name: "Welke modellen gebruikt WeerZone?",
+        name: "Welke modellen gebruikt WEERZONE?",
         acceptedAnswer: {
           "@type": "Answer",
           text: "KNMI HARMONIE (Nederlands, 2.5 km resolutie) en DWD ICON (Duits, 6.5 km). Beide zijn hoge-resolutie regiomodellen, optimaal voor Noordwest-Europa. We tonen de consensus én de afwijking.",
@@ -74,7 +74,7 @@ export default function FortyEightPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WeerZone", item: "https://weerzone.nl" },
+      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
       { "@type": "ListItem", position: 2, name: "Weer", item: "https://weerzone.nl/weer" },
       { "@type": "ListItem", position: 3, name: "48 uur", item: "https://weerzone.nl/weer/48-uur" },
     ],
@@ -87,7 +87,7 @@ export default function FortyEightPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <nav className="text-xs text-white/50 mb-6">
-            <Link href="/" className="hover:text-white">WeerZone</Link>
+            <Link href="/" className="hover:text-white">WEERZONE</Link>
             <span className="mx-2">/</span>
             <Link href="/weer" className="hover:text-white">Weer</Link>
             <span className="mx-2">/</span>

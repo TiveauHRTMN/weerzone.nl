@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Weer Nederland — 48 uur vooruit op de vierkante meter | WeerZone",
+  title: "Weer Nederland — 48 uur vooruit op de vierkante meter | WEERZONE",
   description:
     "Het weer in Nederland, stad voor stad. 48 uur messcherp met KNMI HARMONIE + DWD ICON. Geen 14-daagse ruis, gewoon de waarheid — per uur, per gemeente.",
   keywords: [
@@ -19,13 +19,13 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "https://weerzone.nl/weer" },
   openGraph: {
-    title: "Weer Nederland — WeerZone",
+    title: "Weer Nederland — WEERZONE",
     description:
       "Het weer per Nederlandse stad. 48 uur vooruit met KNMI HARMONIE. De rest is ruis.",
     url: "https://weerzone.nl/weer",
     type: "website",
     locale: "nl_NL",
-    siteName: "WeerZone",
+    siteName: "WEERZONE",
   },
 };
 
@@ -37,8 +37,8 @@ export default function WeerIndexPage() {
     "@type": "CollectionPage",
     name: "Weer Nederland — alle steden",
     url: "https://weerzone.nl/weer",
-    description: "Overzicht van het weer in alle Nederlandse steden op WeerZone.",
-    isPartOf: { "@type": "WebSite", name: "WeerZone", url: "https://weerzone.nl" },
+    description: "Overzicht van het weer in alle Nederlandse steden op WEERZONE.",
+    isPartOf: { "@type": "WebSite", name: "WEERZONE", url: "https://weerzone.nl" },
     hasPart: cities.map((c) => ({
       "@type": "WebPage",
       name: `Weer ${c.name}`,
@@ -50,7 +50,7 @@ export default function WeerIndexPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WeerZone", item: "https://weerzone.nl" },
+      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
       { "@type": "ListItem", position: 2, name: "Weer Nederland", item: "https://weerzone.nl/weer" },
     ],
   };
@@ -62,7 +62,7 @@ export default function WeerIndexPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <nav className="text-xs text-white/50 mb-6">
-            <Link href="/" className="hover:text-white">WeerZone</Link>
+            <Link href="/" className="hover:text-white">WEERZONE</Link>
             <span className="mx-2">/</span>
             <span className="text-white/80">Weer Nederland</span>
           </nav>
@@ -73,7 +73,7 @@ export default function WeerIndexPage() {
             </h1>
             <p className="text-white/70 text-lg leading-relaxed">
               Geen 14-daagse bullshit. Geen gladde presentator die zegt dat het &ldquo;mogelijk gaat regenen&rdquo;.
-              WeerZone combineert <strong className="text-white">KNMI HARMONIE</strong> en{" "}
+              WEERZONE combineert <strong className="text-white">KNMI HARMONIE</strong> en{" "}
               <strong className="text-white">DWD ICON</strong> — de twee meest nauwkeurige modellen van
               Noordwest-Europa — en laat je per uur zien wat er gebeurt in jouw stad.
             </p>

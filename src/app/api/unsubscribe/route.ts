@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   return new NextResponse(
     `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>Uitgeschreven</title></head>
     <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui;background:#4a9ee8;color:white;text-align:center;">
-      <div><h1>✅ Uitgeschreven</h1><p>Je ontvangt geen WeerZone e-mails meer.</p><a href="https://weerzone.nl" style="color:#f59e0b;">Terug naar WeerZone</a></div>
+      <div><h1>✅ Uitgeschreven</h1><p>Je ontvangt geen WEERZONE e-mails meer.</p><a href="https://weerzone.nl" style="color:#f59e0b;">Terug naar WEERZONE</a></div>
     </body></html>`,
     { headers: { "Content-Type": "text/html" } }
   );

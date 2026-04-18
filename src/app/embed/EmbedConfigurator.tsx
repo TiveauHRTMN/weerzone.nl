@@ -6,7 +6,7 @@ export default function EmbedConfigurator({ cities }: { cities: string[] }) {
   const [selectedCity, setSelectedCity] = useState("Amsterdam");
   const [copied, setCopied] = useState(false);
 
-  const embedCode = `<iframe src="https://weerzone.nl/widget?city=${encodeURIComponent(selectedCity)}" width="340" height="200" style="border:none;border-radius:16px;overflow:hidden;" loading="lazy" title="Weer ${selectedCity} — WeerZone"></iframe>`;
+  const embedCode = `<iframe src="https://weerzone.nl/widget?city=${encodeURIComponent(selectedCity)}" width="340" height="200" style="border:none;border-radius:16px;overflow:hidden;" loading="lazy" title="Weer ${selectedCity} — WEERZONE"></iframe>`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode);

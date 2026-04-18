@@ -5,7 +5,7 @@ import PietExtended from "@/components/PietExtended";
 export const metadata: Metadata = {
   title: "Piet — 48 uur weer-update",
   description:
-    "Piet van WeerZone — de uitgebreide 48 uur weer-update voor jouw locatie. Elke ochtend vers in je mailbox. Hier lees je de webversie.",
+    "Piet van WEERZONE — de uitgebreide 48 uur weer-update voor jouw locatie. Elke ochtend vers in je mailbox. Hier lees je de webversie.",
   alternates: { canonical: "https://weerzone.nl/piet" },
 };
 
@@ -14,7 +14,7 @@ export default function PietPage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-8 pb-20">
       <div className="max-w-2xl mx-auto">
         <nav className="text-xs text-white/50 mb-5">
-          <Link href="/" className="hover:text-white">WeerZone</Link>
+          <Link href="/" className="hover:text-white">WEERZONE</Link>
           <span className="mx-2">/</span>
           <span className="text-white/80">Piet</span>
         </nav>

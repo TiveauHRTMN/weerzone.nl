@@ -55,7 +55,7 @@ export default function InstallPrompt() {
           <Download className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-gray-900">WeerZone installeren?</p>
+          <p className="text-sm font-bold text-gray-900">WEERZONE installeren?</p>
           <p className="text-xs text-gray-500 mt-0.5">Direct weer op je homescreen. Geen app store nodig.</p>
         </div>
         <button

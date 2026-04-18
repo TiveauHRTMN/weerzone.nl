@@ -61,7 +61,7 @@ export async function POST(req: Request) {
           customerId: sub.mollie_customer_id,
           amountCents: sub.amount_cents,
           interval: "1 month",
-          description: `WeerZone Zakelijk — ${sub.business_name}`,
+          description: `WEERZONE Zakelijk — ${sub.business_name}`,
           webhookUrl: `${siteUrl}/api/webhooks/mollie`,
         });
 
@@ -81,14 +81,14 @@ export async function POST(req: Request) {
           try {
             const resend = new Resend(process.env.RESEND_API_KEY);
             await resend.emails.send({
-              from: "WeerZone Zakelijk <info@weerzone.nl>",
+              from: "WEERZONE Zakelijk <info@weerzone.nl>",
               to: sub.email,
-              subject: "Welkom bij WeerZone Zakelijk — je account is actief",
+              subject: "Welkom bij WEERZONE Zakelijk — je account is actief",
               html: `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,sans-serif;">
   <div style="max-width:480px;margin:0 auto;">
     <div style="background:linear-gradient(135deg,#1e293b,#0f172a);padding:32px 24px;text-align:center;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:32px;opacity:0.9;" />
+      <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height:32px;opacity:0.9;" />
       <p style="color:rgba(255,255,255,0.5);font-size:9px;margin:8px 0 24px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Zakelijk · Abonnement actief</p>
       <div style="font-size:48px;margin-bottom:8px;">✅</div>
       <h1 style="color:#fff;font-size:24px;font-weight:900;margin:0;line-height:1.3;">Je bent live.</h1>
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       <a href="https://weerzone.nl" style="display:block;margin-top:20px;padding:14px;background:#f59e0b;color:#1e293b;font-weight:800;border-radius:12px;text-decoration:none;text-align:center;">Bekijk dashboard →</a>
     </div>
     <div style="padding:20px 24px;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#94a3b8;">WeerZone — 48 uur. De rest is ruis.</p>
+      <p style="margin:0;font-size:11px;color:#94a3b8;">WEERZONE — 48 uur. De rest is ruis.</p>
     </div>
   </div>
 </body></html>`,

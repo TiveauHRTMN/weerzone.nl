@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     const payment = await createFirstPayment({
       customerId: customer.id,
       amountCents: planConfig.amount_cents,
-      description: `WeerZone Zakelijk — ${planConfig.label} voor ${businessName.trim()}`,
+      description: `WEERZONE Zakelijk — ${planConfig.label} voor ${businessName.trim()}`,
       redirectUrl: `${siteUrl}/zakelijk/bedankt?pid={id}`.replace("{id}", ""),
       webhookUrl: `${siteUrl}/api/webhooks/mollie`,
       metadata: {

@@ -64,7 +64,9 @@
       "Bash(curl -s https://weerzone.nl/ -o /tmp/wz3.html)",
       "Bash(curl -s https://weerzone.nl/weer/amsterdam -o /tmp/ams.html)",
       "Bash(grep -rn \"WeerZone\\\\|Logo\\\\|NavBar\" C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\components\\\\\\\\WeatherDashboard.tsx)",
-      "Bash(grep -E \"vercel\" C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\package.json)"
+      "Bash(grep -E \"vercel\" C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\package.json)",
+      "Bash(ls C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\app\\\\\\\\api\\\\\\\\b2b\\\\\\\\)",
+      "Bash(curl -sS -X POST https://weerzone.nl/api/b2b/outreach -H \"Authorization: Bearer weerzone-cron-2026-djaelito\" -H \"Content-Type: application/json\" -d \"{\\\\\"businessName\\\\\":\\\\\"Test Dakdekker BV\\\\\",\\\\\"email\\\\\":\\\\\"rwnhrtmn@gmail.com\\\\\",\\\\\"city\\\\\":\\\\\"Amsterdam\\\\\",\\\\\"industry\\\\\":\\\\\"dakdekker\\\\\"}\")"
     ]
   }
 }

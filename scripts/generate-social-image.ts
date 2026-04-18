@@ -1,5 +1,5 @@
 /**
- * WeerZone Social Image Generator
+ * WEERZONE Social Image Generator
  *
  * Genereert elke ochtend een 48-uurs weer-image voor Instagram/TikTok/Facebook.
  * Stijl: Roddelpraat — fel, brutaal, urgent.
@@ -110,7 +110,7 @@ function generateBrutalCaption(forecasts: DayForecast[]): string {
 }
 
 async function main() {
-  console.log("🌤️  WeerZone Social Image Generator");
+  console.log("🌤️  WEERZONE Social Image Generator");
   console.log("=====================================\n");
 
   const cityCoords: Record<string, [number, number]> = {

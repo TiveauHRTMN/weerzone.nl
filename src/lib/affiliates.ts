@@ -7,7 +7,7 @@ export const AFFILIATE_CONFIG = {
   bol: {
     // Bol.com partnerprogramma: https://partnerprogramma.bol.com
     // Na aanmelding krijg je een partner-id en site-id
-    partnerId: "", // bijv. "WeerZone-21"
+    partnerId: "", // bijv. "WEERZONE-21"
     enabled: false, // zet op true zodra je ID hebt
   },
   booking: {
@@ -16,14 +16,14 @@ export const AFFILIATE_CONFIG = {
     // → Vind je op: Account > Network Profile, of in de URL, of via Link Generator
     // Advertiser CID: Booking.com BENELUX = 4347407
     // STATUS: Pending approval — zodra "Joined" werken de links
-    cjPublisherId: "7923380", // WeerZone CJ Publisher ID
+    cjPublisherId: "7923380", // WEERZONE CJ Publisher ID
     cjAdvertiserCid: "4347407", // Booking.com BENELUX
     enabled: false, // zet op true zodra Booking.com je goedkeurt (status: Pending)
   },
   amazon: {
     // Amazon Associates NL: https://partnernet.amazon.nl
     // Na aanmelding krijg je een tracking-tag (bijv. "weerzone-21")
-    tag: "tiveaubusines-21", // WeerZone Amazon Associates tag
+    tag: "tiveaubusines-21", // WEERZONE Amazon Associates tag
     enabled: true, // LIVE — commissie actief na 3 bestellingen
   },
   thuisbezorgd: {

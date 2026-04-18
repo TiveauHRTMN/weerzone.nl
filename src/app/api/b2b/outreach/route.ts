@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const MAX_PER_RUN = 10; // Rate limit: max 10 emails per cron-call
-const FROM_ADDRESS = "Steve | WeerZone Zakelijk <info@weerzone.nl>";
+const FROM_ADDRESS = "Steve | WEERZONE Zakelijk <info@weerzone.nl>";
 
 async function buildContext(city: string | null, industry: B2BIndustry): Promise<WeatherSnippet | null> {
   if (!city) return null;

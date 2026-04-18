@@ -4,7 +4,7 @@ import { DUTCH_CITIES } from "@/lib/types";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "WeerZone Widget",
+  title: "WEERZONE Widget",
   robots: { index: false, follow: false },
 };
 
@@ -85,7 +85,7 @@ export default async function WidgetPage({
               letterSpacing: "0.5px",
             }}
           >
-            Powered by WeerZone
+            Powered by WEERZONE
           </a>
         </div>
       </body>

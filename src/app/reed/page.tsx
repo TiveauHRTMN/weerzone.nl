@@ -5,7 +5,7 @@ import ReedExtended from "@/components/ReedExtended";
 export const metadata: Metadata = {
   title: "Reed — extreem weer alerts",
   description:
-    "Reed van WeerZone waarschuwt voor storm, onweer, hitte, vorst en zware neerslag. Alleen als er echt iets op komst is — geen ruis.",
+    "Reed van WEERZONE waarschuwt voor storm, onweer, hitte, vorst en zware neerslag. Alleen als er echt iets op komst is — geen ruis.",
   alternates: { canonical: "https://weerzone.nl/reed" },
 };
 
@@ -14,7 +14,7 @@ export default function ReedPage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-8 pb-20">
       <div className="max-w-2xl mx-auto">
         <nav className="text-xs text-white/50 mb-5">
-          <Link href="/" className="hover:text-white">WeerZone</Link>
+          <Link href="/" className="hover:text-white">WEERZONE</Link>
           <span className="mx-2">/</span>
           <span className="text-white/80">Reed</span>
         </nav>

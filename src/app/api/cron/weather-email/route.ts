@@ -16,7 +16,7 @@ interface Subscriber {
 }
 
 const PIET_PROMPT = `
-Role: Piet van WeerZone.nl.
+Role: Piet van WEERZONE.nl.
 Persona: Een vriendelijke, deskundige lokale gids. Nooit schreeuwerig, altijd behulpzaam. 
 Stijl:
 1. Analyseer de weerdata voor vandaag en geef een nuchtere, deskundige conclusie.
@@ -125,7 +125,7 @@ function buildEmailHtml(city: string, data: Record<string, unknown>, pietComment
   <div style="max-width:480px;margin:0 auto;padding:32px 24px;">
 
     <div style="text-align:center;padding:12px 0 32px;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height: 42px; width: auto; margin-bottom: 4px;" />
+      <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height: 42px; width: auto; margin-bottom: 4px;" />
       <p style="color:rgba(255,255,255,0.6);font-size:10px;margin:0;letter-spacing:1px;text-transform:uppercase;font-weight:700;">Ochtend-update van Piet</p>
     </div>
 
@@ -246,10 +246,10 @@ export async function GET(req: Request) {
       for (const sub of groupSubscribers) {
         const emailPayload = {
           to: sub.email,
-          subject: `${getWeatherEmoji(weatherData.current.weather_code, true)} ${Math.round(weatherData.current.temperature_2m)}° in ${sub.city} — WeerZone`,
+          subject: `${getWeatherEmoji(weatherData.current.weather_code, true)} ${Math.round(weatherData.current.temperature_2m)}° in ${sub.city} — WEERZONE`,
           html: html.replace("{{EMAIL}}", encodeURIComponent(sub.email)),
         };
-        const result = await resend.emails.send({ from: "Piet | WeerZone <info@weerzone.nl>", ...emailPayload });
+        const result = await resend.emails.send({ from: "Piet | WEERZONE <info@weerzone.nl>", ...emailPayload });
         if (!result.error) sent++; else errors.push(result.error.message);
       }
     } catch (e) {

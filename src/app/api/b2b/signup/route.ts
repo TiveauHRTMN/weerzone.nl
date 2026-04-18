@@ -55,16 +55,16 @@ export async function POST(req: Request) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: "WeerZone Zakelijk <info@weerzone.nl>",
+          from: "WEERZONE Zakelijk <info@weerzone.nl>",
           to: email.toLowerCase().trim(),
-          subject: "Welkom bij WeerZone Zakelijk — we nemen contact op",
+          subject: "Welkom bij WEERZONE Zakelijk — we nemen contact op",
           html: `<!DOCTYPE html>
 <html lang="nl">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:480px;margin:0 auto;">
     <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:32px 24px 28px;text-align:center;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:32px;width:auto;margin-bottom:6px;opacity:0.9;" />
+      <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height:32px;width:auto;margin-bottom:6px;opacity:0.9;" />
       <p style="color:rgba(255,255,255,0.5);font-size:9px;margin:0 0 24px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Zakelijk · 48-uurs weerdata</p>
       <div style="font-size:48px;line-height:1;margin-bottom:12px;">🏢</div>
       <h1 style="color:#ffffff;font-size:24px;font-weight:900;margin:0;line-height:1.3;">Aanmelding ontvangen</h1>
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     </div>
     <div style="background:#ffffff;padding:28px 24px;">
       <p style="margin:0 0 16px;font-size:15px;color:#1e293b;font-weight:700;">Beste ${businessName.trim()},</p>
-      <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">Bedankt voor je aanmelding bij WeerZone Zakelijk. We hebben je gegevens ontvangen en nemen binnen 24 uur contact met je op om je account in te richten.</p>
+      <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">Bedankt voor je aanmelding bij WEERZONE Zakelijk. We hebben je gegevens ontvangen en nemen binnen 24 uur contact met je op om je account in te richten.</p>
       <div style="background:#f8fafc;border-radius:12px;padding:20px;margin:20px 0;border:1px solid #e2e8f0;">
         <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Jouw gegevens</p>
         <p style="margin:0 0 6px;font-size:14px;color:#1e293b;"><strong>Bedrijf:</strong> ${businessName.trim()}</p>
@@ -84,11 +84,11 @@ export async function POST(req: Request) {
       </div>
       <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">In de tussentijd kun je alvast een kijkje nemen op ons dashboard:</p>
       <a href="https://weerzone.nl" style="display:block;padding:14px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:14px;border-radius:12px;text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(245,158,11,0.3);">
-        Bekijk WeerZone →
+        Bekijk WEERZONE →
       </a>
     </div>
     <div style="padding:20px 24px;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#94a3b8;">WeerZone.nl — 48 uur. De rest is ruis.</p>
+      <p style="margin:0;font-size:11px;color:#94a3b8;">WEERZONE.nl — 48 uur. De rest is ruis.</p>
     </div>
   </div>
 </body>

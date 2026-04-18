@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "WeerZone — 48 uur. De rest is ruis.";
+export const alt = "WEERZONE — 48 uur. De rest is ruis.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -76,7 +76,7 @@ export default function OgImage() {
             display: "flex",
           }}
         >
-          WeerZone
+          WEERZONE
         </div>
 
         {/* Subtitle */}

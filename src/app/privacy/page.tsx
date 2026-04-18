@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacybeleid — WeerZone",
-  description: "Hoe WeerZone omgaat met je gegevens. Kort, eerlijk, zonder juridisch geneuzel.",
+  title: "Privacybeleid — WEERZONE",
+  description: "Hoe WEERZONE omgaat met je gegevens. Kort, eerlijk, zonder juridisch geneuzel.",
 };
 
 export default function PrivacyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           href="/"
           className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm mb-8 transition-colors"
         >
-          ← Terug naar WeerZone
+          ← Terug naar WEERZONE
         </a>
 
         <div className="card p-6 sm:p-8 space-y-6">
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           </div>
 
           <p className="text-sm text-gray-700 leading-relaxed">
-            WeerZone is de brutale weerdienst van Nederland. Maar met je gegevens
+            WEERZONE is de brutale weerdienst van Nederland. Maar met je gegevens
             zijn we niet brutaal — daar zijn we juist heel voorzichtig mee.
           </p>
 
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
               <p>
                 <strong>Affiliate-cookies:</strong> als je doorklikt naar Bol.com,
                 Booking.com of Thuisbezorgd, plaatsen zij cookies om te meten dat
-                je via WeerZone komt. Hier verdienen wij een kleine commissie mee.
+                je via WEERZONE komt. Hier verdienen wij een kleine commissie mee.
                 Dit gebeurt alleen als je actief doorklikt én je cookies hebt
                 geaccepteerd.
               </p>
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
 
           <div className="pt-4 border-t border-gray-200">
             <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} WeerZone.nl — 48 uur. De rest is ruis.
+              © {new Date().getFullYear()} WEERZONE.nl — 48 uur. De rest is ruis.
             </p>
           </div>
         </div>

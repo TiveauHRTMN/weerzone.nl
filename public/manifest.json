@@ -1,6 +1,6 @@
 {
-  "name": "WeerZone",
-  "short_name": "WeerZone",
+  "name": "WEERZONE",
+  "short_name": "WEERZONE",
   "description": "48-uurs weerbericht — de rest is ruis",
   "start_url": "/",
   "display": "standalone",

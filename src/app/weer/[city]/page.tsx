@@ -47,16 +47,16 @@ export async function generateMetadata({
       "nauwkeurig weerbericht",
     ],
     openGraph: {
-      title: `Weer ${city.name} nu — WeerZone`,
+      title: `Weer ${city.name} nu — WEERZONE`,
       description,
       type: "website",
       locale: "nl_NL",
       url: `https://weerzone.nl/weer/${slug}`,
-      siteName: "WeerZone",
+      siteName: "WEERZONE",
     },
     twitter: {
       card: "summary_large_image",
-      title: `Weer ${city.name} — 48 uur | WeerZone`,
+      title: `Weer ${city.name} — 48 uur | WEERZONE`,
       description: `Het weer in ${city.name}. KNMI HARMONIE + DWD ICON. Brutaal nauwkeurig.`,
     },
     alternates: {
@@ -84,7 +84,7 @@ export default async function CityWeatherPage({
         name: `Wat is het weer in ${city.name} vandaag?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Bekijk het actuele weer in ${city.name} op WeerZone. We combineren KNMI HARMONIE en DWD ICON voor de meest nauwkeurige 48-uurs voorspelling.`,
+          text: `Bekijk het actuele weer in ${city.name} op WEERZONE. We combineren KNMI HARMONIE en DWD ICON voor de meest nauwkeurige 48-uurs voorspelling.`,
         },
       },
       {
@@ -92,7 +92,7 @@ export default async function CityWeatherPage({
         name: `Gaat het regenen in ${city.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Bekijk de live neerslagverwachting voor ${city.name} per uur op WeerZone. Twee weermodellen tonen precies wanneer het droog of nat wordt.`,
+          text: `Bekijk de live neerslagverwachting voor ${city.name} per uur op WEERZONE. Twee weermodellen tonen precies wanneer het droog of nat wordt.`,
         },
       },
       {
@@ -100,7 +100,7 @@ export default async function CityWeatherPage({
         name: `Hoe nauwkeurig is de weersverwachting voor ${city.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `WeerZone combineert twee toonaangevende weermodellen: KNMI HARMONIE (Nederlands) en DWD ICON (Duits). We voorspellen maximaal 48 uur vooruit — langer is wetenschappelijk onbetrouwbaar.`,
+          text: `WEERZONE combineert twee toonaangevende weermodellen: KNMI HARMONIE (Nederlands) en DWD ICON (Duits). We voorspellen maximaal 48 uur vooruit — langer is wetenschappelijk onbetrouwbaar.`,
         },
       },
       {
@@ -108,7 +108,7 @@ export default async function CityWeatherPage({
         name: `Wat is de temperatuur in ${city.name} morgen?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `De temperatuur voor morgen in ${city.name} vind je op WeerZone, inclusief gevoelstemperatuur, wind en neerslagkans. Bijgewerkt elk uur.`,
+          text: `De temperatuur voor morgen in ${city.name} vind je op WEERZONE, inclusief gevoelstemperatuur, wind en neerslagkans. Bijgewerkt elk uur.`,
         },
       },
     ],
@@ -118,14 +118,14 @@ export default async function CityWeatherPage({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `Weer ${city.name} — WeerZone`,
+    name: `Weer ${city.name} — WEERZONE`,
     description: `48 uur extreem nauwkeurig weer voor ${city.name}. KNMI HARMONIE + DWD ICON.`,
     url: `https://weerzone.nl/weer/${slug}`,
     dateModified: new Date().toISOString(),
     inLanguage: "nl",
     isPartOf: {
       "@type": "WebSite",
-      name: "WeerZone",
+      name: "WEERZONE",
       url: "https://weerzone.nl",
     },
     about: {
@@ -138,7 +138,7 @@ export default async function CityWeatherPage({
     },
     provider: {
       "@type": "Organization",
-      name: "WeerZone",
+      name: "WEERZONE",
       url: "https://weerzone.nl",
       logo: "https://weerzone.nl/favicon-icon.png",
     },
@@ -151,7 +151,7 @@ export default async function CityWeatherPage({
       {
         "@type": "ListItem",
         position: 1,
-        name: "WeerZone",
+        name: "WEERZONE",
         item: "https://weerzone.nl",
       },
       {

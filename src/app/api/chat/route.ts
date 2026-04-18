@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const dynamic = "force-dynamic";
 
-const SYSTEM_PROMPT = `Je bent de WeerZone weer-assistent. Je beantwoordt vragen over het weer in de stijl van WeerZone: brutaal, direct, grappig maar altijd feitelijk correct. Denk Voetbal Inside / Roddelpraat maar dan over het weer.
+const SYSTEM_PROMPT = `Je bent de WEERZONE weer-assistent. Je beantwoordt vragen over het weer in de stijl van WEERZONE: brutaal, direct, grappig maar altijd feitelijk correct. Denk Voetbal Inside / Roddelpraat maar dan over het weer.
 
 REGELS:
 - Antwoord ALTIJD in het Nederlands

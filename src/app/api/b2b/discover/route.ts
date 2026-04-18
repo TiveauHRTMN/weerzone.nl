@@ -25,7 +25,7 @@ async function scrapeEmail(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(6000),
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; WeerZone/1.0)" },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; WEERZONE/1.0)" },
     });
     const html = await res.text();
 

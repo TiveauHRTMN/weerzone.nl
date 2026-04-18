@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Onweer vandaag in Nederland — live CAPE-waarden per uur | WeerZone",
+  title: "Onweer vandaag in Nederland — live CAPE-waarden per uur | WEERZONE",
   description:
     "Onweer vandaag in Nederland? Bekijk live de CAPE-waarden (onweersenergie) per uur per stad. KNMI HARMONIE + DWD ICON. De enige site die je echt vertelt óf en wanneer het onweert.",
   keywords: [
@@ -19,12 +19,12 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "https://weerzone.nl/weer/onweer" },
   openGraph: {
-    title: "Onweer vandaag — WeerZone",
+    title: "Onweer vandaag — WEERZONE",
     description: "Live CAPE-waarden per uur per Nederlandse stad.",
     url: "https://weerzone.nl/weer/onweer",
     type: "website",
     locale: "nl_NL",
-    siteName: "WeerZone",
+    siteName: "WEERZONE",
   },
 };
 
@@ -48,7 +48,7 @@ export default function OnweerPage() {
         name: "Gaat het vandaag onweren in Nederland?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Kies je stad op WeerZone en je ziet de CAPE-waarde per uur. Als CAPE boven 1000 komt én er is neerslag voorspeld, dan is onweerskans reëel. Geen giswerk — gewoon de ruwe modeldata.",
+          text: "Kies je stad op WEERZONE en je ziet de CAPE-waarde per uur. Als CAPE boven 1000 komt én er is neerslag voorspeld, dan is onweerskans reëel. Geen giswerk — gewoon de ruwe modeldata.",
         },
       },
       {
@@ -56,7 +56,7 @@ export default function OnweerPage() {
         name: "Hoe nauwkeurig is onweersvoorspelling?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Onweer is lokaal en grillig. Modellen zoals HARMONIE en ICON zien de condities, niet de exacte bliksemflits. WeerZone laat CAPE + neerslag + wind zien, zodat jij zelf de risico-inschatting kan maken.",
+          text: "Onweer is lokaal en grillig. Modellen zoals HARMONIE en ICON zien de condities, niet de exacte bliksemflits. WEERZONE laat CAPE + neerslag + wind zien, zodat jij zelf de risico-inschatting kan maken.",
         },
       },
     ],
@@ -66,7 +66,7 @@ export default function OnweerPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WeerZone", item: "https://weerzone.nl" },
+      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
       { "@type": "ListItem", position: 2, name: "Weer", item: "https://weerzone.nl/weer" },
       { "@type": "ListItem", position: 3, name: "Onweer", item: "https://weerzone.nl/weer/onweer" },
     ],
@@ -79,7 +79,7 @@ export default function OnweerPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <nav className="text-xs text-white/50 mb-6">
-            <Link href="/" className="hover:text-white">WeerZone</Link>
+            <Link href="/" className="hover:text-white">WEERZONE</Link>
             <span className="mx-2">/</span>
             <Link href="/weer" className="hover:text-white">Weer</Link>
             <span className="mx-2">/</span>
@@ -92,7 +92,7 @@ export default function OnweerPage() {
               Onweer vandaag in Nederland — live.
             </h1>
             <p className="text-white/70 text-lg leading-relaxed">
-              De meeste weerapps zeggen &ldquo;kans op onweer&rdquo; en laten je raden. WeerZone laat je
+              De meeste weerapps zeggen &ldquo;kans op onweer&rdquo; en laten je raden. WEERZONE laat je
               de <strong className="text-white">CAPE-waarde per uur</strong> zien — de ruwe energie in de atmosfeer.
               Boven 1500 J/kg wordt het serieus. Kies je stad en je ziet het.
             </p>

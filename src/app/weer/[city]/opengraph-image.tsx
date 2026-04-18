@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const runtime = "edge";
-export const alt = "WeerZone — Weer per stad";
+export const alt = "WEERZONE — Weer per stad";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -119,7 +119,7 @@ export default async function OgImage({
               display: "flex",
             }}
           >
-            WeerZone
+            WEERZONE
           </div>
           <div
             style={{

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const safeMsg = String(message).slice(0, 5000);
 
     await resend.emails.send({
-      from: "WeerZone Contact <info@weerzone.nl>",
+      from: "WEERZONE Contact <info@weerzone.nl>",
       to: "info@weerzone.nl",
       replyTo: safeEmail,
       subject: `Contact via weerzone.nl — ${safeName}`,

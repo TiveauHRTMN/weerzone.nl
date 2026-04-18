@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 // System prompt voor de autonoom draaiende agent
 const SENTINEL_PROMPT = `
-Role: Reed van WeerZone.nl.
+Role: Reed van WEERZONE.nl.
 Persona: De Interceptor. Je taak is de gebruiker behoeden voor weersimpact door directheid en urgentie.
 
 STRIKT:
@@ -127,7 +127,7 @@ function buildAffiliateEmailHtml(city: string, anomaly: any, alertMsg: string) {
   <div style="max-width:500px;margin:0 auto;padding:40px 20px;">
     <div style="background:#ffffff;border-radius:24px;overflow:hidden;box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
       <div style="background:${colors.border};padding:24px;text-align:center;">
-        <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:28px;filter:brightness(0) invert(1);" />
+        <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height:28px;filter:brightness(0) invert(1);" />
         <p style="color:rgba(255,255,255,0.8);font-size:10px;margin:12px 0 0;text-transform:uppercase;letter-spacing:2px;font-weight:800;">Reed | Weer-Alarm 📍 ${city}</p>
       </div>
       
@@ -145,7 +145,7 @@ function buildAffiliateEmailHtml(city: string, anomaly: any, alertMsg: string) {
             ${promo.btn.toUpperCase()} →
           </a>
           <div style="margin-top:16px;">${extrasHtml}</div>
-          <p style="margin:16px 0 0;font-size:10px;color:#94a3b8;text-align:center;">Amazon-partnerlinks · als je via WeerZone bestelt steun je ons zonder extra kosten.</p>
+          <p style="margin:16px 0 0;font-size:10px;color:#94a3b8;text-align:center;">Amazon-partnerlinks · als je via WEERZONE bestelt steun je ons zonder extra kosten.</p>
         </div>
       </div>
 
@@ -153,7 +153,7 @@ function buildAffiliateEmailHtml(city: string, anomaly: any, alertMsg: string) {
     <div style="background:#fef2f2;border-radius:24px;padding:32px;margin:32px 0;text-align:center;border:2px solid #fee2e2;">
       <p style="margin:0 0 12px;font-size:16px;color:#991b1b;font-weight:900;">LAAT JE VRIENDEN NIET VERRASSEN! 🚨</p>
       <p style="margin:0 0 24px;font-size:14px;color:#b91c1c;line-height:1.5;">Stuur deze waarschuwing door zodat niemand in jouw omgeving overvallen wordt door het weer.</p>
-      <a href="https://api.whatsapp.com/send?text=PAS%20OP%3A%20Reed%20waarschuwt%20voor%20extreem%20weer.%20Check%20je%20locatie%20direct%20op%20WeerZone.nl%20%F0%9F%9A%80" style="display:inline-block;padding:14px 28px;background:#25d366;color:white;font-weight:800;font-size:14px;border-radius:12px;text-decoration:none;box-shadow:0 10px 20px rgba(37,211,102,0.4);">
+      <a href="https://api.whatsapp.com/send?text=PAS%20OP%3A%20Reed%20waarschuwt%20voor%20extreem%20weer.%20Check%20je%20locatie%20direct%20op%20WEERZONE.nl%20%F0%9F%9A%80" style="display:inline-block;padding:14px 28px;background:#25d366;color:white;font-weight:800;font-size:14px;border-radius:12px;text-decoration:none;box-shadow:0 10px 20px rgba(37,211,102,0.4);">
         DEEL VIA WHATSAPP →
       </a>
     </div>

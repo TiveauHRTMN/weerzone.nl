@@ -1,4 +1,4 @@
-# WeerZone.nl - Robots.txt
+# WEERZONE.nl - Robots.txt
 User-agent: *
 Allow: /
 Disallow: /api/

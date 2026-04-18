@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Building2, Clock, TrendingUp, Shield, Zap, BarChart3 } from "lucide-react";
 import B2BSignupForm from "@/components/B2BSignupForm";
 
 export const metadata: Metadata = {
-  title: "WeerZone Zakelijk — Het weer, maar dan echt",
+  title: "WEERZONE Zakelijk — Het weer, maar dan echt",
   description:
     "Werk je buiten? Dan kost slecht weer je geld. Met 48-uurs data van het KNMI HARMONIE weet je precies wat er aankomt. Op de meter. Op tijd.",
   openGraph: {
-    title: "WeerZone Zakelijk — Het weer, maar dan echt",
+    title: "WEERZONE Zakelijk — Het weer, maar dan echt",
     description: "48 uur vooruit. Op de vierkante meter. Voor bedrijven die buiten werken.",
   },
 };
@@ -71,7 +72,7 @@ export default function ZakelijkPage() {
       <div className="max-w-4xl mx-auto px-4 pt-16 pb-12 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-orange/15 rounded-full mb-6">
           <Building2 className="w-4 h-4 text-accent-orange" />
-          <span className="text-xs font-bold text-accent-orange uppercase tracking-wider">WeerZone Zakelijk</span>
+          <span className="text-xs font-bold text-accent-orange uppercase tracking-wider">WEERZONE Zakelijk</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
@@ -83,7 +84,7 @@ export default function ZakelijkPage() {
           Dat weet jij beter dan wie ook. Je plant je week, het weer draait en je staat met een vol team op een lege dag. Of andersom.
         </p>
         <p className="text-lg sm:text-xl text-white/80 font-bold max-w-2xl mx-auto mb-8">
-          WeerZone geeft je de komende 48 uur. Jouw locatie, op de meter. Elke ochtend in je inbox.
+          WEERZONE geeft je de komende 48 uur. Jouw locatie, op de meter. Elke ochtend in je inbox.
         </p>
 
         <a
@@ -104,18 +105,21 @@ export default function ZakelijkPage() {
             Na drie dagen is een weersvoorspelling zo onbetrouwbaar dat je er geen beslissingen meer op kunt baseren. Toch verkopen de meeste weerapps je een 14-daagse alsof het de waarheid is. Wij doen dat niet.
           </p>
           <p className="text-white/80 font-semibold text-sm sm:text-base mt-3">
-            WeerZone stopt bij 48 uur. Want dat is de window waarin voorspellingen daadwerkelijk kloppen. KNMI HARMONIE, 2,5 km resolutie. Wat je ziet, klopt.
+            WEERZONE stopt bij 48 uur. Want dat is de window waarin voorspellingen daadwerkelijk kloppen. KNMI HARMONIE, 2,5 km resolutie. Wat je ziet, klopt.
           </p>
         </div>
       </div>
 
-      {/* Social proof */}
+      {/* Hoe het werkt */}
       <div className="max-w-4xl mx-auto px-4 pb-12">
-        <div className="bg-accent-orange/10 border border-accent-orange/20 rounded-2xl p-8 text-center">
-          <p className="text-white/80 text-lg italic">
-            &ldquo;We planden ons terras altijd op de 14-daagse. Drie keer per week fout. Sinds WeerZone besparen we elke dag twee uur aan personeel.&rdquo;
+        <div className="bg-accent-orange/10 border border-accent-orange/20 rounded-2xl p-8">
+          <p className="text-xs font-bold text-accent-orange uppercase tracking-wider mb-3">Hoe het werkt</p>
+          <p className="text-white/80 text-base leading-relaxed">
+            Je geeft je bedrijfsadres. Wij rekenen op KNMI HARMONIE, elke ochtend opnieuw. Als er iets in de komende 48 uur jouw werk raakt — regen, vorst, storm, hitte — krijg je een mail. Anders niet.
           </p>
-          <p className="text-white/40 text-sm mt-3">— We zijn op zoek naar de eerste 10 bedrijven. Doe jij mee?</p>
+          <p className="text-white/60 text-sm leading-relaxed mt-3">
+            Geen ruis. Geen schaarste-spelletjes. Geen app. Eén mail wanneer het telt.
+          </p>
         </div>
       </div>
 
@@ -187,7 +191,7 @@ export default function ZakelijkPage() {
 
       {/* Footer */}
       <div className="border-t border-white/10 py-8 text-center">
-        <p className="text-white/30 text-xs">WeerZone — 48 uur. De rest is ruis.</p>
+        <p className="text-white/30 text-xs">WEERZONE — 48 uur. De rest is ruis.</p>
       </div>
 
     </div>

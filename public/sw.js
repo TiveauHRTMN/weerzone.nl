@@ -1,4 +1,4 @@
-// WeerZone Service Worker — Weather alarm notifications
+// WEERZONE Service Worker — Weather alarm notifications
 const CACHE_NAME = "weerzone-v1";
 
 self.addEventListener("install", (event) => {
@@ -34,7 +34,7 @@ async function checkWeatherAlarm(cityName, lat, lon) {
         ? rainTime.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
         : "binnenkort";
 
-      self.registration.showNotification("WeerZone — Regen op komst", {
+      self.registration.showNotification("WEERZONE — Regen op komst", {
         body: `Regen verwacht in ${cityName} om ${timeStr}. Paraplu mee!`,
         icon: "/favicon-icon.png",
         badge: "/favicon-icon.png",
@@ -44,7 +44,7 @@ async function checkWeatherAlarm(cityName, lat, lon) {
       });
     }
   } catch (e) {
-    console.error("WeerZone SW: weather check failed", e);
+    console.error("WEERZONE SW: weather check failed", e);
   }
 }
 

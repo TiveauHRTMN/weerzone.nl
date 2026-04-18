@@ -35,7 +35,7 @@ export default function WeatherAlarm({ city }: Props) {
         const lastShown = localStorage.getItem("wz_alarm_last_rain");
         const key = `rain-${new Date().toISOString().slice(0, 13)}`;
         if (lastShown !== key) {
-          new Notification("WeerZone — Regen op komst", {
+          new Notification("WEERZONE — Regen op komst", {
             body: `Regen verwacht in ${city.name} om ${t}. Paraplu mee!`,
             icon: "/favicon-icon.png",
             tag: "wz-rain",
@@ -51,7 +51,7 @@ export default function WeatherAlarm({ city }: Props) {
         const lastShown = localStorage.getItem("wz_alarm_last_storm");
         const key = `storm-${new Date().toISOString().slice(0, 13)}`;
         if (lastShown !== key) {
-          new Notification("WeerZone — Onweer!", {
+          new Notification("WEERZONE — Onweer!", {
             body: `Onweer verwacht in ${city.name} rond ${t}. Ga naar binnen.`,
             icon: "/favicon-icon.png",
             tag: "wz-storm",
@@ -60,7 +60,7 @@ export default function WeatherAlarm({ city }: Props) {
         }
       }
     } catch (e) {
-      console.error("WeerZone alarm check failed:", e);
+      console.error("WEERZONE alarm check failed:", e);
     }
   }, [city]);
 

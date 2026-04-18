@@ -196,7 +196,7 @@ export async function generateMetadata({
   const city = findCity(slug);
   if (!city) return {};
 
-  const title = `Weerwaarschuwing ${city.name} vandaag — WeerZone`;
+  const title = `Weerwaarschuwing ${city.name} vandaag — WEERZONE`;
   const description = `Actuele weerwaarschuwingen en alerts voor ${city.name}. Wind, neerslag, temperatuur en UV-risico — 48 uur vooruit. KNMI HARMONIE data.`;
 
   return {
@@ -214,16 +214,16 @@ export async function generateMetadata({
       "weerzone",
     ],
     openGraph: {
-      title: `Weerwaarschuwing ${city.name} — WeerZone`,
+      title: `Weerwaarschuwing ${city.name} — WEERZONE`,
       description,
       type: "website",
       locale: "nl_NL",
       url: `https://weerzone.nl/weer/${slug}/alert`,
-      siteName: "WeerZone",
+      siteName: "WEERZONE",
     },
     twitter: {
       card: "summary_large_image",
-      title: `Weerwaarschuwing ${city.name} — WeerZone`,
+      title: `Weerwaarschuwing ${city.name} — WEERZONE`,
       description: `Actuele weerwaarschuwingen voor ${city.name}. 48 uur vooruit.`,
     },
     alternates: {
@@ -336,14 +336,14 @@ export default async function CityAlertPage({
   const webPageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `Weerwaarschuwing ${city.name} — WeerZone`,
+    name: `Weerwaarschuwing ${city.name} — WEERZONE`,
     description: `Actuele weerwaarschuwingen voor ${city.name}. 48 uur vooruit met KNMI HARMONIE data.`,
     url: `https://weerzone.nl/weer/${slug}/alert`,
     dateModified: now.toISOString(),
     inLanguage: "nl",
     isPartOf: {
       "@type": "WebSite",
-      name: "WeerZone",
+      name: "WEERZONE",
       url: "https://weerzone.nl",
     },
     about: {
@@ -353,7 +353,7 @@ export default async function CityAlertPage({
     },
     provider: {
       "@type": "Organization",
-      name: "WeerZone",
+      name: "WEERZONE",
       url: "https://weerzone.nl",
       logo: "https://weerzone.nl/favicon-icon.png",
     },
@@ -363,7 +363,7 @@ export default async function CityAlertPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WeerZone", item: "https://weerzone.nl" },
+      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
       { "@type": "ListItem", position: 2, name: "Weer", item: "https://weerzone.nl/weer" },
       { "@type": "ListItem", position: 3, name: city.name, item: `https://weerzone.nl/weer/${slug}` },
       { "@type": "ListItem", position: 4, name: "Waarschuwingen", item: `https://weerzone.nl/weer/${slug}/alert` },
@@ -402,7 +402,7 @@ export default async function CityAlertPage({
         {/* ── Header ── */}
         <div className="max-w-2xl mx-auto px-4 pt-8 pb-4">
           <nav className="flex items-center gap-2 text-sm text-white/60 mb-6">
-            <a href="/" className="hover:text-white/90 transition-colors">WeerZone</a>
+            <a href="/" className="hover:text-white/90 transition-colors">WEERZONE</a>
             <span>/</span>
             <a href={`/weer/${slug}`} className="hover:text-white/90 transition-colors">{city.name}</a>
             <span>/</span>

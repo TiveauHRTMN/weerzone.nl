@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Regen vandaag in Nederland — wanneer wordt het droog? | WeerZone",
+  title: "Regen vandaag in Nederland — wanneer wordt het droog? | WEERZONE",
   description:
     "Regen vandaag in Nederland? Bekijk per uur, per stad, wanneer de bui stopt en wanneer het weer droog is. KNMI HARMONIE + DWD ICON, messcherp op de vierkante meter.",
   keywords: [
@@ -19,12 +19,12 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "https://weerzone.nl/weer/regen" },
   openGraph: {
-    title: "Regen vandaag — WeerZone",
+    title: "Regen vandaag — WEERZONE",
     description: "Per uur zien wanneer het stopt met regenen, per Nederlandse stad.",
     url: "https://weerzone.nl/weer/regen",
     type: "website",
     locale: "nl_NL",
-    siteName: "WeerZone",
+    siteName: "WEERZONE",
   },
 };
 
@@ -40,7 +40,7 @@ export default function RegenPage() {
         name: "Gaat het vandaag regenen in Nederland?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Kies je stad op WeerZone en je ziet per uur of er neerslag verwacht wordt, hoeveel millimeter, en of HARMONIE en ICON het eens zijn. Eens = hoge zekerheid. Oneens = onzeker weer.",
+          text: "Kies je stad op WEERZONE en je ziet per uur of er neerslag verwacht wordt, hoeveel millimeter, en of HARMONIE en ICON het eens zijn. Eens = hoge zekerheid. Oneens = onzeker weer.",
         },
       },
       {
@@ -56,7 +56,7 @@ export default function RegenPage() {
         name: "Hoeveel regen valt er vandaag?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "WeerZone toont de neerslagsom per dag (mm) en per uur. Onder 1 mm = motregen. 1-5 mm = normale bui. 5-15 mm = flinke bui. Boven 15 mm per uur = hoosbui of onweer.",
+          text: "WEERZONE toont de neerslagsom per dag (mm) en per uur. Onder 1 mm = motregen. 1-5 mm = normale bui. 5-15 mm = flinke bui. Boven 15 mm per uur = hoosbui of onweer.",
         },
       },
     ],
@@ -66,7 +66,7 @@ export default function RegenPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WeerZone", item: "https://weerzone.nl" },
+      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
       { "@type": "ListItem", position: 2, name: "Weer", item: "https://weerzone.nl/weer" },
       { "@type": "ListItem", position: 3, name: "Regen", item: "https://weerzone.nl/weer/regen" },
     ],
@@ -79,7 +79,7 @@ export default function RegenPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <nav className="text-xs text-white/50 mb-6">
-            <Link href="/" className="hover:text-white">WeerZone</Link>
+            <Link href="/" className="hover:text-white">WEERZONE</Link>
             <span className="mx-2">/</span>
             <Link href="/weer" className="hover:text-white">Weer</Link>
             <span className="mx-2">/</span>
@@ -94,7 +94,7 @@ export default function RegenPage() {
             <p className="text-white/70 text-lg leading-relaxed">
               Je staat op het punt om te gaan fietsen, of de was buiten te hangen, of gewoon naar de
               supermarkt. De vraag is simpel: <strong className="text-white">hoe lang duurt deze bui?</strong>
-              {" "}WeerZone laat het je per minuut (eerste uur) en per uur (tot 48 uur vooruit) zien.
+              {" "}WEERZONE laat het je per minuut (eerste uur) en per uur (tot 48 uur vooruit) zien.
             </p>
           </header>
 
@@ -120,7 +120,7 @@ export default function RegenPage() {
             </div>
             <h2 className="text-2xl font-bold text-white">Waarom twee modellen?</h2>
             <p>
-              Eén model is een mening. Twee modellen is een peiling. WeerZone draait HARMONIE (KNMI) én
+              Eén model is een mening. Twee modellen is een peiling. WEERZONE draait HARMONIE (KNMI) én
               ICON (Duitse Weerdienst) naast elkaar. Zijn ze het eens over de regen? Dan kun je je
               planning erop bouwen. Zijn ze het oneens? Dan weet je dat je een paraplu moet meenemen,
               voor de zekerheid.

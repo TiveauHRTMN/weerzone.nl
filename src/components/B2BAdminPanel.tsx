@@ -108,7 +108,7 @@ export default function B2BAdminPanel({ stats, leads, secret }: { stats: Stats; 
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-xs font-bold text-accent-orange uppercase tracking-widest mb-1">WeerZone</p>
+          <p className="text-xs font-bold text-accent-orange uppercase tracking-widest mb-1">WEERZONE</p>
           <h1 className="text-3xl font-black text-white mb-1">B2B Outreach</h1>
           <p className="text-white/40 text-sm">Leads beheren, bedrijven zoeken, outreach versturen.</p>
         </div>
@@ -262,7 +262,7 @@ export default function B2BAdminPanel({ stats, leads, secret }: { stats: Stats; 
         </div>
 
         <p className="mt-6 text-center text-white/20 text-xs">
-          WeerZone B2B Admin ·{" "}
+          WEERZONE B2B Admin ·{" "}
           <a href="/zakelijk" className="text-accent-orange hover:underline">/zakelijk</a>
           {" · "}
           <a href="/" className="hover:text-white/40">Dashboard</a>

@@ -5,7 +5,7 @@ export function LogoIcon({ size = 40, className = "" }: { size?: number; classNa
   return (
     <Image
       src="/favicon-icon.png"
-      alt="WeerZone"
+      alt="WEERZONE"
       width={size}
       height={size}
       className={className}
@@ -14,7 +14,7 @@ export function LogoIcon({ size = 40, className = "" }: { size?: number; classNa
   );
 }
 
-/** Volledig logo: WeerZone tekst + zon
+/** Volledig logo: WEERZONE tekst + zon
  *  De PNG heeft ~8% transparante padding aan alle kanten.
  *  We compenseren via negatieve margin zodat de tekst visueel uitlijnt.
  */
@@ -25,7 +25,7 @@ export function LogoFull({ height = 32, className = "" }: { height?: number; cla
     <div style={{ marginTop: `-${padY}px`, marginBottom: `-${padY}px` }} className="inline-flex">
       <Image
         src="/logo-full.png"
-        alt="WeerZone"
+        alt="WEERZONE"
         width={width}
         height={height}
         className={className}

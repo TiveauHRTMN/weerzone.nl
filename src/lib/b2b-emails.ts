@@ -28,7 +28,7 @@ const GEAR: Record<string, GearItem[]> = {
     { emoji: "🔦", title: "Noodverlichting oplaadbaar", desc: "Voor als onweer het stroompunt raakt.", href: amazonUrl("led noodverlichting oplaadbaar event") },
   ],
   agrarisch: [
-    { emoji: "🌧️", title: "Regenmeter digitaal", desc: "Eigen perceel-data naast WeerZone.", href: amazonUrl("digitale regenmeter draadloos tuin") },
+    { emoji: "🌧️", title: "Regenmeter digitaal", desc: "Eigen perceel-data naast WEERZONE.", href: amazonUrl("digitale regenmeter draadloos tuin") },
     { emoji: "🌡️", title: "Bodemthermometer professioneel", desc: "Zaaien op het juiste moment.", href: amazonUrl("bodemthermometer professioneel landbouw") },
     { emoji: "🧊", title: "Vliesdoek vorstbescherming", desc: "Gewassen sparen bij nachtvorst.", href: amazonUrl("vliesdoek vorstbescherming tuin xxl") },
   ],
@@ -118,7 +118,7 @@ const HOOKS: Record<B2BIndustry, IndustryHook> = {
   glazenwasser: {
     headline: "Ramen wassen bij regen is weggegooid geld",
     painPoint: "Je rijdt naar de klant, zet je ladder neer — en het begint te regenen. Klus uitstellen, klant ontevreden, dag verspild.",
-    solution: "Met WeerZone weet je 48 uur vooruit of het droog blijft. Plan je routes op basis van weerdata, niet op basis van hoop.",
+    solution: "Met WEERZONE weet je 48 uur vooruit of het droog blijft. Plan je routes op basis van weerdata, niet op basis van hoop.",
     oneLiner: "Stop met gokken op droog weer. Weet het.",
     bullets: [
       "48-uurs regenvoorspelling per locatie",
@@ -129,7 +129,7 @@ const HOOKS: Record<B2BIndustry, IndustryHook> = {
   bouw: {
     headline: "Beton storten bij vorst kost duizenden euro's",
     painPoint: "Kraanwerk bij te veel wind, stortwerk bij vrieskou, dakwerk bij regen — elke fout kost tijd en geld.",
-    solution: "WeerZone levert KNMI HARMONIE-data op 2,5 km resolutie. Je weet per uur of het veilig is om door te werken.",
+    solution: "WEERZONE levert KNMI HARMONIE-data op 2,5 km resolutie. Je weet per uur of het veilig is om door te werken.",
     oneLiner: "De bouwplaats draait door. Het weer beslist niet meer.",
     bullets: [
       "Windsnelheid per uur (kraanwerk-drempel instelbaar)",
@@ -162,7 +162,7 @@ const HOOKS: Record<B2BIndustry, IndustryHook> = {
   agrarisch: {
     headline: "Oogsten bij regen vernietigt opbrengst",
     painPoint: "Spuiten bij wind is geldverspilling. Maaien op een nat veld beschadigt de bodem. Te laat oogsten door onverwachte regen kost de helft van je opbrengst.",
-    solution: "WeerZone geeft je per uur de exacte neerslag, wind en temperatuur voor jouw perceel. Plan op data, niet op gevoel.",
+    solution: "WEERZONE geeft je per uur de exacte neerslag, wind en temperatuur voor jouw perceel. Plan op data, niet op gevoel.",
     oneLiner: "Het veld wacht niet. Jouw planning ook niet.",
     bullets: [
       "Neerslag per uur — plan zaai-, spuit- en oogstmomenten",
@@ -206,7 +206,7 @@ const HOOKS: Record<B2BIndustry, IndustryHook> = {
   schildersbedrijf: {
     headline: "Buitenwerk bij regen = verspilde verf én tijd",
     painPoint: "Latex droogt niet onder 10°C. Regen op natte verf betekent opnieuw beginnen. Een verkeerde planning kost materiaal en uren.",
-    solution: "WeerZone toont droogperiodes, temperatuur en luchtvochtigheid per uur. Plan je buitenwerk wanneer het écht kan.",
+    solution: "WEERZONE toont droogperiodes, temperatuur en luchtvochtigheid per uur. Plan je buitenwerk wanneer het écht kan.",
     oneLiner: "De verf droogt. Gegarandeerd.",
     bullets: [
       "Temperatuur per uur — minimaal 10°C voor buitenwerk",
@@ -280,9 +280,9 @@ export function getB2BSubject(
   if (stage === 1 && snippet?.event) {
     return `⚠️ ${snippet.event.label}${location} — voor ${industry}`;
   }
-  if (stage === 2) return `Korte herinnering: ${hook?.headline ?? "WeerZone"}${location}`;
+  if (stage === 2) return `Korte herinnering: ${hook?.headline ?? "WEERZONE"}${location}`;
   if (stage === 3) return `Laatste mail van mij${location}`;
-  if (!hook) return "48-uurs weerdata voor jouw bedrijf — WeerZone";
+  if (!hook) return "48-uurs weerdata voor jouw bedrijf — WEERZONE";
   return `${hook.headline}${location}`;
 }
 
@@ -318,7 +318,7 @@ function buildWeatherSnippetHtml(snippet: WeatherSnippetLike | null | undefined)
 // ============================================================
 
 export const STEVE_PROMPT = `
-Role: Steve van WeerZone Zakelijk.
+Role: Steve van WEERZONE Zakelijk.
 Persona: Afgeleid van Steve Jobs. Minimalistisch. Declaratief. Geen marketing-BS.
 
 STIJL:
@@ -390,7 +390,7 @@ export function getB2BEmailHtml(
 
     <!-- HEADER -->
     <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:32px 24px 28px;text-align:center;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:32px;width:auto;margin-bottom:6px;opacity:0.9;" />
+      <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height:32px;width:auto;margin-bottom:6px;opacity:0.9;" />
       <p style="color:rgba(255,255,255,0.5);font-size:9px;margin:0 0 24px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Data Intelligence · 48-uurs Impact Monitor</p>
       <h1 style="color:#ffffff;font-size:24px;font-weight:900;margin:0;line-height:1.3;">${copy.headline}</h1>
     </div>
@@ -410,18 +410,7 @@ export function getB2BEmailHtml(
 
       ${stage === 1 ? `<p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">${hook.solution}</p>` : (copy.proof ? `<p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">${copy.proof}</p>` : "")}
 
-      ${stage === 1 ? `<!-- EXCLUSIVE OFFER BOX -->
-      <div style="background:#fff7ed;border:2px dashed #f59e0b;border-radius:12px;padding:20px;margin:24px 0;text-align:center;">
-        <p style="margin:0 0 8px;font-size:12px;color:#c2410c;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Founding Member Actie 🚀</p>
-        <p style="margin:0 0 16px;font-size:14px;color:#7c2d12;font-weight:600;line-height:1.4;">
-          We zoeken de eerste 10 ${industry}bedrijven die WeerZone willen helpen perfect te worden. Jij test, wij leren.
-        </p>
-        <div style="background:#f59e0b;color:#1e293b;padding:8px 12px;border-radius:6px;display:inline-block;font-weight:800;font-size:13px;">
-          GRATIS TOEGANG — Geen factuur, nooit.
-        </div>
-      </div>
-
-      <!-- WAT JE KRIJGT -->
+      ${stage === 1 ? `<!-- WAT JE KRIJGT -->
       <div style="background:#f8fafc;border-radius:12px;padding:20px;margin:20px 0;border:1px solid #e2e8f0;">
         <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Wat je krijgt voor ${location}</p>
         <ul style="margin:0;padding-left:20px;list-style:none;">
@@ -429,7 +418,7 @@ export function getB2BEmailHtml(
         </ul>
       </div>
 
-      <p style="margin:0 0 8px;font-size:14px;color:#475569;line-height:1.6;">Aanmelden duurt 30 seconden. Claim je plek voordat de 10 Founding Member-slots in ${location} vol zijn.</p>
+      <p style="margin:0 0 8px;font-size:14px;color:#475569;line-height:1.6;">Eén mail per dag. Gratis. Stop wanneer je wil.</p>
 
       ${buildGearHtml(industry)}` : ""}
     </div>
@@ -439,7 +428,7 @@ export function getB2BEmailHtml(
       <a href="https://weerzone.nl/zakelijk" style="display:block;padding:16px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:15px;border-radius:12px;text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(245,158,11,0.3);">
         ${stage === 3 ? "Zie wat je mist →" : stage === 2 ? "Aanmelden (30 sec) →" : "Gratis aanmelden →"}
       </a>
-      <p style="margin:20px 0 0;font-size:13px;color:#475569;"><strong>Steve · WeerZone Zakelijk</strong><br><span style="font-size:11px;color:#94a3b8;font-weight:400;">Reply werkt — ik lees mee.</span></p>
+      <p style="margin:20px 0 0;font-size:13px;color:#475569;"><strong>Steve · WEERZONE Zakelijk</strong><br><span style="font-size:11px;color:#94a3b8;font-weight:400;">Reply werkt — ik lees mee.</span></p>
     </div>
 
     <!-- TRUST -->
@@ -463,7 +452,7 @@ export function getB2BEmailHtml(
     <!-- FOOTER -->
     <div style="padding:20px 24px;text-align:center;">
       <p style="margin:0;font-size:11px;color:#94a3b8;">
-        WeerZone.nl — 48 uur. De rest is ruis.<br>
+        WEERZONE.nl — 48 uur. De rest is ruis.<br>
         <span style="font-size:10px;">Dit bericht is verstuurd omdat jouw bedrijf profiteert van nauwkeurige weerdata.</span>
       </p>
       <p style="margin:10px 0 0;font-size:11px;">

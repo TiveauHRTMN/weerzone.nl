@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Bedankt — WeerZone Zakelijk",
+  title: "Bedankt — WEERZONE Zakelijk",
   robots: { index: false, follow: false },
 };
 
@@ -35,7 +35,7 @@ export default function BedanktPage() {
         </div>
 
         <Link href="/" className="inline-block px-8 py-3 rounded-full bg-accent-orange text-text-primary font-bold hover:brightness-90 transition-all">
-          Terug naar WeerZone →
+          Terug naar WEERZONE →
         </Link>
       </div>
     </div>

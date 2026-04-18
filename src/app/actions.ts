@@ -37,7 +37,7 @@ export async function getAiVerdict(weather: WeatherData): Promise<string> {
 
         const tomorrow = weather.daily[1];
         const prompt = `
-Je bent de weerverteller van WeerZone. Stijl: Roddelpraat / VI / Powned — direct, brutaal, eerlijk, met mening. Geen gelul, wel netjes (geen scheldwoorden).
+Je bent de weerverteller van WEERZONE. Stijl: Roddelpraat / VI / Powned — direct, brutaal, eerlijk, met mening. Geen gelul, wel netjes (geen scheldwoorden).
 
 LENGTE (HARD):
 - Exact 4 zinnen.

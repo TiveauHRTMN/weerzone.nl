@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const dynamic = "force-dynamic";
 
-const AGENT_PROMPT = `Je bent de "Hyper-Affiliate" Timing Agent van WeerZone.nl.
+const AGENT_PROMPT = `Je bent de "Hyper-Affiliate" Timing Agent van WEERZONE.nl.
 Jouw doel is om gebruikers cynisch maar constructief te waarschuwen voor een naderende keiharde wolkbreuk, precies wanneer ze het niet verwachten. 
 De data toont aan dat er binnen 3 uur een stortbui of zwaar onweer op hun locatie valt.
 Jij schrijft een extreem korte e-mail (max 5 zinnen) met:
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
       
       const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-top: 5px solid #ef4444; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-        <h2 style="color: #ef4444; margin-top: 0; text-transform: uppercase;">Acuut WeerZone Alarm</h2>
+        <h2 style="color: #ef4444; margin-top: 0; text-transform: uppercase;">Acuut WEERZONE Alarm</h2>
         <p style="color: #333; font-size: 16px; line-height: 1.6;">${aiText.replace(/\n/g, '<br>')}</p>
         <div style="margin-top: 30px; text-align: center;">
           <a href="https://weerzone.nl" style="background: #1e293b; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 50px; font-weight: bold;">Check Radar</a>
@@ -81,7 +81,7 @@ export async function GET(req: Request) {
 
       if (process.env.RESEND_API_KEY) {
         await resend.emails.send({
-          from: "WeerZone Alerts <info@weerzone.nl>",
+          from: "WEERZONE Alerts <info@weerzone.nl>",
           to: user.email,
           subject: `Noodweer om ${timeStr} in ${user.city}`,
           html: html,

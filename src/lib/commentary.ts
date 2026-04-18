@@ -2,7 +2,7 @@ import type { WeatherData } from "./types";
 import { getWeatherDescription } from "./weather";
 
 // ============================================================
-// Commentary engine — WeerZone: Roddelpraat-stijl, brutaal, provocerend
+// Commentary engine — WEERZONE: Roddelpraat-stijl, brutaal, provocerend
 // 48 uur. De rest is ruis.
 // Kijkt naar CURRENT + komende uren + morgen voor slimme context
 // ============================================================
@@ -152,7 +152,7 @@ const ROTATING_QUOTES = [
   "Jas-aan-jas-uit-jas-aan weer. Typisch Nederlands. Volkomen ruk, maar wij waarschuwen tenminste eerlijk.",
   "\"Lokaal een bui\" is meteorologen-taal voor: we hebben geen flauw idee. Wij wel.",
   "De gevestigde orde zit er weer naast? Logisch, die gebruiken achterhaalde data. Wij hebben de bron.",
-  "WeerZone liegt niet. Geen valse hoop, geen 'misschien'. Keiharde data over jouw eigen postzegel.",
+  "WEERZONE liegt niet. Geen valse hoop, geen 'misschien'. Keiharde data over jouw eigen postzegel.",
   "Iedereen is meteoroloog totdat ze kletsnat op de fiets staan. Vertrouw op de radar, niet je onderbuik.",
   "Wij beloven niks. Behalve dat de komende 48 uur klopt. De rest is commerciële ruis.",
   "\"Lekker weertje\" zeggen terwijl het 12 graden is. Wij doen niet mee aan die massapsychose.",

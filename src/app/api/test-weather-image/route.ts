@@ -266,7 +266,7 @@ export async function GET(req: Request) {
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:480px;margin:0 auto;">
     <div style="background:${bg};padding:32px 24px 28px;text-align:center;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WeerZone" style="height:36px;width:auto;margin-bottom:4px;opacity:0.9;" />
+      <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height:36px;width:auto;margin-bottom:4px;opacity:0.9;" />
       <p style="color:${textAccent};font-size:10px;margin:0 0 20px;letter-spacing:2px;text-transform:uppercase;font-weight:700;opacity:0.8;">48-Uurs Weerbericht — ${city}</p>
       <p style="font-size:72px;margin:0;line-height:1;">${emoji}</p>
       <p style="font-size:56px;font-weight:900;color:${textAccent};margin:4px 0 0;line-height:1;">${temp}°</p>
@@ -355,7 +355,7 @@ export async function GET(req: Request) {
     </div>
     ${affiliateBlock}
     <div style="padding:20px 24px;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#94a3b8;">${dateStr} · KNMI HARMONIE data · WeerZone.nl<br><span style="font-size:10px;">48 uur. De rest is ruis.</span></p>
+      <p style="margin:0;font-size:11px;color:#94a3b8;">${dateStr} · KNMI HARMONIE data · WEERZONE.nl<br><span style="font-size:10px;">48 uur. De rest is ruis.</span></p>
       <p style="margin:12px 0 0;font-size:11px;"><a href="https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(to)}" style="color:#94a3b8;text-decoration:underline;">Uitschrijven</a></p>
     </div>
   </div>
@@ -365,9 +365,9 @@ export async function GET(req: Request) {
   const resend = new Resend(resendKey);
   try {
     const result = await resend.emails.send({
-      from: "WeerZone <info@weerzone.nl>",
+      from: "WEERZONE <info@weerzone.nl>",
       to,
-      subject: `${emoji} ${temp}° Amsterdam — 48u Weerbericht | WeerZone`,
+      subject: `${emoji} ${temp}° Amsterdam — 48u Weerbericht | WEERZONE`,
       html,
     });
     if (result.error) return NextResponse.json({ error: result.error.message }, { status: 500 });

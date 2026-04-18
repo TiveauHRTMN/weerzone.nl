@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
           background: "rgba(0,0,0,0.15)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontSize: "24px", fontWeight: 800, color: "white", display: "flex" }}>WeerZone</span>
+            <span style={{ fontSize: "24px", fontWeight: 800, color: "white", display: "flex" }}>WEERZONE</span>
             <span style={{ fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.5)", display: "flex" }}>weerzone.nl</span>
           </div>
           <span style={{ fontSize: "13px", fontWeight: 600, color: "rgba(255,255,255,0.4)", display: "flex" }}>48 uur. De rest is ruis.</span>

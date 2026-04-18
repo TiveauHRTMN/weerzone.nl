@@ -45,9 +45,9 @@ export async function GET(req: Request) {
   // Stap 1: probeer met eigen domein
   try {
     const { data, error } = await resend.emails.send({
-      from: "WeerZone <info@weerzone.nl>",
+      from: "WEERZONE <info@weerzone.nl>",
       to,
-      subject: "WeerZone Test — Resend werkt! ✅",
+      subject: "WEERZONE Test — Resend werkt! ✅",
       html: `<div style="font-family:system-ui;padding:40px;max-width:480px;margin:0 auto;background:#4a9ee8;border-radius:18px;">
         <div style="background:white;border-radius:18px;padding:32px;text-align:center;">
           <h1 style="color:#1e293b;margin:0 0 16px;">✅ Resend werkt!</h1>
@@ -61,9 +61,9 @@ export async function GET(req: Request) {
       // Domein niet verified — fallback
       if (error.message?.includes("not verified") || error.message?.includes("domain") || error.message?.includes("not found")) {
         const fallback = await resend.emails.send({
-          from: "WeerZone <onboarding@resend.dev>",
+          from: "WEERZONE <onboarding@resend.dev>",
           to,
-          subject: "WeerZone Test (via resend.dev) ⚠️",
+          subject: "WEERZONE Test (via resend.dev) ⚠️",
           html: `<div style="font-family:system-ui;padding:40px;max-width:480px;margin:0 auto;background:#4a9ee8;border-radius:18px;">
             <div style="background:white;border-radius:18px;padding:32px;text-align:center;">
               <h2 style="color:#f59e0b;">⚠️ Domein niet geverifieerd</h2>

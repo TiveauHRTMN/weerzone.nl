@@ -5,7 +5,7 @@ import ContactForm from "@/components/ContactForm";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact opnemen met WeerZone? Stuur een mail naar info@weerzone.nl — we lezen alles, antwoorden op werkdagen binnen 24 uur.",
+    "Contact opnemen met WEERZONE? Stuur een mail naar info@weerzone.nl — we lezen alles, antwoorden op werkdagen binnen 24 uur.",
   alternates: { canonical: "https://weerzone.nl/contact" },
 };
 
@@ -14,7 +14,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
       <div className="max-w-xl mx-auto">
         <nav className="text-xs text-white/50 mb-6">
-          <Link href="/" className="hover:text-white">WeerZone</Link>
+          <Link href="/" className="hover:text-white">WEERZONE</Link>
           <span className="mx-2">/</span>
           <span className="text-white/80">Contact</span>
         </nav>
@@ -98,7 +98,7 @@ export default function ContactPage() {
             href="/"
             className="inline-block px-6 py-3 rounded-xl bg-accent-orange text-slate-900 font-bold hover:brightness-95 transition-all"
           >
-            ← Terug naar WeerZone
+            ← Terug naar WEERZONE
           </Link>
         </div>
       </div>

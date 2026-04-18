@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     if (process.env.RESEND_API_KEY) {
       try {
-        const fromAddress = "WeerZone <info@weerzone.nl>";
+        const fromAddress = "WEERZONE <info@weerzone.nl>";
         const welcomeHtml = `
 <!DOCTYPE html>
 <html lang="nl">
