@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users } from "lucide-react";
 import { LogoFull } from "./Logo";
 import PersonaBadge from "./PersonaBadge";
+import PremiumGate from "./PremiumGate";
 import { useSession } from "@/lib/session-context";
 import LoadingScreen from "./LoadingScreen";
 import { loadWeather } from "@/lib/weatherCache";
@@ -327,6 +328,8 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* Mails & Ads moved below alerts */}
 
+      {/* ===== PREMIUM GATE START — alles hieronder is voor Piet/Reed/Steve ===== */}
+      <PremiumGate>
       {/* ===== 2. Rain Radar & Komende Uren (Samengevoegd in 1 box) ===== */}
       <div className="card p-4 animate-fade-in" style={{ animationDelay: "0.15s" }}>
         {weather.minutely && weather.minutely.length > 0 && (
@@ -803,6 +806,9 @@ export default function WeatherDashboard({ initialCity }: DashboardProps = {}) {
 
       {/* Affiliate Spot 1 moved to top */}
 
+
+      </PremiumGate>
+      {/* ===== PREMIUM GATE END ===== */}
 
       {/* ===== Affiliate Spot 2 — onderaan ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
