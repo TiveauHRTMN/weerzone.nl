@@ -348,30 +348,36 @@ export default function OnboardingClient() {
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow mb-2">
-            {step === "sent"
-              ? "Check je inbox"
-              : step === "profile"
-                ? "Vertel wat over jezelf"
-                : "Word founder"}
+            {step === "sent" && "Check je inbox"}
+            {step === "tier" && "Word founder"}
+            {step === "auth" && "Even vastleggen"}
+            {step === "profile" && tier && (
+              <>
+                Hoi — ik ben{" "}
+                <span style={{ color: PERSONAS[tier].color }}>
+                  {PERSONAS[tier].name}
+                </span>
+              </>
+            )}
           </h1>
           <p className="text-white/90 text-sm">
             {step === "tier" && "Kies je persona — gratis tot 1 juni, founder-prijs voor altijd."}
             {step === "auth" && tier && (
               <>
-                Je koos voor{" "}
+                Je koos{" "}
                 <strong style={{ color: PERSONAS[tier].color }}>
                   {PERSONAS[tier].name}
                 </strong>
-                . Log in om te bevestigen.
+                . Geen wachtwoord, gewoon je mail.
               </>
             )}
-            {step === "sent" && "We stuurden je een inloglink."}
-            {step === "profile" && tier && (
-              <>
-                Hoe beter {PERSONAS[tier].name} je kent, hoe scherper je
-                dagelijkse brief. Duurt 2 minuten.
-              </>
-            )}
+            {step === "sent" && "Link onderweg. Klik 'm aan en we gaan verder."}
+            {step === "profile" && tier === "piet" &&
+              "Als ik elke ochtend over jóu schrijf, moet ik weten met wie ik praat. Twee minuten."}
+            {step === "profile" && tier === "reed" &&
+              "Ik bel niet voor niks. Vertel waar jij gevoelig voor bent, dan stuur ik alleen wat ertoe doet."}
+            {step === "profile" && tier === "steve" &&
+              "Ik wil geen generieke mails sturen. Geef me je cijfers, dan reken ik vanochtend mee."}
           </p>
         </div>
 
@@ -563,20 +569,19 @@ function ProfileForm(props: {
     <form onSubmit={onSubmit} className="bg-white/95 backdrop-blur rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
       {/* Basis */}
       <section className="space-y-4">
-        <h2 className="text-sm font-black uppercase tracking-wider text-text-muted">Basis</h2>
-        <Field label="Naam (hoe mag je persona je aanspreken?)">
+        <Field label="Hoe heet je?">
           <input
             type="text"
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Roy Hartman"
+            placeholder="Roy"
             className="input"
           />
         </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Postcode (optioneel)">
+          <Field label="Waar woon je?">
             <input
               type="text"
               value={postcode}
@@ -585,7 +590,7 @@ function ProfileForm(props: {
               className="input"
             />
           </Field>
-          <Field label="GPS-locatie">
+          <Field label="Of deel je GPS (preciezer)">
             <button
               type="button"
               onClick={onGps}
@@ -595,12 +600,12 @@ function ProfileForm(props: {
               <span className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 {gpsStatus === "ok" && gpsCoords
-                  ? `${gpsCoords.lat.toFixed(3)}, ${gpsCoords.lon.toFixed(3)}`
+                  ? `Op de meter — ${gpsCoords.lat.toFixed(3)}, ${gpsCoords.lon.toFixed(3)}`
                   : gpsStatus === "asking"
-                    ? "Bepalen…"
+                    ? "Even kijken…"
                     : gpsStatus === "denied"
-                      ? "Geweigerd — vul postcode in"
-                      : "Klik om te delen"}
+                      ? "Niet gelukt — postcode is prima"
+                      : "Klik hier"}
               </span>
               {gpsStatus === "ok" && <Check className="w-4 h-4 text-green-600" />}
             </button>
@@ -609,36 +614,53 @@ function ProfileForm(props: {
       </section>
 
       {/* Persona-specifiek */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-black uppercase tracking-wider" style={{ color }}>
-          {PERSONAS[tier].name}-profiel
-        </h2>
-
+      <section className="space-y-5 border-t border-black/5 pt-6">
         {tier === "piet" && (
-          <div className="space-y-4">
-            <Field label="Hond — wat is z'n naam? (leeg = geen hond)">
+          <>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Kort vraagje, dan laat ik je met rust. Alles wat je invult komt
+              terug in de briefjes — alles wat je leeg laat, laat ik liggen.
+            </p>
+
+            <Field label="Hond?">
               <input
                 type="text"
                 value={piet.hondNaam}
                 onChange={(e) => setPiet({ ...piet, hondNaam: e.target.value })}
-                placeholder="Peppercorn"
+                placeholder="Naam — of laat leeg als je geen hond hebt"
                 className="input"
               />
             </Field>
-            <CheckRow label="Ik fiets dagelijks" checked={piet.fiets} onChange={(v) => setPiet({ ...piet, fiets: v })} />
-            <CheckRow label="Ik heb een tuin" checked={piet.tuin} onChange={(v) => setPiet({ ...piet, tuin: v })} />
-            <CheckRow label="Ik heb kinderen thuis" checked={piet.kinderen} onChange={(v) => setPiet({ ...piet, kinderen: v })} />
-            <CheckRow label="Ik ben gevoelig voor astma / luchtweg-klachten" checked={piet.astma} onChange={(v) => setPiet({ ...piet, astma: v })} />
-          </div>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-text-primary">
+                Wat doe je nog meer?
+              </p>
+              <CheckRow label="Fiets is m'n hoofdvervoer" checked={piet.fiets} onChange={(v) => setPiet({ ...piet, fiets: v })} />
+              <CheckRow label="Ik heb een tuin — das soms relevant" checked={piet.tuin} onChange={(v) => setPiet({ ...piet, tuin: v })} />
+              <CheckRow label="Kinderen in huis" checked={piet.kinderen} onChange={(v) => setPiet({ ...piet, kinderen: v })} />
+              <CheckRow label="Luchtwegen zijn gevoelig (astma, hooikoorts)" checked={piet.astma} onChange={(v) => setPiet({ ...piet, astma: v })} />
+            </div>
+          </>
         )}
 
         {tier === "reed" && (
-          <div className="space-y-4">
-            <CheckRow label="Kelder is watergevoelig" checked={reed.kelderGevoelig} onChange={(v) => setReed({ ...reed, kelderGevoelig: v })} />
-            <CheckRow label="Plat dak (windgevoelig)" checked={reed.platDak} onChange={(v) => setReed({ ...reed, platDak: v })} />
-            <CheckRow label="Baby in huis" checked={reed.baby} onChange={(v) => setReed({ ...reed, baby: v })} />
-            <CheckRow label="Paarden / vee in de wei" checked={reed.paardWei} onChange={(v) => setReed({ ...reed, paardWei: v })} />
-            <Field label="Eerder waterschade gehad? (jaartal, optioneel)">
+          <>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Ik bel je alleen als het écht ertoe doet. Geen code-geel-spam.
+              Vertel wat er thuis op het spel staat, dan weet ik waar ik op moet
+              letten.
+            </p>
+
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-text-primary">
+                Waar ben jij gevoelig voor?
+              </p>
+              <CheckRow label="Kelder die onderloopt bij hoosbui" checked={reed.kelderGevoelig} onChange={(v) => setReed({ ...reed, kelderGevoelig: v })} />
+              <CheckRow label="Plat dak dat bij storm kan rammen" checked={reed.platDak} onChange={(v) => setReed({ ...reed, platDak: v })} />
+              <CheckRow label="Baby in huis — hitte is dan anders" checked={reed.baby} onChange={(v) => setReed({ ...reed, baby: v })} />
+              <CheckRow label="Dieren buiten (paard, schapen, kippen)" checked={reed.paardWei} onChange={(v) => setReed({ ...reed, paardWei: v })} />
+            </div>
+            <Field label="Ooit waterschade gehad? Welk jaar? (laat leeg als nee)">
               <input
                 type="text"
                 value={reed.waterschadeHistorie}
@@ -647,13 +669,19 @@ function ProfileForm(props: {
                 className="input"
               />
             </Field>
-          </div>
+          </>
         )}
 
         {tier === "steve" && (
-          <div className="space-y-4">
+          <>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Ik hoef geen balans of KvK-nummer. Gewoon: wat doe je, hoe groot
+              ben je, en wanneer kijkt het weer je omzet in de wielen. Dan
+              reken ik vanaf morgen mee.
+            </p>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Branche">
+              <Field label="Wat doe je?">
                 <input
                   type="text"
                   required
@@ -663,7 +691,7 @@ function ProfileForm(props: {
                   className="input"
                 />
               </Field>
-              <Field label="Capaciteit (plekken / dagomzet-schaal)">
+              <Field label="Hoe groot? (plekken, couverts, zzp=1)">
                 <input
                   type="number"
                   value={steve.capaciteit}
@@ -674,37 +702,47 @@ function ProfileForm(props: {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Field label="Wind-drempel (bft)">
-                <input type="number" value={steve.windBft} onChange={(e) => setSteve({ ...steve, windBft: e.target.value })} className="input" />
-              </Field>
-              <Field label="Regen-drempel (mm)">
-                <input type="number" value={steve.regenMm} onChange={(e) => setSteve({ ...steve, regenMm: e.target.value })} className="input" />
-              </Field>
-              <Field label="Temp-minimum (°C)">
-                <input type="number" value={steve.tempMin} onChange={(e) => setSteve({ ...steve, tempMin: e.target.value })} className="input" />
-              </Field>
-              <Field label="Onweer meetellen">
-                <select
-                  value={steve.onweer ? "ja" : "nee"}
-                  onChange={(e) => setSteve({ ...steve, onweer: e.target.value === "ja" })}
-                  className="input"
-                >
-                  <option value="ja">Ja</option>
-                  <option value="nee">Nee</option>
-                </select>
-              </Field>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-text-primary">
+                Wanneer wordt het een probleem?
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Field label="Wind vanaf (bft)">
+                  <input type="number" value={steve.windBft} onChange={(e) => setSteve({ ...steve, windBft: e.target.value })} className="input" />
+                </Field>
+                <Field label="Regen vanaf (mm)">
+                  <input type="number" value={steve.regenMm} onChange={(e) => setSteve({ ...steve, regenMm: e.target.value })} className="input" />
+                </Field>
+                <Field label="Te koud onder (°C)">
+                  <input type="number" value={steve.tempMin} onChange={(e) => setSteve({ ...steve, tempMin: e.target.value })} className="input" />
+                </Field>
+                <Field label="Onweer telt mee">
+                  <select
+                    value={steve.onweer ? "ja" : "nee"}
+                    onChange={(e) => setSteve({ ...steve, onweer: e.target.value === "ja" })}
+                    className="input"
+                  >
+                    <option value="ja">Ja</option>
+                    <option value="nee">Nee</option>
+                  </select>
+                </Field>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Inkoop-deadline (uur)">
-                <input type="number" min={0} max={23} value={steve.inkoopUur} onChange={(e) => setSteve({ ...steve, inkoopUur: e.target.value })} className="input" />
-              </Field>
-              <Field label="Annulering-deadline (uur)">
-                <input type="number" min={0} max={23} value={steve.annuleringUur} onChange={(e) => setSteve({ ...steve, annuleringUur: e.target.value })} className="input" />
-              </Field>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-text-primary">
+                Tot wanneer kan je nog schakelen vandaag?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Inkoop uiterlijk om (uur)">
+                  <input type="number" min={0} max={23} value={steve.inkoopUur} onChange={(e) => setSteve({ ...steve, inkoopUur: e.target.value })} className="input" />
+                </Field>
+                <Field label="Annuleren uiterlijk om (uur)">
+                  <input type="number" min={0} max={23} value={steve.annuleringUur} onChange={(e) => setSteve({ ...steve, annuleringUur: e.target.value })} className="input" />
+                </Field>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </section>
 
@@ -716,11 +754,11 @@ function ProfileForm(props: {
         className="w-full rounded-full px-6 py-3 font-black text-white disabled:opacity-60 flex items-center justify-center gap-2"
         style={{ background: color }}
       >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Klaar — stuur mijn eerste brief</>}
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Klaar. Stuur morgen mijn eerste brief.</>}
       </button>
 
       <p className="text-[11px] text-text-muted text-center">
-        Je kan dit later aanpassen in je dashboard.
+        Bedacht je je? Pas het later aan vanuit je dashboard.
       </p>
 
       <style jsx>{`
