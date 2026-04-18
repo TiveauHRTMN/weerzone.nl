@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/amazon-refresh",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/persona-briefs",
+      "schedule": "0 6 * * *"
     }
   ]
 }
