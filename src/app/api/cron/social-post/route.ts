@@ -25,12 +25,12 @@ interface AffiliatePick {
 function pickAffiliate(w: {
   temp: number; rain: number; wind: number; maxTemp: number; minTemp: number;
 }): AffiliatePick {
-  if (w.rain > 5) return { product: "Stormparaplu", keyword: "stormparaplu+windproof", tag: "regen" };
-  if (w.wind > 40) return { product: "Softshell windjas", keyword: "softshell+jas+windproof", tag: "wind" };
-  if (w.maxTemp > 25) return { product: "Zonnebrand SPF 50+", keyword: "zonnebrand+spf+50+waterproof", tag: "zon" };
-  if (w.minTemp < 3) return { product: "IJskrabber", keyword: "ijskrabber+met+handschoen", tag: "kou" };
-  if (w.maxTemp < 10) return { product: "Thermo-handschoenen", keyword: "thermo+handschoenen+dames+heren", tag: "kou" };
-  return { product: "3-in-1 regenjas", keyword: "3in1+regenjas", tag: "neutraal" };
+  if (w.rain > 5) return { product: "Stormparaplu", keyword: "stormparaplu windproof", tag: "regen" };
+  if (w.wind > 40) return { product: "Softshell windjas", keyword: "softshell jas windproof", tag: "wind" };
+  if (w.maxTemp > 25) return { product: "Zonnebrand SPF 50+", keyword: "zonnebrand spf 50 waterproof", tag: "zon" };
+  if (w.minTemp < 3) return { product: "IJskrabber", keyword: "ijskrabber met handschoen", tag: "kou" };
+  if (w.maxTemp < 10) return { product: "Thermo-handschoenen", keyword: "thermo handschoenen", tag: "kou" };
+  return { product: "3-in-1 regenjas", keyword: "3 in 1 regenjas", tag: "neutraal" };
 }
 
 function buildDeterministicCaption(args: {
