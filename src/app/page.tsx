@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import WeatherDashboard from "@/components/WeatherDashboard";
+import HomePitch from "@/components/HomePitch";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ const jsonLd = {
   name: "WEERZONE",
   url: "https://weerzone.nl",
   description:
-    "WEERZONE.nl — Vergeet de 14-daagse. De komende 48 uur vooruit. De rest is ruis. Puur KNMI HARMONIE op de vierkante meter.",
+    "WEERZONE.nl — De 14-daagse is gokken. Wij niet. 48 uur vooruit, KNMI HARMONIE, op jouw vierkante meter. Eén mail per ochtend, verder nergens last van.",
   potentialAction: {
     "@type": "SearchAction",
     target: "https://weerzone.nl/weer/{city}",
@@ -41,31 +42,31 @@ const faqLd = {
       name: "Wat is WEERZONE?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "WEERZONE vertelt je de werkelijkheid. We gebruiken de krachtige KNMI HARMONIE data voor de enige voorspelling die ertoe doet: de komende 48 uur op je eigen postzegel nauwkeurig. De rest is ruis.",
+        text: "WEERZONE is een weerbericht dat jou kent. Elke ochtend één mail, 48 uur vooruit, op je eigen GPS-punt. Geen 14-daagse, geen code-geel-spam, geen ruis.",
       },
     },
     {
       "@type": "Question",
-      name: "Waarom voorspelt WEERZONE maar 48 uur vooruit?",
+      name: "Waarom maar 48 uur vooruit?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Omdat alles na 48 uur wetenschappelijk gezien onbetrouwbaar is. Die 14-daagse van je weer-app? Een random number generator met een zonnetje erop. Wij doen alleen wat bewezen klopt.",
+        text: "Omdat alles daarna gokken is. Een 14-daagse voorspelling is een muntje opgooien met een zonnetje erop — elke dag die je verder kijkt, neemt de betrouwbaarheid snel af. Wij houden ons bij wat bewezen klopt: 48 uur.",
       },
     },
     {
       "@type": "Question",
-      name: "Welke bron gebruikt WEERZONE?",
+      name: "Welk model gebruikt WEERZONE?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Wij ontsluiten direct de rauwe KNMI HARMONIE data (het meest geavanceerde weermodel van Nederland). Waar andere apps gokken met globale data, gebruiken wij de bron die tot op de kilometer nauwkeurig is voor jouw straat. Eerlijkheid boven alles.",
+        text: "KNMI HARMONIE — het scherpste weermodel van Nederland, gebouwd voor ons kustklimaat. Raster van 2,5 km, dus fijnmazig genoeg voor jouw straat. Wij ontsluiten het rauw, zonder Silicon-Valley-filter ertussen.",
       },
     },
     {
       "@type": "Question",
-      name: "Is WEERZONE gratis?",
+      name: "Is het gratis?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Het 48-uurs weerbericht is volledig gratis. Met een gratis account krijg je extra features: postcodespecifieke alerts, AI-kledingadvies van Piet en de 48-uurs Impact Analyse. Geen creditcard nodig.",
+        text: "De 48-uurs voorspelling op de homepage is gratis. De dagelijkse persoonlijke mail (Piet, Reed of Steve) is tot 1 juni 2026 gratis voor founders. Daarna vanaf €2,99 per maand, met jouw founder-tarief voor altijd vastgeklikt.",
       },
     },
   ],
@@ -91,6 +92,7 @@ export default function Home() {
       />
       <main>
         <WeatherDashboard initialCity={DUTCH_CITIES[0]} />
+        <HomePitch />
       </main>
     </>
   );

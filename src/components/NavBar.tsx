@@ -65,8 +65,8 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         </li>
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
-          <Link href="/zakelijk" className="nav-item w-full">
-            <span className="label">Zakelijk</span>
+          <Link href="/prijzen" className="nav-item w-full">
+            <span className="label">Prijzen</span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
@@ -78,7 +78,13 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
           <Link href={reedHref} className="nav-item w-full">
-            <span className="label">Waarschuwing</span>
+            <span className="label">Alerts</span>
+          </Link>
+        </li>
+        <li className="nav-divider" aria-hidden="true" />
+        <li className="flex-1">
+          <Link href="/zakelijk" className="nav-item w-full">
+            <span className="label">Zakelijk</span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
