@@ -69,7 +69,10 @@
       "Bash(curl -sS -X POST https://weerzone.nl/api/b2b/outreach -H \"Authorization: Bearer weerzone-cron-2026-djaelito\" -H \"Content-Type: application/json\" -d \"{\\\\\"businessName\\\\\":\\\\\"Test Dakdekker BV\\\\\",\\\\\"email\\\\\":\\\\\"rwnhrtmn@gmail.com\\\\\",\\\\\"city\\\\\":\\\\\"Amsterdam\\\\\",\\\\\"industry\\\\\":\\\\\"dakdekker\\\\\"}\")",
       "Bash(echo \"EXIT=$?\")",
       "Bash(echo \"TSC=$?\")",
-      "Bash(find C:/Users/rwnhr/kutweer/src -name \"*.ts\" -exec grep -l \"@anthropic-ai\\\\|Anthropic\\\\|claude-\" {} \\\\;)"
+      "Bash(find C:/Users/rwnhr/kutweer/src -name \"*.ts\" -exec grep -l \"@anthropic-ai\\\\|Anthropic\\\\|claude-\" {} \\\\;)",
+      "Bash(xargs grep *)",
+      "Bash(xargs head *)",
+      "Bash(xargs ls *)"
     ]
   }
 }

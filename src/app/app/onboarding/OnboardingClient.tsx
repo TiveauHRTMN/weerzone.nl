@@ -204,7 +204,15 @@ export default function OnboardingClient() {
       options: { redirectTo },
     });
     if (oauthError) {
-      setError(oauthError.message);
+      // Supabase geeft "Unsupported provider" als Google in dashboard niet aanstaat.
+      const msg = oauthError.message.toLowerCase();
+      if (msg.includes("provider") || msg.includes("unsupported")) {
+        setError(
+          "Google-login is nog niet actief. Gebruik tijdelijk je e-mailadres — je bent in 30 seconden ingelogd.",
+        );
+      } else {
+        setError(oauthError.message);
+      }
       setLoading(false);
     }
   }
@@ -383,7 +391,7 @@ export default function OnboardingClient() {
           />
         )}
 
-        {step === "sent" && <SentCard email={email} />}
+        {step === "sent" && <SentCard email={email} tier={tier} />}
 
         {step === "profile" && tier && (
           <ProfileForm
@@ -507,19 +515,80 @@ function AuthCard(props: {
   );
 }
 
-function SentCard({ email }: { email: string }) {
+function SentCard({ email, tier }: { email: string; tier: PersonaTier | null }) {
+  const p = tier ? PERSONAS[tier] : null;
+  const accent = p?.color ?? "#f59e0b";
+
   return (
-    <div className="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-xl text-center">
-      <div className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
-        <Check className="w-7 h-7" />
+    <div className="space-y-5">
+      {/* Hoofd-confirmatiekaart — glass, in huisstijl */}
+      <div className="bg-white/95 backdrop-blur rounded-3xl p-8 sm:p-10 shadow-2xl text-center relative overflow-hidden">
+        {/* Persona-accentstrook bovenin */}
+        <div
+          className="absolute top-0 left-0 right-0 h-1.5"
+          style={{ background: accent }}
+        />
+
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg"
+          style={{ background: `${accent}1f`, color: accent }}
+        >
+          <Check className="w-8 h-8" strokeWidth={3} />
+        </div>
+
+        <h2 className="text-2xl sm:text-3xl font-black text-text-primary mb-3 leading-tight">
+          Check je inbox
+        </h2>
+        <p className="text-text-secondary text-base leading-relaxed mb-1">
+          We hebben een inloglink gestuurd naar
+        </p>
+        <p className="text-lg font-black text-text-primary mb-5 break-all">
+          {email}
+        </p>
+
+        <div className="bg-black/[0.03] rounded-2xl p-4 text-left space-y-2.5 mb-5">
+          <div className="flex items-start gap-3">
+            <span className="shrink-0 w-6 h-6 rounded-full bg-white flex items-center justify-center text-xs font-black text-text-primary shadow-sm">1</span>
+            <p className="text-sm text-text-primary pt-0.5">Open de mail van <strong>info@weerzone.nl</strong></p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="shrink-0 w-6 h-6 rounded-full bg-white flex items-center justify-center text-xs font-black text-text-primary shadow-sm">2</span>
+            <p className="text-sm text-text-primary pt-0.5">Klik de inloglink (geldig 1 uur)</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="shrink-0 w-6 h-6 rounded-full bg-white flex items-center justify-center text-xs font-black text-text-primary shadow-sm">3</span>
+            <p className="text-sm text-text-primary pt-0.5">Vul je postcode + voorkeuren in</p>
+          </div>
+        </div>
+
+        <p className="text-xs text-text-muted">
+          Niks gezien? Check je spam-map, of wacht een minuutje. Dit tabblad mag dicht.
+        </p>
       </div>
-      <p className="text-text-primary font-bold mb-2">
-        Inloglink verstuurd naar <br />
-        <span className="text-accent-orange">{email}</span>
-      </p>
-      <p className="text-sm text-text-secondary">
-        Check je inbox (en spam). Klik de link om door te gaan. Je kan dit tabblad sluiten.
-      </p>
+
+      {/* Preview van wat ze straks gaan ontvangen */}
+      {p && (
+        <div className="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-xl">
+          <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">
+            Morgenochtend om 07:00
+          </p>
+          <div className="flex items-start gap-3">
+            <div
+              className="w-12 h-12 rounded-full shrink-0 flex items-center justify-center text-white font-black text-lg"
+              style={{ background: accent }}
+            >
+              {p.name.charAt(0)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-black text-text-primary">{p.name} | WEERZONE</p>
+              <p className="text-xs text-text-secondary">Jouw {p.label.toLowerCase()}-brief — op jouw postcode</p>
+              <p className="text-[13px] text-text-primary mt-2 leading-snug italic">
+                &ldquo;{p.tagline}&rdquo;
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
