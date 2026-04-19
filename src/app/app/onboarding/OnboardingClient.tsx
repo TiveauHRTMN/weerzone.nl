@@ -490,7 +490,7 @@ function AuthCard(props: {
           className="w-full rounded-full px-6 py-3 font-black text-white disabled:opacity-60 flex items-center justify-center gap-2"
           style={{ background: PERSONAS[tier].color }}
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Stuur inloglink</>}
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Verzend e-mail</>}
         </button>
       </form>
 
