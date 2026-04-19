@@ -64,13 +64,13 @@ export async function GET(req: NextRequest) {
     timeZone: "Europe/Amsterdam",
   });
 
+  const origin = req.nextUrl.origin.startsWith("http://localhost")
+    ? req.nextUrl.origin
+    : "https://weerzone.nl";
+  const logoUrl = `${origin}/logo-full.png`;
+
   // ----- SLIDE 2: logo + CTA (geen weerdata nodig) -----
   if (slide === 2) {
-    const origin = req.nextUrl.origin.startsWith("http://localhost")
-      ? req.nextUrl.origin
-      : "https://weerzone.nl";
-    const logoUrl = `${origin}/logo-full.png`;
-
     return new ImageResponse(
       (
         <div
@@ -80,90 +80,112 @@ export async function GET(req: NextRequest) {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
             background: "linear-gradient(160deg,#2563eb 0%,#4a9ee8 55%,#1e5a8a 100%)",
             fontFamily: "system-ui, sans-serif",
             position: "relative",
-            padding: "80px",
+            padding: "80px 72px",
           }}
         >
-          {/* Zon-glow */}
-          <div
-            style={{
-              position: "absolute",
-              top: "-120px",
-              right: "-120px",
-              width: "500px",
-              height: "500px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(255,180,0,0.45) 0%, transparent 70%)",
-              display: "flex",
-            }}
-          />
-
-          {/* Echte logo */}
+          {/* Logo groot bovenaan — zon zit rechts in het logo-canvas */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={logoUrl}
             alt="WEERZONE"
-            width={720}
-            height={240}
+            width={936}
+            height={260}
             style={{
-              maxWidth: "720px",
-              width: "720px",
+              width: "936px",
               height: "auto",
               objectFit: "contain",
-              marginBottom: "40px",
-              filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.3))",
+              filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.25))",
             }}
           />
 
+          {/* Strong CTA headline */}
           <div
             style={{
-              fontSize: "34px",
-              fontWeight: 600,
-              color: "rgba(255,255,255,0.9)",
+              marginTop: "90px",
+              fontSize: "96px",
+              fontWeight: 900,
+              color: "#ffffff",
+              letterSpacing: "-3px",
+              lineHeight: 1.05,
+              textAlign: "center",
               display: "flex",
+              textShadow: "0 4px 16px rgba(0,0,0,0.25)",
             }}
           >
-            Jouw postcode. Jouw ochtendbrief.
+            Stop met Buienradar.
           </div>
 
-          {/* CTA block */}
           <div
             style={{
-              marginTop: "72px",
-              background: "rgba(255,255,255,0.96)",
-              borderRadius: "32px",
-              padding: "40px 56px",
+              marginTop: "28px",
+              fontSize: "44px",
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.92)",
+              textAlign: "center",
+              display: "flex",
+              lineHeight: 1.25,
+              maxWidth: "900px",
+            }}
+          >
+            48 uur. Eén mail. Geen reclame.
+          </div>
+
+          {/* URL block */}
+          <div
+            style={{
+              marginTop: "80px",
+              background: "rgba(255,255,255,0.97)",
+              borderRadius: "36px",
+              padding: "44px 72px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.28)",
             }}
           >
-            <div style={{ fontSize: "28px", color: "#64748b", fontWeight: 700, display: "flex", letterSpacing: "2px", textTransform: "uppercase" }}>
-              Elke dag om 7:00 in je inbox
+            <div
+              style={{
+                fontSize: "26px",
+                color: "#64748b",
+                fontWeight: 700,
+                letterSpacing: "3px",
+                textTransform: "uppercase",
+                display: "flex",
+              }}
+            >
+              Meld je aan op
             </div>
-            <div style={{ fontSize: "52px", color: "#0f172a", fontWeight: 900, marginTop: "8px", display: "flex" }}>
+            <div
+              style={{
+                fontSize: "96px",
+                color: "#0f172a",
+                fontWeight: 900,
+                marginTop: "8px",
+                letterSpacing: "-2px",
+                display: "flex",
+              }}
+            >
               weerzone.nl
             </div>
           </div>
 
-          {/* Badge: tijdelijk gratis */}
+          {/* Badge */}
           <div
             style={{
               marginTop: "40px",
               background: "#FFB400",
               color: "#0f172a",
-              fontSize: "28px",
+              fontSize: "30px",
               fontWeight: 900,
-              padding: "14px 36px",
+              padding: "16px 44px",
               borderRadius: "999px",
-              letterSpacing: "1px",
+              letterSpacing: "2px",
               textTransform: "uppercase",
               display: "flex",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
             }}
           >
             Tijdelijk gratis
@@ -216,9 +238,19 @@ export async function GET(req: NextRequest) {
               {dateStr}
             </div>
           </div>
-          <div style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "2px", opacity: 0.9, display: "flex" }}>
-            WEERZONE
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoUrl}
+            alt="WEERZONE"
+            width={260}
+            height={72}
+            style={{
+              width: "260px",
+              height: "auto",
+              objectFit: "contain",
+              filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.25))",
+            }}
+          />
         </div>
 
         {/* Centerpiece */}
