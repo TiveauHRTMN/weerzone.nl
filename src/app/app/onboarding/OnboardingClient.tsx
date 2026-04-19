@@ -7,7 +7,6 @@ import {
   PERSONAS,
   PERSONA_ORDER,
   formatPrice,
-  daysUntilLaunch,
   type PersonaTier,
 } from "@/lib/personas";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -94,8 +93,6 @@ export default function OnboardingClient() {
   const [pietPrefs, setPietPrefs] = useState<PietPrefs>(EMPTY_PIET);
   const [reedPrefs, setReedPrefs] = useState<ReedPrefs>(EMPTY_REED);
   const [stevePrefs, setStevePrefs] = useState<StevePrefs>(EMPTY_STEVE);
-
-  const days = daysUntilLaunch();
 
   // On mount: session-check
   useEffect(() => {
@@ -344,7 +341,7 @@ export default function OnboardingClient() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur mb-4 shadow-sm">
             <span className="w-2 h-2 rounded-full animate-pulse bg-red-500" />
             <span className="text-xs font-black text-text-primary uppercase tracking-wider">
-              Tijdelijk gratis · nog {days} dagen
+              Nu nog gratis aanmelden
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow mb-2">

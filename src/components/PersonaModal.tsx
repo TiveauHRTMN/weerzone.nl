@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { PERSONA_ORDER, type PersonaTier, daysUntilLaunch } from "@/lib/personas";
+import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import PersonaCard from "./PersonaCard";
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
 
 export default function PersonaModal({ open, onClose }: Props) {
   const [selected, setSelected] = useState<PersonaTier | null>(null);
-  const days = daysUntilLaunch();
 
   if (!open) return null;
 
@@ -49,15 +48,15 @@ export default function PersonaModal({ open, onClose }: Props) {
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-orange/15 mb-4">
               <span className="text-xs font-black text-accent-orange uppercase tracking-wider">
-                Tijdelijk gratis · nog {days} dagen
+                Nu nog gratis aanmelden
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-text-primary mb-3">
-              Kies je WEERZONE.
+              Kies een abonnement
             </h2>
             <p className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto">
-              Drie persona's. Alle drie leren je, je locatie en je leven kennen. Tot 1 juni
-              gratis als founder — daarna houd je een lagere prijs voor altijd.
+              Piet, Reed of Steve. Elke ochtend een weermail op jouw postcode.
+              Geen reclame, geen creditcard vooraf, opzeggen kan altijd.
             </p>
           </div>
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PERSONA_ORDER, FOUNDER_SLOTS, daysUntilLaunch, type PersonaTier } from "@/lib/personas";
+import { PERSONA_ORDER, FOUNDER_SLOTS, type PersonaTier } from "@/lib/personas";
 import PersonaCard from "@/components/PersonaCard";
 
 const FAQS = [
@@ -38,7 +38,6 @@ const FAQS = [
 
 export default function PrijzenClient() {
   const [selected, setSelected] = useState<PersonaTier | null>(null);
-  const days = daysUntilLaunch();
 
   const handleSelect = (tier: PersonaTier) => {
     setSelected(tier);
@@ -56,7 +55,7 @@ export default function PrijzenClient() {
               style={{ background: "#ef4444" }}
             />
             <span className="text-xs font-black text-text-primary uppercase tracking-wider">
-              Tijdelijk gratis · nog {days} dagen
+              Nu nog gratis aanmelden
             </span>
           </div>
 
