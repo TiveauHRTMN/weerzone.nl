@@ -75,7 +75,8 @@
       "Bash(xargs ls *)",
       "Bash(curl -s --max-time 10 https://weerzone.nl/robots.txt)",
       "Bash(curl -s --max-time 10 https://weerzone.nl/sitemap.xml)",
-      "Bash(curl -s --max-time 10 \"https://weerzone.nl/api/amazon/live\")"
+      "Bash(curl -s --max-time 10 \"https://weerzone.nl/api/amazon/live\")",
+      "Bash(curl -sI https://weerzone.nl/logo-full.png)"
     ]
   }
 }

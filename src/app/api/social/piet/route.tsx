@@ -49,6 +49,21 @@ async function fetchWeather(lat: number, lon: number) {
   }>;
 }
 
+async function fetchLogoDataUrl(origin: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${origin}/logo-full.png`, { cache: "force-cache" });
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    // btoa in edge runtime verwacht binary string
+    let binary = "";
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return `data:image/png;base64,${btoa(binary)}`;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const slide = searchParams.get("slide") === "2" ? 2 : 1;
@@ -67,7 +82,7 @@ export async function GET(req: NextRequest) {
   const origin = req.nextUrl.origin.startsWith("http://localhost")
     ? req.nextUrl.origin
     : "https://weerzone.nl";
-  const logoUrl = `${origin}/logo-full.png`;
+  const logoUrl = (await fetchLogoDataUrl(origin)) ?? `${origin}/logo-full.png`;
 
   // ----- SLIDE 2: logo + CTA (geen weerdata nodig) -----
   if (slide === 2) {
