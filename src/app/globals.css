@@ -23,7 +23,7 @@
   --gradient-line: linear-gradient(90deg, #f59e0b, #fbbf24, #0891b2);
   --card-border: rgba(255, 255, 255, 0.6);
   --card-radius: 18px;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-roboto), system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
@@ -52,13 +52,27 @@ html {
 }
 
 body {
-  background: transparent;
+  background: var(--bg-primary);
   color: var(--text-on-sky);
   font-family: var(--font-sans);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/* NUCLEAR FIX: Force all inputs to have dark text and white background */
+input:not([type="checkbox"]):not([type="radio"]), 
+select, 
+textarea {
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
 }
 
 /* Scrollbar */

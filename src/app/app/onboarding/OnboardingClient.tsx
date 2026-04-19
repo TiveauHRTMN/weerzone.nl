@@ -216,15 +216,30 @@ export default function OnboardingClient() {
       setGpsStatus("denied");
       return;
     }
-    setGpsStatus("asking");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGpsCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-        setGpsStatus("ok");
-      },
-      () => setGpsStatus("denied"),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60 * 60 * 1000 },
-    );
+    // Veiligheidstimer: als de browser nooit reageert (bijv. op Windows met locatie uit)
+    const safety = setTimeout(() => {
+      setGpsStatus((current) => (current === "asking" ? "denied" : current));
+    }, 12000);
+
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          clearTimeout(safety);
+          setGpsCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+          setGpsStatus("ok");
+        },
+        (err) => {
+          console.error("GPS Error:", err);
+          clearTimeout(safety);
+          setGpsStatus("denied");
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60 * 60 * 1000 },
+      );
+    } catch (err) {
+      console.error("GPS Exception:", err);
+      clearTimeout(safety);
+      setGpsStatus("denied");
+    }
   }
 
   // ---------- Submit profiel ----------
@@ -335,15 +350,9 @@ export default function OnboardingClient() {
   }
 
   return (
-    <main className="min-h-screen py-12 px-4">
+    <main className="min-h-screen py-12 px-4 bg-[#4a9ee8] text-white">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur mb-4 shadow-sm">
-            <span className="w-2 h-2 rounded-full animate-pulse bg-red-500" />
-            <span className="text-xs font-black text-text-primary uppercase tracking-wider">
-              Nu nog gratis aanmelden
-            </span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow mb-2">
             {step === "sent" && "Check je inbox"}
             {step === "tier" && "Word founder"}
@@ -357,25 +366,6 @@ export default function OnboardingClient() {
               </>
             )}
           </h1>
-          <p className="text-white/90 text-sm">
-            {step === "tier" && "Kies je persona — gratis tot 1 juni, founder-prijs voor altijd."}
-            {step === "auth" && tier && (
-              <>
-                Je koos{" "}
-                <strong style={{ color: PERSONAS[tier].color }}>
-                  {PERSONAS[tier].name}
-                </strong>
-                . Geen wachtwoord, gewoon je mail.
-              </>
-            )}
-            {step === "sent" && "Link onderweg. Klik 'm aan en we gaan verder."}
-            {step === "profile" && tier === "piet" &&
-              "Als ik elke ochtend over jóu schrijf, moet ik weten met wie ik praat. Twee minuten."}
-            {step === "profile" && tier === "reed" &&
-              "Ik bel niet voor niks. Vertel waar jij gevoelig voor bent, dan stuur ik alleen wat ertoe doet."}
-            {step === "profile" && tier === "steve" &&
-              "Ik wil geen generieke mails sturen. Geef me je cijfers, dan reken ik vanochtend mee."}
-          </p>
         </div>
 
         {step === "tier" && <TierGrid onPick={(t) => { setTier(t); setStep("auth"); }} />}
@@ -475,7 +465,7 @@ function AuthCard(props: {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="jij@voorbeeld.nl"
-            className="mt-1 w-full rounded-xl border border-black/10 px-4 py-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-orange"
+            className="mt-1 w-full rounded-xl border border-black/10 px-4 py-3 text-[#1e293b] bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent-orange"
           />
           <span className="text-xs text-text-muted mt-1 block">
             Elke e-mailprovider werkt (Gmail, Outlook, eigen domein…)
@@ -487,8 +477,7 @@ function AuthCard(props: {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full px-6 py-3 font-black text-white disabled:opacity-60 flex items-center justify-center gap-2"
-          style={{ background: PERSONAS[tier].color }}
+          className="w-full rounded-full px-6 py-3 font-black text-white disabled:opacity-60 flex items-center justify-center gap-2 bg-[#f59e0b] shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Verzend e-mail</>}
         </button>
@@ -535,6 +524,8 @@ function SentCard({ email }: { email: string }) {
   );
 }
 
+const INPUT_CLASS = "w-full rounded-xl border border-black/10 px-4 py-3 text-[#1e293b] bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent-orange transition-all";
+
 function ProfileForm(props: {
   tier: PersonaTier;
   fullName: string;
@@ -573,7 +564,7 @@ function ProfileForm(props: {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Roy"
-            className="input"
+            className={INPUT_CLASS}
           />
         </Field>
 
@@ -584,7 +575,7 @@ function ProfileForm(props: {
               value={postcode}
               onChange={(e) => setPostcode(e.target.value)}
               placeholder="1012 AB"
-              className="input"
+              className={INPUT_CLASS}
             />
           </Field>
           <Field label="Of deel je GPS (preciezer)">
@@ -592,7 +583,7 @@ function ProfileForm(props: {
               type="button"
               onClick={onGps}
               disabled={gpsStatus === "asking" || gpsStatus === "ok"}
-              className="input flex items-center justify-between text-left disabled:opacity-60"
+              className={`${INPUT_CLASS} flex items-center justify-between text-left disabled:opacity-60`}
             >
               <span className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
@@ -625,7 +616,7 @@ function ProfileForm(props: {
                 value={piet.hondNaam}
                 onChange={(e) => setPiet({ ...piet, hondNaam: e.target.value })}
                 placeholder="Naam — of laat leeg als je geen hond hebt"
-                className="input"
+                className={INPUT_CLASS}
               />
             </Field>
             <div className="space-y-2">
@@ -663,7 +654,7 @@ function ProfileForm(props: {
                 value={reed.waterschadeHistorie}
                 onChange={(e) => setReed({ ...reed, waterschadeHistorie: e.target.value })}
                 placeholder="2018"
-                className="input"
+                className={INPUT_CLASS}
               />
             </Field>
           </>
@@ -685,7 +676,7 @@ function ProfileForm(props: {
                   value={steve.branche}
                   onChange={(e) => setSteve({ ...steve, branche: e.target.value })}
                   placeholder="strandtent, dakdekker, horeca…"
-                  className="input"
+                  className={INPUT_CLASS}
                 />
               </Field>
               <Field label="Hoe groot? (plekken, couverts, zzp=1)">
@@ -694,7 +685,7 @@ function ProfileForm(props: {
                   value={steve.capaciteit}
                   onChange={(e) => setSteve({ ...steve, capaciteit: e.target.value })}
                   placeholder="120"
-                  className="input"
+                  className={INPUT_CLASS}
                 />
               </Field>
             </div>
@@ -705,19 +696,19 @@ function ProfileForm(props: {
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Field label="Wind vanaf (bft)">
-                  <input type="number" value={steve.windBft} onChange={(e) => setSteve({ ...steve, windBft: e.target.value })} className="input" />
+                  <input type="number" value={steve.windBft} onChange={(e) => setSteve({ ...steve, windBft: e.target.value })} className={INPUT_CLASS} />
                 </Field>
                 <Field label="Regen vanaf (mm)">
-                  <input type="number" value={steve.regenMm} onChange={(e) => setSteve({ ...steve, regenMm: e.target.value })} className="input" />
+                  <input type="number" value={steve.regenMm} onChange={(e) => setSteve({ ...steve, regenMm: e.target.value })} className={INPUT_CLASS} />
                 </Field>
                 <Field label="Te koud onder (°C)">
-                  <input type="number" value={steve.tempMin} onChange={(e) => setSteve({ ...steve, tempMin: e.target.value })} className="input" />
+                  <input type="number" value={steve.tempMin} onChange={(e) => setSteve({ ...steve, tempMin: e.target.value })} className={INPUT_CLASS} />
                 </Field>
                 <Field label="Onweer telt mee">
                   <select
                     value={steve.onweer ? "ja" : "nee"}
                     onChange={(e) => setSteve({ ...steve, onweer: e.target.value === "ja" })}
-                    className="input"
+                    className={INPUT_CLASS}
                   >
                     <option value="ja">Ja</option>
                     <option value="nee">Nee</option>
@@ -732,10 +723,10 @@ function ProfileForm(props: {
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Inkoop uiterlijk om (uur)">
-                  <input type="number" min={0} max={23} value={steve.inkoopUur} onChange={(e) => setSteve({ ...steve, inkoopUur: e.target.value })} className="input" />
+                  <input type="number" min={0} max={23} value={steve.inkoopUur} onChange={(e) => setSteve({ ...steve, inkoopUur: e.target.value })} className={INPUT_CLASS} />
                 </Field>
                 <Field label="Annuleren uiterlijk om (uur)">
-                  <input type="number" min={0} max={23} value={steve.annuleringUur} onChange={(e) => setSteve({ ...steve, annuleringUur: e.target.value })} className="input" />
+                  <input type="number" min={0} max={23} value={steve.annuleringUur} onChange={(e) => setSteve({ ...steve, annuleringUur: e.target.value })} className={INPUT_CLASS} />
                 </Field>
               </div>
             </div>
@@ -748,8 +739,7 @@ function ProfileForm(props: {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full px-6 py-3 font-black text-white disabled:opacity-60 flex items-center justify-center gap-2"
-        style={{ background: color }}
+        className="w-full rounded-full px-6 py-3 font-black text-white disabled:opacity-60 flex items-center justify-center gap-2 bg-[#f59e0b] shadow-lg hover:brightness-110 active:scale-[0.98] transition-all"
       >
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Klaar. Stuur morgen mijn eerste brief.</>}
       </button>
@@ -757,21 +747,6 @@ function ProfileForm(props: {
       <p className="text-[11px] text-text-muted text-center">
         Bedacht je je? Pas het later aan vanuit je dashboard.
       </p>
-
-      <style jsx>{`
-        .input {
-          width: 100%;
-          border: 1px solid rgba(0, 0, 0, 0.1);
-          border-radius: 0.75rem;
-          padding: 0.75rem 1rem;
-          background: #fff;
-          font-size: 0.95rem;
-        }
-        .input:focus {
-          outline: 2px solid var(--color-accent-orange, #f97316);
-          outline-offset: 1px;
-        }
-      `}</style>
     </form>
   );
 }

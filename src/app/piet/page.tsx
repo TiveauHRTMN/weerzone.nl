@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function PietPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-8 pb-20">
+    <main className="min-h-screen bg-[#4a9ee8] text-white px-4 py-8 pb-20">
       <div className="max-w-2xl mx-auto">
         <nav className="text-xs text-white/50 mb-5">
           <Link href="/" className="hover:text-white">WEERZONE</Link>

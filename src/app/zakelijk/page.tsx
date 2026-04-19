@@ -66,7 +66,7 @@ const FEATURES = [
 
 export default function ZakelijkPage() {
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #1e293b 0%, #0f172a 100%)" }}>
+    <div className="min-h-screen bg-[#4a9ee8]">
 
       {/* Hero */}
       <div className="max-w-4xl mx-auto px-4 pt-16 pb-12 text-center">

@@ -14,7 +14,13 @@ export async function GET(request: NextRequest) {
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      const redirectUrl = new URL(next, origin);
+      searchParams.forEach((value, key) => {
+        if (key !== "code" && key !== "next") {
+          redirectUrl.searchParams.set(key, value);
+        }
+      });
+      return NextResponse.redirect(redirectUrl.href);
     }
   }
 

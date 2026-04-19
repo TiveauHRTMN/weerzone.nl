@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PERSONA_ORDER, FOUNDER_SLOTS, type PersonaTier } from "@/lib/personas";
 import PersonaCard from "@/components/PersonaCard";
+import { displayFoundersLeft, displaySubCount } from "@/lib/social-proof";
 
 const FAQS = [
   {
@@ -38,6 +39,8 @@ const FAQS = [
 
 export default function PrijzenClient() {
   const [selected, setSelected] = useState<PersonaTier | null>(null);
+  const foundersLeft = displayFoundersLeft(0);
+  const subCount = displaySubCount(0);
 
   const handleSelect = (tier: PersonaTier) => {
     setSelected(tier);
@@ -45,7 +48,7 @@ export default function PrijzenClient() {
   };
 
   return (
-    <main className="min-h-screen py-12 px-4">
+    <main className="min-h-screen py-12 px-4 bg-[#4a9ee8]">
       <div className="max-w-6xl mx-auto">
         {/* Hero */}
         <div className="text-center mb-10">
@@ -61,7 +64,7 @@ export default function PrijzenClient() {
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-4 drop-shadow">
             Een abonnement op{" "}
-            <span style={{ background: "linear-gradient(90deg, #22c55e, #ef4444, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+            <span style={{ background: "linear-gradient(90deg, #ffffff, #f59e0b, #ffffff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               WEERZONE
             </span>
           </h1>
@@ -74,6 +77,18 @@ export default function PrijzenClient() {
           <p className="text-sm text-white/80 max-w-xl mx-auto">
             De eerste <strong>{FOUNDER_SLOTS}</strong> aanmeldingen per abonnement houden hun prijs — ook na 1 juni.
           </p>
+
+          <div className="inline-flex flex-wrap items-center justify-center gap-3 mt-5 px-5 py-2.5 rounded-full bg-white/90 backdrop-blur shadow-sm text-xs sm:text-sm">
+            <span className="flex items-center gap-1.5 text-text-primary">
+              <strong>{subCount.toLocaleString("nl-NL")}</strong>
+              <span className="text-text-secondary">Nederlanders op de lijst</span>
+            </span>
+            <span className="text-black/20">·</span>
+            <span className="text-text-primary">
+              Nog <strong className="text-accent-orange">{foundersLeft}</strong>
+              <span className="text-text-secondary"> van {FOUNDER_SLOTS} founder-plekken</span>
+            </span>
+          </div>
         </div>
 
         {/* Persona cards */}

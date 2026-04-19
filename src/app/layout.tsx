@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import FounderBanner from "@/components/FounderBanner";
@@ -9,9 +9,10 @@ import "./globals.css";
 
 const ADSENSE_CLIENT = "ca-pub-6187487207780127";
 
-const inter = Inter({
-  variable: "--font-inter",
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
   display: "swap",
 });
 
@@ -86,7 +87,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl" className={`${inter.variable} antialiased`}>
+    <html lang="nl" className={`${roboto.variable} antialiased`}>
       <head>
         <meta name="theme-color" content="#4a9ee8" />
         {/* AdSense loader — native script in head, voorkomt data-nscript warning */}
