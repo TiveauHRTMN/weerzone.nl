@@ -44,8 +44,8 @@ function buildDeterministicCaption(args: {
   return (
     `Ochtend ${ochtend}° · middag ${middag}° · avond ${avond}° · nacht ${nacht}°. ${droog ? "Droog." : regen}\n\n` +
     `Echte voorspelling op jouw postcode → weerzone.nl\n\n` +
-    `Tip: ${affiliate.product} → ${affiliateUrl}\n\n` +
-    `#weer #weerzone #nederland ${condTag}`
+    `Tip bij dit weer (advertentie): ${affiliate.product} → ${affiliateUrl}\n\n` +
+    `#weer #weerzone #nederland ${condTag} #ad`
   );
 }
 

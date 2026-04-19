@@ -84,7 +84,8 @@
       "Bash(curl -sL https://developers.buffer.com/)",
       "Bash(curl -sL https://developers.buffer.com/__TRACKED_VAR__)",
       "Bash(curl -sL https://developers.buffer.com/reference.html)",
-      "Bash(curl -sL https://developers.buffer.com/guides/api-limits.html)"
+      "Bash(curl -sL https://developers.buffer.com/guides/api-limits.html)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
     ]
   }
 }
