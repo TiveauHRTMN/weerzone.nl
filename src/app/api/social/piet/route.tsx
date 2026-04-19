@@ -107,10 +107,13 @@ export async function GET(req: NextRequest) {
   const format: Format =
     formatParam === "tiktok" ? "tiktok" : formatParam === "x" ? "x" : "ig";
   const SIZE = SIZES[format];
-  const cityParam = (searchParams.get("city") || "amsterdam").toLowerCase();
-  const city =
-    DUTCH_CITIES.find((c) => c.name.toLowerCase() === cityParam) ??
-    DUTCH_CITIES.find((c) => c.name === "Amsterdam")!;
+  // Default: landelijk weerbericht (De Bilt = KNMI-referentie).
+  // ?city=… blijft optioneel voor debugging / specials.
+  const cityParam = searchParams.get("city")?.toLowerCase();
+  const cityMatch = cityParam
+    ? DUTCH_CITIES.find((c) => c.name.toLowerCase() === cityParam)
+    : undefined;
+  const city = cityMatch ?? { name: "Nederland", lat: 52.11, lon: 5.18 };
 
   const dateStr = new Date().toLocaleDateString("nl-NL", {
     weekday: "long",

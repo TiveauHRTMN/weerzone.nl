@@ -1,9 +1,7 @@
-import { DUTCH_CITIES } from "@/lib/types";
-
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ city?: string; format?: string }>;
+  searchParams: Promise<{ format?: string }>;
 }
 
 type Format = "ig" | "tiktok" | "x";
@@ -16,22 +14,19 @@ const FORMATS: Array<{ key: Format; label: string; dims: string }> = [
 
 /**
  * Preview-pagina voor de Piet social carrousel.
- * Genereert 2 slides in drie formaten (IG / TikTok / X).
- * Rechts-klik op een slide → "Afbeelding opslaan als…" of download-knop.
+ * Landelijk weerbericht (De Bilt / KNMI-referentie), 2 slides, 3 formaten.
+ * Hyper-gepersonaliseerd weer zit op de site zelf — socials zijn landelijk.
  */
 export default async function PietSocialPreview({ searchParams }: PageProps) {
   const sp = await searchParams;
-  const city = (sp.city ?? "amsterdam").toLowerCase();
   const formatParam = (sp.format ?? "ig").toLowerCase();
   const format: Format =
     formatParam === "tiktok" ? "tiktok" : formatParam === "x" ? "x" : "ig";
   const bust = Date.now();
 
-  const base = `/api/social/piet?city=${encodeURIComponent(city)}&format=${format}`;
+  const base = `/api/social/piet?format=${format}`;
   const slide1 = `${base}&slide=1&t=${bust}`;
   const slide2 = `${base}&slide=2&t=${bust}`;
-
-  const cityOptions = DUTCH_CITIES.slice(0, 15);
 
   return (
     <main className="min-h-screen bg-[#0f172a] py-10 px-4">
@@ -40,13 +35,13 @@ export default async function PietSocialPreview({ searchParams }: PageProps) {
           Piet · social-carrousel preview
         </h1>
         <p className="text-white/70 text-sm mb-6">
-          Rechts-klik op een slide → &ldquo;Afbeelding opslaan als…&rdquo;, of
-          gebruik de download-knop. Formaat via <code>?format=</code>, stad via{" "}
-          <code>?city=</code>.
+          Landelijk weerbericht (KNMI-referentie De Bilt). Rechts-klik op een
+          slide → &ldquo;Afbeelding opslaan als…&rdquo;, of gebruik de
+          download-knop.
         </p>
 
         {/* Formaat-kiezer */}
-        <div className="mb-4">
+        <div className="mb-8">
           <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-2">
             Formaat
           </p>
@@ -56,7 +51,7 @@ export default async function PietSocialPreview({ searchParams }: PageProps) {
               return (
                 <a
                   key={f.key}
-                  href={`?city=${city}&format=${f.key}`}
+                  href={`?format=${f.key}`}
                   className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     active
                       ? "bg-[#FFB400] text-slate-900"
@@ -65,31 +60,6 @@ export default async function PietSocialPreview({ searchParams }: PageProps) {
                 >
                   {f.label}{" "}
                   <span className="opacity-60 font-normal">{f.dims}</span>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Stadkiezer */}
-        <div className="mb-8">
-          <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-2">
-            Stad
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {cityOptions.map((c) => {
-              const active = c.name.toLowerCase() === city.toLowerCase();
-              return (
-                <a
-                  key={c.name}
-                  href={`?city=${c.name.toLowerCase()}&format=${format}`}
-                  className={`px-3 py-1.5 rounded-full text-sm font-bold transition-colors ${
-                    active
-                      ? "bg-[#FFB400] text-slate-900"
-                      : "bg-white/10 text-white/80 hover:bg-white/20"
-                  }`}
-                >
-                  {c.name}
                 </a>
               );
             })}
@@ -109,7 +79,7 @@ export default async function PietSocialPreview({ searchParams }: PageProps) {
             />
             <a
               href={slide1}
-              download={`weerzone-piet-${city}-${format}-slide1.png`}
+              download={`weerzone-piet-nl-${format}-slide1.png`}
               className="text-center py-2 rounded-xl bg-white/10 text-white text-sm font-bold hover:bg-white/20"
             >
               Download slide 1 ({format})
@@ -128,7 +98,7 @@ export default async function PietSocialPreview({ searchParams }: PageProps) {
             />
             <a
               href={slide2}
-              download={`weerzone-piet-${city}-${format}-slide2.png`}
+              download={`weerzone-piet-nl-${format}-slide2.png`}
               className="text-center py-2 rounded-xl bg-white/10 text-white text-sm font-bold hover:bg-white/20"
             >
               Download slide 2 ({format})
@@ -137,12 +107,8 @@ export default async function PietSocialPreview({ searchParams }: PageProps) {
         </div>
 
         <p className="text-white/50 text-xs mt-8">
-          API:{" "}
-          <code>
-            /api/social/piet?slide=1|2&amp;city=…&amp;format=ig|tiktok|x
-          </code>
-          . Weer-data via Open-Meteo (KNMI HARMONIE-fallback), gegenereerd per
-          request.
+          API: <code>/api/social/piet?slide=1|2&amp;format=ig|tiktok|x</code>.
+          Weer-data via Open-Meteo (KNMI HARMONIE), gegenereerd per request.
         </p>
       </div>
     </main>
