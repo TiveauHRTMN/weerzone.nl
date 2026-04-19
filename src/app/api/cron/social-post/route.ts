@@ -64,8 +64,8 @@ async function postToBuffer(caption: string, imageUrl: string) {
   if (!token) return { status: "skipped", reason: "missing_token" };
 
   try {
-    // 1. Haal profiles op (nieuwe Beta API endpoint)
-    const profilesRes = await fetch("https://api.buffer.com/v1/profiles", {
+    // 1. Haal profiles op (gebruik api.bufferapp.com voor betere compatibiliteit)
+    const profilesRes = await fetch("https://api.bufferapp.com/1/profiles.json", {
       headers: { "Authorization": `Bearer ${token}` }
     });
     
@@ -76,25 +76,24 @@ async function postToBuffer(caption: string, imageUrl: string) {
 
     const profiles = await profilesRes.json();
     if (!Array.isArray(profiles) || profiles.length === 0) {
-      throw new Error("No connected profiles found in Buffer account.");
+      throw new Error("No connected profiles found. Make sure you connected X or TikTok in Buffer.");
     }
 
-    // 2. Post naar elk profiel
+    // 2. Post naar elk profiel via x-www-form-urlencoded (zoals Buffer v1 verwacht)
     const results = await Promise.all(profiles.map(async (profile: any) => {
-      const res = await fetch("https://api.buffer.com/v1/updates/create", {
+      const params = new URLSearchParams();
+      params.append("text", caption);
+      params.append("profile_ids[]", profile.id);
+      params.append("now", "true");
+      params.append("media[photo]", imageUrl);
+
+      const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: JSON.stringify({
-          text: caption,
-          profile_ids: [profile.id],
-          now: true,
-          media: {
-            photo: imageUrl
-          }
-        })
+        body: params.toString()
       });
 
       const data = await res.json();
@@ -129,11 +128,8 @@ export async function GET(req: Request) {
 
     const caption = await generateCaption(weather);
     
-    // Zorg voor een absolute URL voor de afbeeldingsgenerator
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://weerzone.nl";
     const imageUrl = `${baseUrl}/api/social/piet?city=debilt&slide=1&t=${Date.now()}`;
-
-    console.log("Posting to Buffer...", { imageUrl, captionLength: caption.length });
 
     const bufferResults = await postToBuffer(caption, imageUrl);
 
