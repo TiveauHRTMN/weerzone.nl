@@ -28,7 +28,6 @@ async function generateCaption(weather: any) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     
-    // Weer suggestie logica voor Amazon
     let suggestion = "Paraplu";
     if (weather.current.temperature > 22) suggestion = "Zonnebrandcreme";
     if (weather.current.temperature < 3) suggestion = "IJskrabber";
@@ -60,49 +59,59 @@ async function generateCaption(weather: any) {
   }
 }
 
-/**
- * BUFFER API POSTING
- */
-async function postToBuffer(caption: string, imageUrl1: string) {
+async function postToBuffer(caption: string, imageUrl: string) {
   const token = process.env.BUFFER_API_TOKEN;
   if (!token) return { status: "skipped", reason: "missing_token" };
 
   try {
-    const profilesRes = await fetch("https://api.bufferapp.com/1/profiles.json", {
+    // 1. Haal profiles op (nieuwe Beta API endpoint)
+    const profilesRes = await fetch("https://api.buffer.com/v1/profiles", {
       headers: { "Authorization": `Bearer ${token}` }
     });
+    
+    if (!profilesRes.ok) {
+      const errorText = await profilesRes.text();
+      throw new Error(`Buffer Profiles Error (${profilesRes.status}): ${errorText}`);
+    }
+
     const profiles = await profilesRes.json();
+    if (!Array.isArray(profiles) || profiles.length === 0) {
+      throw new Error("No connected profiles found in Buffer account.");
+    }
 
-    if (!Array.isArray(profiles)) throw new Error("Could not fetch Buffer profiles");
-
+    // 2. Post naar elk profiel
     const results = await Promise.all(profiles.map(async (profile: any) => {
-      const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
+      const res = await fetch("https://api.buffer.com/v1/updates/create", {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded"
+          "Content-Type": "application/json"
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           text: caption,
-          "profile_ids[]": profile.id,
-          "media[photo]": imageUrl1,
-          now: "true"
+          profile_ids: [profile.id],
+          now: true,
+          media: {
+            photo: imageUrl
+          }
         })
       });
-      return res.json();
+
+      const data = await res.json();
+      return { profile_id: profile.id, service: profile.service, result: data };
     }));
 
     return results;
   } catch (e: any) {
-    console.error("Buffer API Error:", e.message);
+    console.error("Buffer Integration Error:", e.message);
     return { status: "error", message: e.message };
   }
 }
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get("authorization");
   const { searchParams } = new URL(req.url);
   const authParam = searchParams.get("auth");
+  const authHeader = req.headers.get("authorization");
 
   const isProduction = process.env.NODE_ENV === "production";
   const isVercelCron = req.headers.get("x-vercel-cron") === "1";
@@ -113,7 +122,6 @@ export async function GET(req: Request) {
   }
 
   try {
-    // De Bilt (Landelijk middelpunt / KNMI basis)
     const lat = 52.11;
     const lon = 5.18;
     const weather = await fetchWeatherData(lat, lon);
@@ -121,21 +129,24 @@ export async function GET(req: Request) {
 
     const caption = await generateCaption(weather);
     
+    // Zorg voor een absolute URL voor de afbeeldingsgenerator
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://weerzone.nl";
-    const imageUrl1 = `${baseUrl}/api/social/piet?city=debilt&slide=1&t=${Date.now()}`;
+    const imageUrl = `${baseUrl}/api/social/piet?city=debilt&slide=1&t=${Date.now()}`;
 
-    const bufferResults = await postToBuffer(caption, imageUrl1);
+    console.log("Posting to Buffer...", { imageUrl, captionLength: caption.length });
+
+    const bufferResults = await postToBuffer(caption, imageUrl);
 
     return NextResponse.json({
       status: "success",
       scope: "Landelijk",
-      buffer: bufferResults,
       caption,
-      imageUrl: imageUrl1
+      imageUrl,
+      buffer_results: bufferResults
     });
 
   } catch (e: any) {
-    console.error("Social Automation Error:", e);
+    console.error("Final Route Error:", e.message);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
