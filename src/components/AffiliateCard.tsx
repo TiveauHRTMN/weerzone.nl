@@ -215,13 +215,19 @@ export default function AffiliateCard({ weather }: Props) {
               </p>
             </div>
             <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-[15px] font-black text-text-primary">{hero.price}</span>
                 {hero.oldPrice && (
                   <span className="text-[11px] text-text-muted line-through">{hero.oldPrice}</span>
                 )}
+                <span className="text-[9px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-500/15 px-1.5 py-0.5 rounded-full">
+                  Op voorraad
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-wide text-sky-700 bg-sky-500/15 px-1.5 py-0.5 rounded-full">
+                  Prime · morgen
+                </span>
               </div>
-              <span className="text-[10px] font-bold text-accent-orange">Bekijk →</span>
+              <span className="text-[10px] font-bold text-accent-orange whitespace-nowrap">Bekijk →</span>
             </div>
           </div>
         </div>

@@ -7,7 +7,9 @@ import {
   generatePersonaBrief,
   type WeatherSnapshot,
 } from "@/lib/persona-brief";
-import { buildPersonaEmailHtml } from "@/lib/persona-email";
+import { buildPersonaEmailHtml, type EmailAmazonTip } from "@/lib/persona-email";
+import { matchProducts } from "@/lib/amazon-matcher";
+import { productHref, parseEmojiImage } from "@/lib/amazon-catalog";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 min — ruimte voor LLM-calls
@@ -170,7 +172,28 @@ export async function GET(request: NextRequest) {
       });
 
       const unsubscribeUrl = `https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(profile.email)}`;
-      const html = buildPersonaEmailHtml(sub.tier, brief, city, unsubscribeUrl);
+
+      // Amazon-tip: top-1 match op basis van het weer. Niet blocking.
+      let amazonTip: EmailAmazonTip | undefined;
+      try {
+        const { products } = matchProducts(weather, 1);
+        const pick = products[0];
+        if (pick) {
+          const em = parseEmojiImage(pick.image);
+          amazonTip = {
+            title: pick.title,
+            subtitle: pick.subtitle,
+            price: pick.priceHint,
+            url: productHref(pick),
+            emoji: em?.emoji,
+            color: em?.color,
+          };
+        }
+      } catch {
+        // negeer — tip is optioneel
+      }
+
+      const html = buildPersonaEmailHtml(sub.tier, brief, city, unsubscribeUrl, amazonTip);
 
       const fromName = PERSONAS[sub.tier].name;
       const { data: mail, error: mailErr } = await resend.emails.send({

@@ -21,6 +21,8 @@ import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/w
 import { getTemperatureComparison } from "@/lib/climate";
 import { motion, AnimatePresence } from "framer-motion";
 import AffiliateCard from "./AffiliateCard";
+import AmazonStickyBar from "./AmazonStickyBar";
+import PietInlineTip from "./PietInlineTip";
 import EmailSubscribe from "./EmailSubscribe";
 import NavBar from "./NavBar";
 import AdSlot from "./AdSlot";
@@ -232,6 +234,7 @@ export default function WeatherDashboard({ initialCity, beforeFooter }: Dashboar
             <p className="font-semibold text-lg text-text-primary break-words leading-snug relative z-10 mb-3">
               {weather.aiVerdict || getMainCommentary(weather)}
             </p>
+            <PietInlineTip weather={weather} />
             <div className="pt-4 border-t border-white/5">
               <p className="text-[11px] font-bold text-text-secondary uppercase tracking-widest opacity-80">
                 📊 {new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} — KNMI bevestigt dit.
@@ -902,6 +905,8 @@ export default function WeatherDashboard({ initialCity, beforeFooter }: Dashboar
       </div>
 
       {beforeFooter}
+
+      <AmazonStickyBar weather={weather} />
 
       {/* ===== Footer ===== */}
       <footer className="pt-12 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.0s" }}>
