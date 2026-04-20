@@ -1,0 +1,77 @@
+<!--
+  Plak deze HTML in Supabase dashboard:
+  Authentication -> Email Templates -> Magic Link -> Message (HTML)
+
+  Subject regel:  Log in bij WEERZONE
+
+  Placeholders die Supabase invult:
+    {{ .ConfirmationURL }}  = de login-link
+    {{ .Email }}            = het e-mailadres
+
+  Deze template is persona-onafhankelijk (Supabase kent geen chosen_tier
+  in de email-template context) dus we gebruiken WEERZONE-geel als accent.
+-->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in bij WEERZONE</title>
+</head>
+<body style="margin:0;padding:0;background-color:#eaf3fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eaf3fb;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#FFB400 0%,#1e293b 100%);padding:40px 30px;text-align:center;">
+              <div style="font-size:12px;font-weight:900;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:3px;margin-bottom:8px;">WEERZONE</div>
+              <h1 style="color:#ffffff;font-size:26px;font-weight:900;margin:0;letter-spacing:-0.5px;line-height:1.25;">&Eacute;&eacute;n klik verwijderd van je data</h1>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:36px 32px;text-align:center;">
+              <p style="font-size:16px;color:#1e293b;line-height:1.55;margin:0 0 24px;">
+                Klik op de knop om veilig in te loggen bij WEERZONE.<br>
+                De link is <strong>1 uur geldig</strong> en werkt maar 1 keer.
+              </p>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
+                <tr>
+                  <td style="border-radius:999px;background:#FFB400;box-shadow:0 8px 20px rgba(255,180,0,0.35);">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 34px;font-size:15px;font-weight:900;color:#0f172a;text-decoration:none;border-radius:999px;letter-spacing:0.3px;">
+                      Log in bij WEERZONE &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size:12px;color:#64748b;margin:0 0 6px;">Werkt de knop niet? Kopieer deze link:</p>
+              <p style="font-size:12px;color:#2563eb;margin:0 0 24px;word-break:break-all;">
+                <a href="{{ .ConfirmationURL }}" style="color:#2563eb;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+              </p>
+
+              <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.55;">
+                Heb je deze mail niet aangevraagd? Dan kan je hem rustig negeren &mdash; er gebeurt niets.
+              </p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background:#f8fafc;padding:20px 32px;text-align:center;border-top:1px solid #f1f5f9;">
+              <p style="margin:0;font-size:12px;color:#1e293b;font-weight:800;text-transform:uppercase;letter-spacing:2px;">48 uur vooruit. De rest is ruis.</p>
+              <p style="margin:6px 0 0;font-size:11px;color:#94a3b8;">WEERZONE &middot; weerzone.nl &middot; info@weerzone.nl</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
