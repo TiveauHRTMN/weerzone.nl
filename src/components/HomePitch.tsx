@@ -35,7 +35,7 @@ export default function HomePitch() {
           return (
             <Link
               key={tier}
-              href={`/app/onboarding?tier=${tier}`}
+              href={`/app/signup?tier=${tier}`}
               className="group rounded-2xl bg-white/95 backdrop-blur p-5 sm:p-6 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all"
             >
               <div className="flex items-center gap-2 mb-3">

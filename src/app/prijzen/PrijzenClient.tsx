@@ -43,7 +43,7 @@ export default function PrijzenClient() {
 
   const handleSelect = (tier: PersonaTier) => {
     setSelected(tier);
-    window.location.href = `/app/onboarding?tier=${tier}`;
+    window.location.href = `/app/signup?tier=${tier}`;
   };
 
   return (

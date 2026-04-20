@@ -19,7 +19,7 @@ export default function PersonaModal({ open, onClose }: Props) {
     setSelected(tier);
     // Redirect naar signup-flow met gekozen tier als query-param.
     // /app/onboarding handelt magic-link + profiel af (volgende build-stap).
-    window.location.href = `/app/onboarding?tier=${tier}`;
+    window.location.href = `/app/signup?tier=${tier}`;
   };
 
   return (
