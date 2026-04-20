@@ -119,11 +119,26 @@ export async function GET(req: NextRequest) {
   }
 
   // WEATHER SLIDE
-  const w = await fetchWeather(city.lat, city.lon);
+  // const w = await fetchWeather(city.lat, city.lon);
+  const w = {
+    current: { temperature_2m: 12, weather_code: 1, wind_speed_10m: 15 },
+    hourly: { 
+      temperature_2m: new Array(48).fill(12), 
+      weather_code: new Array(48).fill(1),
+      precipitation_probability: new Array(48).fill(0)
+    },
+    daily: {
+      temperature_2m_max: [15, 16],
+      temperature_2m_min: [8, 9],
+      weather_code: [1, 1],
+      precipitation_sum: [0, 0],
+      uv_index_max: [5, 6]
+    }
+  };
   const temp = Math.round(w.current.temperature_2m);
   const code = w.current.weather_code;
-  const desc = getWeatherDescription(code);
-  const emoji = getWeatherEmoji(code, true);
+  const desc = "Licht Bewolkt";
+  const emoji = "🌤️";
   const theme = getPremiumTheme(code);
 
   const periods = [
@@ -133,23 +148,13 @@ export async function GET(req: NextRequest) {
     { label: "Nacht", idx: 25, isDay: false },
   ].map((p) => ({
     label: p.label,
-    temp: Math.round(w.hourly.temperature_2m[p.idx]),
-    code: w.hourly.weather_code[p.idx],
-    rain: w.hourly.precipitation_probability[p.idx],
+    temp: 12,
+    code: 1,
+    rain: 0,
     isDay: p.isDay
   }));
 
-  const brief = pietBrief({
-    ochtendTemp: periods[0].temp,
-    middagTemp: periods[1].temp,
-    avondTemp: periods[2].temp,
-    rainDay: w.daily.precipitation_sum[0],
-    windMax: w.current.wind_speed_10m,
-    tomorrowMax: w.daily.temperature_2m_max[1],
-    todayMax: w.daily.temperature_2m_max[0],
-    code,
-    uvIndex: w.daily.uv_index_max[0]
-  });
+  const brief = "Test render met mock data. Als je dit ziet, werkt de layout-engine.";
 
   return new ImageResponse(
     (
