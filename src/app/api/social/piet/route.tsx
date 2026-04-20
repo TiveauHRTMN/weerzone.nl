@@ -82,7 +82,8 @@ export async function GET(req: NextRequest) {
   const city = { name: "Landelijk", lat: 52.11, lon: 5.18 };
   const dateStr = new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
   const origin = req.nextUrl.origin.startsWith("http://localhost") ? req.nextUrl.origin : "https://weerzone.nl";
-  const logoUrl = (await fetchLogoDataUrl(origin)) ?? `${origin}/logo-full.png`;
+  // const logoUrl = (await fetchLogoDataUrl(origin)) ?? `${origin}/logo-full.png`;
+  const logoUrl = ""; // Disabled for debug
 
   if (slide === 2) {
     // CTA SLIDE
@@ -177,8 +178,9 @@ export async function GET(req: NextRequest) {
               {dateStr}
             </div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoUrl} alt="WEERZONE" style={{ height: "48px", width: "auto" }} />
+          <div style={{ display: "flex", fontSize: "24px", fontWeight: 900, color: theme.accent }}>
+            WEERZONE.NL
+          </div>
         </div>
 
         {/* Main Part */}
