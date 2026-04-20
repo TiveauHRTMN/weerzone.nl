@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { DUTCH_CITIES } from "@/lib/types";
+import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://weerzone.nl";
@@ -14,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // City pages — /weer/amsterdam, /weer/rotterdam, etc.
+  // Legacy city pages — /weer/amsterdam, /weer/rotterdam, etc.
   for (const city of DUTCH_CITIES) {
     const slug = city.name.toLowerCase().replace(/\s+/g, "-");
     routes.push({
@@ -34,6 +35,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "hourly",
       priority: 0.9,
+    });
+  }
+
+  // ── PROGRAMMATIC SEO: Province hub pages ──
+  for (const prov of Object.keys(PROVINCE_LABELS)) {
+    routes.push({
+      url: `${baseUrl}/weer/${prov}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    });
+  }
+
+  // ── PROGRAMMATIC SEO: All place pages ──
+  // Elke plaats = een indexeerbare pagina voor "weer [plaatsnaam]"
+  for (const place of ALL_PLACES) {
+    routes.push({
+      url: `${baseUrl}/weer/${place.province}/${placeSlug(place.name)}`,
+      lastModified: new Date(),
+      changeFrequency: "hourly",
+      priority: 0.85,
     });
   }
 
