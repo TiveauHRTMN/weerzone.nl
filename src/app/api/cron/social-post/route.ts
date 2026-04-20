@@ -66,18 +66,26 @@ interface WeatherLite {
 }
 
 export async function generatePlatformCaption(weather: WeatherLite, platform: 'x' | 'tiktok') {
+  if (!weather) throw new Error("No weather data provided to caption generator");
+  
   const isTikTok = platform === 'tiktok';
-  const ochtend = Math.round(weather.hourly?.[8]?.temperature ?? weather.current?.temperature ?? 10);
-  const middag = Math.round(weather.hourly?.[13]?.temperature ?? weather.daily?.[0]?.tempMax ?? 15);
-  const avond = Math.round(weather.hourly?.[19]?.temperature ?? weather.current?.temperature ?? 10);
-  const nacht = Math.round(weather.hourly?.[25]?.temperature ?? weather.daily?.[0]?.tempMin ?? 5);
+  
+  // Ultra-safe extraction
+  const cur = weather.current || {};
+  const d0 = weather.daily?.[0] || {};
+  const h = weather.hourly || [];
+
+  const ochtend = Math.round(h[8]?.temperature ?? cur.temperature ?? 10);
+  const middag = Math.round(h[13]?.temperature ?? d0.tempMax ?? 15);
+  const avond = Math.round(h[19]?.temperature ?? cur.temperature ?? 10);
+  const nacht = Math.round(h[25]?.temperature ?? d0.tempMin ?? 5);
 
   const affiliate = pickAffiliate({
-    temp: weather.current?.temperature ?? 10,
-    rain: weather.current?.precipitation ?? 0,
-    wind: weather.current?.windSpeed ?? 10,
-    maxTemp: weather.daily?.[0]?.tempMax ?? 15,
-    minTemp: weather.daily?.[0]?.tempMin ?? 5,
+    temp: cur.temperature ?? 10,
+    rain: cur.precipitation ?? 0,
+    wind: cur.windSpeed ?? 10,
+    maxTemp: d0.tempMax ?? 15,
+    minTemp: d0.tempMin ?? 5,
   });
 
   const useTemu = AFFILIATE_CONFIG.temu.enabled && isTikTok;
@@ -85,7 +93,7 @@ export async function generatePlatformCaption(weather: WeatherLite, platform: 'x
 
   const deterministicCaption = buildDeterministicCaption({
     ochtend, middag, avond, nacht,
-    rainDay: weather.daily?.[0]?.precipitationSum ?? 0,
+    rainDay: d0.precipitationSum ?? 0,
     affiliate,
     affiliateUrl,
   });
