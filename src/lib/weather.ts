@@ -124,6 +124,18 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     const data = genericRes;
     const { hourly, agreement } = blendHourly(harmonieData, data.hourly);
 
+    // RAIN ACCURACY FIX: Voor de Nederlandse polder (bijv. Nieuwe Niedorp) 
+    // kan de 'current' API soms regen overslaan die de hourly (Harmonie) wel ziet.
+    let currentPrecip = data.current.precipitation;
+    let currentCode = data.current.weather_code;
+    
+    if (currentPrecip === 0 && hourly[0].precipitation > 0) {
+      currentPrecip = hourly[0].precipitation;
+      if (currentCode === 0 || currentCode === 1 || currentCode === 3) {
+        currentCode = hourly[0].weatherCode; // Update code naar regen/bui
+      }
+    }
+
     const minutely: MinutelyPrecipitation[] = [];
     if (data.minutely_15?.time && data.minutely_15?.precipitation) {
       const currentApiTime = data.current?.time ?? data.minutely_15.time[0];
@@ -145,8 +157,8 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         windSpeed: Math.round(data.current.wind_speed_10m),
         windDirection: degreesToDirection(data.current.wind_direction_10m),
         windGusts: Math.round(data.current.wind_gusts_10m),
-        precipitation: data.current.precipitation,
-        weatherCode: data.current.weather_code,
+        precipitation: currentPrecip,
+        weatherCode: currentCode,
         isDay: data.current.is_day === 1,
         cloudCover: data.current.cloud_cover,
       },

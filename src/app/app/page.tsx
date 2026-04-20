@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import { isFounderEmail, FOUNDER_TIER } from "@/lib/founders";
+import LogoutButton from "@/components/LogoutButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,9 +39,12 @@ export default async function AppDashboard() {
     <main className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-xl">
-          <p className="text-xs uppercase tracking-wider text-text-muted mb-2">
-            Ingelogd als {user.email}
-          </p>
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <p className="text-xs uppercase tracking-wider text-text-muted">
+              Ingelogd als {user.email}
+            </p>
+            <LogoutButton />
+          </div>
           <h1 className="text-3xl font-black text-text-primary mb-4">
             {persona ? (
               <>

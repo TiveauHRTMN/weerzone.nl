@@ -92,7 +92,9 @@
       "Bash(ls C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\supabase)",
       "Bash(ls C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\lib)",
       "Bash(grep -rE \"RESEND_API_KEY|SUPABASE_SERVICE_ROLE\" C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src --include=\"*.ts\" -l)",
-      "Bash(ls \"C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\app\\\\\\\\api\\\\\\\\auth\")"
+      "Bash(ls \"C:\\\\\\\\Users\\\\\\\\rwnhr\\\\\\\\kutweer\\\\\\\\src\\\\\\\\app\\\\\\\\api\\\\\\\\auth\")",
+      "Bash(curl -s -H 'Authorization: Bearer sbp_87619606a494e5bb4e579235931006877fb613b4' https://api.supabase.com/v1/projects/bhguergqkyiejyxsiwdu/config/auth)",
+      "Bash(node -e ' *)"
     ]
   }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import FounderBanner from "@/components/FounderBanner";
@@ -9,10 +9,15 @@ import "./globals.css";
 
 const ADSENSE_CLIENT = "ca-pub-6187487207780127";
 
-const roboto = Roboto({
-  variable: "--font-roboto",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
+  display: "swap",
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
   display: "swap",
 });
 
@@ -26,8 +31,8 @@ export const metadata: Metadata = {
     apple: "/favicon-icon.png",
   },
   title: {
-    default: "WEERZONE | 48 uur vooruit. De rest is ruis.",
-    template: "%s | WEERZONE | 48 uur vooruit. De rest is ruis.",
+    default: "WEERZONE | 48 uur. De rest is ruis.",
+    template: "%s | WEERZONE",
   },
   description:
     "WEERZONE.nl — Vergeet de 14-daagse. De komende 48 uur vooruit. De rest is ruis. KNMI HARMONIE data op de vierkante meter.",
@@ -87,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl" className={`${roboto.variable} antialiased`}>
+    <html lang="nl" className={`${inter.variable} ${outfit.variable} antialiased`}>
       <head>
         <meta name="theme-color" content="#4a9ee8" />
         {/* AdSense loader — native script in head, voorkomt data-nscript warning */}

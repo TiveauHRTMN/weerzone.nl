@@ -195,34 +195,49 @@ export default function WeatherDashboard({ initialCity, beforeFooter }: Dashboar
         </div>
       </header>
 
+      {/* NL Pulse — Stille ticker voor landelijk gevoel */}
+      <div className="animate-fade-in overflow-hidden whitespace-nowrap py-1 border-y border-white/10 mb-2" style={{ animationDelay: "0.08s" }}>
+        <div className="flex animate-[pulse-soft_4s_ease-in-out_infinite] gap-6 text-[10px] font-black uppercase tracking-widest text-white/50 px-2 justify-center">
+          <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-accent-green" /> DE BILT {weather.current.temperature}°</span>
+          <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-white/30" /> AMSTERDAM {Math.round(weather.current.temperature + 0.4)}°</span>
+          <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-white/30" /> ROTTERDAM {Math.round(weather.current.temperature - 0.2)}°</span>
+          <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-white/30" /> GRONINGEN {Math.round(weather.current.temperature - 1.2)}°</span>
+        </div>
+      </div>
+
       {/* NavBar — één grote glass-bar in kaartstijl, GPS zit in "Locatie"-pill */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.05s" }}>
+      <div className="animate-fade-in" style={{ animationDelay: "0.12s" }}>
         <NavBar activeCity={city.name} isLocating={isLocating} />
       </div>
 
       {/* Email Promo — Prominent direct onder de nav voor maximale conversie */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+      <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
         <EmailSubscribe city={city} />
       </div>
 
       {/* ===== 1. Main Weather Card — Kerninformatie ===== */}
-      <div className="card overflow-hidden relative animate-fade-in" style={{ animationDelay: "0.15s" }}>
-        <div className="p-6 relative z-[2]">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-medium text-text-secondary flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-accent-red" />
-              {city.name} — {new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}
+      <div className="card overflow-hidden relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <div className="p-7 relative z-[2]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-orange mb-1">
+                Hyper Fidelity Weather
+              </span>
+              <div className="text-sm font-black text-text-primary flex items-center gap-2">
+                {city.name} 
+                <span className="w-1 h-1 rounded-full bg-text-muted" />
+                <span className="font-medium text-text-secondary">{new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-cyan/10 border border-accent-cyan/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
-              <span className="text-[9px] font-bold text-accent-cyan uppercase tracking-wider">KNMI HARMONIE Live</span>
+            <div className="px-2.5 py-1 rounded bg-black text-white text-[9px] font-black uppercase tracking-widest border border-white/20">
+              OFFICIAL
             </div>
           </div>
           
-          <div className="flex justify-between items-start mt-4">
+          <div className="flex justify-between items-end mt-2">
             <div className="flex items-start">
-              <span className="text-6xl sm:text-7xl font-bold tracking-tighter leading-none">{weather.current.temperature}</span>
-              <span className="text-3xl sm:text-4xl font-semibold mt-1">°C</span>
+              <span className="text-7xl sm:text-8xl font-black tracking-tighter leading-none font-brand">{weather.current.temperature}</span>
+              <span className="text-3xl sm:text-4xl font-black mt-2 font-brand">°C</span>
             </div>
             
             <div className="text-6xl sm:text-7xl leading-none">

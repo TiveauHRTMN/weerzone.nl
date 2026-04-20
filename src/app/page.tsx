@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import HomePitch from "@/components/HomePitch";
+import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -93,7 +94,12 @@ export default function Home() {
       <main>
         <WeatherDashboard
           initialCity={DUTCH_CITIES[0]}
-          beforeFooter={<HomePitch />}
+          beforeFooter={
+            <>
+              <TrustSection />
+              <HomePitch />
+            </>
+          }
         />
       </main>
     </>
