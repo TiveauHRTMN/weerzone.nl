@@ -35,7 +35,8 @@ export type WeatherTag =
   | "garden"          // seizoen+droog → tuin-spul
   | "indoor"          // stug weer → binnen
   | "commute"         // weekdag + regen/kou → forens-spul
-  | "allergy";        // lente/zomer → pollen
+  | "allergy"         // lente/zomer → pollen
+  | "sun" | "outdoor" | "sport" | "festival";
 
 export interface CatalogProduct {
   id: string;                 // uniek voor rotatie

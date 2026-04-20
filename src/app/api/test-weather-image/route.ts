@@ -201,6 +201,7 @@ export async function GET(req: Request) {
     hourly: (hourlyRaw.temperature_2m as number[]).map((t, i) => ({
       time: String(hourlyRaw.time?.[i] ?? i),
       temperature: t,
+      apparentTemperature: t, // Fallback for type compliance
       weatherCode: (hourlyRaw.weather_code as number[])[i] ?? 0,
       precipitation: (hourlyRaw.precipitation as number[])[i] ?? 0,
       windSpeed: (hourlyRaw.wind_speed_10m as number[])[i] ?? 0,

@@ -66,7 +66,7 @@ function getSavedCity(): City | null {
   return null;
 }
 
-export default function WeatherDashboard({ initialCity, beforeFooter }: DashboardProps = {}) {
+export default function WeatherDashboard({ initialCity, beforeFooter, titleOverride }: DashboardProps = {}) {
   const [city, setCity] = useState<City>(initialCity || getSavedCity() || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
