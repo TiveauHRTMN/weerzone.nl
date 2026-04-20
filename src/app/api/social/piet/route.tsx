@@ -160,73 +160,37 @@ export async function GET(req: NextRequest) {
     (
       <div style={{
         width: "100%", height: "100%", display: "flex", flexDirection: "column",
-        background: theme.bg, color: theme.text, padding: "80px 72px",
-        fontFamily: "Inter, system-ui, sans-serif", position: "relative"
+        background: "#0284c7", color: "white", padding: "80px 72px",
       }}>
-        {/* Glow accent */}
-        <div style={{
-          position: "absolute", top: "-150px", right: "-150px", width: "500px", height: "500px",
-          borderRadius: "50%", background: `radial-gradient(circle, ${theme.accent}20 0%, transparent 70%)`
-        }} />
-
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px" }}>
+        {/* Simple Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "40px" }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ 
-              background: theme.glass, padding: "8px 16px", borderRadius: "99px",
-              display: "flex", alignItems: "center", gap: "8px", border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }} />
-              <span style={{ fontSize: "16px", fontWeight: 800, letterSpacing: "2px" }}>LANDELIJK WEERBERICHT</span>
-            </div>
-            <div style={{ fontSize: "28px", fontWeight: 500, marginTop: "20px", display: "flex", textTransform: "capitalize", opacity: 0.7 }}>
-              {dateStr}
-            </div>
+            <span style={{ fontSize: "20px", fontWeight: 800 }}>LANDELIJK WEERBERICHT</span>
+            <span style={{ fontSize: "30px", opacity: 0.8 }}>{dateStr}</span>
           </div>
-          <div style={{ display: "flex", fontSize: "24px", fontWeight: 900, color: theme.accent }}>
-            WEERZONE.NL
-          </div>
+          <span style={{ fontSize: "30px", fontWeight: 900 }}>WEERZONE</span>
         </div>
 
-        {/* Main Part */}
+        {/* Main Content */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
-          <div style={{ fontSize: "120px", display: "flex" }}>{emoji}</div>
-          <div style={{ fontSize: "320px", fontWeight: 900, lineHeight: 0.8, letterSpacing: "-15px", display: "flex" }}>
-            {temp}°
-          </div>
-          <div style={{ fontSize: "40px", fontWeight: 700, marginTop: "20px", display: "flex" }}>
-            NL: {desc}
-          </div>
+          <div style={{ fontSize: "150px" }}>{emoji}</div>
+          <div style={{ fontSize: "250px", fontWeight: 900, lineHeight: 1 }}>{temp}°</div>
+          <div style={{ fontSize: "50px", fontWeight: 700 }}>{desc}</div>
         </div>
 
         {/* Piet Commentary */}
         <div style={{ 
-          background: "rgba(0,0,0,0.2)", padding: "32px 40px", borderRadius: "32px",
-          border: "1px solid rgba(255,255,255,0.1)", marginBottom: "40px", display: "flex"
+          background: "rgba(255,255,255,0.1)", padding: "40px", borderRadius: "30px",
+          marginBottom: "40px", display: "flex"
         }}>
-          <div style={{ fontSize: "32px", fontWeight: 600, fontStyle: "italic", textAlign: "center", width: "100%", lineHeight: 1.2 }}>
+          <div style={{ fontSize: "35px", fontWeight: 600, textAlign: "center", width: "100%" }}>
             "{brief}"
           </div>
         </div>
 
-        {/* Periods */}
-        <div style={{ display: "flex", gap: "16px" }}>
-          {periods.map(p => (
-            <div key={p.label} style={{
-              flex: 1, background: theme.glass, padding: "24px 12px", borderRadius: "24px",
-              display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid rgba(255,255,255,0.05)"
-            }}>
-              <span style={{ fontSize: "16px", fontWeight: 800, opacity: 0.6, textTransform: "uppercase", letterSpacing: "2px" }}>{p.label}</span>
-              <span style={{ fontSize: "60px", margin: "12px 0", display: "flex" }}>{getWeatherEmoji(p.code, p.isDay)}</span>
-              <span style={{ fontSize: "44px", fontWeight: 800 }}>{p.temp}°</span>
-              <span style={{ fontSize: "14px", fontWeight: 700, marginTop: "4px", color: theme.accent }}>{p.rain}% 🌧️</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer info */}
-        <div style={{ marginTop: "40px", display: "flex", justifyContent: "center", opacity: 0.4, fontSize: "14px", fontWeight: 500 }}>
-          DATA: KNMI HARMONIE · VOORSPELLING VOOR DE BILT (REFERENTIE NL)
+        {/* Simple Footer */}
+        <div style={{ display: "flex", justifyContent: "center", opacity: 0.5, fontSize: "20px" }}>
+          48 UUR VOORUIT · DE REST IS RUIS
         </div>
       </div>
     ),
