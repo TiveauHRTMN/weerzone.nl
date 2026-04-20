@@ -190,22 +190,27 @@ export async function GET(req: Request) {
 
     const base = process.env.NEXT_PUBLIC_BASE_URL || "https://weerzone.nl";
     const bust = Date.now();
-    const slide1 = `${base}/api/social/piet?city=debilt&slide=1&t=${bust}`;
-    const slide2 = `${base}/api/social/piet?city=debilt&slide=2&t=${bust}`;
+    const xSlide1 = `${base}/api/social/piet-v2?city=debilt&slide=1&format=x&t=${bust}`;
+    const xSlide2 = `${base}/api/social/piet-v2?city=debilt&slide=2&format=x&t=${bust}`;
+    const ttSlide1 = `${base}/api/social/piet-v2?city=debilt&slide=1&format=tiktok&t=${bust}`;
+    const ttSlide2 = `${base}/api/social/piet-v2?city=debilt&slide=2&format=tiktok&t=${bust}`;
 
     if (dryRun) {
       return NextResponse.json({
         dry_run: true,
         x: xData,
         tiktok: tiktokData,
-        images: [slide1, slide2],
+        images: {
+          x: [xSlide1, xSlide2],
+          tt: [ttSlide1, ttSlide2]
+        },
       });
     }
 
     // Post parallel naar X en TikTok
     const [xResult, tiktokResult] = await Promise.allSettled([
-      createBufferPost(BUFFER_CHANNELS.x, xData.caption, [slide1, slide2]),
-      createBufferPost(BUFFER_CHANNELS.tiktok, tiktokData.caption, [slide1, slide2]),
+      createBufferPost(BUFFER_CHANNELS.x, xData.caption, [xSlide1, xSlide2]),
+      createBufferPost(BUFFER_CHANNELS.tiktok, tiktokData.caption, [ttSlide1, ttSlide2]),
     ]);
 
     return NextResponse.json({
