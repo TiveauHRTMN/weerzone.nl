@@ -260,7 +260,7 @@ export async function sendBrandedMagicLink(email: string, tier: PersonaTier, ful
 export async function registerUser(args: {
   email: string;
   password: string;
-  tier: PersonaTier;
+  tier?: PersonaTier | null;
   fullName: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const { email, password, tier, fullName } = args;
@@ -273,11 +273,15 @@ export async function registerUser(args: {
   }
 
   const admin = createSupabaseAdminClient();
+  // Zonder tier blijft chosen_tier weg uit metadata zodat de DB-trigger nog
+  // geen subscription maakt — die komt pas na /prijzen + /checkout.
+  const metadata: Record<string, unknown> = { full_name: fullName };
+  if (tier) metadata.chosen_tier = tier;
   const { error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName, chosen_tier: tier },
+    user_metadata: metadata,
   });
 
   if (error) {
@@ -291,11 +295,11 @@ export async function registerUser(args: {
     return { ok: false, error: error.message };
   }
 
-  // Optioneel: welkomstmail. We bouwen 'm niet in het kritieke pad zodat
-  // een Resend-storing de registratie niet tegenhoudt.
+  // Optioneel: welkomstmail. Alleen als er al een tier bekend is; anders
+  // wachten we tot na checkout. Bouwen we niet in het kritieke pad.
   try {
     const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey) {
+    if (apiKey && tier) {
       const resend = new Resend(apiKey);
       const html = getWelcomeEmailHtml(email, tier);
       await resend.emails.send({
@@ -311,3 +315,4 @@ export async function registerUser(args: {
 
   return { ok: true };
 }
+

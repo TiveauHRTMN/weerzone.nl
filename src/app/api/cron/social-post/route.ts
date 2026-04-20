@@ -217,7 +217,7 @@ export async function GET(req: Request) {
       status: "done",
       x: xData,
       tiktok: tiktokData,
-      images: [slide1, slide2],
+      images: [xSlide1, xSlide2, ttSlide1, ttSlide2],
       results: {
         x:
           xResult.status === "fulfilled"

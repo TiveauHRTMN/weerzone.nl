@@ -65,7 +65,7 @@ export function amazonUrl(keywords: string): string {
   if (!AFFILIATE_CONFIG.amazon.enabled || !AFFILIATE_CONFIG.amazon.tag) {
     return `https://www.amazon.nl/s?k=${searchK}`;
   }
-  return `https://www.amazon.nl/s?k=${searchK}&tag=${AFFILIATE_CONFIG.amazon.tag}&linkCode=ll2`;
+  return `https://www.amazon.nl/s?k=${searchK}&tag=${AFFILIATE_CONFIG.amazon.tag}`;
 }
 
 export function amazonProductUrl(asin: string): string {
