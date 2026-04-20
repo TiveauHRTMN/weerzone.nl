@@ -61,13 +61,12 @@ async function fetchWeather(lat: number, lon: number) {
 
 async function fetchLogoDataUrl(origin: string): Promise<string | null> {
   try {
+    // Gebruik een betere methode voor base64 in Edge runtime
     const res = await fetch(`${origin}/logo-full.png`, { cache: "force-cache" });
     if (!res.ok) return null;
-    const buf = await res.arrayBuffer();
-    let binary = "";
-    const bytes = new Uint8Array(buf);
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-    return `data:image/png;base64,${btoa(binary)}`;
+    const arrayBuffer = await res.arrayBuffer();
+    const base64 = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+    return `data:image/png;base64,${base64}`;
   } catch {
     return null;
   }
@@ -105,7 +104,7 @@ export async function GET(req: NextRequest) {
           <div style={{ 
             background: "#ffd60a", color: "black", padding: "30px 60px", 
             borderRadius: "99px", fontSize: "40px", fontWeight: 900,
-            boxShadow: "0 20px 50px rgba(0,0,0,0.2)"
+            border: "4px solid black" // Vervang shadow door border voor visuele impact
           }}>
             MELD JE NU GRATIS AAN
           </div>
