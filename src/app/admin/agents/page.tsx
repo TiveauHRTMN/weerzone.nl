@@ -15,11 +15,24 @@ export default async function AgentCockpit() {
     return <div className="p-20 text-center text-white/50 uppercase font-black tracking-widest">Supabase niet geconfigureerd.</div>;
   }
 
+  // Fetch Logs
   const { data: logs } = await supabase
     .from("agent_activity")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(50);
+
+  // Growth Engine: Fetch Data Vault status
+  const { count: totalLeads } = await supabase
+    .from("subscribers")
+    .select("*", { count: "exact", head: true });
+
+  const { count: leadsToday } = await supabase
+    .from("subscribers")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", new Date(new Date().setHours(0,0,0,0)).toISOString());
+
+  const pipeValue = (totalLeads || 0) * 10; // €10 target per lead/mo
 
   const agents = [
     { name: "Hermes", role: "SEO & Spider Architect", status: "Active", color: "text-purple-400", bg: "bg-purple-400/10", mood: "Methodical", kpi: "Indexed Pages" },
@@ -40,6 +53,25 @@ export default async function AgentCockpit() {
             ← Dashboard
           </Link>
         </header>
+
+        {/* GROWTH ENGINE: DATA VAULT */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+           <div className="bg-gradient-to-br from-accent-cyan/20 to-transparent border border-accent-cyan/30 p-8 rounded-[40px] backdrop-blur-xl">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-cyan mb-4">Lead Vault (Data Capital)</h3>
+              <div className="text-6xl font-black tracking-tighter mb-1">{totalLeads || 0}</div>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Total Active Emails</p>
+           </div>
+           <div className="bg-white/5 border border-white/10 p-8 rounded-[40px] backdrop-blur-xl">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-4">Daily Velocity</h3>
+              <div className="text-5xl font-black tracking-tighter mb-1">+{leadsToday || 0}</div>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest text-accent-green">New Leads Today</p>
+           </div>
+           <div className="bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 p-8 rounded-[40px] backdrop-blur-xl border-dashed">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-4">Pipeline Value (Est. June)</h3>
+              <div className="text-5xl font-black tracking-tighter mb-1">€{pipeValue.toLocaleString()} <span className="text-xl text-white/20">/mo</span></div>
+              <p className="text-xs font-bold text-emerald-400/40 uppercase tracking-widest">Projected MRR</p>
+           </div>
+        </section>
 
         {/* AGENT CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
