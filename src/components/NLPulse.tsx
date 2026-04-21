@@ -70,11 +70,11 @@ export default function NLPulse() {
         .animate-marquee {
           display: flex;
           width: max-content;
-          animation: marquee 70s linear infinite;
+          animation: marquee 120s linear infinite;
         }
         @media (max-width: 640px) {
           .animate-marquee {
-             animation-duration: 50s; /* Iets sneller op mobiel ivm kortere tekst-breedte */
+             animation-duration: 90s;
           }
         }
         .hover\:pause-marquee:hover {

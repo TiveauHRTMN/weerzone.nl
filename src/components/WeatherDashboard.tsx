@@ -206,14 +206,14 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         </div>
       </header>
 
-      {/* NL Pulse — Dynamische ticker voor alle landelijke meetstations */}
-      <div className="min-h-[36px] overflow-hidden rounded-xl">
-        <NLPulse />
-      </div>
-
       {/* NavBar — één grote glass-bar in kaartstijl, GPS zit in "Locatie"-pill */}
       <div className="animate-fade-in" style={{ animationDelay: "0.12s" }}>
         <NavBar activeCity={city.name} isLocating={isLocating} />
+      </div>
+
+      {/* NL Pulse — Dynamische ticker voor alle landelijke meetstations */}
+      <div className="min-h-[36px] overflow-hidden rounded-xl animate-fade-in" style={{ animationDelay: "0.14s" }}>
+        <NLPulse />
       </div>
 
       {/* Email Promo — Prominent direct onder de nav voor maximale conversie */}
