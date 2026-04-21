@@ -225,20 +225,8 @@ export default function WeatherDashboard({ initialCity, beforeFooter, titleOverr
                 <span className="font-medium text-text-secondary">{new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
               </h1>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  const summary = `Nederland Weerupdate 🌪️\n\nNu ${weather.current.temperature}°C in ${city.name} (${getWeatherDescription(weather.current.weatherCode)}).\n\n${weather.aiVerdict || "De rest is ruis."}\n\nCheck het volledige 48-uurs rapport: https://weerzone.nl/weer/${city.name.toLowerCase().replace(/\s+/g, '-')}\n\n#weer #weerzone #nederland`;
-                  navigator.clipboard.writeText(summary);
-                  alert("Kopie voor Buffer staat op je klembord! 🚀");
-                }}
-                className="px-2.5 py-1 rounded bg-accent-cyan/10 text-accent-cyan text-[9px] font-black uppercase tracking-widest border border-accent-cyan/20 hover:bg-accent-cyan/20 transition-all hover:scale-105"
-              >
-                Copy for Buffer
-              </button>
-              <div className="px-2.5 py-1 rounded bg-black text-white text-[9px] font-black uppercase tracking-widest border border-white/20">
-                OFFICIAL
-              </div>
+            <div className="px-2.5 py-1 rounded bg-black text-white text-[9px] font-black uppercase tracking-widest border border-white/20">
+              OFFICIAL
             </div>
           </div>
           
