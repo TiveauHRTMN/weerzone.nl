@@ -71,10 +71,26 @@ export async function GET(req: NextRequest) {
     const isLandscape = format === "x";
     const scale = isLandscape ? 0.7 : 1;
 
-    // Minimal weatherData for matcher
+    // Minimal weatherData for matcher (needs hourly for slice() and daily for indices)
     const weatherData = {
-      current: { temperature: temp, weatherCode: code, precipitation: w.current.precipitation },
-      daily: w.daily.time.map((_: any, i: number) => ({ tempMax: w.daily.temperature_2m_max[i] }))
+      current: { 
+        temperature: temp, 
+        weatherCode: code, 
+        precipitation: w.current.precipitation,
+        windSpeed: w.current.wind_speed_10m || 0,
+        humidity: 70 
+      },
+      daily: w.daily.time.map((_: any, i: number) => ({ 
+        tempMax: w.daily.temperature_2m_max[i],
+        tempMin: w.daily.temperature_2m_min[i],
+        precipitationSum: w.daily.precipitation_sum[i],
+        windSpeedMax: 20
+      })),
+      hourly: w.hourly.time.map((_: any, i: number) => ({
+        temperature: w.hourly.temperature_2m[i],
+        weatherCode: w.hourly.weather_code[i],
+        precipitation: w.hourly.precipitation[i]
+      }))
     };
     const { products } = matchProducts(weatherData as any, 1, new Date(), personaParam);
     const deal = products[0];
