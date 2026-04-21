@@ -43,7 +43,7 @@ async function fetchWeather(lat: number, lon: number) {
       `&hourly=temperature_2m,weather_code,precipitation` +
       `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
       `&timezone=Europe/Amsterdam&forecast_days=2`,
-    { cache: "no-store", signal: AbortSignal.timeout(5000) }
+    { cache: "no-store" }
   );
   if (!res.ok) throw new Error("Weather API unreachable");
   return res.json();
@@ -56,9 +56,9 @@ export async function GET(req: NextRequest) {
   const SIZE = SIZES[format];
   const personaParam = (searchParams.get("persona") || "piet").toLowerCase() as PersonaTier;
   const theme = PERSONA_THEMES[personaParam] || PERSONA_THEMES.piet;
+  const cityName = searchParams.get("city") || "Nederland";
 
   try {
-    const cityName = searchParams.get("city") || "Nederland";
     const lat = parseFloat(searchParams.get("lat") || "52.11");
     const lon = parseFloat(searchParams.get("lon") || "5.18");
 
@@ -126,12 +126,15 @@ export async function GET(req: NextRequest) {
       { ...SIZE }
     );
   } catch (e: any) {
-    return NextResponse.json({ 
-      error: e.message, 
-      stack: e.stack,
-      cityName: cityName,
-      searchParams: Object.fromEntries(new URL(req.url).searchParams)
-    }, { status: 500 });
+    return new ImageResponse(
+      (
+        <div style={{ height: "100%", width: "100%", background: "#1e3a8a", color: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: 60, fontWeight: 700 }}>WEERZONE.NL</div>
+          <div style={{ fontSize: 24, marginTop: 20 }}>Laden van gegevens...</div>
+        </div>
+      ),
+      { ...SIZE }
+    );
   }
 }
 
