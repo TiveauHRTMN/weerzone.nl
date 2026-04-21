@@ -36,8 +36,7 @@ export async function proxy(request: NextRequest) {
   const isAppRoute = pathname.startsWith("/app");
   const isOnboarding = pathname.startsWith("/app/onboarding");
 
-  // Founder Persistence: Als de gebruiker een founder is (info@weerzone.nl), 
-  // verlengen we de session cookies naar 10 jaar zodat ze "altijd" ingelogd blijven.
+  // Founder Persistence: 10 jaar sessie voor eigenaren
   const { isFounderEmail } = await import("@/lib/founders");
   if (user && isFounderEmail(user.email)) {
     const sessionCookies = request.cookies.getAll().filter(c => c.name.startsWith("sb-"));
