@@ -10,6 +10,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AgentCockpit() {
   const supabase = getSupabase();
+  
+  if (!supabase) {
+    return <div className="p-20 text-center text-white/50 uppercase font-black tracking-widest">Supabase niet geconfigureerd.</div>;
+  }
+
   const { data: logs } = await supabase
     .from("agent_activity")
     .select("*")

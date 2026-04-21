@@ -32,6 +32,8 @@ export async function GET(req: Request) {
   }
 
   const supabase = getSupabase();
+  if (!supabase) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+
   const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
 
   const results = {
