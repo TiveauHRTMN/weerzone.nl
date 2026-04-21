@@ -116,48 +116,33 @@ export async function generatePlatformCaption(weather: WeatherLite, platform: 'x
   }
 }
 
-interface BufferResponse {
-  data?: unknown;
-  errors?: Array<{ message: string; path?: string[] }>;
-}
 
-async function bufferGraphQL(query: string, variables: Record<string, unknown>): Promise<BufferResponse> {
+
+async function createBufferPost(channelId: string, text: string, imageUrls: string[]) {
   const token = process.env.BUFFER_API_TOKEN;
   if (!token) throw new Error("BUFFER_API_TOKEN missing");
-  const res = await fetch("https://api.buffer.com", {
+
+  const params = new URLSearchParams();
+  params.append("profile_ids[]", channelId);
+  params.append("text", text);
+  params.append("now", "true"); // Direct posten
+  
+  if (imageUrls.length > 0) {
+    params.append("media[photo]", imageUrls[0]);
+  }
+
+  const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: JSON.stringify({ query, variables }),
+    body: params.toString(),
   });
-  const body = (await res.json()) as BufferResponse;
-  if (!res.ok) throw new Error(`Buffer HTTP ${res.status}: ${JSON.stringify(body)}`);
-  return body;
-}
 
-async function createBufferPost(channelId: string, text: string, imageUrls: string[]) {
-  const mutation = `
-    mutation CreatePost($input: CreatePostInput!) {
-      createPost(input: $input) {
-        __typename
-        ... on CreatePostSuccess { post { id scheduledAt } }
-        ... on MutationError { message }
-      }
-    }
-  `;
-  const variables = {
-    input: {
-      organizationId: BUFFER_ORG_ID,
-      channelIds: [channelId],
-      text,
-      media: imageUrls.map((url) => ({ url, type: "image" })),
-      schedulingType: "custom",
-      mode: "shareNow",
-    },
-  };
-  return bufferGraphQL(mutation, variables);
+  const body = await res.json();
+  if (!res.ok) throw new Error(`Buffer API Error ${res.status}: ${JSON.stringify(body)}`);
+  return body;
 }
 
 export async function GET(req: Request) {
