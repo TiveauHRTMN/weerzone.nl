@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     apple: "/favicon-icon.png",
   },
   title: {
-    default: "WEERZONE | 48 uur snoeihard weerbericht. De rest is ruis.",
+    default: "WEERZONE | 48 uur vooruit. De rest is ruis.",
     template: "%s | WEERZONE",
   },
   description:
