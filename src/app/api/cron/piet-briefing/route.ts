@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     const topDeal = deals[0];
 
     // 4. AI Copy (Piet Style)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const prompt = `
       Je bent Piet van WEERZONE. STIJL: Doortastend, scherp, tikkeltje brutaal ("Vandaag Inside" vibe).
       CONTEXT: Landelijk weerbericht voor Nederland.
