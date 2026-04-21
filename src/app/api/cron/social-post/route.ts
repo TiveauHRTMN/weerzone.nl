@@ -123,27 +123,39 @@ async function createBufferPost(channelId: string, text: string, imageUrls: stri
   const token = process.env.BUFFER_API_TOKEN;
   if (!token) throw new Error("BUFFER_API_TOKEN missing");
 
-  const params = new URLSearchParams();
-  params.append("profile_ids[]", channelId);
-  params.append("text", text);
-  params.append("now", "true"); // Direct posten
-  
-  if (imageUrls.length > 0) {
-    params.append("media[photo]", imageUrls[0]);
-  }
+  const query = `
+    mutation CreatePost($input: CreatePostInput!) {
+      createPost(input: $input) {
+        post {
+          id
+        }
+      }
+    }
+  `;
 
-  const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
+  const variables = {
+    input: {
+      channelId,
+      text,
+      media: imageUrls.map(url => ({ url, type: "image" })),
+      schedulingType: "now"
+    }
+  };
+
+  const res = await fetch("https://api.buffer.com", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
     },
-    body: params.toString(),
+    body: JSON.stringify({ query, variables }),
   });
 
   const body = await res.json();
-  if (!res.ok) throw new Error(`Buffer API Error ${res.status}: ${JSON.stringify(body)}`);
-  return body;
+  if (!res.ok || body.errors) {
+    throw new Error(`Buffer GraphQL Error: ${JSON.stringify(body.errors || body)}`);
+  }
+  return body.data;
 }
 
 export async function GET(req: Request) {
