@@ -287,41 +287,66 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       </div>
 
       {/* ===== 2. Weermodel Verificatie — Waarom dit klopt ===== */}
-      {/* ===== 14. Zon & UV — compact ===== */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.18s" }}>
-        <div className="card p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1 text-[9px] sm:text-[10px]">Zonlicht</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">🌅</span>
-                    <span className="text-xs font-bold text-text-primary truncate">
-                      {new Date(weather.sunrise).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">🌇</span>
-                    <span className="text-xs font-bold text-text-primary truncate">
-                      {new Date(weather.sunset).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col border-l border-black/5 pl-4 sm:pl-6">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1 text-[9px] sm:text-[10px]">Zonuren</span>
-                <div className="flex items-center gap-1.5">
-                  <Sun className="w-3.5 h-3.5 text-accent-orange" />
-                  <span className="text-xs font-bold text-text-primary whitespace-nowrap">{weather.daily[0].sunHours} uur</span>
-                </div>
+      {/* ===== Dagoverzicht Insights — Alles in één Grid ===== */}
+      <div className="animate-fade-in space-y-3" style={{ animationDelay: "0.22s" }}>
+        <div className="flex justify-between items-end px-1">
+          <h3 className="section-title">Insights voor Vandaag</h3>
+          <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">KNMI Live Data</span>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* Zon & UV (Gecombineerd) */}
+          <div className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">Zon & UV</span>
+              <Sun className="w-3.5 h-3.5 text-accent-orange" />
+            </div>
+            <div className="flex flex-col mt-2">
+              <span className="text-lg font-black text-text-primary">UV {weather.uvIndex.toFixed(0)}</span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px] font-bold text-text-secondary">🌅 {new Date(weather.sunrise).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="text-[10px] font-bold text-text-secondary">🌇 {new Date(weather.sunset).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-1 text-right text-[9px] sm:text-[10px]">Straling</span>
-              <span className="badge text-[9px] sm:text-[10px] whitespace-nowrap" style={{ backgroundColor: `${uvInfo.color}20`, color: uvInfo.color, border: `1px solid ${uvInfo.color}40` }}>
-                UV {weather.uvIndex.toFixed(0)} — {uvInfo.label.split("—")[0].trim()}
-              </span>
+          </div>
+
+          {[
+            { id: "bbq", icon: "🔥", label: "BBQ Weer", score: getBbqScore(weather) },
+            { id: "strand", icon: "🏖️", label: "Strand", score: getStrandScore(weather) },
+            { id: "pollen", icon: "🤧", label: "Hooikoorts", score: getHooikoortsScore(weather) },
+            { id: "run", icon: "🏃", label: "Hardlopen", score: getHardloopScore(weather) },
+          ].map((item) => (
+            <div
+              key={item.id}
+              className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px] transition-all hover:border-accent-orange/30"
+            >
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">{item.label}</span>
+                <span className="text-lg">{item.icon}</span>
+              </div>
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className={`text-2xl font-black ${item.score >= 7 ? 'text-accent-green' : item.score >= 5 ? 'text-accent-amber' : 'text-accent-red'}`}>
+                  {item.score}
+                </span>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-tighter">/ 10</span>
+              </div>
+            </div>
+          ))}
+
+          {/* Wind & Neerslag (Quick Insight) */}
+          <div className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">Wind & Regen</span>
+              <Wind className="w-3.5 h-3.5 text-accent-cyan" />
+            </div>
+            <div className="flex flex-col mt-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-bold">{getWindBeaufort(weather.current.windSpeed).scale} Bft</span>
+                <span className="text-sm font-bold">{weather.current.precipitation} mm</span>
+              </div>
+              <div className="bg-black/5 h-1.5 rounded-full mt-2 overflow-hidden">
+                 <div className="bg-accent-cyan h-full" style={{ width: `${Math.min(100, (weather.current.windSpeed / 60) * 100)}%` }} />
+              </div>
             </div>
           </div>
         </div>
@@ -957,36 +982,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         </div>
       </div>
 
-      {/* ===== 12. Populaire Thema's (Data Insights) ===== */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
-        <div className="flex justify-between items-end mb-3 px-1">
-          <h3 className="section-title">Populair op WeerZone</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { id: "bbq", icon: "🔥", label: "BBQ Weer", score: getBbqScore(weather) },
-            { id: "strand", icon: "🏖️", label: "Strandweer", score: getStrandScore(weather) },
-            { id: "pollen", icon: "🤧", label: "Hooikoorts", score: getHooikoortsScore(weather) },
-            { id: "run", icon: "🏃", label: "Hardlopen", score: getHardloopScore(weather) },
-          ].map((theme) => (
-            <div
-              key={theme.id}
-              className="card p-4 flex items-center justify-between transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{theme.icon}</span>
-                <span className="text-sm font-bold text-text-primary">{theme.label}</span>
-              </div>
-              <div className="flex flex-col items-end">
-                <span className={`text-lg font-black ${theme.score >= 7 ? 'text-accent-green' : theme.score >= 5 ? 'text-accent-amber' : 'text-accent-red'}`}>
-                  {theme.score}
-                </span>
-                <span className="text-[9px] font-bold text-text-muted uppercase tracking-tighter">Index</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
 
       {beforeFooter}
