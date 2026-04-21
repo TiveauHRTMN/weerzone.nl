@@ -173,3 +173,63 @@ export function getUvLabel(uv: number): { label: string; color: string } {
   if (uv <= 10) return { label: "Zeer hoog — binnenblijven of factor 50, geen discussie", color: "#ef4444" };
   return { label: "Extreem — je verbrandt sneller dan een tosti", color: "#a855f7" };
 }
+
+export function getBbqScore(w: WeatherData): number {
+    let score = 10;
+    const t = w.current.temperature;
+    if (t < 15) score -= 4;
+    else if (t < 20) score -= 1.5;
+    else if (t > 32) score -= 2.5;
+
+    if (w.current.precipitation > 0) score -= 7;
+    if (w.current.windSpeed > 25) score -= 3;
+    if (w.current.windSpeed > 40) score -= 5;
+    
+    return Math.max(1, Math.min(10, Math.round(score)));
+}
+
+export function getStrandScore(w: WeatherData): number {
+    let score = 1;
+    const t = w.current.temperature;
+    const uv = w.uvIndex;
+    
+    if (t > 20) score += 4;
+    if (t > 24) score += 2;
+    if (t > 28) score += 1;
+    if (uv > 4) score += 2;
+    if (uv > 7) score += 1;
+    
+    if (w.current.precipitation > 0) score -= 5;
+    if (w.current.windSpeed > 40) score -= 3;
+    
+    return Math.max(1, Math.min(10, Math.round(score)));
+}
+
+export function getHooikoortsScore(w: WeatherData): number {
+    // Hooikoorts is erger bij droog, zonnig weer met een briesje
+    let score = 1;
+    if (w.current.precipitation === 0) score += 5;
+    if (w.current.windSpeed > 10 && w.current.windSpeed < 30) score += 3;
+    if (w.current.temperature > 15) score += 1;
+    
+    if (w.current.precipitation > 2) score -= 4;
+    
+    return Math.max(1, Math.min(10, Math.round(score)));
+}
+
+export function getHardloopScore(w: WeatherData): number {
+    let score = 10;
+    const t = w.current.temperature;
+    
+    // Ideaal tussen 8 en 16 graden
+    if (t < 5) score -= 2;
+    if (t > 20) score -= 3;
+    if (t > 25) score -= 4;
+    if (t > 30) score -= 2;
+
+    if (w.current.precipitation > 0.5) score -= 4;
+    if (w.current.windSpeed > 35) score -= 4;
+    if (w.current.humidity > 85) score -= 1;
+    
+    return Math.max(1, Math.min(10, Math.round(score)));
+}

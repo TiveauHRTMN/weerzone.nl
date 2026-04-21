@@ -16,6 +16,10 @@ import {
   getOutfitAdvice,
   getWindComment,
   getUvLabel,
+  getBbqScore,
+  getStrandScore,
+  getHooikoortsScore,
+  getHardloopScore,
 } from "@/lib/commentary";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
 import { getTemperatureComparison } from "@/lib/climate";
@@ -949,26 +953,33 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         </div>
       </div>
 
-      {/* ===== 12. Populaire Thema's (SEO Booster) ===== */}
+      {/* ===== 12. Populaire Thema's (Data Insights) ===== */}
       <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
         <div className="flex justify-between items-end mb-3 px-1">
           <h3 className="section-title">Populair op WeerZone</h3>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { slug: "bbq-weer", icon: "🔥", label: "BBQ Weer" },
-            { slug: "strandweer", icon: "🏖️", label: "Strandweer" },
-            { slug: "hooikoorts", icon: "🤧", label: "Hooikoorts" },
-            { slug: "hardloopweer", icon: "🏃", label: "Hardlopen" },
+            { id: "bbq", icon: "🔥", label: "BBQ Weer", score: getBbqScore(weather) },
+            { id: "strand", icon: "🏖️", label: "Strandweer", score: getStrandScore(weather) },
+            { id: "pollen", icon: "🤧", label: "Hooikoorts", score: getHooikoortsScore(weather) },
+            { id: "run", icon: "🏃", label: "Hardlopen", score: getHardloopScore(weather) },
           ].map((theme) => (
-            <a
-              key={theme.slug}
-              href={`/weer/themas/${theme.slug}`}
-              className="card p-4 flex items-center gap-3 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            <div
+              key={theme.id}
+              className="card p-4 flex items-center justify-between transition-all"
             >
-              <span className="text-2xl">{theme.icon}</span>
-              <span className="text-sm font-bold text-text-primary">{theme.label}</span>
-            </a>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{theme.icon}</span>
+                <span className="text-sm font-bold text-text-primary">{theme.label}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className={`text-lg font-black ${theme.score >= 7 ? 'text-accent-green' : theme.score >= 5 ? 'text-accent-amber' : 'text-accent-red'}`}>
+                  {theme.score}
+                </span>
+                <span className="text-[9px] font-bold text-text-muted uppercase tracking-tighter">Index</span>
+              </div>
+            </div>
           ))}
         </div>
       </div>
