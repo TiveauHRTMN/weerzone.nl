@@ -134,7 +134,7 @@ export async function generatePlatformCaption(weather: WeatherLite, platform: 'x
 
   try {
     const genAI = new GoogleGenerativeAI(key);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
     const res = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: `${personaPrompt}\n\nTEMPLATE:\n${deterministicCaption}` }] }],
       generationConfig: { maxOutputTokens: 400, temperature: 0.8 },
