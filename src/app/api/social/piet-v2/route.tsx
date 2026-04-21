@@ -43,53 +43,43 @@ async function fetchWeather(lat: number, lon: number) {
       `&hourly=temperature_2m,weather_code,precipitation` +
       `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum` +
       `&timezone=Europe/Amsterdam&forecast_days=2`,
-    { cache: "no-store" }
+    { cache: "no-store", signal: AbortSignal.timeout(5000) }
   );
+  if (!res.ok) throw new Error("Weather API unreachable");
   return res.json();
 }
 
 export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const formatParam = (searchParams.get("format") || "x").toLowerCase() as Format;
-    const format: Format = SIZES[formatParam] ? formatParam : "x";
-    const SIZE = SIZES[format];
-    
-    const personaParam = (searchParams.get("persona") || "piet").toLowerCase() as PersonaTier;
-    const theme = PERSONA_THEMES[personaParam] || PERSONA_THEMES.piet;
+  const { searchParams } = new URL(req.url);
+  const formatParam = (searchParams.get("format") || "x").toLowerCase() as Format;
+  const format: Format = SIZES[formatParam] ? formatParam : "x";
+  const SIZE = SIZES[format];
+  const personaParam = (searchParams.get("persona") || "piet").toLowerCase() as PersonaTier;
+  const theme = PERSONA_THEMES[personaParam] || PERSONA_THEMES.piet;
 
+  try {
     const cityName = searchParams.get("city") || "Nederland";
     const lat = parseFloat(searchParams.get("lat") || "52.11");
     const lon = parseFloat(searchParams.get("lon") || "5.18");
 
     const w = await fetchWeather(lat, lon);
-    const temp = Math.round(w.current.temperature_2m);
-    const code = w.current.weather_code;
+    const temp = Math.round(w?.current?.temperature_2m ?? 0);
+    const code = w?.current?.weather_code ?? 0;
     const desc = getDesc(code).toUpperCase();
     const emoji = getEmoji(code);
 
-    const isLandscape = format === "x";
-    const scale = isLandscape ? 0.7 : 1;
-
-    // Minimal weatherData for matcher (needs hourly for slice() and daily for indices)
     const weatherData = {
-      current: { 
-        temperature: temp, 
-        weatherCode: code, 
-        precipitation: w.current.precipitation,
-        windSpeed: w.current.wind_speed_10m || 0,
-        humidity: 70 
-      },
-      daily: w.daily.time.map((_: any, i: number) => ({ 
-        tempMax: w.daily.temperature_2m_max[i],
-        tempMin: w.daily.temperature_2m_min[i],
-        precipitationSum: w.daily.precipitation_sum[i],
+      current: { temperature: temp, weatherCode: code, precipitation: w?.current?.precipitation ?? 0, windSpeed: 10, humidity: 70 },
+      daily: (w?.daily?.time ?? [0,0]).map((_: any, i: number) => ({ 
+        tempMax: w.daily.temperature_2m_max[i] ?? 10,
+        tempMin: w.daily.temperature_2m_min[i] ?? 5,
+        precipitationSum: w.daily.precipitation_sum[i] ?? 0,
         windSpeedMax: 20
       })),
-      hourly: w.hourly.time.map((_: any, i: number) => ({
-        temperature: w.hourly.temperature_2m[i],
-        weatherCode: w.hourly.weather_code[i],
-        precipitation: w.hourly.precipitation[i]
+      hourly: (w?.hourly?.time ?? []).slice(0, 24).map((_: any, i: number) => ({
+        temperature: w.hourly.temperature_2m[i] ?? 10,
+        weatherCode: w.hourly.weather_code[i] ?? 0,
+        precipitation: w.hourly.precipitation[i] ?? 0
       }))
     };
     const { products } = matchProducts(weatherData as any, 1, new Date(), personaParam);
@@ -102,37 +92,33 @@ export async function GET(req: NextRequest) {
           backgroundColor: theme.bg, color: theme.text, padding: "80px",
           fontFamily: "sans-serif"
         }}>
-          {/* Header */}
           <div style={{ display: "flex", width: "100%", justifyContent: "space-between", marginBottom: "60px" }}>
              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ fontSize: "40px", fontWeight: "bold", color: theme.accent }}>{cityName.toUpperCase()}</div>
-                <div style={{ fontSize: "30px", opacity: 0.8 }}>WEERZONE OFFICIAL</div>
+                <div style={{ fontSize: 40, fontWeight: 700, color: theme.accent }}>{String(cityName).toUpperCase()}</div>
+                <div style={{ fontSize: 30 }}>WEERZONE OFFICIAL</div>
              </div>
-             <div style={{ fontSize: "50px", fontWeight: "bold" }}>WEERZONE</div>
+             <div style={{ fontSize: 50, fontWeight: 700 }}>WEERZONE</div>
           </div>
 
-          {/* Main Body */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-             <div style={{ fontSize: "200px" }}>{emoji}</div>
-             <div style={{ fontSize: "300px", fontWeight: "bold", marginTop: "20px" }}>{temp}°</div>
-             <div style={{ fontSize: "80px", fontWeight: "bold", marginTop: "40px", padding: "20px 60px", backgroundColor: "black" }}>
+             <div style={{ fontSize: 200 }}>{emoji}</div>
+             <div style={{ fontSize: 300, fontWeight: 700, marginTop: 20 }}>{temp}°</div>
+             <div style={{ fontSize: 80, fontWeight: 700, marginTop: 40, padding: "20px 60px", backgroundColor: "black" }}>
                 {desc}
              </div>
           </div>
 
-          {/* Bottom Deal Tip */}
           {deal && (
             <div style={{ display: "flex", backgroundColor: "white", color: "black", padding: "40px", border: "8px solid black" }}>
-               <div style={{ fontSize: "80px", marginRight: "40px" }}>🛍️</div>
+               <div style={{ fontSize: 80, marginRight: 40 }}>🛍️</div>
                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#666" }}>TIP: {deal.badge}</div>
-                  <div style={{ fontSize: "36px", fontWeight: "bold" }}>{deal.title}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: "#666" }}>TIP: {String(deal.badge)}</div>
+                  <div style={{ fontSize: 36, fontWeight: 700 }}>{String(deal.title)}</div>
                </div>
             </div>
           )}
 
-          {/* Footer */}
-          <div style={{ marginTop: "60px", textAlign: "center", fontSize: "30px", opacity: 0.7 }}>
+          <div style={{ marginTop: 60, textAlign: "center", fontSize: 30 }}>
              WWW.WEERZONE.NL · DE REST IS RUIS
           </div>
         </div>
@@ -140,7 +126,15 @@ export async function GET(req: NextRequest) {
       { ...SIZE }
     );
   } catch (e: any) {
-    return new Response(`Er ging iets mis: ${e.message}`, { status: 500 });
+    return new ImageResponse(
+      (
+        <div style={{ height: "100%", width: "100%", background: "#1e3a8a", color: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: 60, fontWeight: 700 }}>WEERZONE.NL</div>
+          <div style={{ fontSize: 30, marginTop: 20 }}>Laden van gegevens...</div>
+        </div>
+      ),
+      { ...SIZE }
+    );
   }
 }
 
