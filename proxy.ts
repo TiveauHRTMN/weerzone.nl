@@ -39,19 +39,7 @@ export async function proxy(request: NextRequest) {
   const isAppRoute = pathname.startsWith("/app");
   const isOnboarding = pathname.startsWith("/app/onboarding");
 
-  // Founder Persistence: 10 jaar sessie voor eigenaren
-  if (user && user.email && FOUNDER_EMAILS.includes(user.email.toLowerCase())) {
-    const sessionCookies = request.cookies.getAll().filter(c => c.name.startsWith("sb-"));
-    sessionCookies.forEach(cookie => {
-      response.cookies.set(cookie.name, cookie.value, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365 * 10,
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-    });
-  }
+
 
   if (isAppRoute && !isOnboarding && !user) {
     const redirectUrl = new URL("/app/onboarding", request.url);
