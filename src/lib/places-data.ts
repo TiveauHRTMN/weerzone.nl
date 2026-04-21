@@ -75,17 +75,22 @@ export function placesByProvince(): Record<string, Place[]> {
 }
 
 /** Zoek een plaats op slug */
-export function findPlace(provinceSlug: string, placeSlug: string): Place | undefined {
+export function findPlace(provinceSlug: string, placeSlugToFind: string): Place | undefined {
   return ALL_PLACES.find(
     (p) =>
       p.province === provinceSlug &&
-      p.name.toLowerCase().replace(/['\s]+/g, "-") === placeSlug
+      placeSlug(p.name) === placeSlugToFind
   );
 }
 
 /** Maak een URL-slug van een plaatsnaam */
 export function placeSlug(name: string): string {
-  return name.toLowerCase().replace(/['\s]+/g, "-");
+  return name
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Verwijder e.g. û naar u
+    .replace(/&/g, "en")                              // & naar en
+    .replace(/[^a-z0-9\-]+/g, "-")                    // Alleen letters, cijfers & streepjes
+    .replace(/^-+|-+$/g, "");                         // Trim streepjes aan uiteinden
 }
 
 /** Vind de 5 dichtstbijzijnde plaatsen */
