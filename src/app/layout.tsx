@@ -100,11 +100,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import { getSupabase } from "@/lib/supabase";
+import AffiliateBanner from "@/components/AffiliateBanner";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = getSupabase();
+  let activeDeal = null;
+
+  if (supabase) {
+    const { data: state } = await supabase
+      .from("system_state")
+      .select("*")
+      .eq("id", "global")
+      .single();
+    
+    if (state?.is_active) {
+      activeDeal = state;
+    }
+  }
+
   return (
     <html lang="nl" className={`${inter.variable} ${outfit.variable} ${manrope.variable} antialiased`}>
       <head>
@@ -121,6 +139,16 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <PostHogPageView />
           </Suspense>
+          
+          {activeDeal && (
+            <AffiliateBanner 
+              message={activeDeal.flash_deal_message}
+              link={activeDeal.flash_deal_link}
+              cta="Profiteer nu"
+              type={activeDeal.flash_deal_type as any}
+            />
+          )}
+
           {children}
           <CookieBanner />
           <InstallPrompt />
