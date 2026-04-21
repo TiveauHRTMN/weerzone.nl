@@ -207,7 +207,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       </header>
 
       {/* NL Pulse — Dynamische ticker voor alle landelijke meetstations */}
-      <div className="min-h-[29px] overflow-hidden">
+      <div className="min-h-[36px] overflow-hidden rounded-xl">
         <NLPulse />
       </div>
 
