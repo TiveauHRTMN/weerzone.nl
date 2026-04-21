@@ -39,7 +39,9 @@ export default async function AgentCockpit() {
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const pipeValue = (totalLeads || 0) * 10; // €10 target per lead/mo
+  const totalLeads = totalLeadsCount || 0;
+  const arpuEstimate = 7.50; // Average across Piet, Reed and Steve tiers
+  const pipeValue = totalLeads * arpuEstimate;
 
   const agents = [
     { name: "Hermes", role: "SEO & Spider Architect", status: "Active", color: "text-purple-400", bg: "bg-purple-400/10", mood: "Methodical", kpi: "Indexed Pages" },
@@ -76,7 +78,7 @@ export default async function AgentCockpit() {
            <div className="bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 p-8 rounded-[40px] backdrop-blur-xl border-dashed">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-4">Pipeline Value (Est. June)</h3>
               <div className="text-5xl font-black tracking-tighter mb-1">€{pipeValue.toLocaleString()} <span className="text-xl text-white/20">/mo</span></div>
-              <p className="text-xs font-bold text-emerald-400/40 uppercase tracking-widest">Projected MRR</p>
+              <p className="text-xs font-bold text-emerald-400/40 uppercase tracking-widest">Base estimation • €7.50 avg</p>
            </div>
         </section>
 
