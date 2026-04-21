@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ALL_PLACES } from "@/lib/places-data";
 import { fetchWeatherData } from "@/lib/weather";
 import { logAgentAction } from "@/lib/agent-logger";
+import { getSupabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,8 @@ export async function GET(req: Request) {
   }
 
   try {
+    const supabase = getSupabase();
+    if (!supabase) throw new Error("Supabase not configured");
     // 1. Analyseer landelijke trends (sample van 3 grote steden)
     const cities = ["Utrecht", "Amsterdam", "Eindhoven"];
     const trends = [];
