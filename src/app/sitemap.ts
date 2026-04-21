@@ -1,60 +1,43 @@
-import type { MetadataRoute } from "next";
-import { DUTCH_CITIES } from "@/lib/types";
-import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
+import { MetadataRoute } from 'next';
+import { ALL_PLACES } from '@/lib/places-data';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://weerzone.nl";
+/**
+ * SEO TURBO: Segmented Sitemap Index
+ * We splitsen de 9.000+ pagina's op per provincie.
+ * Dit voorkomt memory limits en zorgt dat Google de site sneller 'snapt'.
+ */
 
-  // Homepage
-  const routes: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "hourly",
-      priority: 1.0,
-    },
-  ];
+const PROVINCES = [
+  "groningen", "friesland", "drenthe", "overijssel", "flevoland", "gelderland", 
+  "utrecht", "noord-holland", "zuid-holland", "zeeland", "noord-brabant", "limburg"
+];
 
-  // ── PROGRAMMATIC SEO: Province hub pages ──
-  for (const prov of Object.keys(PROVINCE_LABELS)) {
-    routes.push({
-      url: `${baseUrl}/weer/${prov}`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
-    });
+export async function generateSitemaps() {
+  // We genereren 12 sitemaps (één per provincie)
+  return PROVINCES.map((prov, id) => ({ id }));
+}
+
+export default async function sitemap({
+  id,
+}: {
+  id: number;
+}): Promise<MetadataRoute.Sitemap> {
+  // Als er geen id is (de hoofd sitemap.xml), geven we de statische pagina's
+  if (id === undefined) {
+    return [
+      { url: 'https://weerzone.nl', lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
+      { url: 'https://weerzone.nl/prijzen', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+      { url: 'https://weerzone.nl/over-ons', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    ];
   }
 
-  // ── PROGRAMMATIC SEO: All place pages ──
-  // Elke plaats = een indexeerbare pagina voor "weer [plaatsnaam]"
-  for (const place of ALL_PLACES) {
-    routes.push({
-      url: `${baseUrl}/weer/${place.province}/${placeSlug(place.name)}`,
-      lastModified: new Date(),
-      changeFrequency: "hourly",
-      priority: 0.85,
-    });
-  }
+  const prov = PROVINCES[id];
+  const cities = ALL_PLACES.filter(p => p.province === prov);
 
-  // Topic pages — hoge prioriteit, mikken op generieke queries
-  routes.push(
-    { url: `${baseUrl}/weer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.95 },
-    { url: `${baseUrl}/weer/onweer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/weer/regen`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/weer/48-uur`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
-    { url: `${baseUrl}/weer/themas/bbq-weer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/weer/themas/strandweer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/weer/themas/hardloopweer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/weer/themas/hooikoorts`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/weer/themas/wintersport-nl`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-  );
-
-  // Static pages
-  routes.push(
-    { url: `${baseUrl}/zakelijk`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/embed`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
-    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
-  );
-
-  return routes;
+  return cities.map((city) => ({
+    url: `https://weerzone.nl/weer/${city.name.toLowerCase().replace(/ /g, '-')}`,
+    lastModified: new Date(),
+    changeFrequency: 'hourly',
+    priority: 0.7,
+  }));
 }
