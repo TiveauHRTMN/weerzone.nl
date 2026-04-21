@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { PersonaTier } from "@/lib/personas";
 import { matchProducts } from "@/lib/amazon-matcher";
 
-export const runtime = "edge";
+
 
 type Format = "ig" | "tiktok" | "x";
 const SIZES: Record<Format, { width: number; height: number }> = {
@@ -125,76 +125,79 @@ export async function GET(req: NextRequest) {
     const { products } = matchProducts(weatherData as any, 1, new Date(), personaParam);
     const deal = products[0];
 
+    const isLandscape = format === "x";
+    const scale = isLandscape ? 0.65 : 1; // Schaal alles af voor landscape
+
     return new ImageResponse(
       (
         <div style={{
           width: "100%", height: "100%", display: "flex", flexDirection: "column",
-          background: theme.bg, color: theme.text, padding: "80px 72px",
+          background: theme.bg, color: theme.text, padding: isLandscape ? "40px 60px" : "80px 72px",
           fontFamily: "sans-serif"
         }}>
           {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "60px", alignItems: "center" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: `${40 * scale}px`, alignItems: "center" }}>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "2px", color: theme.accent }}>{cityName.toUpperCase()}</span>
-              <span style={{ fontSize: "36px", fontWeight: 800 }}>{dateStr}</span>
+              <span style={{ fontSize: `${24 * scale}px`, fontWeight: 900, letterSpacing: "2px", color: theme.accent }}>{cityName.toUpperCase()}</span>
+              <span style={{ fontSize: `${36 * scale}px`, fontWeight: 800 }}>{dateStr}</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-              <span style={{ fontSize: "32px", fontWeight: 900 }}>WEERZONE</span>
-              <span style={{ fontSize: "16px", fontWeight: 700, opacity: 0.7 }}>{theme.name}</span>
+              <span style={{ fontSize: `${32 * scale}px`, fontWeight: 900 }}>WEERZONE</span>
+              <span style={{ fontSize: `${16 * scale}px`, fontWeight: 700, opacity: 0.7 }}>{theme.name}</span>
             </div>
           </div>
 
           {/* Main Content */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
-              <div style={{ fontSize: "180px" }}>{emoji}</div>
-              <div style={{ fontSize: "280px", fontWeight: 900, lineHeight: 1, letterSpacing: "-10px" }}>{temp}°</div>
+            <div style={{ display: "flex", alignItems: "center", gap: `${40 * scale}px` }}>
+              <div style={{ fontSize: `${180 * scale}px` }}>{emoji}</div>
+              <div style={{ fontSize: `${280 * scale}px`, fontWeight: 900, lineHeight: 1, letterSpacing: "-10px" }}>{temp}°</div>
             </div>
             <div style={{ 
-              fontSize: "60px", fontWeight: 900, background: "black", color: "white", 
-              padding: "10px 40px", marginTop: "-20px", transform: "rotate(-1deg)" 
+              fontSize: `${60 * scale}px`, fontWeight: 900, background: "black", color: "white", 
+              padding: `${10 * scale}px ${40 * scale}px`, marginTop: `-${20 * scale}px`, transform: "rotate(-1deg)" 
             }}>{desc}</div>
           </div>
 
           {/* Deal Sniper Integration */}
           {deal && (
             <div style={{ 
-              background: "white", color: "black", padding: "30px", borderRadius: "0px",
-              marginBottom: "50px", display: "flex", alignItems: "center", border: "5px solid black",
+              background: "white", color: "black", padding: `${30 * scale}px`, borderRadius: "0px",
+              marginBottom: `${30 * scale}px`, display: "flex", alignItems: "center", border: "5px solid black",
               boxShadow: "15px 15px 0px rgba(0,0,0,0.2)"
             }}>
-              <div style={{ fontSize: "60px", marginRight: "30px" }}>🛒</div>
+              <div style={{ fontSize: `${60 * scale}px`, marginRight: `${30 * scale}px` }}>🛒</div>
               <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                <span style={{ fontSize: "18px", fontWeight: 800, color: "#666" }}>TIP VAN {personaParam.toUpperCase()} — {deal.badge || 'DEAL'}</span>
-                <span style={{ fontSize: "32px", fontWeight: 900 }}>{deal.title}</span>
-                <span style={{ fontSize: "20px", fontWeight: 700 }}>{deal.subtitle}</span>
+                <span style={{ fontSize: `${18 * scale}px`, fontWeight: 800, color: "#666" }}>TIP VAN {personaParam.toUpperCase()} — {deal.badge || 'DEAL'}</span>
+                <span style={{ fontSize: `${32 * scale}px`, fontWeight: 900 }}>{deal.title}</span>
+                <span style={{ fontSize: `${20 * scale}px`, fontWeight: 700 }}>{deal.subtitle}</span>
               </div>
-              <div style={{ fontSize: "40px", fontWeight: 900, marginLeft: "20px" }}>{deal.priceHint}</div>
+              <div style={{ fontSize: `${40 * scale}px`, fontWeight: 900, marginLeft: `${20 * scale}px` }}>{deal.priceHint}</div>
             </div>
           )}
 
           {/* Forecast Grid */}
-          <div style={{ display: "flex", gap: "20px", marginBottom: "40px" }}>
+          <div style={{ display: "flex", gap: `${20 * scale}px`, marginBottom: `${30 * scale}px` }}>
             {[8, 13, 19, 23].map((hour, i) => {
               const labels = ["OCHTEND", "MIDDAG", "AVOND", "NACHT"];
               const hTemp = Math.round(w.hourly.temperature_2m[hour]);
               const hCode = w.hourly.weather_code[hour];
               return (
                 <div key={hour} style={{ 
-                  flex: 1, background: "rgba(0,0,0,0.2)", padding: "30px 20px", 
+                  flex: 1, background: "rgba(0,0,0,0.2)", padding: `${20 * scale}px`, 
                   borderRadius: "0px", display: "flex", flexDirection: "column", alignItems: "center",
                   border: "2px solid rgba(255,255,255,0.2)"
                 }}>
-                  <span style={{ fontSize: "18px", fontWeight: 800, opacity: 0.8 }}>{labels[i]}</span>
-                  <span style={{ fontSize: "60px", margin: "15px 0" }}>{getEmoji(hCode)}</span>
-                  <span style={{ fontSize: "40px", fontWeight: 900 }}>{hTemp}°</span>
+                  <span style={{ fontSize: `${18 * scale}px`, fontWeight: 800, opacity: 0.8 }}>{labels[i]}</span>
+                  <span style={{ fontSize: `${60 * scale}px`, margin: `${15 * scale}px 0` }}>{getEmoji(hCode)}</span>
+                  <span style={{ fontSize: `${40 * scale}px`, fontWeight: 900 }}>{hTemp}°</span>
                 </div>
               );
             })}
           </div>
 
           {/* Footer */}
-          <div style={{ display: "flex", justifyContent: "center", opacity: 0.6, fontSize: "24px", fontWeight: 800, letterSpacing: "4px" }}>
+          <div style={{ display: "flex", justifyContent: "center", opacity: 0.6, fontSize: `${24 * scale}px`, fontWeight: 800, letterSpacing: "4px" }}>
             WEERZONE.NL · DE REST IS RUIS
           </div>
         </div>
@@ -205,7 +208,7 @@ export async function GET(req: NextRequest) {
     return new ImageResponse(
       (
         <div style={{ width: "100%", height: "100%", background: theme.bg, color: theme.text, display: "flex", alignItems: "center", justifyContent: "center" }}>
-           <h1>Weerzone — Laden...</h1>
+           <div style={{ fontSize: "40px", fontWeight: "bold" }}>Weerzone — Laden...</div>
         </div>
       ),
       { ...SIZE }
