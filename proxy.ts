@@ -28,6 +28,9 @@ export async function proxy(request: NextRequest) {
     },
   });
 
+  // Founder Verification (Inline voor Edge-compatibility)
+  const FOUNDER_EMAILS = ["rwnhrtmn@gmail.com", "iamrowanonl@gmail.com", "info@weerzone.nl"];
+  
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -37,13 +40,12 @@ export async function proxy(request: NextRequest) {
   const isOnboarding = pathname.startsWith("/app/onboarding");
 
   // Founder Persistence: 10 jaar sessie voor eigenaren
-  const { isFounderEmail } = await import("@/lib/founders");
-  if (user && isFounderEmail(user.email)) {
+  if (user && user.email && FOUNDER_EMAILS.includes(user.email.toLowerCase())) {
     const sessionCookies = request.cookies.getAll().filter(c => c.name.startsWith("sb-"));
     sessionCookies.forEach(cookie => {
       response.cookies.set(cookie.name, cookie.value, {
         path: "/",
-        maxAge: 60 * 60 * 24 * 365 * 10, // 10 jaar
+        maxAge: 60 * 60 * 24 * 365 * 10,
         httpOnly: true,
         secure: true,
         sameSite: "lax",
