@@ -115,6 +115,8 @@ export async function GET(req: NextRequest) {
         precipitationSum: w.daily.precipitation_sum[i],
         windSpeedMax: 20 // fallback
       })),
+    };
+
     // 3. Simple Render
     return new ImageResponse(
       (
