@@ -125,10 +125,10 @@ export async function GET(req: NextRequest) {
       ),
       { ...SIZE }
     );
-  } catch (e: any) {
+  } catch (err: any) {
     return new ImageResponse(
       (
-        <div style={{ height: "100%", width: "100%", background: "#1e3a8a", color: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ height: "100%", width: "100%", backgroundColor: "#1e3a8a", color: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 60, fontWeight: 700 }}>WEERZONE.NL</div>
           <div style={{ fontSize: 24, marginTop: 20 }}>Laden van gegevens...</div>
         </div>
@@ -137,7 +137,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
-
-
-// Deployment sync: 2026-04-22 00:26
