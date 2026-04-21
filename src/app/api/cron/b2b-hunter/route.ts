@@ -96,7 +96,7 @@ export async function GET(req: Request) {
             results.leadsGenerated++;
 
             await logAgentAction(
-                "Steve", 
+                "B2B Ignite", 
                 "lead_found", 
                 `Nieuwe lead voor ${tier.industry}: ${rawLead.businessName} in ${city}`,
                 { city, industry: tier.industry, website: details.website }
@@ -114,7 +114,7 @@ export async function GET(req: Request) {
             });
 
             await logAgentAction(
-                "Steve", 
+                "B2B Ignite", 
                 "outreach_sent", 
                 `Outreach gemaild naar ${rawLead.businessName} (${contactEmail})`,
                 { email: contactEmail, subject }
@@ -132,9 +132,9 @@ export async function GET(req: Request) {
   }
 
   await logAgentAction(
-    "Steve", 
+    "B2B Ignite", 
     "system_check", 
-    `B2B Hunter cyclus afgerond. ${results.emailsSent} emails verstuurd voor ${results.hotspotsFound} hotspots.`,
+    `B2B Hunter cyclus afgerond. ${results.emailsSent} emails verstuurd en ${results.leadsGenerated} leads gegenereerd.`,
     results
   );
 
