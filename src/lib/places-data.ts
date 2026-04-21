@@ -443,6 +443,67 @@ export const ALL_PLACES: Place[] = [
   { name: "Putten", province: "gelderland", lat: 52.2583, lon: 5.6067, population: 24500 },
   { name: "Nunspeet", province: "gelderland", lat: 52.3783, lon: 5.7917, population: 28000 },
   { name: "Elburg", province: "gelderland", lat: 52.4475, lon: 5.8333, population: 12500, character: "coastal" },
+
+  // ── BATCH #9: EILANDEN & DEEP SOUTH ──
+  // Zuid-Hollandse Eilanden
+  { name: "Ouddorp", province: "zuid-holland", lat: 51.8117, lon: 3.9350, population: 6000, character: "coastal" },
+  { name: "Middelharnis", province: "zuid-holland", lat: 51.7583, lon: 4.1617, population: 7000, character: "coastal" },
+  { name: "Sommelsdijk", province: "zuid-holland", lat: 51.7567, lon: 4.1483, population: 7500 },
+  { name: "Dirksland", province: "zuid-holland", lat: 51.7483, lon: 4.1000, population: 5000 },
+  { name: "Stellendam", province: "zuid-holland", lat: 51.8058, lon: 4.0292, population: 3500, character: "coastal" },
+  { name: "Brielle", province: "zuid-holland", lat: 51.9017, lon: 4.1633, population: 13000, character: "coastal" },
+  { name: "Oostvoorne", province: "zuid-holland", lat: 51.9117, lon: 4.1033, population: 8000, character: "coastal" },
+  { name: "Rockanje", province: "zuid-holland", lat: 51.8717, lon: 4.0650, population: 6500, character: "coastal" },
+
+  // Limburg Extra
+  { name: "Beek", province: "limburg", lat: 50.9417, lon: 5.7950, population: 16000 },
+  { name: "Meerssen", province: "limburg", lat: 50.8850, lon: 5.7533, population: 19000 },
+  { name: "Elsloo", province: "limburg", lat: 50.9500, lon: 5.7667, population: 8000 },
+  { name: "Born", province: "limburg", lat: 51.0317, lon: 5.8083, population: 6000 },
+  { name: "Bocholtz", province: "limburg", lat: 50.8167, lon: 6.0500, population: 5000 },
+  { name: "Simpelveld", province: "limburg", lat: 50.8350, lon: 5.9833, population: 10000 },
+  { name: "Vaals", province: "limburg", lat: 50.7694, lon: 6.0183, population: 10000, character: "highland" },
+  { name: "Gulpen", province: "limburg", lat: 50.8150, lon: 5.8900, population: 5000, character: "highland" },
+
+  // Noord-Brabant
+  { name: "Dongen", province: "noord-brabant", lat: 51.6258, lon: 4.9333, population: 26000 },
+  { name: "Loon op Zand", province: "noord-brabant", lat: 51.6267, lon: 5.0750, population: 23000 },
+  { name: "Uden", province: "noord-brabant", lat: 51.6583, lon: 5.6167, population: 42000 },
+  { name: "Veghel", province: "noord-brabant", lat: 51.6167, lon: 5.5417, population: 31000 },
+  { name: "Vught", province: "noord-brabant", lat: 51.6567, lon: 5.2917, population: 26500 },
+  { name: "Rosmalen", province: "noord-brabant", lat: 51.7167, lon: 5.3667, population: 35000 },
+  { name: "Boxmeer", province: "noord-brabant", lat: 51.6442, lon: 5.9458, population: 30000 },
+
+  // ── BATCH #10: TOERISME & DEEP DRENTHE ──
+  // Drenthe
+  { name: "Havelte", province: "drenthe", lat: 52.7717, lon: 6.2367, population: 4000 },
+  { name: "Ruinen", province: "drenthe", lat: 52.7625, lon: 6.3533, population: 4000 },
+  { name: "Nijeveen", province: "drenthe", lat: 52.7294, lon: 6.2208, population: 4000 },
+  { name: "Vries", province: "drenthe", lat: 53.0733, lon: 6.5783, population: 4500 },
+  { name: "Tynaarlo", province: "drenthe", lat: 53.0775, lon: 6.6167, population: 2000 },
+  { name: "Zuidveld", province: "drenthe", lat: 52.8800, lon: 6.6800, population: 100 },
+
+  // Overijssel Hotspots
+  { name: "Steenwijk", province: "overijssel", lat: 52.7883, lon: 6.1167, population: 25000 },
+  { name: "Giethoorn", province: "overijssel", lat: 52.7400, lon: 6.0833, population: 2800, character: "coastal" },
+  { name: "Vollenhove", province: "overijssel", lat: 52.6800, lon: 5.9533, population: 4000, character: "coastal" },
+  { name: "Blokzijl", province: "overijssel", lat: 52.7267, lon: 5.9617, population: 1500, character: "coastal" },
+  { name: "Oldemarkt", province: "overijssel", lat: 52.8225, lon: 5.9733, population: 2500 },
+
+  // Noord-Holland (Texel & Omstreken)
+  { name: "Den Burg", province: "noord-holland", lat: 53.0533, lon: 4.7967, population: 7000, character: "coastal" },
+  { name: "De Koog", province: "noord-holland", lat: 53.0975, lon: 4.7617, population: 1500, character: "coastal" },
+  { name: "Oosterend", province: "noord-holland", lat: 53.0858, lon: 4.8883, population: 1100, character: "coastal" },
+  { name: "Den Hoorn (Texel)", province: "noord-holland", lat: 53.0250, lon: 4.7500, population: 500, character: "coastal" },
+  { name: "Anna Paulowna", province: "noord-holland", lat: 52.8617, lon: 4.8258, population: 8000 },
+  { name: "Breezand", province: "noord-holland", lat: 52.8933, lon: 4.7958, population: 3500 },
+
+  // Utrechtse Heuvelrug
+  { name: "Driebergen", province: "utrecht", lat: 52.0533, lon: 5.2817, population: 19000, character: "highland" },
+  { name: "Doorn", province: "utrecht", lat: 52.0333, lon: 5.3500, population: 10000, character: "highland" },
+  { name: "Maarn", province: "utrecht", lat: 52.0633, lon: 5.3733, population: 4500, character: "highland" },
+  { name: "Amerongen", province: "utrecht", lat: 52.0033, lon: 5.4617, population: 7000, character: "highland" },
+  { name: "Leersum", province: "utrecht", lat: 52.0117, lon: 5.4292, population: 7500, character: "highland" },
 ];
 
 // ============================================================

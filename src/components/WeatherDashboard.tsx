@@ -967,6 +967,27 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         </div>
       </div>
 
+      {/* ===== 13. Provincie Navigator (SEO Power) ===== */}
+      <div className="animate-fade-in mt-10" style={{ animationDelay: "1s" }}>
+        <div className="flex justify-between items-end mb-3 px-1">
+          <h3 className="section-title">Alle Regio's</h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {[
+            "Groningen", "Friesland", "Drenthe", "Overijssel", "Flevoland", "Gelderland", 
+            "Utrecht", "Noord-Holland", "Zuid-Holland", "Zeeland", "Noord-Brabant", "Limburg"
+          ].map((prov) => (
+            <a
+              key={prov}
+              href={`/weer/${prov.toLowerCase().replace(" ", "-")}`}
+              className="px-3 py-1.5 bg-black/5 hover:bg-black/10 rounded-full text-[11px] font-bold text-text-secondary transition-colors"
+            >
+              {prov}
+            </a>
+          ))}
+        </div>
+      </div>
+
       {beforeFooter}
 
       <AmazonStickyBar weather={weather} />
