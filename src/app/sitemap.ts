@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { ALL_PLACES } from '@/lib/places-data';
+import { ALL_PLACES, placeSlug } from '@/lib/places-data';
 
 /**
  * SEO TURBO: Segmented Sitemap Index
@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 2. Dynamische lokale pagina's (ca. 9000 stuks)
   // De limiet per sitemap is 50.000, we zitten daar dus nog ver onder.
   const dynamicPages: MetadataRoute.Sitemap = ALL_PLACES.map((city) => ({
-    url: `https://weerzone.nl/weer/${city.name.toLowerCase().replace(/ /g, '-')}`,
+    url: `https://weerzone.nl/weer/${placeSlug(city.name)}`,
     lastModified: new Date(),
     changeFrequency: 'hourly', // Lokale weardata vernieuwt continu
     priority: 0.7,
