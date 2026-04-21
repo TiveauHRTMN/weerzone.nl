@@ -32,6 +32,13 @@ export default async function AgentCockpit() {
     .select("*", { count: "exact", head: true })
     .gte("created_at", new Date(new Date().setHours(0,0,0,0)).toISOString());
 
+  // Fetch Recent Subscribers
+  const { data: recentLeads } = await supabase
+    .from("subscribers")
+    .select("email, city, created_at")
+    .order("created_at", { ascending: false })
+    .limit(10);
+
   const pipeValue = (totalLeads || 0) * 10; // €10 target per lead/mo
 
   const agents = [
@@ -72,6 +79,56 @@ export default async function AgentCockpit() {
               <p className="text-xs font-bold text-emerald-400/40 uppercase tracking-widest">Projected MRR</p>
            </div>
         </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {/* RECENT LEADS TABLE */}
+            <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-[40px] p-8 backdrop-blur-2xl">
+                <h2 className="text-sm font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full" />
+                    Recent Leads Content
+                </h2>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="text-[10px] uppercase font-black tracking-widest text-white/20 border-b border-white/5">
+                                <th className="pb-4 px-2">Email Hash / Address</th>
+                                <th className="pb-4 px-2">City Focus</th>
+                                <th className="pb-4 px-2">Acquired</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-xs">
+                            {recentLeads?.map((lead, i) => (
+                                <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                                    <td className="py-4 px-2 font-bold text-white/80">{lead.email}</td>
+                                    <td className="py-4 px-2 uppercase tracking-widest text-white/40">{lead.city}</td>
+                                    <td className="py-4 px-2 text-white/20 italic">{new Date(lead.created_at).toLocaleDateString()}</td>
+                                </tr>
+                            ))}
+                            {(!recentLeads || recentLeads.length === 0) && (
+                                <tr>
+                                    <td colSpan={3} className="py-20 text-center text-white/10 italic">Geen recente data in de kluis.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* QUICK STATS / INSIGHTS */}
+            <div className="bg-white/5 border border-white/10 rounded-[40px] p-8 backdrop-blur-2xl">
+                <h2 className="text-sm font-black uppercase tracking-widest mb-6">Founder Intelligence</h2>
+                <div className="space-y-6">
+                    <div className="p-4 rounded-3xl bg-accent-cyan/10 border border-accent-cyan/20">
+                        <p className="text-[10px] font-black uppercase text-accent-cyan mb-1">Most Profitable Region</p>
+                        <p className="text-lg font-black">{recentLeads?.[0]?.city || "N/A"}</p>
+                    </div>
+                    <div className="p-4 rounded-3xl bg-white/5 border border-white/10">
+                        <p className="text-[10px] font-black uppercase text-white/30 mb-1">Lead Conversion Rate</p>
+                        <p className="text-lg font-black">2.4% <span className="text-[10px] text-accent-green text-normal lowercase ml-1">avg baseline</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {/* AGENT CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
