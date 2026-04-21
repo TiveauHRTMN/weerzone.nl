@@ -5,17 +5,19 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
 import ZakelijkCTA from "@/components/ZakelijkCTA";
 import { getLocationSEOContent } from "@/app/actions";
+import { fetchWeatherData } from "@/lib/weather";
 import Link from "next/link";
 
 interface PageProps {
   params: Promise<{ province: string; place: string }>;
 }
 
+/** 
+ * We laten deze leeg zodat we niet 7000+ pagina's tijdens de build hoeven te fetchen. 
+ * Next.js genereert ze on-demand (ISR) zodra Google ze crawlt via de sitemap.
+ */
 export function generateStaticParams() {
-  return ALL_PLACES.map((p) => ({
-    province: p.province,
-    place: placeSlug(p.name),
-  }));
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -159,6 +161,9 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   }));
 
   const city = { name: place.name, lat: place.lat, lon: place.lon };
+  
+  // Initial weather fetch on server for instant LCP
+  const initialWeather = await fetchWeatherData(place.lat, place.lon).catch(() => undefined);
 
   return (
     <>
@@ -177,7 +182,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
           <span className="text-white/80">{place.name}</span>
         </nav>
 
-        <WeatherDashboard initialCity={city} />
+        <WeatherDashboard initialCity={city} initialWeather={initialWeather} />
 
         {/* AI Programmatic SEO Content */}
         <section className="max-w-4xl mx-auto px-4 py-8 border-t border-white/5">

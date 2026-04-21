@@ -143,9 +143,9 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       currentPrecip = hourly[0].precipitation;
       currentCode = hourly[0].weatherCode;
       currentWind = hourly[0].windSpeed;
-    } else {
+    } else if (hourly.length > 0) {
       // Fallback: Rain Accuracy Fix voor generic model
-      if (currentPrecip === 0 && hourly?.[0]?.precipitation > 0) {
+      if (currentPrecip === 0 && hourly[0].precipitation > 0) {
         currentPrecip = hourly[0].precipitation;
         if (currentCode === 0 || currentCode === 1 || currentCode === 3) {
           currentCode = hourly[0].weatherCode;

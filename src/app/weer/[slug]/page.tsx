@@ -6,6 +6,7 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
 import ZakelijkCTA from "@/components/ZakelijkCTA";
 import { getLocationSEOContent, getProvinceVerdict } from "@/app/actions";
+import { fetchWeatherData } from "@/lib/weather";
 import Link from "next/link";
 
 interface PageProps {
@@ -63,7 +64,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 // STATIC PARAMS
 // ============================================================
 export function generateStaticParams() {
-  const cityParams = DUTCH_CITIES.map((city) => ({
+  // Prerender alleen de top 30 steden om build-tijd te beheersen
+  const cityParams = DUTCH_CITIES.slice(0, 30).map((city) => ({
     slug: city.name.toLowerCase().replace(/\s+/g, "-"),
   }));
   const provinceParams = VALID_PROVINCES.map((province) => ({
@@ -106,11 +108,14 @@ export default async function MergedSlugPage({ params }: PageProps) {
       .sort((a, b) => a.dist - b.dist)
       .slice(0, 5);
 
+    // Initial weather fetch on server for instant LCP
+    const initialWeather = await fetchWeatherData(city.lat, city.lon).catch(() => undefined);
+
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
         <main>
-          <WeatherDashboard initialCity={city} />
+          <WeatherDashboard initialCity={city} initialWeather={initialWeather} />
 
           {/* AI Programmatic SEO Content */}
           <section className="max-w-4xl mx-auto px-4 py-8 border-t border-white/5">

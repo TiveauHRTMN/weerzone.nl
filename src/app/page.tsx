@@ -4,6 +4,7 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import HomePitch from "@/components/HomePitch";
 import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
+import { fetchWeatherData } from "@/lib/weather";
 
 export const metadata: Metadata = {
   alternates: {
@@ -73,9 +74,10 @@ const faqLd = {
   ],
 };
 
-export default function Home() {
-  // Top 10 cities for SEO internal linking
-  const topCities = DUTCH_CITIES.slice(0, 10);
+export default async function Home() {
+  // Default city for homepage server fetch
+  const defaultCity = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
+  const initialWeather = await fetchWeatherData(defaultCity.lat, defaultCity.lon).catch(() => undefined);
 
   return (
     <>
@@ -93,7 +95,8 @@ export default function Home() {
       />
       <main>
         <WeatherDashboard
-          initialCity={DUTCH_CITIES[0]}
+          initialCity={defaultCity}
+          initialWeather={initialWeather}
           titleOverride="WEERZONE | De eerlijke 48-uurs weersverwachting"
           beforeFooter={
             <>

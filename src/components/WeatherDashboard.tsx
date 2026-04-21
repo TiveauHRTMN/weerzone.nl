@@ -45,6 +45,7 @@ const AD_SLOT_BOTTOM = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM || "";
 
 interface DashboardProps {
   initialCity?: City;
+  initialWeather?: WeatherData;
   /** Optionele content die nét vóór de footer gerenderd wordt (bijv. HomePitch op /). */
   beforeFooter?: React.ReactNode;
   /** Optionele H1 override voor SEO (ninja-style) */
@@ -67,10 +68,10 @@ function getSavedCity(): City | null {
   return null;
 }
 
-export default function WeatherDashboard({ initialCity, beforeFooter, titleOverride }: DashboardProps = {}) {
+export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride }: DashboardProps = {}) {
   const [city, setCity] = useState<City>(initialCity || getSavedCity() || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
+  const [loading, setLoading] = useState(!initialWeather);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
 
   const handleShare = async () => {
@@ -199,7 +200,9 @@ export default function WeatherDashboard({ initialCity, beforeFooter, titleOverr
       </header>
 
       {/* NL Pulse — Dynamische ticker voor alle landelijke meetstations */}
-      <NLPulse />
+      <div className="min-h-[29px] overflow-hidden">
+        <NLPulse />
+      </div>
 
       {/* NavBar — één grote glass-bar in kaartstijl, GPS zit in "Locatie"-pill */}
       <div className="animate-fade-in" style={{ animationDelay: "0.12s" }}>
@@ -615,7 +618,7 @@ export default function WeatherDashboard({ initialCity, beforeFooter, titleOverr
       {/* ===== AdSense Top ===== */}
       {AD_SLOT_TOP && (
         <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-          <AdSlot slot={AD_SLOT_TOP} format="auto" responsive minHeight={100} />
+          <AdSlot slot={AD_SLOT_TOP} format="auto" responsive minHeight={280} />
         </div>
       )}
 
@@ -690,7 +693,7 @@ export default function WeatherDashboard({ initialCity, beforeFooter, titleOverr
       {/* ===== AdSense Mid ===== */}
       {AD_SLOT_MID && (
         <div className="animate-fade-in" style={{ animationDelay: "0.45s" }}>
-          <AdSlot slot={AD_SLOT_MID} format="auto" responsive minHeight={100} />
+          <AdSlot slot={AD_SLOT_MID} format="auto" responsive minHeight={250} />
         </div>
       )}
 
