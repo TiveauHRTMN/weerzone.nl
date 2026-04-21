@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { fetchWeatherData } from "@/lib/weather";
 import { ALL_PLACES } from "@/lib/places-data";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -201,6 +202,42 @@ export async function GET(req: Request) {
       createBufferPost(BUFFER_CHANNELS.x, xData.caption, [xSlide1, xSlide2]),
       createBufferPost(BUFFER_CHANNELS.tiktok, tiktokData.caption, [ttSlide1, ttSlide2]),
     ]);
+
+    // 3. Stuur een kopie en samenvatting naar de founder (info@weerzone.nl)
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey) {
+      const resend = new Resend(resendKey);
+      await resend.emails.send({
+        from: "Weerzone System <system@weerzone.nl>",
+        to: "info@weerzone.nl",
+        subject: `🚀 Social Post Status: ${deBilt.name}`,
+        html: `
+          <div style="font-family:sans-serif; padding:20px;">
+            <h1 style="color:#0ea5e9;">WeerZone Social Automator</h1>
+            <p>De dagelijkse social media posts zijn voorbereid en doorgestuurd naar Buffer.</p>
+            
+            <hr />
+            
+            <h3>X (Twitter) Content [${xPersona.toUpperCase()}]:</h3>
+            <p style="background:#f1f5f9; padding:15px; border-radius:8px;">${xData.caption.replace(/\n/g, '<br>')}</p>
+            <div style="display:flex; gap:10px;">
+              <img src="${xSlide1}" width="300" style="border:1px solid #ddd" />
+              <img src="${xSlide2}" width="300" style="border:1px solid #ddd" />
+            </div>
+
+            <h3>TikTok Content [${ttPersona.toUpperCase()}]:</h3>
+            <p style="background:#f1f5f9; padding:15px; border-radius:8px;">${tiktokData.caption.replace(/\n/g, '<br>')}</p>
+            <div style="display:flex; gap:10px;">
+              <img src="${ttSlide1}" width="200" style="border:1px solid #ddd" />
+              <img src="${ttSlide2}" width="200" style="border:1px solid #ddd" />
+            </div>
+
+            <hr />
+            <p style="font-size:12px; color:#666;">Status X: ${xResult.status}<br>Status TikTok: ${tiktokResult.status}</p>
+          </div>
+        `
+      });
+    }
 
     return NextResponse.json({
       status: "done",
