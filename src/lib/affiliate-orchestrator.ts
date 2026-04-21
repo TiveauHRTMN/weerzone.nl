@@ -156,6 +156,8 @@ export function getRecommendedDeals(weather: WeatherData, city: string): Affilia
       reason: deal.reason.replace("[Plaats]", city)
     };
   }).sort((a, b) => b.score - a.score);
+}
+
 /**
  * Analytics tracking — inserts into analytics_events via API
  */

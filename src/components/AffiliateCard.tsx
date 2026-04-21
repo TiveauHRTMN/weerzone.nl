@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import type { WeatherData } from "@/lib/types";
 import { matchProducts, markSeen } from "@/lib/amazon-matcher";
 import { productHref, parseEmojiImage, type CatalogProduct } from "@/lib/amazon-catalog";
-import { getConditionTag } from "@/lib/affiliate-orchestrator";
+import { getConditionTag, getRecommendedDeals, type AffiliateDeal } from "@/lib/affiliate-orchestrator";
 import { useSession } from "@/lib/session-context";
 
 type LiveShape = {
@@ -71,9 +71,6 @@ function ProductImage({ src, alt, size = 100 }: { src: string; alt: string; size
     />
   );
 }
-
-import { getConditionTag, getRecommendedDeals, type AffiliateDeal } from "@/lib/affiliate-orchestrator";
-import { useSession } from "@/lib/session-context";
 
 export default function AffiliateCard({ weather }: Props) {
   const [sessionId] = useState(() => Math.random().toString(36).slice(2));
