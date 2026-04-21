@@ -4,6 +4,7 @@ import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import FounderBanner from "@/components/FounderBanner";
 import GlobalPersonaModal from "@/components/GlobalPersonaModal";
+import PaperclipAssistant from "@/components/PaperclipAssistant";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -120,6 +121,7 @@ export default function RootLayout({
           <InstallPrompt />
           <FounderBanner />
           <GlobalPersonaModal />
+          <PaperclipAssistant />
         </Providers>
       </body>
     </html>
