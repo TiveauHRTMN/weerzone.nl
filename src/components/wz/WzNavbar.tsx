@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "../NLPulse";
+import { useSession } from "@/lib/session-context";
 
 const LINKS: Array<{ key: string; label: string; href: string }> = [
   { key: "weer", label: "Weer", href: "/" },
@@ -24,6 +25,7 @@ function isActive(pathname: string, key: string): boolean {
 
 export default function WzNavbar() {
   const pathname = usePathname() ?? "/";
+  const { user } = useSession();
   const [open, setOpen] = useState(false);
 
   return (
@@ -61,12 +63,33 @@ export default function WzNavbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
-          <Link href="/app/login" className="wz-btn wz-btn-ghost wz-btn-sm">
-            Inloggen
-          </Link>
-          <Link href="/app/signup" className="wz-btn wz-btn-primary wz-btn-sm">
-            Aanmelden
-          </Link>
+          {user ? (
+            <>
+              <Link href="/app" className="wz-btn wz-btn-ghost wz-btn-sm font-bold">
+                Mijn Weerzone
+              </Link>
+              <button
+                onClick={async () => {
+                  const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+                  const supabase = createSupabaseBrowserClient();
+                  await supabase.auth.signOut();
+                  window.location.href = "/";
+                }}
+                className="wz-btn wz-btn-primary wz-btn-sm"
+              >
+                Log uit
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/app/login" className="wz-btn wz-btn-ghost wz-btn-sm">
+                Inloggen
+              </Link>
+              <Link href="/app/signup" className="wz-btn wz-btn-primary wz-btn-sm">
+                Aanmelden
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -108,20 +131,45 @@ export default function WzNavbar() {
             className="grid gap-2 mt-3 pt-3 border-t"
             style={{ borderColor: "var(--wz-border)" }}
           >
-            <Link
-              href="/app/login"
-              onClick={() => setOpen(false)}
-              className="wz-btn wz-btn-ghost wz-btn-block"
-            >
-              Inloggen
-            </Link>
-            <Link
-              href="/app/signup"
-              onClick={() => setOpen(false)}
-              className="wz-btn wz-btn-primary wz-btn-block"
-            >
-              Aanmelden
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/app"
+                  onClick={() => setOpen(false)}
+                  className="wz-btn wz-btn-ghost wz-btn-block"
+                >
+                  Mijn Weerzone
+                </Link>
+                <button
+                  onClick={async () => {
+                    const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+                    const supabase = createSupabaseBrowserClient();
+                    await supabase.auth.signOut();
+                    window.location.href = "/";
+                  }}
+                  className="wz-btn wz-btn-primary wz-btn-block"
+                >
+                  Log uit
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/app/login"
+                  onClick={() => setOpen(false)}
+                  className="wz-btn wz-btn-ghost wz-btn-block"
+                >
+                  Inloggen
+                </Link>
+                <Link
+                  href="/app/signup"
+                  onClick={() => setOpen(false)}
+                  className="wz-btn wz-btn-primary wz-btn-block"
+                >
+                  Aanmelden
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

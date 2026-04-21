@@ -36,6 +36,22 @@ export async function proxy(request: NextRequest) {
   const isAppRoute = pathname.startsWith("/app");
   const isOnboarding = pathname.startsWith("/app/onboarding");
 
+  // Founder Persistence: Als de gebruiker een founder is (info@weerzone.nl), 
+  // verlengen we de session cookies naar 10 jaar zodat ze "altijd" ingelogd blijven.
+  const { isFounderEmail } = await import("@/lib/founders");
+  if (user && isFounderEmail(user.email)) {
+    const sessionCookies = request.cookies.getAll().filter(c => c.name.startsWith("sb-"));
+    sessionCookies.forEach(cookie => {
+      response.cookies.set(cookie.name, cookie.value, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365 * 10, // 10 jaar
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+    });
+  }
+
   if (isAppRoute && !isOnboarding && !user) {
     const redirectUrl = new URL("/app/onboarding", request.url);
     redirectUrl.searchParams.set("next", pathname);

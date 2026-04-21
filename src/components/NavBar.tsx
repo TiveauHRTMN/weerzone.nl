@@ -22,7 +22,7 @@ type Props = {
  * - Contact → /contact
  */
 export default function NavBar({ activeCity, isLocating }: Props) {
-  const { tier } = useSession();
+  const { user, tier } = useSession();
   const hasSub = !!tier;
 
   const handleLocateClick = () => {
@@ -111,9 +111,23 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         </li>
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
-          <Link href="/contact" className="nav-item w-full">
-            <span className="label">Contact</span>
-          </Link>
+          {user ? (
+            <button
+              onClick={async () => {
+                const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+                const supabase = createSupabaseBrowserClient();
+                await supabase.auth.signOut();
+                window.location.reload();
+              }}
+              className="nav-item w-full"
+            >
+              <span className="label">Log uit</span>
+            </button>
+          ) : (
+            <Link href="/app/login" className="nav-item w-full">
+              <span className="label">Inloggen</span>
+            </Link>
+          )}
         </li>
       </ul>
     </nav>
