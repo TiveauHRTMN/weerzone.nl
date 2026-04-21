@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import { PersonaTier } from "@/lib/personas";
 import { matchProducts } from "@/lib/amazon-matcher";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type Format = "tiktok" | "x";
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
       (
         <div style={{
           height: "100%", width: "100%", display: "flex", flexDirection: "column",
-          background: theme.bg, color: theme.text, padding: isLandscape ? "40px 60px" : "80px 72px",
+          backgroundColor: theme.bg, color: theme.text, padding: isLandscape ? "40px 60px" : "80px 72px",
           fontFamily: "sans-serif"
         }}>
           {/* Header */}
