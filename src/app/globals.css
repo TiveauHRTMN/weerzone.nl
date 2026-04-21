@@ -20,8 +20,8 @@
   --persona-steve: #0ea5e9;
   --card-border: rgba(255, 255, 255, 0.5);
   --card-radius: 24px;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-brand: var(--font-outfit), system-ui, sans-serif;
+  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-brand: var(--font-inter), 'Inter', system-ui, sans-serif;
 
   /* -------- WEERZONE 2026 brand tokens (handoff) --------
      Opt-in via .wz-page / WzNavbar / nieuwe auth & pricing schermen.

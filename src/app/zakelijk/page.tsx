@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Building2, Clock, TrendingUp, Shield, Zap, BarChart3 } from "lucide-react";
 import B2BSignupForm from "@/components/B2BSignupForm";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "WEERZONE Zakelijk — Het weer, maar dan echt",
@@ -215,10 +216,7 @@ export default function ZakelijkPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-white/10 py-8 text-center">
-        <p className="text-white/30 text-xs">WEERZONE — 48 uur. De rest is ruis.</p>
-      </div>
+      <Footer />
 
     </div>
   );

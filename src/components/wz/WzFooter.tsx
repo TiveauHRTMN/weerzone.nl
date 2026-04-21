@@ -1,82 +1,47 @@
 import Link from "next/link";
-import WzLogo from "./WzLogo";
-
-const COLUMNS: Array<{ heading: string; items: Array<{ label: string; href: string }> }> = [
-  {
-    heading: "Product",
-    items: [
-      { label: "Piet", href: "/prijzen#piet" },
-      { label: "Reed", href: "/prijzen#reed" },
-      { label: "Steve", href: "/prijzen#steve" },
-      { label: "Prijzen", href: "/prijzen" },
-    ],
-  },
-  {
-    heading: "Bedrijf",
-    items: [
-      { label: "Over ons", href: "/over" },
-      { label: "Blog", href: "/blog" },
-      { label: "Contact", href: "/contact" },
-      { label: "Pers", href: "/pers" },
-    ],
-  },
-  {
-    heading: "Juridisch",
-    items: [
-      { label: "Voorwaarden", href: "/voorwaarden" },
-      { label: "Privacy", href: "/privacy" },
-      { label: "Cookies", href: "/cookies" },
-    ],
-  },
-];
+import { LogoFull } from "../Logo";
 
 export default function WzFooter() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer
-      className="mt-16 py-12 px-5 sm:px-12"
-      style={{ background: "#0f1a2c", color: "#b9c4dc" }}
-    >
-      <div
-        className="max-w-[1200px] mx-auto grid gap-8"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}
-      >
-        <div>
-          <div className="mb-3.5">
-            <WzLogo />
+    <footer className="mt-20 border-t border-white/5 pt-16 pb-12 bg-black/5 px-6 sm:px-12">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          <div className="col-span-2">
+            <LogoFull height={32} className="mb-6 opacity-40 grayscale" />
+            <p className="text-white/30 text-xs max-w-xs leading-relaxed font-medium uppercase tracking-wider">
+              HET EERLIJKE WEERBERICHT.<br/>
+              48 UUR VOORUIT. DE REST IS RUIS.
+            </p>
           </div>
-          <p className="text-[13px] leading-[1.6] max-w-[260px]" style={{ color: "#8998b9" }}>
-            48 uur vooruit. De rest is ruis. Dagelijks weer voor Nederland, zonder reclame.
-          </p>
-        </div>
-        {COLUMNS.map((col) => (
-          <div key={col.heading}>
-            <div
-              className="mb-3.5 text-xs font-extrabold uppercase tracking-[0.1em]"
-              style={{ color: "#fff" }}
-            >
-              {col.heading}
-            </div>
-            <ul className="list-none p-0 m-0 grid gap-2">
-              {col.items.map((i) => (
-                <li key={i.label}>
-                  <Link
-                    href={i.href}
-                    className="text-sm no-underline hover:underline"
-                    style={{ color: "#8998b9" }}
-                  >
-                    {i.label}
-                  </Link>
-                </li>
-              ))}
+          
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Product</h4>
+            <ul className="space-y-4">
+              <li><Link href="/prijzen" className="text-sm text-white/30 hover:text-white transition-colors">Prijzen</Link></li>
+              <li><Link href="/piet" className="text-sm text-white/30 hover:text-white transition-colors">Piet (Particulier)</Link></li>
+              <li><Link href="/zakelijk" className="text-sm text-white/30 hover:text-white transition-colors">Steve (Zakelijk)</Link></li>
             </ul>
           </div>
-        ))}
-      </div>
-      <div
-        className="max-w-[1200px] mx-auto mt-8 pt-6 border-t text-xs"
-        style={{ borderColor: "rgba(255,255,255,0.08)", color: "#6b7997" }}
-      >
-        © {new Date().getFullYear()} Weerzone · Made with ☀ in Nederland
+
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Support</h4>
+            <ul className="space-y-4">
+              <li><Link href="/privacy" className="text-sm text-white/30 hover:text-white transition-colors">Privacy</Link></li>
+              <li><Link href="/contact" className="text-sm text-white/30 hover:text-white transition-colors">Contact</Link></li>
+              <li><Link href="/" className="text-sm text-white/30 hover:text-white transition-colors">Homepage</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-4">
+             <span className="text-[10px] font-black uppercase tracking-widest text-white/10">
+               © {currentYear} WEERZONE.nl — POWERED BY TIVEAU
+             </span>
+          </div>
+        </div>
       </div>
     </footer>
   );

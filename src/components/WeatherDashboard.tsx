@@ -33,6 +33,7 @@ import NavBar from "./NavBar";
 import AdSlot from "./AdSlot";
 import NLPulse from "./NLPulse";
 import LeadRescue from "./LeadRescue";
+import Footer from "./Footer";
 import dynamic from "next/dynamic";
 
 // Lazy-load zware visuele componenten — scheelt initial JS
@@ -1010,19 +1011,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       <AmazonStickyBar weather={weather} />
 
       {/* ===== Footer ===== */}
-      <footer className="pt-12 pb-4 text-center animate-fade-in" style={{ animationDelay: "1.0s" }}>
-        <p className="text-[12px] text-white font-black uppercase tracking-[0.2em]">
-          48 uur vooruit. De rest is ruis.
-        </p>
-        <p className="text-[10px] text-white/40 mt-2">
-          Harde data via <a href="https://open-meteo.com" className="text-accent-orange hover:underline">Open-Meteo</a> & KNMI HARMONIE.
-        </p>
-        <div className="mt-8 pt-6 border-t border-white/10 opacity-100">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
-            POWERED BY TIVEAU & KNMI
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
     </>
   );
