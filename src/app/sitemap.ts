@@ -15,29 +15,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Legacy city pages — /weer/amsterdam, /weer/rotterdam, etc.
-  for (const city of DUTCH_CITIES) {
-    const slug = city.name.toLowerCase().replace(/\s+/g, "-");
-    routes.push({
-      url: `${baseUrl}/weer/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: "hourly",
-      priority: 0.9,
-    });
-  }
-
-  // City alert pages — /weer/amsterdam/alert, etc.
-  // Hogere priority: Google beloont frequent bijgewerkte alert-content
-  for (const city of DUTCH_CITIES) {
-    const slug = city.name.toLowerCase().replace(/\s+/g, "-");
-    routes.push({
-      url: `${baseUrl}/weer/${slug}/alert`,
-      lastModified: new Date(),
-      changeFrequency: "hourly",
-      priority: 0.9,
-    });
-  }
-
   // ── PROGRAMMATIC SEO: Province hub pages ──
   for (const prov of Object.keys(PROVINCE_LABELS)) {
     routes.push({
