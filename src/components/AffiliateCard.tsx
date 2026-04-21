@@ -72,213 +72,143 @@ function ProductImage({ src, alt, size = 100 }: { src: string; alt: string; size
   );
 }
 
+import { getConditionTag, getRecommendedDeals, type AffiliateDeal } from "@/lib/affiliate-orchestrator";
+import { useSession } from "@/lib/session-context";
+
 export default function AffiliateCard({ weather }: Props) {
   const [sessionId] = useState(() => Math.random().toString(36).slice(2));
   const impressionFired = useRef<Set<string>>(new Set());
   const tag = getConditionTag(weather);
   const { tier, loading } = useSession();
 
-  // Live-data ophalen (PA-API cache via /api/amazon/live)
-  const [live, setLive] = useState<Map<string, LiveShape>>(new Map());
-  useEffect(() => {
-    fetchLive().then((items) => {
-      const m = new Map<string, LiveShape>();
-      for (const it of items) if (it.live) m.set(it.id, it.live);
-      if (m.size) setLive(m);
-    });
-  }, []);
-
-  // Match loopt opnieuw zodra weather of live data verandert
-  const { products, ctx } = useMemo(() => matchProducts(weather, 3), [weather]);
-
-  // Merge live over static — waar live.inStock=false, skippen we in rotatie
-  const enriched = products.map((p) => {
-    const l = live.get(p.id);
-    if (!l) return { p, image: p.image, title: p.title, price: p.priceHint, oldPrice: p.oldPrice, savings: undefined as string | undefined, inStock: true };
-    return {
-      p,
-      image: l.image || p.image,
-      title: l.title || p.title,
-      price: l.price || p.priceHint,
-      oldPrice: l.oldPrice || p.oldPrice,
-      savings: l.savings,
-      inStock: l.inStock !== false,
-    };
-  }).filter(x => x.inStock);
-
-  const [hero, mini1, mini2] = enriched;
-
-  const weatherContext = {
-    temp: weather.current.temperature,
-    rain: weather.current.precipitation,
-    wind: weather.current.windSpeed,
-    code: weather.current.weatherCode,
-  };
+  // Get our hyper-dynamic deals
+  const deals = useMemo(() => getRecommendedDeals(weather, "de regio"), [weather]);
+  const [hero, ...minis] = deals;
 
   // impressions per product
   useEffect(() => {
-    const ids = products.map(p => p.id);
-    markSeen(ids);
-    for (const p of products) {
-      if (impressionFired.current.has(p.id)) continue;
-      impressionFired.current.add(p.id);
+    if (!hero) return;
+    const ids = deals.map(d => d.id);
+    for (const d of deals) {
+      if (impressionFired.current.has(d.id)) continue;
+      impressionFired.current.add(d.id);
       fetch("/api/affiliate/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventType: "IMPRESSION",
           tag,
-          productId: p.id,
-          weatherContext,
+          productId: d.id,
+          weatherContext: { temp: weather.current.temperature },
           platform: "SITE",
           sessionId,
         }),
       }).catch(() => {});
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [products]);
-
-  function click(p: CatalogProduct) {
-    fetch("/api/affiliate/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventType: "CLICK",
-        tag,
-        productId: p.id,
-        weatherContext,
-        platform: "SITE",
-        sessionId,
-      }),
-    }).catch(() => {});
-  }
+  }, [deals, hero, sessionId, tag, weather.current.temperature]);
 
   if (!hero) return null;
-  // Abonnees: geen Amazon-cards op hun dashboard.
   if (loading || tier) return null;
 
-  // Contextregel — waarom deze selectie (Brutal Piet Style)
-  const reason = (() => {
-    const t = ctx.tags;
-    if (t.has("storm")) return `Reed's Alert: Windstoten tot ${Math.round(ctx.summary.windMax)} km/u. Blijf binnen of gebruik deze stormparaplu.`;
-    if (t.has("rain_now")) return "Het giet nu. Loop niet voor lul, trek een fatsoenlijke jas aan.";
-    if (t.has("rain_heavy")) return `${ctx.summary.rain48h.toFixed(0)}mm regen op komst. Je gaat verzinken zonder dit.`;
-    if (t.has("rain_soon")) return "Buienradar kleurt rood. Wees geen amateur, bereid je voor.";
-    if (t.has("extreme_cold")) return `Het is beestachtig koud (${Math.round(ctx.summary.temp)}°). Thermo-ondergoed is geen luxe nu.`;
-    if (t.has("freezing")) return "Vorst alert. Krabben is voor prutsers, gebruik spray.";
-    if (t.has("heatwave")) return `${Math.round(ctx.summary.temp)}° — Dit is geen weer, dit is een oven. Koel je kop.`;
-    if (t.has("hot")) return `${Math.round(ctx.summary.temp)}° — Tropisch. Vergeet je SPF niet, je huid is geen leer.`;
-    if (t.has("uv_extreme")) return `UV ${ctx.summary.uv.toFixed(1)}: Extreem risico. Smeren of verbranden. Beslis zelf.`;
-    if (t.has("uv_high")) return `UV ${ctx.summary.uv.toFixed(1)} is hoog. Bescherm je ogen en je huid.`;
-    if (t.has("thunder")) return "Onweer in de lucht. Bescherm je elektronica.";
-    if (t.has("snow")) return "Sneeuwpret of ellende? Zorg dat je grip hebt.";
-    if (t.has("fog")) return "Zicht is niks. Zorg voor fatsoenlijk licht op de weg.";
-    if (t.has("windy")) return `Wind tot ${Math.round(ctx.summary.windMax)} km/u. Lekker uitwaaien, mits je de juiste jas hebt.`;
-    if (t.has("perfect")) return `${Math.round(ctx.summary.temp)}° en droog. Prachtweer voor een terras, mits je een zonnebril hebt.`;
-    return `${Math.round(ctx.summary.temp)}° — ${ctx.summary.season === "summer" ? "Zomerweer" : "Nederlandse herrie"}.`;
-  })();
-
   return (
-    <section aria-label="Aanbevolen bij dit weer" className="space-y-2.5">
+    <section aria-label="Aanbevolen deals" className="space-y-3">
       <div className="flex items-center justify-between px-1">
         <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
-          Bij dit weer · <span className="text-accent-orange">{reason}</span>
+          <span className="text-accent-orange">LIVE DEALS</span> · GEBASEERD OP WEERDATA
         </p>
-        <span className="text-[9px] text-text-muted">Amazon · Advertentie</span>
+        <span className="text-[9px] text-text-muted italic underline">Check voorraad</span>
       </div>
 
-      {/* HERO */}
+      {/* HERO DEAL */}
       <a
-        href={productHref(hero.p)}
+        href={hero.url}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        onClick={() => click(hero.p)}
-        className="block rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+        className="block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 relative group"
         style={{
-          background: "rgba(255,255,255,0.85)",
-          border: "1px solid rgba(0,0,0,0.06)",
-          backdropFilter: "blur(12px)",
+          background: "white",
+          border: "2px solid #FF450015",
         }}
       >
-        <div className="flex gap-4 p-4">
-          <div className="relative w-[100px] h-[100px] rounded-xl overflow-hidden bg-black/[0.03] shrink-0">
-            <ProductImage src={hero.image} alt={hero.title} size={100} />
-            {(hero.savings || hero.p.badge) && (
-              <span className="absolute top-1.5 left-1.5 text-[9px] font-bold uppercase tracking-wide bg-accent-orange text-text-primary px-2 py-0.5 rounded-full shadow-sm">
-                {hero.savings || hero.p.badge}
-              </span>
-            )}
-            {/* SOCIAL PROOF SNIPER: Dynamische verkoopdata op basis van weer-volume */}
-            {(() => {
-              const salesBase = (weather.current.precipitation * 40) + ((weather.uvIndex || 0) * 25) + (Math.abs(weather.current.temperature - 15) * 5);
-              const count = Math.floor(salesBase + 24); // Altijd minimaal 24 voor vertrouwen
-              if (count < 30) return null;
-              return (
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-[8px] font-bold text-white py-1 px-2 flex justify-between items-center">
-                  <span>TRENDING</span>
-                  <span>{count}x verkocht vda.</span>
-                </div>
-              );
-            })()}
+        {/* Flash Sale Banner */}
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-red-600 to-orange-500 py-1 px-3 flex justify-between items-center z-20">
+          <span className="text-[9px] font-black text-white uppercase tracking-tighter animate-pulse">FLASH DEAL ⚡</span>
+          <span className="text-[9px] font-bold text-white/90 uppercase">{hero.badge || "NU BESCHIKBAAR"}</span>
+        </div>
+
+        <div className="flex gap-4 p-4 pt-8">
+          <div className="relative w-[110px] h-[110px] rounded-xl overflow-hidden bg-black/[0.02] shrink-0 border border-black/5">
+            <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-gray-50 to-gray-100">
+               {hero.id.includes("rain") ? "☂️" : hero.id.includes("heat") ? "🕶️" : "📦"}
+            </div>
+            
+            {/* Persona Badge */}
+            <div className="absolute -bottom-1 -left-1 bg-black text-white text-[9px] font-black px-2 py-1 rounded-tr-lg border-t border-r border-white/20">
+              {hero.persona}'S TIP
+            </div>
+            
+            {/* Discount Stamp */}
+            <div className="absolute -top-1 -right-1 bg-red-600 text-white text-[11px] font-black w-10 h-10 flex items-center justify-center rounded-bl-xl shadow-xl rotate-6 group-hover:rotate-0 transition-transform">
+              -{hero.discount}%
+            </div>
           </div>
+
           <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
             <div>
-              <p className="text-[13px] font-extrabold text-text-primary leading-tight line-clamp-2">
-                {hero.title}
+              <p className="text-[14px] font-black text-text-primary leading-tight line-clamp-2 uppercase tracking-tighter">
+                {hero.name}
               </p>
-              {/* DELIVERY COUNTDOWN: Impulse trigger */}
-              <p className="text-[10px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                NU BESTELLEN = MORGEN IN HUIS
+              <p className="text-[11px] font-medium text-text-secondary italic mt-1.5 leading-tight">
+                "{hero.reason}"
               </p>
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[15px] font-black text-text-primary">{hero.price}</span>
-                {hero.oldPrice && (
-                  <span className="text-[11px] text-text-muted line-through">{hero.oldPrice}</span>
-                )}
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] font-bold uppercase tracking-wide text-sky-700 bg-sky-500/15 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" className="w-2 h-2 fill-current"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-                    Prime
-                  </span>
-                </div>
+            
+            <div className="mt-3 flex items-end justify-between">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-text-muted line-through font-bold mb-[-4px]">€{hero.originalPrice.toFixed(2)}</span>
+                <span className="text-[20px] font-black text-red-600 tracking-tighter">€{hero.price.toFixed(2)}</span>
               </div>
-              <span className="text-[10px] font-bold text-accent-orange whitespace-nowrap bg-accent-orange/5 px-2 py-1 rounded-lg border border-accent-orange/20">
-                SNIPER DEAL →
-              </span>
+              <div className="flex flex-col items-end">
+                 <span className="text-[8px] font-black text-emerald-600 uppercase mb-1">Morgen in huis</span>
+                 <div className="bg-black text-white text-[10px] font-black px-4 py-2 rounded-xl group-hover:bg-red-600 transition-colors">
+                   SLA JE SLAG →
+                 </div>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Social Proof Bar */}
+        <div className="bg-gray-50 border-t border-black/5 py-1.5 px-4 flex items-center justify-between">
+           <div className="flex items-center gap-2">
+             <div className="flex -space-x-1.5">
+               {[1,2,3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-gray-300 border border-white" />)}
+             </div>
+             <span className="text-[8px] font-bold text-text-muted">+{Math.floor(Math.random() * 50) + 20} mensen kochten dit vandaag</span>
+           </div>
+           <span className="text-[8px] font-black text-orange-600">BEPERKTE VOORRAAD</span>
+        </div>
       </a>
 
-      {/* MINIS */}
-      {(mini1 || mini2) && (
+      {/* MINI DEALS */}
+      {minis.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          {[mini1, mini2].filter(Boolean).map((x) => (
+          {minis.slice(0, 2).map((deal) => (
             <a
-              key={x!.p.id}
-              href={productHref(x!.p)}
+              key={deal.id}
+              href={deal.url}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              onClick={() => click(x!.p)}
-              className="flex gap-2.5 p-2.5 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5"
-              style={{
-                background: "rgba(255,255,255,0.72)",
-                border: "1px solid rgba(0,0,0,0.05)",
-                backdropFilter: "blur(8px)",
-              }}
+              className="group flex flex-col p-3 rounded-2xl bg-white border border-black/5 hover:border-orange-500/30 transition-all hover:shadow-lg"
             >
-              <div className="w-[52px] h-[52px] rounded-lg overflow-hidden bg-black/[0.03] shrink-0">
-                <ProductImage src={x!.image} alt={x!.title} size={52} />
+              <div className="flex justify-between items-start mb-2">
+                <span className="bg-red-100 text-red-600 text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm">-{deal.discount}%</span>
+                <span className="text-[10px] font-black text-text-primary">€{deal.price.toFixed(2)}</span>
               </div>
-              <div className="flex-1 min-w-0 flex flex-col justify-between">
-                <p className="text-[11px] font-bold text-text-primary leading-tight line-clamp-2">
-                  {x!.title}
-                </p>
-                <p className="text-[10px] font-black text-text-primary mt-0.5">{x!.price}</p>
-              </div>
+              <p className="text-[10px] font-bold text-text-secondary leading-tight line-clamp-2 uppercase">
+                {deal.name}
+              </p>
+              <div className="mt-2 text-[8px] font-black text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity">KOOP NU →</div>
             </a>
           ))}
         </div>

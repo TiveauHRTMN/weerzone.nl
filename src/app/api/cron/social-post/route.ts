@@ -51,19 +51,40 @@ function buildDeterministicCaption(args: {
   );
 }
 
-const CAPTION_PROMPT = `
+const PERSONA_PROMPTS = {
+  PIET: `
 Je bent Piet van WEERZONE. 
-STIJL: Vandaag Inside / PowNed niveau. Brutaal, scherp, ongezouten mening, maar wél met absolute weer-expertise. 
-Je lult niet om de hete brij heen. Als het kudtweer is, zeg je het. Als het KNMI er naast zit, pak je ze aan.
-Focus op het landelijke nieuws (De Bilt), maar maak gerust een zijstapje naar "die mazzelaars in Limburg" of "die verzopen katten in de Randstad".
+STIJL: Vandaag Inside / PowNed. Brutaal, ongezouten mening, absolute weer-expertise. 
+Je focus: De harde realiteit. Als het kutweer is, zeg je het. 
+REGELLIJST: Max 240 tekens. Johan Derksen van het weer. Max 2 emoji.
+`,
+  REED: `
+Je bent Reed van WEERZONE. 
+STIJL: Stormchaser / Survival Expert. Serieus, waarschuwend, actiegericht, tactisch.
+Je focus: Veiligheid en de brute kracht van de natuur. Geen grappen, alleen feiten en voorbereiding.
+REGELLIJST: Max 240 tekens. Gebruik termen als 'Impact', 'Tactisch', 'Paraat'. Max 2 emoji (bijv. 🌪️).
+`,
+  STEVE: `
+Je bent Steve van WEERZONE. 
+STIJL: Lifestyle / Chill / Positief. Relaxte vibe, focus op genieten.
+Je focus: Het goede leven. Terrasjes, strand, barbecue en ijskoude drankjes. 
+REGELLIJST: Max 240 tekens. Vibe: 'Lekker man', 'Genieten'. Max 2 emoji (bijv. 🍺☀️).
+`,
+};
 
-REGELLIJST:
-1. Max 240 tekens voor de tekst (kort & krachtig).
-2. Geen "lieve" weerpraatjes. Wees de Johan Derksen van het weer.
-3. Behoud de exacte temperaturen uit de template, maar geef er je eigen brute draai aan.
-4. Call-to-action naar weerzone.nl moet blijven.
-5. Maximaal 2 emoji (niet te vrolijk).
-`;
+function getPersona(w: WeatherLite): "PIET" | "REED" | "STEVE" {
+  const cur = w.current;
+  const d0 = w.daily[0];
+  
+  // REED: Extreme wind, kou of onweer
+  if (cur.windSpeed > 60 || d0.tempMin < -5 || cur.weatherCode >= 80) return "REED";
+  
+  // STEVE: Beach/Terras weer
+  if (d0.tempMax > 23 && cur.precipitation < 1) return "STEVE";
+  
+  // PIET: De rest
+  return "PIET";
+}
 
 interface WeatherLite {
   current: { temperature: number; weatherCode: number; windSpeed: number; precipitation: number };
@@ -97,6 +118,9 @@ export async function generatePlatformCaption(weather: WeatherLite, platform: 'x
   const useTemu = AFFILIATE_CONFIG.temu.enabled && isTikTok;
   const affiliateUrl = useTemu ? temuUrl(affiliate.keyword) : amazonUrl(affiliate.keyword);
 
+  const persona = getPersona(weather);
+  const personaPrompt = PERSONA_PROMPTS[persona];
+
   const deterministicCaption = buildDeterministicCaption({
     ochtend, middag, avond, nacht,
     rainDay: d0.precipitationSum ?? 0,
@@ -106,13 +130,13 @@ export async function generatePlatformCaption(weather: WeatherLite, platform: 'x
 
   // Gemini voor variatie
   const key = process.env.GEMINI_API_KEY;
-  if (!key) return { caption: deterministicCaption, affiliate, affiliateUrl };
+  if (!key) return { caption: deterministicCaption, affiliate, affiliateUrl, persona };
 
   try {
     const genAI = new GoogleGenerativeAI(key);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
     const res = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: `${CAPTION_PROMPT}\n\nTEMPLATE:\n${deterministicCaption}` }] }],
+      contents: [{ role: "user", parts: [{ text: `${personaPrompt}\n\nTEMPLATE:\n${deterministicCaption}` }] }],
       generationConfig: { maxOutputTokens: 400, temperature: 0.8 },
     });
     const text = res.response.text()?.trim();

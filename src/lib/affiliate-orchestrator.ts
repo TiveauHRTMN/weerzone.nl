@@ -42,60 +42,123 @@ export function getConditionTag(weather: WeatherData): ConditionTag {
 }
 
 // ============================================================
-// Map condition tag to the right affiliate URL
+// Persona & Deal logic
 // ============================================================
 
-export function getAffiliateUrl(
-  tag: ConditionTag,
-  city: string
-): { url: string; label: string; platform: string } {
-  switch (tag) {
-    case "RAIN":
-      return {
-        url: thuisbezorgdUrl(),
-        label: "Laat bezorgen via Thuisbezorgd",
-        platform: "THUISBEZORGD",
-      };
-    case "HEAT":
-      return {
-        url: bookingUrl("Malaga"),
-        label: "Boek een zonnige vakantie",
-        platform: "BOOKING",
-      };
-    case "COLD":
-      return {
-        url: amazonUrl("winterkleding heren dames warm"),
-        label: "Winterkleding op Amazon",
-        platform: "AMAZON",
-      };
-    case "WIND":
-      return {
-        url: amazonProductUrl("B07B8K47M2"),
-        label: "Stormparaplu op Amazon",
-        platform: "AMAZON",
-      };
-    case "PERFECT":
-      return {
-        url: bookingUrl("Zeeland dagje uit"),
-        label: "Dagje uit in Nederland",
-        platform: "BOOKING",
-      };
-    case "DEFAULT":
-    default:
-      return {
-        url: amazonUrl("outdoor regenjas windbreaker"),
-        label: "Weergadgets op Amazon",
-        platform: "AMAZON",
-      };
-  }
+export interface AffiliateDeal {
+  id: string;
+  name: string;
+  url: string;
+  price: number;
+  originalPrice: number;
+  discount: number; // percentage
+  platform: "AMAZON" | "TEMU" | "BOOKING" | "THUISBEZORGD";
+  persona: "PIET" | "REED" | "STEVE";
+  reason: string;
+  badge?: string;
+  score: number;
 }
 
-// ============================================================
-// Analytics tracking — inserts into analytics_events via API
-// Server-side (API routes) call this directly via Supabase;
-// client components should call /api/affiliate/track instead.
-// ============================================================
+const DEALS_CATALOG: Partial<Record<ConditionTag, Partial<AffiliateDeal>[]>> = {
+  RAIN: [
+    {
+      id: "rain-1",
+      name: "Smart Paraplu - Windproof",
+      price: 14.95,
+      originalPrice: 24.95,
+      discount: 40,
+      platform: "AMAZON",
+      persona: "PIET",
+      reason: "Houd je kop droog zonder 20 euro te verspillen.",
+      badge: "BESTSELLER",
+    },
+    {
+      id: "rain-2",
+      name: "Waterdichte Schoenhoezen (Siliconen)",
+      price: 8.50,
+      originalPrice: 15.00,
+      discount: 43,
+      platform: "TEMU",
+      persona: "STEVE",
+      reason: "Je sneakers blijven fresh, ook in deze teringregen.",
+      badge: "FLASHSALE",
+    }
+  ],
+  HEAT: [
+    {
+      id: "heat-1",
+      name: "Draadloze Nek-Ventilator",
+      price: 19.99,
+      originalPrice: 39.99,
+      discount: 50,
+      platform: "AMAZON",
+      persona: "REED",
+      reason: "Handen vrij en je kop koel. Tactisch voordeel in de hitte.",
+      badge: "TREENDING",
+    },
+    {
+      id: "heat-2",
+      name: "UV-Zonnebril Polarized",
+      price: 12.00,
+      originalPrice: 45.00,
+      discount: 73,
+      platform: "TEMU",
+      persona: "STEVE",
+      reason: "Ziet er duur uit, kost niks. Ideaal voor het terras.",
+      badge: "90% VERKOCHT",
+    }
+  ],
+  COLD: [
+    {
+      id: "cold-1",
+      name: "USB Verwarmde Handschoenen",
+      price: 16.50,
+      originalPrice: 29.95,
+      discount: 45,
+      platform: "AMAZON",
+      persona: "REED",
+      reason: "Nooit meer bevroren vingers tijdens het fietsen.",
+      badge: "WINTER-DEAL",
+    }
+  ],
+  PERFECT: [
+    {
+      id: "perf-1",
+      name: "Draagbaar Picknickkleed XL",
+      price: 12.95,
+      originalPrice: 19.95,
+      discount: 35,
+      platform: "TEMU",
+      persona: "STEVE",
+      reason: "Vandaag is de dag. Pak die rust.",
+      badge: "WEEKEND-FAVORIET",
+    }
+  ]
+};
 
+/**
+ * Get the best deals based on weather and impulse potential
+ */
+export function getRecommendedDeals(weather: WeatherData, city: string): AffiliateDeal[] {
+  const tag = getConditionTag(weather);
+  const deals = (DEALS_CATALOG[tag] || DEALS_CATALOG["PERFECT"]) as AffiliateDeal[];
+  
+  return deals.map(deal => {
+    // Dynamische scoring
+    let score = 50;
+    if (deal.discount > 40) score += 30; // High discount priority
+    if (deal.price < 20) score += 20;    // Impulse price point priority
+    
+    return {
+      ...deal,
+      score,
+      // Inject variables into reasoning
+      reason: deal.reason.replace("[Plaats]", city)
+    };
+  }).sort((a, b) => b.score - a.score);
+/**
+ * Analytics tracking — inserts into analytics_events via API
+ */
 export async function trackEvent(
   eventType: "IMPRESSION" | "CLICK",
   tag: ConditionTag,
