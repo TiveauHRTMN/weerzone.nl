@@ -79,12 +79,29 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   const nearby = nearbyPlaces(place, 12);
   const isTopCity = TOP_CITIES.includes(place.name);
 
+  // Initial weather fetch on server for instant LCP & Disaster SEO
+  const initialWeather = await fetchWeatherData(place.lat, place.lon).catch(() => undefined);
+
+  // Hermes Disaster SEO: Dynamic Schema Injection
+  let schemaTitle = `Weer ${place.name} — WEERZONE`;
+  let schemaDesc = `48 uur nauwkeurig weer voor ${place.name}, ${provLabel}. KNMI HARMONIE + DWD ICON.`;
+  
+  if (initialWeather) {
+    const { getMisereScore } = await import("@/lib/commentary");
+    const misery = getMisereScore(initialWeather);
+    // If the weather is highly disruptive, hijack the SERP schema
+    if (misery.score >= 8) {
+      schemaTitle = `🚨 ALARM: Extreem Weer ${place.name} — WEERZONE`;
+      schemaDesc = `WAARSCHUWING voor ${place.name}: ${misery.label}. Bekijk de exacte 48-uurs voorspelling en extremiteiten-index.`;
+    }
+  }
+
   // Structured data: WeatherForecast (voor Google rich results)
   const weatherForecastLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `Weer ${place.name} — WEERZONE`,
-    description: `48 uur nauwkeurig weer voor ${place.name}, ${provLabel}. KNMI HARMONIE + DWD ICON.`,
+    name: schemaTitle,
+    description: schemaDesc,
     url: `https://weerzone.nl/weer/${province}/${slug}`,
     dateModified: new Date().toISOString(),
     inLanguage: "nl",
@@ -155,9 +172,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   };
 
   const city = { name: place.name, lat: place.lat, lon: place.lon };
-  
-  // Initial weather fetch on server for instant LCP
-  const initialWeather = await fetchWeatherData(place.lat, place.lon).catch(() => undefined);
+
 
   return (
     <>
