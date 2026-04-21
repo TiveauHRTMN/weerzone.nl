@@ -71,8 +71,8 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         </li>
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
-          <Link href="/prijzen" className="nav-item w-full">
-            <span className="label">Prijzen</span>
+          <Link href="/weer/landelijk" className="nav-item w-full">
+            <span className="label">Landelijk</span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
