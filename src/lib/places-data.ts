@@ -504,20 +504,7 @@ export const ALL_PLACES: Place[] = [
   { name: "Maarn", province: "utrecht", lat: 52.0633, lon: 5.3733, population: 4500, character: "highland" },
   { name: "Amerongen", province: "utrecht", lat: 52.0033, lon: 5.4617, population: 7000, character: "highland" },
   { name: "Leersum", province: "utrecht", lat: 52.0117, lon: 5.4292, population: 7500, character: "highland" },
-];
 
-// ============================================================
-// Helper functies
-// ============================================================
-
-/** Totaal aantal plaatsen in de database */
-export const PLACES_COUNT = ALL_PLACES.length;
-
-/** Alle provincies met hun plaatsen */
-export function placesByProvince(): Record<string, Place[]> {
-  const result: Record<string, Place[]> = {};
-  for (const place of ALL_PLACES) {
-    if (!result[place.province]) result[place.province] = [
   // --- AUTO-GENERATED BATCH BY OPENCLAW ---
   { name: "'n Oaln Diek", province: "overijssel", lat: 52.3517, lon: 6.4756 },
   { name: "'s Gravenmoer", province: "noord-brabant", lat: 51.6579, lon: 4.9407, population: 2325 },
@@ -8724,6 +8711,21 @@ export function placesByProvince(): Record<string, Place[]> {
   { name: "Zwolsehoek", province: "flevoland", lat: 52.6551, lon: 5.6208 },
   { name: "Zwolseweg", province: "overijssel", lat: 52.2636, lon: 6.1446 },
 ];
+
+// ============================================================
+// Helper functies
+// ============================================================
+
+/** Totaal aantal plaatsen in de database */
+export const PLACES_COUNT = ALL_PLACES.length;
+
+/** Alle provincies met hun plaatsen */
+export function placesByProvince(): Record<string, Place[]> {
+  const result: Record<string, Place[]> = {};
+  for (const place of ALL_PLACES) {
+    if (!result[place.province]) {
+      result[place.province] = [];
+    }
     result[place.province].push(place);
   }
   return result;
