@@ -38,19 +38,19 @@ const PERSONA_PROMPTS = {
 Je bent Piet van WEERZONE. 
 STIJL: Vandaag Inside / PowNed. Brutaal, ongezouten mening, absolute weer-expertise. 
 Je focus: De harde realiteit. Als het kutweer is, zeg je het. 
-REGELLIJST: Max 240 tekens. Johan Derksen van het weer. Max 2 emoji.
+REGELLIJST: Max 240 tekens. Johan Derksen van het weer. Gebruik "virale" hooks. Max 2 emoji.
 `,
   REED: `
 Je bent Reed van WEERZONE. 
 STIJL: Stormchaser / Survival Expert. Serieus, waarschuwend, actiegericht, tactisch.
 Je focus: Veiligheid en de brute kracht van de natuur. Geen grappen, alleen feiten en voorbereiding.
-REGELLIJST: Max 240 tekens. Gebruik termen als 'Impact', 'Tactisch', 'Paraat'. Max 2 emoji (bijv. 🌪️).
+REGELLIJST: Max 240 tekens. Gebruik termen als 'Impact', 'Code Rood', 'Paraat'. Zorg voor een gevoel van urgentie. Max 2 emoji (bijv. 🌪️).
 `,
   STEVE: `
 Je bent Steve van WEERZONE. 
 STIJL: Lifestyle / Chill / Positief. Relaxte vibe, focus op genieten.
 Je focus: Het goede leven. Terrasjes, strand, barbecue en ijskoude drankjes. 
-REGELLIJST: Max 240 tekens. Vibe: 'Lekker man', 'Genieten'. Max 2 emoji (bijv. 🍺☀️).
+REGELLIJST: Max 240 tekens. Focus op de "FOMO" van een mooie dag. Max 2 emoji (bijv. 🍺☀️).
 `,
 };
 
@@ -200,22 +200,45 @@ export async function GET(req: Request) {
     const ttSlide1 = `${base}/api/social/piet-v2?city=${citySlug}&lat=${deBilt.lat}&lon=${deBilt.lon}&slide=1&format=tiktok&persona=${ttPersona}&t=${bust}`;
     const ttSlide2 = `${base}/api/social/piet-v2?city=${citySlug}&lat=${deBilt.lat}&lon=${deBilt.lon}&slide=2&format=tiktok&persona=${ttPersona}&t=${bust}`;
 
+    // Nano Banana 2: Viral Visual Generation for Social
+    let viralVisualUrl = "";
+    const key = process.env.GEMINI_API_KEY;
+    if (key) {
+      try {
+        const genAI = new GoogleGenerativeAI(key);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const promptRes = await model.generateContent(`
+          Geef een KORTE Engelse prompt voor een virale weerfoto in Nederland.
+          Locatie: De Bilt/Nederland. Weer: ${weather.current.temperature}°C, code ${weather.current.weatherCode}.
+          Stijl: National Geographic, dramatic lighting, 8k, awe-inspiring. 
+          Geen tekst in beeld.
+        `);
+        const prompt = promptRes.response.text().trim();
+        viralVisualUrl = `https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(prompt)}&v=2.1&seed=${bust}`;
+      } catch (e) {
+        console.error("Social Visual Error:", e);
+      }
+    }
+
+    const xImages = viralVisualUrl ? [viralVisualUrl, xSlide1, xSlide2] : [xSlide1, xSlide2];
+    const ttImages = viralVisualUrl ? [viralVisualUrl, ttSlide1, ttSlide2] : [ttSlide1, ttSlide2];
+
     if (dryRun) {
       return NextResponse.json({
         dry_run: true,
         x: xData,
         tiktok: tiktokData,
         images: {
-          x: [xSlide1, xSlide2],
-          tt: [ttSlide1, ttSlide2]
+          x: xImages,
+          tt: ttImages
         },
       });
     }
 
     // Post parallel naar X en TikTok
     const [xResult, tiktokResult] = await Promise.allSettled([
-      createBufferPost(BUFFER_CHANNELS.x, xData.caption, [xSlide1, xSlide2]),
-      createBufferPost(BUFFER_CHANNELS.tiktok, tiktokData.caption, [ttSlide1, ttSlide2]),
+      createBufferPost(BUFFER_CHANNELS.x, xData.caption, xImages),
+      createBufferPost(BUFFER_CHANNELS.tiktok, tiktokData.caption, ttImages),
     ]);
 
     // 3. Stuur een kopie en samenvatting naar de founder (info@weerzone.nl)
