@@ -284,106 +284,142 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       </div>
 
       
-      {/* ===== 2. Daily & Detail Cluster — Unified Grid ===== */}
-      <div className="animate-fade-in grid grid-cols-2 gap-3 sm:gap-4" style={{ animationDelay: "0.22s" }}>
-        {/* Vandaag & Morgen Cards */}
-        <div className="card p-4 flex flex-col justify-between min-h-[100px] border-white/40 relative overflow-hidden group/mini">
-          <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent to-white pointer-events-none" />
-          <div className="flex justify-between items-start relative z-10">
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Vandaag</span>
-            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 group-hover/mini:scale-110 transition-transform">
+      {/* ===== 1. FORECAST CLUSTER — Today & Tomorrow ===== */}
+      <div className="card p-4 sm:p-6 animate-fade-in border-white/40 shadow-xl overflow-hidden relative" style={{ animationDelay: "0.22s" }}>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+        <div className="flex justify-between items-center mb-6 relative z-10 px-1">
+          <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Korte Termijn</h3>
+          <span className="text-[9px] font-bold text-accent-orange uppercase tracking-widest">Nano Banana 2.1 Driven</span>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 relative z-10">
+          {/* Vandaag */}
+          <div className="flex flex-col gap-3 group/item">
+            <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 transition-transform hover:scale-[1.02]">
               <img 
-                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[0].weatherCode))}&v=2.1&seed=today`} 
+                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[0].weatherCode) + " cinematic view")}&v=2.1&seed=today`} 
                 alt="Today" 
                 className="w-full h-full object-cover"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </div>
-          </div>
-          <div className="mt-2 relative z-10">
-            <div className="text-2xl font-black text-text-primary">
-              {weather.daily[0].tempMax}° <span className="text-sm text-text-muted font-bold">/ {weather.daily[0].tempMin}°</span>
+            <div className="px-1">
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] font-black text-text-primary uppercase">Vandaag</span>
+                <span className="text-lg font-black text-text-primary">{weather.daily[0].tempMax}°</span>
+              </div>
+              <p className="text-[10px] font-bold text-text-muted uppercase mt-0.5">{getWeatherDescription(weather.daily[0].weatherCode)}</p>
             </div>
-            <div className="text-[10px] font-bold text-text-secondary uppercase mt-1">
-              {getWeatherDescription(weather.daily[0].weatherCode)}
-            </div>
           </div>
-        </div>
 
-        <div className="card p-4 flex flex-col justify-between min-h-[100px] border-white/40 relative overflow-hidden group/mini">
-          <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent to-white pointer-events-none" />
-          <div className="flex justify-between items-start relative z-10">
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Morgen</span>
-            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 group-hover/mini:scale-110 transition-transform">
+          {/* Morgen */}
+          <div className="flex flex-col gap-3 group/item">
+            <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 transition-transform hover:scale-[1.02]">
               <img 
-                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[1].weatherCode))}&v=2.1&seed=tomorrow`} 
+                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[1].weatherCode) + " cinematic view")}&v=2.1&seed=tomorrow`} 
                 alt="Tomorrow" 
                 className="w-full h-full object-cover"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </div>
-          </div>
-          <div className="mt-2 relative z-10">
-            <div className="text-2xl font-black text-text-primary">
-              {weather.daily[1].tempMax}° <span className="text-sm text-text-muted font-bold">/ {weather.daily[1].tempMin}°</span>
-            </div>
-            <div className="text-[10px] font-bold text-text-secondary uppercase mt-1">
-              {getWeatherDescription(weather.daily[1].weatherCode)}
+            <div className="px-1">
+              <div className="flex justify-between items-baseline">
+                <span className="text-[11px] font-black text-text-primary uppercase">Morgen</span>
+                <span className="text-lg font-black text-text-primary">{weather.daily[1].tempMax}°</span>
+              </div>
+              <p className="text-[10px] font-bold text-text-muted uppercase mt-0.5">{getWeatherDescription(weather.daily[1].weatherCode)}</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Gevoelstemperatuur */}
-        <div className="card p-4 border-white/30">
-          <div className="text-[10px] font-black text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            🌡️ Gevoel
-          </div>
-          <div className="text-2xl font-black text-text-primary">
-            {weather.current.feelsLike}°
-          </div>
-          <div className="text-[10px] font-bold text-text-secondary mt-1 uppercase">
-            {weather.current.feelsLike < weather.current.temperature ? "Kouder" : "Warmer"}
+      {/* ===== 2. LIFESTYLE CLUSTER — Scores (BBQ, Hooikoorts, etc.) ===== */}
+      <div className="card p-4 sm:p-6 animate-fade-in border-white/40 shadow-xl" style={{ animationDelay: "0.25s" }}>
+        <div className="flex justify-between items-center mb-6 px-1">
+          <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Activiteiten & Scores</h3>
+          <div className="flex items-center gap-1.5">
+             <div className="w-1.5 h-1.5 rounded-full bg-accent-green" />
+             <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest">Optimale Match</span>
           </div>
         </div>
         
-        {/* Luchtvochtigheid */}
-        <div className="card p-4 border-white/30">
-          <div className="text-[10px] font-black text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            💧 Vocht
-          </div>
-          <div className="text-2xl font-black text-text-primary">
-            {weather.current.humidity}%
-          </div>
-          <div className="text-[10px] font-bold text-text-secondary mt-1 uppercase">
-            {weather.current.humidity > 80 ? "Klam" : "Normaal"}
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), prompt: "juicy barbecue in sunny garden" },
+            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), prompt: "pollen in summer air" },
+            { id: "run", label: "Hardlopen", score: getHardloopScore(weather), prompt: "running shoes on park path" },
+            { id: "fiets", label: "Fietsen", score: getFietsScore(weather).score, prompt: "bicycle leaning against canal" },
+          ].map((item) => (
+            <div key={item.id} className="flex flex-col gap-2 group/score">
+              <div className="w-full aspect-square rounded-xl overflow-hidden border border-white/60 bg-slate-50 transition-transform group-hover/score:scale-105 shadow-sm">
+                <img 
+                  src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(item.prompt)}&v=2.1&seed=${item.id}`} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+              <div className="flex justify-between items-center px-0.5">
+                <span className="text-[9px] font-black text-text-muted uppercase truncate mr-1">{item.label}</span>
+                <span className={`text-sm font-black ${item.score >= 7 ? 'text-accent-green' : item.score >= 5 ? 'text-accent-amber' : 'text-accent-red'}`}>{item.score}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== 3. ATMOSPHERE CLUSTER — Metrics (UV, Wind, Regen, etc.) ===== */}
+      <div className="card p-4 sm:p-6 animate-fade-in border-white/40 shadow-xl" style={{ animationDelay: "0.28s" }}>
+        <div className="flex justify-between items-center mb-6 px-1">
+          <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Atmosferische Details</h3>
+          <span className="text-[9px] font-bold text-text-muted opacity-40 uppercase">Real-time KNMI Sensors</span>
         </div>
         
-        {/* Wind */}
-        <div className="card p-4 border-white/30">
-          <div className="text-[10px] font-black text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            🌬️ Wind
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-6 gap-x-4">
+          {/* UV Card */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-text-muted uppercase mb-2">☀️ UV & Zon</span>
+            <div className="text-2xl font-black text-text-primary">UV {weather.uvIndex.toFixed(0)}</div>
+            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">Huidig Risico</p>
           </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-text-primary">{weather.current.windSpeed}</span>
-            <span className="text-[10px] font-bold text-text-muted">KM/H</span>
+          
+          {/* Regen Card */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-text-muted uppercase mb-2">🌧️ Neerslag</span>
+            <div className="text-2xl font-black text-text-primary">{weather.current.precipitation} <span className="text-xs">MM</span></div>
+            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">{weather.current.precipitation > 0 ? 'Actieve Neerslag' : 'Geen Regen'}</p>
           </div>
-          <div className="text-[10px] font-bold text-text-secondary mt-1 uppercase">
-            {weather.current.windDirection} · Bft {getWindBeaufort(weather.current.windSpeed).scale}
+
+          {/* Wind Card */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-text-muted uppercase mb-2">🌬️ Wind</span>
+            <div className="text-2xl font-black text-text-primary">{weather.current.windSpeed} <span className="text-xs">KM/H</span></div>
+            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">BFT {getWindBeaufort(weather.current.windSpeed).scale} · {weather.current.windDirection}</p>
           </div>
-        </div>
-        
-        {/* Neerslag */}
-        <div className="card p-4 border-white/30">
-          <div className="text-[10px] font-black text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            🌧️ Regen
+
+          {/* Gevoel Card */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-text-muted uppercase mb-2">🌡️ Gevoel</span>
+            <div className="text-2xl font-black text-text-primary">{weather.current.feelsLike}°</div>
+            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">Lucht {weather.current.temperature}°</p>
           </div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-text-primary">{weather.current.precipitation}</span>
-            <span className="text-[10px] font-bold text-text-muted">MM</span>
+
+          {/* Vocht Card */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-text-muted uppercase mb-2">💧 Vocht</span>
+            <div className="text-2xl font-black text-text-primary">{weather.current.humidity}%</div>
+            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">Luchtvochtigheid</p>
           </div>
-          <div className="text-[10px] font-bold text-text-secondary mt-1 uppercase">
-            {weather.current.precipitation > 0 ? "Nat" : "Droog"}
+
+          {/* Klimaat Card */}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-text-muted uppercase mb-2">🌍 Klimaat</span>
+            <div className="text-2xl font-black text-text-primary">
+              {(() => {
+                const climate = getTemperatureComparison(weather.current.temperature, new Date().getMonth());
+                return `${climate.diff > 0 ? '+' : ''}${climate.diff}°`;
+              })()}
+            </div>
+            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">vs Maandgemiddelde</p>
           </div>
         </div>
       </div>
@@ -396,71 +432,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <EmailSubscribe city={city} />
       </div>
 
-      {/* ===== 2. Weermodel Verificatie — Waarom dit klopt ===== */}
-      {/* ===== Dagoverzicht Insights — Alles in één Grid ===== */}
-      <div className="animate-fade-in space-y-3" style={{ animationDelay: "0.22s" }}>
-        <div className="flex justify-between items-end px-1">
-          <h3 className="section-title">Insights voor Vandaag</h3>
-          <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">KNMI Live Data</span>
-        </div>
-        
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-          {/* Zon & UV (Gecombineerd) */}
-          <div className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">Zon & UV</span>
-              <Sun className="w-3.5 h-3.5 text-accent-orange" />
-            </div>
-            <div className="flex flex-col mt-2">
-              <span className="text-lg font-black text-text-primary">UV {weather.uvIndex.toFixed(0)}</span>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] font-bold text-text-secondary">🌅 {new Date(weather.sunrise).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
-                <span className="text-[10px] font-bold text-text-secondary">🌇 {new Date(weather.sunset).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-            </div>
-          </div>
-
-          {[
-            { id: "bbq", icon: "🔥", label: "BBQ Weer", score: getBbqScore(weather) },
-            { id: "strand", icon: "🏖️", label: "Strand", score: getStrandScore(weather) },
-            { id: "pollen", icon: "🤧", label: "Hooikoorts", score: getHooikoortsScore(weather) },
-            { id: "run", icon: "🏃", label: "Hardlopen", score: getHardloopScore(weather) },
-          ].map((item) => (
-            <div
-              key={item.id}
-              className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px] transition-all hover:border-accent-orange/30"
-            >
-              <div className="flex justify-between items-start">
-                <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">{item.label}</span>
-                <span className="text-lg">{item.icon}</span>
-              </div>
-              <div className="flex items-baseline gap-1 mt-2">
-                <span className={`text-2xl font-black ${item.score >= 7 ? 'text-accent-green' : item.score >= 5 ? 'text-accent-amber' : 'text-accent-red'}`}>
-                  {item.score}
-                </span>
-                <span className="text-[10px] font-bold text-text-muted uppercase tracking-tighter">/ 10</span>
-              </div>
-            </div>
-          ))}
-
-          {/* Klimaat Check (Moved from hero for cleaner look) */}
-          <div className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">Klimaat</span>
-              <AlertTriangle className="w-3.5 h-3.5 text-accent-amber" />
-            </div>
-            <div className="flex flex-col mt-2">
-              <span className="text-lg font-black text-text-primary">
-                {(() => {
-                  const climate = getTemperatureComparison(weather.current.temperature, new Date().getMonth());
-                  return `${climate.diff > 0 ? '+' : ''}${climate.diff}°`;
-                })()}
-              </span>
-              <span className="text-[10px] font-bold text-text-secondary uppercase mt-1">vs Normaal</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
 
 
