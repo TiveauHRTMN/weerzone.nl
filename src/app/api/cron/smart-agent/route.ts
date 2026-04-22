@@ -7,17 +7,16 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export const dynamic = "force-dynamic";
 
 const AGENT_PROMPT = `Je bent de "Hyper-Affiliate" Timing Agent van WEERZONE.nl.
-Jouw doel is om gebruikers cynisch maar constructief te waarschuwen voor een naderende keiharde wolkbreuk, precies wanneer ze het niet verwachten. 
-De data toont aan dat er binnen 3 uur een stortbui of zwaar onweer op hun locatie valt.
+Jouw doel is om gebruikers cynisch maar constructief te waarschuwen voor naderend ongemak (regen, hitte, kou of storm).
+De data toont aan dat er binnenkort iets vervelends gebeurt op hun locatie.
 Jij schrijft een extreem korte e-mail (max 5 zinnen) met:
-1. De cynische realiteit: ze gaan waarschijnlijk verzuipen als ze straks naar buiten gaan.
-2. Wat ze moeten doen: thuisblijven of een aankoop doen zodat ze de volgende keer wél voorbereid zijn.
-3. Optioneel een referentie naar een regenponcho, stormparaplu of droge sokken.
+1. De cynische realiteit van het weertype (regen = verzuipen, hitte = smelten, kou = bevriezen, storm = wegwaaien).
+2. Een sarcastisch advies.
+3. Een "nuttige" product-referentie die ze NU nodig hebben (paraplu, zonnebrand, dikke trui, stormhaken).
 
 Houd het grof, feitelijk en sarcastisch. Gebruik géén aanhef. Begin direct met schieten.`;
 
 export async function GET(req: Request) {
-  // Beveiliging: vereist een authorization header die we matchen met env, of een bypass voor cron-job.org
   const authHeader = req.headers.get("authorization");
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -43,24 +42,28 @@ export async function GET(req: Request) {
     try {
       const weather = await fetchWeatherData(user.lat, user.lon);
       
-      // Zoek naar een heftige bui in de komende 3 uur (> 2.5mm neerslag in 1 uur)
-      const upcomingRain = weather.hourly.slice(0, 3).find(h => h.precipitation > 2.5);
-      
-      if (!upcomingRain) {
-        continue; // Niets aan de hand, we vallen de gebruiker niet lastig
-      }
+      // Detect triggers
+      const rainEvent = weather.hourly.slice(0, 4).find(h => h.precipitation > 2.0);
+      const heatEvent = weather.current.temperature > 28;
+      const coldEvent = weather.current.temperature < 2;
+      const stormEvent = weather.current.windSpeed > 60;
 
-      // Wow, zware regen voorspeld! Laat de Agent los!
-      const timeStr = new Date(upcomingRain.time).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+      let trigger = "";
+      let details = "";
+
+      if (stormEvent) { trigger = "storm"; details = "Windkracht 8+ komt eraan."; }
+      else if (rainEvent) { trigger = "regen"; details = `Er valt ${rainEvent.precipitation}mm om ${new Date(rainEvent.time).getHours()}:00.`; }
+      else if (heatEvent) { trigger = "hitte"; details = `Het is ${weather.current.temperature}°C. Geen pretje.`; }
+      else if (coldEvent) { trigger = "kou"; details = `Met ${weather.current.temperature}°C vriezen je oren eraf.`; }
+
+      if (!trigger) continue; 
+
+      let aiText = `Er komt ${trigger} aan in ${user.city}. Bereid je voor op ellende.`;
       
-      let aiText = `${user.city} krijgt zo meteen ${upcomingRain.precipitation}mm op z'n dak. Succes ermee.`;
       if (genAI) {
         try {
           const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-          const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: `${AGENT_PROMPT}\n\nDe gebruiker in ${user.city} krijgt een bui van ${upcomingRain.precipitation}mm/u om ${timeStr}. Waarschuw ze en upsell iets nuttigs.` }] }],
-            generationConfig: { maxOutputTokens: 250, temperature: 0.9 },
-          });
+          const result = await model.generateContent(`${AGENT_PROMPT}\n\nSituatie: ${trigger} in ${user.city}. Details: ${details}.`);
           aiText = result.response.text()?.trim() || aiText;
         } catch (e) {
           console.error("Gemini error:", e);
@@ -72,26 +75,26 @@ export async function GET(req: Request) {
         <h2 style="color: #ef4444; margin-top: 0; text-transform: uppercase;">Acuut WEERZONE Alarm</h2>
         <p style="color: #333; font-size: 16px; line-height: 1.6;">${aiText.replace(/\n/g, '<br>')}</p>
         <div style="margin-top: 30px; text-align: center;">
-          <a href="https://weerzone.nl" style="background: #1e293b; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 50px; font-weight: bold;">Check Radar</a>
+          <a href="https://weerzone.nl" style="background: #1e293b; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 50px; font-weight: bold;">Bekijk Real-time Data</a>
         </div>
         <p style="text-align: center; font-size: 11px; color: #999; margin-top: 30px;">
-          Wil je dit niet meer weten? <a href="https://weerzone.nl/api/unsubscribe?email=${user.email}" style="color: #999;">Uitschrijven</a>
+          WEERZONE.nl — 48 uur vooruit. De rest is ruis.
         </p>
       </div>`;
 
       if (process.env.RESEND_API_KEY) {
         await resend.emails.send({
-          from: "WEERZONE Alerts <info@weerzone.nl>",
+          from: "WEERZONE Smart Agent <info@weerzone.nl>",
           to: user.email,
-          subject: `Noodweer om ${timeStr} in ${user.city}`,
+          subject: `WAARSCHUWING: ${trigger.toUpperCase()} in ${user.city}`,
           html: html,
         });
-        emailsSent.push({ to: user.email, time: timeStr });
+        emailsSent.push({ to: user.email, trigger });
       }
     } catch (e) {
       console.error(`Failed to process agent alert for ${user.email}:`, e);
     }
   }
 
-  return NextResponse.json({ status: "Agent Run Complete", emailsSent });
+  return NextResponse.json({ status: "Smart Agent Run Complete", emailsSent });
 }
