@@ -31,7 +31,52 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Supabase niet beschikbaar" }, { status: 500 });
     }
 
-    // Zoek de subscription-record
+    const isPersona = !!(payment.metadata && payment.metadata.userId && payment.metadata.tier);
+    
+    if (isPersona) {
+      const userId = payment.metadata.userId as string;
+      const tier = payment.metadata.tier as string;
+
+      if (payment.status === "paid") {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://weerzone.nl";
+        const amountCents = parseInt(payment.amount.value.replace('.', ''), 10);
+        
+        try {
+          const subscription = await createSubscription({
+            customerId: payment.customerId,
+            amountCents: amountCents,
+            interval: "1 month",
+            description: `WEERZONE ${tier.toUpperCase()}`,
+            webhookUrl: `${siteUrl}/api/webhooks/mollie`,
+          });
+
+          await supabase
+            .from("subscriptions")
+            .update({
+              status: "active",
+              mollie_subscription_id: subscription.id,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("user_id", userId)
+            .eq("tier", tier);
+        } catch (subErr) {
+          console.error("[webhook] persona subscription creation failed", subErr);
+        }
+      } else if (payment.status === "failed" || payment.status === "canceled" || payment.status === "expired") {
+        await supabase
+          .from("subscriptions")
+          .update({
+            status: payment.status === "failed" ? "past_due" : "canceled",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId)
+          .eq("tier", tier);
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    // B2B Logic
     const { data: sub } = await supabase
       .from("b2b_subscriptions")
       .select("*")

@@ -22,9 +22,27 @@ export default function CheckoutClient({ persona, email, initialName, initialPos
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    // TODO: Implement actual payment/subscription logic via Mollie
-    alert("Dank je! Betalingskoppeling wordt geladen...");
-    setTimeout(() => setLoading(false), 2000);
+    try {
+      const res = await fetch("/api/checkout-persona", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, postcode, tier: persona.tier }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Er is iets misgegaan");
+      }
+      
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error("Geen checkout URL ontvangen");
+      }
+    } catch (err: any) {
+      alert(err.message);
+      setLoading(false);
+    }
   }
 
   return (
