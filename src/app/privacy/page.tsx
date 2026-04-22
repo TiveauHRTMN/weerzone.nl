@@ -33,8 +33,11 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-bold text-gray-900">Wat we verzamelen</h2>
             <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
               <li>
+                <strong>E-mailadres:</strong> alleen als je je aanmeldt voor een van onze briefings (Piet, Reed of Steve). We gebruiken dit uitsluitend om je de weerrapporten te sturen waarvoor je hebt gekozen.
+              </li>
+              <li>
                 <strong>Locatie (optioneel):</strong> alleen als je op de locatieknop
-                klikt. Wordt niet opgeslagen.
+                klikt of je postcode opgeeft voor de briefing. Wordt gebruikt voor de weersverwachting, niet voor tracking.
               </li>
               <li>
                 <strong>Stadkeuze:</strong> onthouden we lokaal in je browser
@@ -51,18 +54,16 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-bold text-gray-900">Cookies</h2>
             <div className="text-sm text-gray-700 space-y-2">
               <p>
-                <strong>Noodzakelijk:</strong> je voorkeuren onthouden. Geen tracking.
+                <strong>Noodzakelijk:</strong> je voorkeuren onthouden en je sessie veilig houden als je ingelogd bent. Geen tracking.
               </p>
               <p>
                 <strong>Affiliate-cookies:</strong> als je doorklikt naar Bol.com,
-                Booking.com of Thuisbezorgd, plaatsen zij cookies om te meten dat
+                Booking.com of Amazon, plaatsen zij cookies om te meten dat
                 je via WEERZONE komt. Hier verdienen wij een kleine commissie mee.
-                Dit gebeurt alleen als je actief doorklikt én je cookies hebt
-                geaccepteerd.
+                Dit gebeurt alleen als je actief doorklikt.
               </p>
               <p>
-                <strong>Analytics:</strong> we gebruiken anonieme, privacy-vriendelijke
-                analytics (geen Google Analytics). Geen persoonlijke data.
+                <strong>Analytics:</strong> we gebruiken anonieme analytics (PostHog) om de site te verbeteren. Geen persoonlijke data wordt gekoppeld aan je browser-gedrag tenzij je bent ingelogd.
               </p>
             </div>
           </section>
@@ -70,10 +71,9 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-bold text-gray-900">Wat we NIET doen</h2>
             <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-              <li>Je gegevens verkopen. Nooit.</li>
-              <li>Je tracken over het internet. Nee.</li>
-              <li>Persoonlijke profielen opbouwen. Nope.</li>
-              <li>Je e-mailadres vragen. Waarom zou je?</li>
+              <li>Je gegevens verkopen aan derden. Nooit.</li>
+              <li>Je tracken over het internet voor advertenties. Nee.</li>
+              <li>Je inbox volspammen met onzin. Alleen het weerbericht dat je vroeg.</li>
             </ul>
           </section>
 
@@ -81,8 +81,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-bold text-gray-900">Weer-data</h2>
             <p className="text-sm text-gray-700">
               Weerdata komt van Open-Meteo (KNMI HARMONIE model).
-              Open-Meteo verwerkt geen persoonsgegevens. De API-calls bevatten
-              alleen coördinaten, geen identificerende informatie.
+              De API-calls bevatten alleen coördinaten, geen identificerende informatie.
             </p>
           </section>
 

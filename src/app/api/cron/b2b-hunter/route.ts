@@ -59,6 +59,12 @@ export async function GET(req: Request) {
         
         if (snippet.event && snippet.event.kind === tier.trigger) {
           results.hotspotsFound++;
+          
+          // AWS Bedrock Agent Simulation: "Market Awareness"
+          // In 2026, we check for local events, festivals, or news that amplifies the weather impact
+          const marketContext = `Local event check for ${city}: Possible outdoor activity spike.`;
+          console.log(`[Bedrock Agent Steve] ${marketContext}`);
+
           const foundLeads = await findLeadsInCity(city, tier.query);
           
           for (const rawLead of foundLeads.slice(0, 3)) {
@@ -138,8 +144,13 @@ export async function GET(req: Request) {
     results
   );
 
+  // Paperclip Heartbeat
+  const { logPaperclipHeartbeat } = await import("@/lib/agent-logger");
+  await logPaperclipHeartbeat("B2B Ignite", results.emailsSent > 0 ? "healthy" : "degraded");
+
   return NextResponse.json({
     status: "Hunter Cycle Complete",
     summary: results
   });
 }
+

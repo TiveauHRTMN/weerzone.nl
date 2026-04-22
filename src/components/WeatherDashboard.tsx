@@ -194,9 +194,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const uvInfo = getUvLabel(weather.uvIndex);
 
   return (
-    <>
-    <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
-    <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
+    <div className="min-h-screen relative overflow-x-hidden">
+      <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
+      <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6" style={{ isolation: "isolate" }}>
       {/* Header — puur logo, groot en prominent bovenaan */}
       <header className="animate-fade-in flex flex-col items-center mb-8 sm:mb-10 pt-2">
         <div className="relative flex items-center justify-center">
@@ -211,17 +211,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <NavBar activeCity={city.name} isLocating={isLocating} />
       </div>
 
-      {/* NL Pulse — Dynamische ticker voor alle landelijke meetstations */}
-      <div className="min-h-[36px] overflow-hidden rounded-xl animate-fade-in" style={{ animationDelay: "0.14s" }}>
-        <NLPulse />
-      </div>
-
-      {/* Email Promo — Prominent direct onder de nav voor maximale conversie */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.15s" }}>
-        <EmailSubscribe city={city} />
-      </div>
-
-      {/* ===== 1. Main Weather Hero Card — De absolute blikvanger ===== */}
+      {/* ===== CORE WEATHER SECTION — Hero & Cards grouped as one unit ===== */}
+      <div className="flex flex-col gap-3 animate-fade-in" style={{ animationDelay: "0.15s" }}>
       <div className="card overflow-hidden relative animate-fade-in group shadow-2xl border-white/40" style={{ animationDelay: "0.2s" }}>
         {/* Subtiele inner-glow die meekleurt met temperatuur */}
         <div className={`absolute inset-0 opacity-10 pointer-events-none ${weather.current.temperature > 20 ? 'bg-orange-400' : weather.current.temperature < 5 ? 'bg-blue-400' : 'bg-white'}`} />
@@ -299,30 +290,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           </div>
           
-          {/* Compact Weather Stats Bar */}
-          <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-black/5">
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-text-muted uppercase tracking-wider mb-0.5">Luchtvochtigheid</span>
-              <span className="text-sm font-black text-text-primary">{weather.current.humidity}%</span>
-            </div>
-            <div className="w-px h-8 bg-black/5 hidden xs:block" />
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-text-muted uppercase tracking-wider mb-0.5">Windstoten</span>
-              <span className="text-sm font-black text-text-primary">{weather.current.windGusts} km/h</span>
-            </div>
-            <div className="w-px h-8 bg-black/5 hidden xs:block" />
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-text-muted uppercase tracking-wider mb-0.5">Klimaat-check</span>
-              <span className="text-sm font-black text-text-primary">
-                {(() => {
-                  const climate = getTemperatureComparison(weather.current.temperature, new Date().getMonth());
-                  return `${climate.diff > 0 ? '+' : ''}${climate.diff}° vs normaal`;
-                })()}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
+
       
       {/* ===== 2. Daily & Detail Cluster — De kern van de voorspelling ===== */}
       <div className="animate-fade-in space-y-3 sm:space-y-4" style={{ animationDelay: "0.22s" }}>
@@ -422,6 +392,19 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           </div>
         </div>
+      </div>
+
+      </div>
+
+      {/* NL Pulse — Dynamische ticker moved below weather core */}
+      <div className="min-h-[36px] overflow-hidden rounded-xl animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <NLPulse />
+      </div>
+
+      {/* Email Promo — Moved below weather core */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.35s" }}>
+        <EmailSubscribe city={city} />
+      </div>
 
       {/* ===== 2. Weermodel Verificatie — Waarom dit klopt ===== */}
       {/* ===== Dagoverzicht Insights — Alles in één Grid ===== */}
@@ -470,24 +453,25 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           ))}
 
-          {/* Wind & Neerslag (Quick Insight) */}
+          {/* Klimaat Check (Moved from hero for cleaner look) */}
           <div className="card p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">Wind & Regen</span>
-              <Wind className="w-3.5 h-3.5 text-accent-cyan" />
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">Klimaat</span>
+              <AlertTriangle className="w-3.5 h-3.5 text-accent-amber" />
             </div>
             <div className="flex flex-col mt-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold">{getWindBeaufort(weather.current.windSpeed).scale} Bft</span>
-                <span className="text-sm font-bold">{weather.current.precipitation} mm</span>
-              </div>
-              <div className="bg-black/5 h-1.5 rounded-full mt-2 overflow-hidden">
-                 <div className="bg-accent-cyan h-full" style={{ width: `${Math.min(100, (weather.current.windSpeed / 60) * 100)}%` }} />
-              </div>
+              <span className="text-lg font-black text-text-primary">
+                {(() => {
+                  const climate = getTemperatureComparison(weather.current.temperature, new Date().getMonth());
+                  return `${climate.diff > 0 ? '+' : ''}${climate.diff}°`;
+                })()}
+              </span>
+              <span className="text-[10px] font-bold text-text-secondary uppercase mt-1">vs Normaal</span>
             </div>
           </div>
         </div>
       </div>
+
 
 
       {/* ===== PAPERCLIP: Hyper-Local Affiliate Injection ===== */}
@@ -1009,9 +993,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           </button>
         </div>
       </div>
-
-
-
       {beforeFooter}
 
       <AmazonStickyBar weather={weather} />
@@ -1019,6 +1000,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       {/* ===== Footer ===== */}
       <Footer />
     </div>
-    </>
+  </div>
   );
 }

@@ -33,3 +33,19 @@ export async function logAgentAction(
     console.error("[AGENT LOGGER FATAL EXCEPTION]:", e);
   }
 }
+
+/**
+ * Paperclip Heartbeat: Signaleert dat een agent-programma nog leeft en gezond is.
+ */
+export async function logPaperclipHeartbeat(programName: string, status: "healthy" | "degraded" | "failing" = "healthy") {
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  await supabase.from("agent_activity").insert({
+    agent_name: programName as AgentName,
+    action_type: "system_check",
+    description: `Paperclip Pulse: ${programName} is ${status}.`,
+    metadata: { paperclip_pulse: true, status, timestamp: new Date().toISOString() }
+  });
+}
+

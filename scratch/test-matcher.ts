@@ -1,61 +1,49 @@
 
 import { matchProducts } from '../src/lib/amazon-matcher';
-import { type WeatherData } from '../src/lib/types';
+import { WeatherData } from '../src/lib/types';
 
 const mockWeather: WeatherData = {
   current: {
-    temperature: 12,
-    feelsLike: 10,
-    humidity: 85,
-    windSpeed: 25,
-    windDirection: "ZW",
-    windGusts: 40,
-    precipitation: 5.5, // Regen!
-    weatherCode: 61,
+    temperature: 28,
+    feelsLike: 30,
+    humidity: 40,
+    windSpeed: 10,
+    windDirection: "N",
+    windGusts: 15,
+    weatherCode: 0,
     isDay: true,
-    cloudCover: 100,
+    precipitation: 0,
+    cloudCover: 0,
   },
   minutely: [],
-  hourly: [],
+  hourly: Array(48).fill(0).map((_, i) => ({
+    time: new Date(Date.now() + i * 3600000).toISOString(),
+    temperature: 28,
+    apparentTemperature: 30,
+    weatherCode: 0,
+    precipitation: 0,
+    windSpeed: 10,
+    cape: 0,
+    confidence: "high"
+  })),
   daily: [
-    { date: "2026-04-21", tempMax: 15, tempMin: 8, weatherCode: 61, precipitationSum: 12, windSpeedMax: 45, sunHours: 2 }
+    {
+      date: new Date().toISOString(),
+      tempMax: 30,
+      tempMin: 20,
+      precipitationSum: 0,
+      weatherCode: 0,
+      windSpeedMax: 15,
+      sunHours: 12
+    }
   ],
-  sunrise: "",
-  sunset: "",
-  uvIndex: 1,
-  models: { agreement: 90, label: "High", sources: ["KNMI"] }
+  uvIndex: 9,
+  sunrise: new Date().toISOString(),
+  sunset: new Date().toISOString(),
+  models: { agreement: 100, label: "Perfect", sources: ["KNMI"] }
 };
 
-console.log("\n🧪 TESTING MATCH ENGINE...\n");
-
-console.log("--- TEST 1: REGEN + PIET (Basis) ---");
-const pietMatch = matchProducts(mockWeather, 3, new Date(), "piet");
-pietMatch.products.forEach(p => console.log(`[${p.personas.join(',')}] ${p.title} (${p.id})`));
-
-console.log("\n--- TEST 2: REGEN + REED (Stormchaser) ---");
-const reedMatch = matchProducts(mockWeather, 3, new Date(), "reed");
-reedMatch.products.forEach(p => console.log(`[${p.personas.join(',')}] ${p.title} (${p.id})`));
-
-const mockHotWeather: any = {
-    ...mockWeather,
-    current: { ...mockWeather.current, temperature: 28, precipitation: 0, weatherCode: 0 },
-    daily: [{ ...mockWeather.daily[0], tempMax: 30, precipitationSum: 0 }]
-};
-
-console.log("\n--- TEST 3: HOT + STEVE (Pro) ---");
-const steveMatch = matchProducts(mockHotWeather, 3, new Date(), "steve");
-steveMatch.products.forEach(p => console.log(`[${p.personas.join(',')}] ${p.title} (${p.id})`));
-
-const mockStormWeather: any = {
-    ...mockWeather,
-    current: { ...mockWeather.current, windSpeed: 75, weatherCode: 95 },
-    daily: [{ ...mockWeather.daily[0], windSpeedMax: 80 }], // Storm!
-    hourly: Array(24).fill({ temperature: 12, weatherCode: 95, precipitation: 1, cape: 1200 }) // Thunder!
-};
-
-console.log("\n--- TEST 4: STORM + REED (Stormchaser) ---");
-const stormMatch = matchProducts(mockStormWeather, 3, new Date(), "reed");
-stormMatch.products.forEach(p => console.log(`[${p.personas.join(',')}] ${p.title} (${p.id})`));
-
-
-
+const result = matchProducts(mockWeather, 3);
+console.log("Matched Products for Heatwave + High UV:");
+console.log(JSON.stringify(result.products.map(p => ({ title: p.title, tags: p.tags })), null, 2));
+console.log("Context Tags:", Array.from(result.ctx.tags.entries()));

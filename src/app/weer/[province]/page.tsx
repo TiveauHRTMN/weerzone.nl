@@ -10,24 +10,26 @@ export async function generateStaticParams() {
   return Object.keys(PROVINCE_LABELS).map((province) => ({ province }));
 }
 
-export async function generateMetadata({ params }: { params: { province: Province } }): Promise<Metadata> {
-  const label = PROVINCE_LABELS[params.province];
+export async function generateMetadata({ params }: { params: Promise<{ province: Province }> }): Promise<Metadata> {
+  const { province } = await params;
+  const label = PROVINCE_LABELS[province];
   if (!label) return {};
 
   return {
     title: `Weer ${label} | Actuele weersverwachting per stad`,
     description: `Het actuele weer in de provincie ${label}. Bekijk de weersverwachting voor alle steden en dorpen in ${label} direct van het KNMI.`,
     alternates: {
-      canonical: `https://weerzone.nl/weer/${params.province}`,
+      canonical: `https://weerzone.nl/weer/${province}`,
     },
   };
 }
 
-export default async function ProvincePage({ params }: { params: { province: Province } }) {
-  const label = PROVINCE_LABELS[params.province];
+export default async function ProvincePage({ params }: { params: Promise<{ province: Province }> }) {
+  const { province } = await params;
+  const label = PROVINCE_LABELS[province];
   if (!label) notFound();
 
-  const places = placesByProvince()[params.province] || [];
+  const places = placesByProvince()[province] || [];
 
   // Gebruik de eerste stad uit de lijst als referentie voor de provincie
   const refCity = places[0] || DUTCH_CITIES.find(c => c.name === "De Bilt")!;
@@ -43,11 +45,11 @@ export default async function ProvincePage({ params }: { params: { province: Pro
     const rain = weather.current.precipitation;
     const wind = Math.round(weather.current.windSpeed);
     
-    if (params.province === "limburg") return `Limburg: ${temp}°C. Vlaai eten in de zon? In je dromen. ${wind} km/u wind op de heuvels. Zoek een grot op of trek een dikke trui aan.`;
-    if (params.province === "groningen") return `Groningen: ${temp}°C. Het waait weer een baksteen uit de muur (${wind} km/u). Blijf niet lullen maar zoek de luwte op.`;
-    if (params.province === "zeeland") return `Zeeland: ${temp}°C. Altijd die wind hè? ${wind} km/u. Als je niet wilt wegwaaien bij de Neeltje Jans, blijf je nu binnen.`;
-    if (params.province === "friesland") return `Friesland: ${temp}°C. Prachtig dat water, maar met ${rain}mm regen zijn zelfs de Friezen niet blij vandaag.`;
-    if (params.province === "noord-brabant") return `Brabant: ${temp}°C. Gezelligheid kent geen tijd, maar met dit weer is de kroeg de enige optie.`;
+    if (province === "limburg") return `Limburg: ${temp}°C. Vlaai eten in de zon? In je dromen. ${wind} km/u wind op de heuvels. Zoek een grot op of trek een dikke trui aan.`;
+    if (province === "groningen") return `Groningen: ${temp}°C. Het waait weer een baksteen uit de muur (${wind} km/u). Blijf niet lullen maar zoek de luwte op.`;
+    if (province === "zeeland") return `Zeeland: ${temp}°C. Altijd die wind hè? ${wind} km/u. Als je niet wilt wegwaaien bij de Neeltje Jans, blijf je nu binnen.`;
+    if (province === "friesland") return `Friesland: ${temp}°C. Prachtig dat water, maar met ${rain}mm regen zijn zelfs de Friezen niet blij vandaag.`;
+    if (province === "noord-brabant") return `Brabant: ${temp}°C. Gezelligheid kent geen tijd, maar met dit weer is de kroeg de enige optie.`;
     return `${label}: ${temp}°C. Piet's oordeel? ${wind > 30 ? "Stormachtig kut." : "Matig, niks om over naar huis te schrijven."} WeerZone expertise: bereid je voor op ${temp < 10 ? "kou" : "gedoe"}.`;
   })();
 
@@ -87,7 +89,7 @@ export default async function ProvincePage({ params }: { params: { province: Pro
             {places.sort((a, b) => a.name.localeCompare(b.name)).map((place) => (
               <Link
                 key={place.name}
-                href={`/weer/${params.province}/${placeSlug(place.name)}`}
+                href={`/weer/${province}/${placeSlug(place.name)}`}
                 className="card p-4 hover:scale-[1.02] transition-transform active:scale-[0.98]"
               >
                 <span className="text-sm font-bold text-text-primary line-clamp-1">

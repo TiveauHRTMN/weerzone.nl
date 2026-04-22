@@ -85,6 +85,10 @@ export async function GET(req: Request) {
       }
     );
 
+    // 5. Paperclip Heartbeat
+    const { logPaperclipHeartbeat } = await import("@/lib/agent-logger");
+    await logPaperclipHeartbeat("Performance Control", "healthy");
+
     return NextResponse.json({
       status: "Performance Audit Complete",
       strategy,
@@ -93,6 +97,13 @@ export async function GET(req: Request) {
     });
   } catch (e: any) {
     console.error("Performance Control Error:", e);
+    // Paperclip Heartbeat: FAILING
+    try {
+      const { logPaperclipHeartbeat } = await import("@/lib/agent-logger");
+      await logPaperclipHeartbeat("Performance Control", "failing");
+    } catch {}
+    
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
+

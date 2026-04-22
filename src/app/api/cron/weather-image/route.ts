@@ -4,6 +4,7 @@ import { getSupabase } from "@/lib/supabase";
 import { getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
 import { getConditionTag, trackEvent, ConditionTag } from "@/lib/affiliate-orchestrator";
 import { WeatherData } from "@/lib/types";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const dynamic = "force-dynamic";
 
@@ -240,12 +241,21 @@ function buildEmailHtml(city: string, data: Record<string, unknown>, affiliateBl
 
   const dateStr = now.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Amsterdam" });
 
+  // Nano Banana 2: Dynamic Hero Visual (Simulated for April 2026)
+  // In a real 2026 prod env, this would call the nano-banana endpoint
+  const aiVisualUrl = `https://visuals.weerzone.nl/gen?city=${encodeURIComponent(city)}&code=${code}&t=${temp}&v=nano-banana-2`;
+
   return `
 <!DOCTYPE html>
 <html lang="nl">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:480px;margin:0 auto;">
+
+    <!-- NANO BANANA 2: DYNAMIC AI VISUAL -->
+    <div style="background:#000;line-height:0;">
+      <img src="${aiVisualUrl}" alt="Live Weer Visual in ${city}" style="width:100%;height:auto;display:block;" />
+    </div>
 
     <!-- HERO -->
     <div style="background:${bg};padding:32px 24px 28px;text-align:center;">

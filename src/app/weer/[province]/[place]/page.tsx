@@ -176,9 +176,16 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(weatherForecastLd) }} />
-      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script 
+        type="application/ld+json" 
+        dangerouslySetInnerHTML={{ 
+          __html: JSON.stringify([
+            weatherForecastLd,
+            ...(faqLd ? [faqLd] : []),
+            breadcrumbLd
+          ]) 
+        }} 
+      />
       <main>
         {/* Breadcrumb navigatie */}
         <nav className="max-w-4xl mx-auto px-4 pt-4 text-xs text-white/50">

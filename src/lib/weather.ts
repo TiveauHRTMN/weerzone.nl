@@ -118,13 +118,14 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         forecast_days: "2",
         forecast_hours: "48",
       })}`, { next: { revalidate: 300 } }).then(r => {
-        if (!r.ok) throw new Error("Open-Meteo main API error");
+        if (!r.ok) return null;
         return r.json();
       }),
       fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_seamless" }).catch(() => null),
     ]);
 
     const data = genericRes;
+    if (!data) return null as any;
     const { hourly, agreement } = blendHourly(harmonieData, data.hourly);
 
     // 5. SYNC CURRENT WITH HARMONIE (Belangrijk voor consistentie!)
