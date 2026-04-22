@@ -341,12 +341,14 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           </div>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
-            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), prompt: "a glossy 3D emoji of a smoking barbecue grill, vibrant colors, isolated on minimalist background" },
-            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), prompt: "a glossy 3D emoji of a blooming flower with floating pollen particles, high-quality, vibrant" },
-            { id: "strand", label: "Strand", score: getStrandScore(weather), prompt: "a glossy 3D emoji of a beach umbrella and sunbed, summer vibes, high-quality" },
-            { id: "terras", label: "Terrasje", score: getTerrasScore(weather), prompt: "a glossy 3D emoji of a cold beer glass and a wine glass, cafe terrace vibes, high-quality" },
+            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), prompt: "a glossy 3D emoji of a smoking barbecue grill, vibrant colors" },
+            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), prompt: "a glossy 3D emoji of a blooming flower with floating pollen" },
+            { id: "strand", label: "Strand", score: getStrandScore(weather), prompt: "a glossy 3D emoji of a beach umbrella and sunbed" },
+            { id: "terras", label: "Terrasje", score: getTerrasScore(weather), prompt: "a glossy 3D emoji of a cold beer glass and wine glass" },
+            { id: "was", label: "Wasje Buiten", score: getWasScore(weather), prompt: "a glossy 3D emoji of a clothes drying rack with laundry, breezy vibes" },
+            { id: "autowas", label: "Auto Wassen", score: getAutoWasScore(weather), prompt: "a glossy 3D emoji of a shiny blue car with soap bubbles" },
           ].map((item) => (
             <div key={item.id} className="flex flex-col gap-2 group/score">
               <div className="w-full aspect-square rounded-2xl overflow-hidden border border-white/60 bg-white/5 backdrop-blur-sm transition-transform group-hover/score:scale-105 shadow-lg">

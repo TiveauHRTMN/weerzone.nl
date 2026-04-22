@@ -12,6 +12,8 @@ import {
   getStrandScore,
   getHooikoortsScore,
   getTerrasScore,
+  getWasScore,
+  getAutoWasScore,
 } from "@/lib/commentary";
 
 export async function GET(request: NextRequest) {
@@ -40,6 +42,8 @@ export async function GET(request: NextRequest) {
         strand: getStrandScore(weather),
         hooikoorts: getHooikoortsScore(weather),
         terras: getTerrasScore(weather),
+        was: getWasScore(weather),
+        autowas: getAutoWasScore(weather),
       }
     },
   });

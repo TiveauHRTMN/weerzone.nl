@@ -229,3 +229,31 @@ export function getTerrasScore(w: WeatherData): number {
 
     return Math.max(1, Math.min(10, Math.round(score)));
 }
+
+export function getWasScore(w: WeatherData): number {
+    // Wasje buiten hangen: droog, wind (voor drogen), zon
+    let score = 1;
+    if (w.current.precipitation === 0) score += 4;
+    if (w.current.windSpeed > 10) score += 2;
+    if (w.current.windSpeed > 20) score += 1;
+    if (w.current.temperature > 15) score += 2;
+    if (w.current.isDay) score += 1;
+    
+    if (w.current.precipitation > 0.1) score -= 8;
+    if (w.current.humidity > 80) score -= 2;
+    
+    return Math.max(1, Math.min(10, Math.round(score)));
+}
+
+export function getAutoWasScore(w: WeatherData): number {
+    // Auto wassen: droog nu EN komende 48 uur
+    let score = 10;
+    if (w.current.precipitation > 0) score -= 5;
+    
+    const rainComing = w.daily[1].precipitationSum + w.daily[0].precipitationSum;
+    if (rainComing > 0.5) score -= 3;
+    if (rainComing > 2.0) score -= 4;
+    if (w.current.windSpeed > 40) score -= 2; // Zand/stof
+    
+    return Math.max(1, Math.min(10, Math.round(score)));
+}
