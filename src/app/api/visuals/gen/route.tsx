@@ -7,18 +7,26 @@ export const dynamic = "force-dynamic";
 /**
  * Nano Banana 2.1 - Local Visual Engine (Standard Fallback)
  * This replaces the external visuals.weerzone.nl engine when it's offline.
- * It generates beautiful, context-aware gradients and overlays.
+ * It generates real AI images via bridge or beautiful context-aware gradients.
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const prompt = searchParams.get("prompt") || "Weather";
   const city = searchParams.get("city") || "";
+  const style = searchParams.get("style") || "cinematic";
 
   try {
-    
     // NANO BANANA 2.1 - High-Fidelity Image Generation Bridge
-    // This fetches a real AI-generated image based on the dynamic prompt
-    const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ", cinematic weather photography, 8k, highly detailed, atmospheric") }?width=1200&height=630&nologo=true&enhance=true&seed=${Math.floor(Math.random() * 1000000)}`;
+    let finalPrompt = prompt;
+    if (style === "emoji") {
+      // Special prompt engineering for HQ AI Emojis
+      finalPrompt = `${prompt}, high-quality 3D glossy emoji, Apple Memoji style, professional digital icon, isolated on clean background, studio lighting, 8k render, vibrant colors, minimalist 3D asset`;
+    } else {
+      // Standard cinematic weather photography
+      finalPrompt = `${prompt}, cinematic weather photography, 8k, highly detailed, atmospheric, national geographic style`;
+    }
+
+    const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1200&height=630&nologo=true&enhance=true&seed=${Math.floor(Math.random() * 1000000)}`;
 
     // Fetch the image from the AI provider
     const imageRes = await fetch(aiImageUrl);
@@ -33,7 +41,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (e: any) {
-    // Fallback to the original beautiful gradient engine if the AI bridge fails
+    // Fallback to the beautiful gradient engine if the AI bridge fails
     return new ImageResponse(
       (
         <div style={{

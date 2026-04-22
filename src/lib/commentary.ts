@@ -140,32 +140,6 @@ export function getKutweerScore(w: WeatherData): number {
   return getMisereScore(w).score;
 }
 
-const ROTATING_QUOTES = [
-  "Buienradar gokt, wij rekenen. 48 uur messcherp met KNMI HARMONIE data. De rest is ruis.",
-  "Morgen wordt het beter? Dat zeiden ze gisteren ook. Geloof die 14-daagse fantasie-apps niet blind.",
-  "\"Kans op zon\" is de laffe uitweg van Weerplaza. Wij vertellen je gewoon de realiteit op de kilometer nauwkeurig.",
-  "48 uur. Meer heb je niet nodig. Een 14-daagse voorspelling is commerciële clickbait voor de massa.",
-  "Je weer-app zegt 22° volgende week? Trap er niet in. Puur bedrog om clicks te genereren.",
-  "KNMI HARMONIE op volle sterkte. Eén brute waarheid. Geen gelul.",
-  "14-daagse voorspelling? Dan kun je net zo goed je horoscoop of de krant van gisteren lezen.",
-  "Weerplaza, NOS, Buienradar... Stuk voor stuk bezig met nattevingerwerk. Wij vertellen je de feiten.",
-  "Jas-aan-jas-uit-jas-aan weer. Typisch Nederlands. Volkomen ruk, maar wij waarschuwen tenminste eerlijk.",
-  "\"Lokaal een bui\" is meteorologen-taal voor: we hebben geen flauw idee. Wij wel.",
-  "De gevestigde orde zit er weer naast? Logisch, die gebruiken achterhaalde data. Wij hebben de bron.",
-  "WEERZONE liegt niet. Geen valse hoop, geen 'misschien'. Keiharde data over jouw eigen postzegel.",
-  "Iedereen is meteoroloog totdat ze kletsnat op de fiets staan. Vertrouw op de radar, niet je onderbuik.",
-  "Wij beloven niks. Behalve dat de komende 48 uur klopt. De rest is commerciële ruis.",
-  "\"Lekker weertje\" zeggen terwijl het 12 graden is. Wij doen niet mee aan die massapsychose.",
-  "De enige weerdienst die niet bang is om je de waarheid te vertellen. Geen poespas.",
-  "Regen voorspeld? Dan regent het ook. De rest draait eromheen om je humeur niet te verpesten.",
-  "Weerplaza zit qua voorspellingen dichter bij een waarzegster dan bij de realiteit.",
-  "KNMI HARMONIE is de enige bron die telt voor Nederland. De rest is vulling.",
-];
-
-export function getRandomQuote(): string {
-  return ROTATING_QUOTES[Math.floor(Math.random() * ROTATING_QUOTES.length)];
-}
-
 export function getUvLabel(uv: number): { label: string; color: string } {
   if (uv <= 2) return { label: "Laag — chill", color: "#34d399" };
   if (uv <= 5) return { label: "Matig — smeer je in, malloot", color: "#f0a040" };
@@ -231,5 +205,27 @@ export function getHardloopScore(w: WeatherData): number {
     if (w.current.windSpeed > 35) score -= 4;
     if (w.current.humidity > 85) score -= 1;
     
+    return Math.max(1, Math.min(10, Math.round(score)));
+}
+
+export function getTerrasScore(w: WeatherData): number {
+    let score = 1;
+    const t = w.current.temperature;
+    const isDay = w.current.isDay;
+    
+    if (t > 15) score += 3;
+    if (t > 18) score += 3;
+    if (t > 22) score += 2;
+    if (t > 28) score += 1;
+    if (w.current.precipitation === 0) score += 1;
+    if (w.current.windSpeed < 15) score += 1;
+    
+    // Avond terrasje bonus
+    if (!isDay && t > 16) score += 2;
+    
+    if (w.current.precipitation > 0) score -= 6;
+    if (w.current.windSpeed > 35) score -= 3;
+    if (t < 12) score -= 4;
+
     return Math.max(1, Math.min(10, Math.round(score)));
 }

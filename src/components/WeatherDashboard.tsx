@@ -343,16 +343,16 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), prompt: "juicy barbecue in sunny garden" },
-            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), prompt: "pollen in summer air" },
-            { id: "run", label: "Hardlopen", score: getHardloopScore(weather), prompt: "running shoes on park path" },
-            { id: "fiets", label: "Fietsen", score: getFietsScore(weather).score, prompt: "bicycle leaning against canal" },
+            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), prompt: "a glossy 3D emoji of a smoking barbecue grill, vibrant colors, isolated on minimalist background" },
+            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), prompt: "a glossy 3D emoji of a blooming flower with floating pollen particles, high-quality, vibrant" },
+            { id: "strand", label: "Strand", score: getStrandScore(weather), prompt: "a glossy 3D emoji of a beach umbrella and sunbed, summer vibes, high-quality" },
+            { id: "terras", label: "Terrasje", score: getTerrasScore(weather), prompt: "a glossy 3D emoji of a cold beer glass and a wine glass, cafe terrace vibes, high-quality" },
           ].map((item) => (
             <div key={item.id} className="flex flex-col gap-2 group/score">
-              <div className="w-full aspect-square rounded-xl overflow-hidden border border-white/60 bg-slate-50 transition-transform group-hover/score:scale-105 shadow-sm">
+              <div className="w-full aspect-square rounded-2xl overflow-hidden border border-white/60 bg-white/5 backdrop-blur-sm transition-transform group-hover/score:scale-105 shadow-lg">
                 <img 
-                  src={`/api/visuals/gen?prompt=${encodeURIComponent(item.prompt)}&v=2.1&seed=${item.id}`} 
-                  className="w-full h-full object-cover"
+                  src={`/api/visuals/gen?prompt=${encodeURIComponent(item.prompt)}&v=2.1&seed=${item.id}&style=emoji`} 
+                  className="w-full h-full object-cover p-2"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               </div>
