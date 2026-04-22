@@ -211,18 +211,25 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <NavBar activeCity={city.name} isLocating={isLocating} />
       </div>
 
-      {/* NL Pulse — Dynamische ticker moved above weather core */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.13s" }}>
+      {/* NL Pulse — Wider and more prominent */}
+      <div className="animate-fade-in w-full px-1" style={{ animationDelay: "0.13s" }}>
         <NLPulse />
       </div>
 
       {/* ===== CORE WEATHER SECTION — Hero & Cards grouped as one unit ===== */}
       <div className="flex flex-col gap-3 animate-fade-in" style={{ animationDelay: "0.15s" }}>
       <div className="card overflow-hidden relative animate-fade-in group shadow-2xl border-white/40" style={{ animationDelay: "0.2s" }}>
-        {/* Subtiele inner-glow die meekleurt met temperatuur */}
-        <div className={`absolute inset-0 opacity-10 pointer-events-none ${weather.current.temperature > 20 ? 'bg-orange-400' : weather.current.temperature < 5 ? 'bg-blue-400' : 'bg-white'}`} />
-        
-        <div className="p-7 sm:p-9 relative z-[2]">
+        {/* Nano Banana 2.1 — Dynamic Hero Visual Overlay */}
+        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1]">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 z-10" />
+          <img 
+            src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(`A beautiful realistic landscape in ${city.name} during ${getWeatherDescription(weather.current.weatherCode).toLowerCase()} weather, professional photography, cinematic lighting, 8k`)}&v=2.1&seed=${new Date().getUTCHours()}`}
+            alt="Local weather visual"
+            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[10s] ease-linear"
+          />
+        </div>
+
+        <div className="p-7 sm:p-9 relative z-[2] pt-32 sm:pt-40">
           {/* Top Labeling */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex flex-col">
