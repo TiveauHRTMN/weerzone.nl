@@ -219,7 +219,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-slate-400">
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/90 z-10" />
           <img 
-            src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(`A beautiful landscape of ${city.name} during ${getWeatherDescription(weather.current.weatherCode)} weather, cinematic photography, high-fidelity, vibrant colors, 8k`)}&city=${encodeURIComponent(city.name)}&v=2.1&seed=${new Date().getUTCHours()}`}
+            src={`/api/visuals/gen?prompt=${encodeURIComponent(`A beautiful landscape of ${city.name} during ${getWeatherDescription(weather.current.weatherCode)} weather, cinematic photography, high-fidelity, vibrant colors, 8k`)}&city=${encodeURIComponent(city.name)}&v=2.1&seed=${new Date().getUTCHours()}`}
             alt="Local weather visual"
             className="w-full h-full object-cover transition-transform duration-[15s] ease-linear group-hover:scale-110"
             onError={(e) => { e.currentTarget.style.opacity = '0'; }}
@@ -293,7 +293,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           <div className="flex flex-col gap-3 group/item">
             <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 transition-transform hover:scale-[1.02]">
               <img 
-                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[0].weatherCode) + " cinematic view")}&v=2.1&seed=today`} 
+                src={`/api/visuals/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[0].weatherCode) + " cinematic view")}&v=2.1&seed=today`} 
                 alt="Today" 
                 className="w-full h-full object-cover"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -312,9 +312,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           <div className="flex flex-col gap-3 group/item">
             <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 transition-transform hover:scale-[1.02]">
               <img 
-                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[1].weatherCode) + " cinematic view")}&v=2.1&seed=tomorrow`} 
+                src={`/api/visuals/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[1].weatherCode) + " cinematic view")}&v=2.1&seed=tomorrow`} 
                 alt="Tomorrow" 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-center"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </div>
@@ -349,7 +349,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <div key={item.id} className="flex flex-col gap-2 group/score">
               <div className="w-full aspect-square rounded-xl overflow-hidden border border-white/60 bg-slate-50 transition-transform group-hover/score:scale-105 shadow-sm">
                 <img 
-                  src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(item.prompt)}&v=2.1&seed=${item.id}`} 
+                  src={`/api/visuals/gen?prompt=${encodeURIComponent(item.prompt)}&v=2.1&seed=${item.id}`} 
                   className="w-full h-full object-cover"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />

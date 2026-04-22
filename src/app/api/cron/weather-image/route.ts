@@ -262,7 +262,8 @@ async function buildEmailHtml(city: string, data: Record<string, unknown>, affil
     }
   }
 
-  const aiVisualUrl = `https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(visualPrompt)}&city=${encodeURIComponent(city)}&v=2.1&seed=${new Date().getDate()}`;
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://weerzone.nl";
+  const aiVisualUrl = `${base}/api/visuals/gen?prompt=${encodeURIComponent(visualPrompt)}&city=${encodeURIComponent(city)}&v=2.1&seed=${new Date().getDate()}`;
 
   return `
 <!DOCTYPE html>

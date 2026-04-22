@@ -215,7 +215,7 @@ export async function GET(req: Request) {
           Geen tekst in beeld.
         `);
         const prompt = promptRes.response.text().trim();
-        viralVisualUrl = `https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(prompt)}&v=2.1&seed=${bust}`;
+        viralVisualUrl = `${base}/api/visuals/gen?prompt=${encodeURIComponent(prompt)}&v=2.1&seed=${bust}`;
       } catch (e) {
         console.error("Social Visual Error:", e);
       }
