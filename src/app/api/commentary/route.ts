@@ -8,6 +8,10 @@ import {
   getWindComment,
   getRandomQuote,
   getUvLabel,
+  getBbqScore,
+  getStrandScore,
+  getHooikoortsScore,
+  getTerrasScore,
 } from "@/lib/commentary";
 
 export async function GET(request: NextRequest) {
@@ -31,6 +35,12 @@ export async function GET(request: NextRequest) {
       wind: getWindComment(weather.current.windSpeed, weather.current.windGusts),
       quote: getRandomQuote(),
       uv: getUvLabel(weather.uvIndex),
+      lifestyle: {
+        bbq: getBbqScore(weather),
+        strand: getStrandScore(weather),
+        hooikoorts: getHooikoortsScore(weather),
+        terras: getTerrasScore(weather),
+      }
     },
   });
 }
