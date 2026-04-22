@@ -211,8 +211,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <NavBar activeCity={city.name} isLocating={isLocating} />
       </div>
 
-      {/* NL Pulse — Wider and more prominent */}
-      <div className="animate-fade-in w-full px-1" style={{ animationDelay: "0.13s" }}>
+      {/* NL Pulse — Perfectly aligned with boxes */}
+      <div className="animate-fade-in" style={{ animationDelay: "0.13s" }}>
         <NLPulse />
       </div>
 
@@ -287,12 +287,20 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       {/* ===== 2. Daily & Detail Cluster — Unified Grid ===== */}
       <div className="animate-fade-in grid grid-cols-2 gap-3 sm:gap-4" style={{ animationDelay: "0.22s" }}>
         {/* Vandaag & Morgen Cards */}
-        <div className="card p-4 flex flex-col justify-between min-h-[100px] border-white/40">
-          <div className="flex justify-between items-start">
+        <div className="card p-4 flex flex-col justify-between min-h-[100px] border-white/40 relative overflow-hidden group/mini">
+          <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent to-white pointer-events-none" />
+          <div className="flex justify-between items-start relative z-10">
             <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Vandaag</span>
-            <span className="text-2xl">{getWeatherEmoji(weather.daily[0].weatherCode)}</span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/60 shadow-lg bg-white/20 backdrop-blur-sm group-hover/mini:scale-110 transition-transform">
+              <img 
+                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[0].weatherCode) + " cinematic closeup")}&v=2.1&seed=today`} 
+                alt="Today" 
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
           </div>
-          <div className="mt-2">
+          <div className="mt-2 relative z-10">
             <div className="text-2xl font-black text-text-primary">
               {weather.daily[0].tempMax}° <span className="text-sm text-text-muted font-bold">/ {weather.daily[0].tempMin}°</span>
             </div>
@@ -302,12 +310,20 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           </div>
         </div>
 
-        <div className="card p-4 flex flex-col justify-between min-h-[100px] border-white/40">
-          <div className="flex justify-between items-start">
+        <div className="card p-4 flex flex-col justify-between min-h-[100px] border-white/40 relative overflow-hidden group/mini">
+          <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent to-white pointer-events-none" />
+          <div className="flex justify-between items-start relative z-10">
             <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Morgen</span>
-            <span className="text-2xl">{getWeatherEmoji(weather.daily[1].weatherCode)}</span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/60 shadow-lg bg-white/20 backdrop-blur-sm group-hover/mini:scale-110 transition-transform">
+              <img 
+                src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[1].weatherCode) + " cinematic closeup")}&v=2.1&seed=tomorrow`} 
+                alt="Tomorrow" 
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
           </div>
-          <div className="mt-2">
+          <div className="mt-2 relative z-10">
             <div className="text-2xl font-black text-text-primary">
               {weather.daily[1].tempMax}° <span className="text-sm text-text-muted font-bold">/ {weather.daily[1].tempMin}°</span>
             </div>

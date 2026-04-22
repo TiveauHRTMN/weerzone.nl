@@ -34,7 +34,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="mt-20 border-t border-white/10 pt-16 pb-12 bg-black/20 backdrop-blur-3xl rounded-t-[40px] px-6 sm:px-10">
+    <footer className="mt-20 border-t border-white/20 pt-16 pb-12 bg-white/5 backdrop-blur-3xl rounded-t-[40px] px-6 sm:px-10 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2">
