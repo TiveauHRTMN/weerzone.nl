@@ -206,27 +206,23 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         </div>
       </header>
 
-      {/* NavBar — één grote glass-bar in kaartstijl, GPS zit in "Locatie"-pill */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.12s" }}>
-        <NavBar activeCity={city.name} isLocating={isLocating} />
-      </div>
+      {/* NavBar — één grote glass-bar in kaartstijl */}
+      <NavBar activeCity={city.name} isLocating={isLocating} />
 
       {/* NL Pulse — Perfectly aligned with boxes */}
-      <div className="animate-fade-in" style={{ animationDelay: "0.13s" }}>
-        <NLPulse />
-      </div>
+      <NLPulse />
 
-      {/* ===== CORE WEATHER SECTION — Hero & Cards grouped as one unit ===== */}
-      <div className="flex flex-col gap-3 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+      {/* ===== CORE WEATHER SECTION — Hero & Clusters grouped with consistent spacing ===== */}
+      <div className="flex flex-col gap-6 animate-fade-in" style={{ animationDelay: "0.15s" }}>
       <div className="card overflow-hidden relative animate-fade-in group shadow-2xl border-white/40" style={{ animationDelay: "0.2s" }}>
         {/* Nano Banana 2.1 — Dynamic Hero Visual Overlay */}
-        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-slate-200">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-white/90 z-10" />
+        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-slate-400">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/90 z-10" />
           <img 
-            src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(`${getWeatherDescription(weather.current.weatherCode)} in ${city.name}, high-resolution realistic photography, 8k`)}&city=${encodeURIComponent(city.name)}&v=2.1&seed=${new Date().getUTCHours()}`}
+            src={`https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(`A beautiful landscape of ${city.name} during ${getWeatherDescription(weather.current.weatherCode)} weather, cinematic photography, high-fidelity, vibrant colors, 8k`)}&city=${encodeURIComponent(city.name)}&v=2.1&seed=${new Date().getUTCHours()}`}
             alt="Local weather visual"
             className="w-full h-full object-cover transition-transform duration-[15s] ease-linear group-hover:scale-110"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            onError={(e) => { e.currentTarget.style.opacity = '0'; }}
           />
         </div>
 
