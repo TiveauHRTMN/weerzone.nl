@@ -219,15 +219,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         
         {/* HERO SECTION */}
         <div className="card overflow-hidden relative group shadow-2xl border-white/40">
-        {/* Nano Banana 2.1 — Dynamic Hero Visual Overlay */}
-        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-slate-400">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/90 z-10" />
-          <img 
-            src={`/api/visuals/gen?prompt=${encodeURIComponent(`A beautiful landscape of ${city.name} during ${getWeatherDescription(weather.current.weatherCode)} weather, cinematic photography, high-fidelity, vibrant colors, 8k`)}&city=${encodeURIComponent(city.name)}&v=2.1&seed=${new Date().getUTCHours()}`}
-            alt="Local weather visual"
-            className="w-full h-full object-cover transition-transform duration-[15s] ease-linear group-hover:scale-110"
-            onError={(e) => { e.currentTarget.style.opacity = '0'; }}
-          />
+        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-gradient-to-br from-accent-blue/30 to-accent-orange/10 backdrop-blur-3xl">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-white/90 z-10" />
         </div>
 
         <div className="p-7 sm:p-9 relative z-[2] pt-32 sm:pt-40">
@@ -345,20 +338,16 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
-            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), prompt: "a premium 3D glassmorphic barbecue grill, sleek design" },
-            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), prompt: "a premium 3D glassmorphic blooming flower with floating pollen" },
-            { id: "strand", label: "Strand", score: getStrandScore(weather), prompt: "a premium 3D glassmorphic beach umbrella and sunbed" },
-            { id: "terras", label: "Terrasje", score: getTerrasScore(weather), prompt: "a premium 3D glassmorphic beer glass and wine glass" },
-            { id: "was", label: "Wasje Buiten", score: getWasScore(weather), prompt: "a premium 3D glassmorphic clothes drying rack with laundry" },
-            { id: "autowas", label: "Auto Wassen", score: getAutoWasScore(weather), prompt: "a premium 3D glassmorphic shiny blue car with bubbles" },
+            { id: "bbq", label: "BBQ Weer", score: getBbqScore(weather), emoji: "🍖" },
+            { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), emoji: "🤧" },
+            { id: "strand", label: "Strand", score: getStrandScore(weather), emoji: "🏖️" },
+            { id: "terras", label: "Terrasje", score: getTerrasScore(weather), emoji: "🍻" },
+            { id: "was", label: "Wasje Buiten", score: getWasScore(weather), emoji: "🧺" },
+            { id: "autowas", label: "Auto Wassen", score: getAutoWasScore(weather), emoji: "🚗" },
           ].map((item) => (
             <div key={item.id} className="flex flex-col gap-2 group/score">
-              <div className="w-full aspect-square rounded-2xl overflow-hidden border border-white/60 bg-white/5 backdrop-blur-sm transition-transform group-hover/score:scale-105 shadow-lg">
-                <img 
-                  src={`/api/visuals/gen?prompt=${encodeURIComponent(item.prompt)}&v=2.1&seed=${item.id}&style=emoji`} 
-                  className="w-full h-full object-cover p-2"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
+              <div className="w-full aspect-square rounded-2xl overflow-hidden border border-white/60 bg-white/5 backdrop-blur-sm transition-transform group-hover/score:scale-105 shadow-lg flex items-center justify-center text-5xl">
+                {item.emoji}
               </div>
               <div className="flex justify-between items-center px-0.5">
                 <span className="text-[9px] font-black text-text-muted uppercase truncate mr-1">{item.label}</span>
