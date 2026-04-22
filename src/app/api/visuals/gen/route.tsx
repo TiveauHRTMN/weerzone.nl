@@ -10,10 +10,11 @@ export const dynamic = "force-dynamic";
  * It generates beautiful, context-aware gradients and overlays.
  */
 export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const prompt = searchParams.get("prompt") || "Weather";
+  const city = searchParams.get("city") || "";
+
   try {
-    const { searchParams } = new URL(req.url);
-    const prompt = searchParams.get("prompt") || "Weather";
-    const city = searchParams.get("city") || "";
     
     // NANO BANANA 2.1 - High-Fidelity Image Generation Bridge
     // This fetches a real AI-generated image based on the dynamic prompt
