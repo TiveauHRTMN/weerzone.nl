@@ -241,9 +241,28 @@ function buildEmailHtml(city: string, data: Record<string, unknown>, affiliateBl
 
   const dateStr = now.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Amsterdam" });
 
-  // Nano Banana 2: Dynamic Hero Visual (Simulated for April 2026)
-  // In a real 2026 prod env, this would call the nano-banana endpoint
-  const aiVisualUrl = `https://visuals.weerzone.nl/gen?city=${encodeURIComponent(city)}&code=${code}&t=${temp}&v=nano-banana-2`;
+  // Nano Banana 2: Dynamic Hero Visual Integration
+  // We use Gemini to generate a specific prompt for the visual engine based on city and weather
+  let visualPrompt = `Realistisch weerbeeld in ${city}: ${desc}, ${temp}°C.`;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+      const aiRes = await model.generateContent(`
+        Geef een KORTE Engelse prompt voor een AI image generator (Stable Diffusion/Flux stijl).
+        Het moet het weer in ${city} uitbeelden.
+        Weer: ${desc}, Temperatuur: ${temp}°C. 
+        Stijl: Hyper-realistisch, cinematic, wide angle, 8k. 
+        Geen tekst in het beeld.
+      `);
+      visualPrompt = aiRes.response.text().trim();
+    } catch (e) {
+      console.error("Nano Banana Prompt Error:", e);
+    }
+  }
+
+  const aiVisualUrl = `https://visuals.weerzone.nl/gen?prompt=${encodeURIComponent(visualPrompt)}&city=${encodeURIComponent(city)}&v=2.1&seed=${new Date().getDate()}`;
 
   return `
 <!DOCTYPE html>
@@ -253,8 +272,11 @@ function buildEmailHtml(city: string, data: Record<string, unknown>, affiliateBl
   <div style="max-width:480px;margin:0 auto;">
 
     <!-- NANO BANANA 2: DYNAMIC AI VISUAL -->
-    <div style="background:#000;line-height:0;">
+    <div style="background:#000;line-height:0;position:relative;">
       <img src="${aiVisualUrl}" alt="Live Weer Visual in ${city}" style="width:100%;height:auto;display:block;" />
+      <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.5);padding:4px 8px;border-radius:4px;">
+        <span style="color:#fff;font-size:8px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">AI Generated · Nano Banana 2.1</span>
+      </div>
     </div>
 
     <!-- HERO -->
