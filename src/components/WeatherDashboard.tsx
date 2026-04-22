@@ -219,8 +219,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         
         {/* HERO SECTION */}
         <div className="card overflow-hidden relative group shadow-2xl border-white/40">
-        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-gradient-to-br from-accent-blue/30 to-accent-orange/10 backdrop-blur-3xl">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-white/90 z-10" />
+        <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-white/5 backdrop-blur-2xl">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 z-10" />
         </div>
 
         <div className="p-7 sm:p-9 relative z-[2] pt-32 sm:pt-40">
@@ -282,19 +282,13 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
         <div className="flex justify-between items-center mb-6 relative z-10 px-1">
           <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Korte Termijn</h3>
-          <span className="text-[9px] font-bold text-accent-orange uppercase tracking-widest">Nano Banana 2.1 Driven</span>
         </div>
         
         <div className="grid grid-cols-2 gap-4 relative z-10">
           {/* Vandaag */}
           <div className="flex flex-col gap-3 group/item">
-            <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 transition-transform hover:scale-[1.02]">
-              <img 
-                src={`/api/visuals/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[0].weatherCode) + " cinematic view")}&v=2.1&seed=today`} 
-                alt="Today" 
-                className="w-full h-full object-cover"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
+            <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-white/5 backdrop-blur-md transition-transform hover:scale-[1.02] flex items-center justify-center">
+              <span className="text-6xl drop-shadow-2xl">{getWeatherEmoji(weather.daily[0].weatherCode, true)}</span>
             </div>
             <div className="px-1">
               <div className="flex justify-between items-baseline">
@@ -307,13 +301,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
           {/* Morgen */}
           <div className="flex flex-col gap-3 group/item">
-            <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-slate-100 transition-transform hover:scale-[1.02]">
-              <img 
-                src={`/api/visuals/gen?prompt=${encodeURIComponent(getWeatherDescription(weather.daily[1].weatherCode) + " cinematic view")}&v=2.1&seed=tomorrow`} 
-                alt="Tomorrow" 
-                className="w-full h-full object-center"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
+            <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/60 shadow-lg bg-white/5 backdrop-blur-md transition-transform hover:scale-[1.02] flex items-center justify-center">
+              <span className="text-6xl drop-shadow-2xl">{getWeatherEmoji(weather.daily[1].weatherCode, true)}</span>
             </div>
             <div className="px-1">
               <div className="flex justify-between items-baseline">
@@ -356,7 +345,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               </div>
               
               {/* Emoji — Centered */}
-              <div className="text-4xl mb-1 drop-shadow-lg">
+              <div className="text-5xl mb-1 drop-shadow-lg">
                 {item.emoji}
               </div>
               
