@@ -19,11 +19,11 @@ export async function GET(req: NextRequest) {
     // NANO BANANA 2.1 - High-Fidelity Image Generation Bridge
     let finalPrompt = prompt;
     if (style === "emoji") {
-      // Special prompt engineering for HQ AI Emojis
-      finalPrompt = `${prompt}, high-quality 3D glossy emoji, Apple Memoji style, professional digital icon, isolated on clean background, studio lighting, 8k render, vibrant colors, minimalist 3D asset`;
+      // NANO BANANA 2.2 - Premium Glassmorphic Icons
+      finalPrompt = `Premium 3D glassmorphic icon of ${prompt}, Apple-style minimalist design, soft translucent textures, elegant studio lighting, high-end digital art, clean isolated white background, 8k octane render, professional UI asset, sleek and modern`;
     } else {
       // Standard cinematic weather photography
-      finalPrompt = `${prompt}, cinematic weather photography, 8k, highly detailed, atmospheric, national geographic style`;
+      finalPrompt = `${prompt}, cinematic weather photography, 8k, highly detailed, atmospheric, national geographic style, professional color grading`;
     }
 
     const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1200&height=630&nologo=true&enhance=true&seed=${Math.floor(Math.random() * 1000000)}`;
