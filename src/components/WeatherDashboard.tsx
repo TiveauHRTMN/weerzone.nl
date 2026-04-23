@@ -488,7 +488,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       </PremiumGate>
 
       <Footer />
-      <AmazonStickyBar />
+      <AmazonStickyBar weather={weather} />
       </div>
     </div>
   );
