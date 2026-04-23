@@ -6,8 +6,8 @@
   --bg-card: rgba(255, 255, 255, 0.88);
   --bg-card-hover: rgba(255, 255, 255, 0.96);
   --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-secondary: #1e293b;
+  --text-muted: #475569;
   --text-on-sky: #ffffff;
   --accent-orange: #ffd60a;
   --accent-amber: #f59e0b;
@@ -199,6 +199,24 @@ textarea::placeholder {
     padding: 0.85rem 0.5rem;
   }
   .nav-item .label { font-size: 0.82rem; }
+}
+
+/* Scrollable NavBar for Mobile */
+@media (max-width: 639px) {
+  ul.nav-list {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+    padding-right: 20px;
+  }
+  ul.nav-list::-webkit-scrollbar { display: none; }
+  ul.nav-list > li {
+    scroll-snap-align: start;
+    flex: 0 0 auto !important;
+    min-width: 80px;
+  }
 }
 
 /* Gradient divider */

@@ -22,6 +22,7 @@ const DISMISS_KEY = "wz_sticky_amazon_dismissed";
 
 export default function AmazonStickyBar({ weather }: Props) {
   const [dismissed, setDismissed] = useState(true); // default true → pas tonen na mount
+  const [founderActive, setFounderActive] = useState(false);
   const [sessionId] = useState(() => Math.random().toString(36).slice(2));
   const { tier, loading } = useSession();
 
@@ -32,6 +33,10 @@ export default function AmazonStickyBar({ weather }: Props) {
     } catch {
       setDismissed(false);
     }
+
+    const onFounderChange = (e: any) => setFounderActive(!!e.detail);
+    window.addEventListener("wz:founder-visible" as any, onFounderChange);
+    return () => window.removeEventListener("wz:founder-visible" as any, onFounderChange);
   }, []);
 
   const { products } = useMemo(() => matchProducts(weather, 1), [weather]);
@@ -39,7 +44,7 @@ export default function AmazonStickyBar({ weather }: Props) {
 
   // Abonnees: geen ads — zoals beloofd in de FAQ.
   if (loading || tier) return null;
-  if (dismissed || !pick) return null;
+  if (dismissed || founderActive || !pick) return null;
 
   const emoji = parseEmojiImage(pick.image);
   const tag = getConditionTag(weather);

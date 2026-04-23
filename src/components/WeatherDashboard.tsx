@@ -81,6 +81,24 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [loading, setLoading] = useState(!initialWeather);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
+  const [unit, setUnit] = useState<"C" | "F">("C");
+
+  // Load persistent unit
+  useEffect(() => {
+    const saved = localStorage.getItem("wz_unit");
+    if (saved === "F") setUnit("F");
+  }, []);
+
+  const toggleUnit = () => {
+    const next = unit === "C" ? "F" : "C";
+    setUnit(next);
+    localStorage.setItem("wz_unit", next);
+  };
+
+  const convert = useCallback((c: number) => {
+    if (unit === "C") return c;
+    return Math.round((c * 9/5) + 32);
+  }, [unit]);
 
   const handleShare = async () => {
     if (typeof navigator.share !== 'undefined') {
@@ -209,6 +227,28 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       {/* NL Pulse — Perfectly aligned with boxes */}
       <NLPulse />
 
+      {/* EMERGENCY ALERTS SECTION (Always visible if serious) */}
+      {(weather.current.windGusts > 75 || weather.uvIndex > 7 || weather.current.precipitation > 5) && (
+        <a 
+          href="https://www.knmi.nl/nederland-nu/weer/waarschuwingen" 
+          target="_blank"
+          className="card p-4 border-accent-red/30 bg-accent-red/5 flex items-center gap-4 group animate-pulse"
+        >
+          <div className="w-10 h-10 rounded-full bg-accent-red flex items-center justify-center text-white shrink-0">
+             <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-xs font-black text-accent-red uppercase tracking-widest">Actuele Waarschuwing</h4>
+            <p className="text-[11px] font-bold text-text-primary mt-0.5">
+              {weather.current.windGusts > 75 ? "Zware windstoten gedetecteerd. " : ""}
+              {weather.uvIndex > 7 ? "Extreme zonkracht (UV 8+). " : ""}
+              {weather.current.precipitation > 5 ? "Hevige neerslag verwacht. " : ""}
+              Check KNMI voor details →
+            </p>
+          </div>
+        </a>
+      )}
+
       {/* ===== MAIN DASHBOARD CONTENT — Unified Gap-6 Spacing ===== */}
       <div className="flex flex-col gap-6 animate-fade-in" style={{ animationDelay: "0.15s" }}>
         
@@ -225,34 +265,30 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         </div>
 
         <div className="p-7 sm:p-9 relative z-[2] pt-32 sm:pt-40">
-          {/* Top Labeling */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex justify-between items-center mb-8">
             <div className="flex flex-col">
-              <h1 className="text-xl sm:text-2xl font-black text-text-primary tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-text-primary tracking-tight">
                 {city.name}
               </h1>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-25"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
-              </span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black">
-                Actueel
-              </span>
-            </div>
+            <button 
+              onClick={toggleUnit}
+              className="px-3 py-1 bg-black/5 hover:bg-black/10 rounded-full text-[11px] font-black uppercase tracking-widest border border-black/5 transition-all active:scale-95"
+            >
+              {unit === "C" ? "Switch to °F" : "Switch to °C"}
+            </button>
           </div>
           
           <div className="flex justify-between items-center mt-4">
             <div className="flex flex-col">
               <div className="flex items-start">
-                <span className="text-8xl sm:text-9xl font-black tracking-tighter leading-none text-text-primary drop-shadow-xl">{weather.current.temperature}</span>
+                <span className="text-8xl sm:text-9xl font-black tracking-tighter leading-none text-text-primary drop-shadow-xl">{convert(weather.current.temperature)}</span>
                 <span className="text-4xl sm:text-5xl font-black mt-3 ml-1 text-text-primary leading-none">°</span>
               </div>
               <div className="mt-2 flex items-center gap-2">
-                 <span className="text-lg font-bold text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
+                 <span className="text-xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
                  <span className="w-1 h-1 rounded-full bg-text-muted/30" />
-                 <span className="text-sm font-medium text-text-secondary">Voelt als {weather.current.feelsLike}°</span>
+                 <span className="text-base font-bold text-text-secondary">Voelt als {convert(weather.current.feelsLike)}°</span>
               </div>
             </div>
             
@@ -277,7 +313,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       <div className="card p-4 sm:p-6 border-white/40 shadow-xl overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
         <div className="flex justify-between items-center mb-6 relative z-10 px-1">
-          <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Korte Termijn</h3>
+          <h3 className="text-[11px] font-black text-text-primary uppercase tracking-[0.2em]">Korte Termijn</h3>
         </div>
         
         <div className="grid grid-cols-2 gap-4 relative z-10">
@@ -289,9 +325,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <div className="px-1">
               <div className="flex justify-between items-baseline">
                 <span className="text-[11px] font-black text-text-primary uppercase">Vandaag</span>
-                <span className="text-lg font-black text-text-primary">{weather.daily[0].tempMax}°</span>
+                <span className="text-lg font-black text-text-primary">{convert(weather.daily[0].tempMax)}°</span>
               </div>
-              <p className="text-[10px] font-bold text-text-muted uppercase mt-0.5">{getWeatherDescription(weather.daily[0].weatherCode)}</p>
+              <p className="text-[10px] font-black text-text-secondary uppercase mt-0.5">{getWeatherDescription(weather.daily[0].weatherCode)}</p>
             </div>
           </div>
 
@@ -303,9 +339,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <div className="px-1">
               <div className="flex justify-between items-baseline">
                 <span className="text-[11px] font-black text-text-primary uppercase">Morgen</span>
-                <span className="text-lg font-black text-text-primary">{weather.daily[1].tempMax}°</span>
+                <span className="text-lg font-black text-text-primary">{convert(weather.daily[1].tempMax)}°</span>
               </div>
-              <p className="text-[10px] font-bold text-text-muted uppercase mt-0.5">{getWeatherDescription(weather.daily[1].weatherCode)}</p>
+              <p className="text-[10px] font-black text-text-secondary uppercase mt-0.5">{getWeatherDescription(weather.daily[1].weatherCode)}</p>
             </div>
           </div>
         </div>
@@ -376,18 +412,17 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <p className="text-[9px] font-bold text-text-muted uppercase mt-1">{weather.current.precipitation > 0 ? 'Actieve Neerslag' : 'Geen Regen'}</p>
           </div>
 
-          {/* Wind Card */}
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-text-muted uppercase mb-2">🌬️ Wind</span>
+            <span className="text-[10px] font-black text-text-primary uppercase mb-2">🌬️ Wind</span>
             <div className="text-2xl font-black text-text-primary">{weather.current.windSpeed} <span className="text-xs">KM/H</span></div>
-            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">BFT {getWindBeaufort(weather.current.windSpeed).scale} · {weather.current.windDirection}</p>
+            <p className="text-[9px] font-black text-text-secondary uppercase mt-1">BFT {getWindBeaufort(weather.current.windSpeed).scale} · {weather.current.windDirection}</p>
           </div>
 
           {/* Gevoel Card */}
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-text-muted uppercase mb-2">🌡️ Gevoel</span>
-            <div className="text-2xl font-black text-text-primary">{weather.current.feelsLike}°</div>
-            <p className="text-[9px] font-bold text-text-muted uppercase mt-1">Lucht {weather.current.temperature}°</p>
+            <span className="text-[10px] font-black text-text-primary uppercase mb-2">🌡️ Gevoel</span>
+            <div className="text-2xl font-black text-text-primary">{convert(weather.current.feelsLike)}°</div>
+            <p className="text-[9px] font-black text-text-secondary uppercase mt-1">Lucht {convert(weather.current.temperature)}°</p>
           </div>
 
           {/* Vocht Card */}
@@ -472,7 +507,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                     {getWeatherEmoji(hour.weatherCode, h > 6 && h < 21)}
                   </div>
                   
-                  {hourlyMetric === "temp" && <span className="text-sm font-black text-text-primary leading-none">{hour.temperature}°</span>}
+                  {hourlyMetric === "temp" && <span className="text-sm font-black text-text-primary leading-none">{convert(hour.temperature)}°</span>}
                   {hourlyMetric === "rain" && <span className="text-[10px] font-black text-accent-cyan leading-none">{hour.precipitation.toFixed(1)}</span>}
                   {hourlyMetric === "wind" && <span className="text-[10px] font-black text-text-primary leading-none">{hour.windSpeed}</span>}
 

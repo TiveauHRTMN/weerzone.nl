@@ -51,7 +51,7 @@ export default function NavBar({ activeCity, isLocating }: Props) {
 
   return (
     <nav aria-label="Hoofdnavigatie" className="card p-1 sm:p-2">
-      <ul className="flex items-stretch justify-between">
+      <ul className="nav-list flex items-stretch justify-between">
         <li className="flex-1">
           <button
             type="button"

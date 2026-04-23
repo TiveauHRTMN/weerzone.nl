@@ -25,8 +25,8 @@ export default function NLPulse() {
 
   return (
     <div className="relative group overflow-hidden bg-white/5 backdrop-blur-md border border-white/20 h-11 flex items-center shadow-lg rounded-[24px]" style={{ isolation: "isolate" }}>
-      {/* Live Indicator Fixed on Left - More prominent glass look */}
-      <div className="absolute left-0 top-0 bottom-0 z-20 px-3 flex items-center gap-2 bg-gradient-to-r from-white/20 via-white/10 to-transparent pr-8 pointer-events-none">
+      {/* Live Indicator Fixed on Left - Solid glass background to prevent text overlap */}
+      <div className="absolute left-0 top-0 bottom-0 z-20 px-3 flex items-center gap-2 bg-[#4a9ee8] shadow-[10px_0_15px_-5px_rgba(0,0,0,0.1)] pr-6 pointer-events-none rounded-l-[24px]">
         <div className="relative flex">
           <Radio className="w-3 h-3 text-accent-orange animate-pulse" />
           <div className="absolute inset-0 bg-accent-orange/50 rounded-full blur-[3px] animate-pulse" />

@@ -33,12 +33,16 @@ export default function FounderBanner() {
     // Al weggeklikt in deze sessie?
     if (sessionStorage.getItem(STORAGE_KEY) === "1") return;
 
-    const timer = setTimeout(() => setVisible(true), IDLE_MS);
+    const timer = setTimeout(() => {
+      setVisible(true);
+      window.dispatchEvent(new CustomEvent("wz:founder-visible", { detail: true }));
+    }, IDLE_MS);
     return () => clearTimeout(timer);
   }, [tier, loading]);
 
   const dismiss = () => {
     setVisible(false);
+    window.dispatchEvent(new CustomEvent("wz:founder-visible", { detail: false }));
     try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch {}
   };
 
