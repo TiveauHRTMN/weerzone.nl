@@ -8,6 +8,7 @@ import { loadWeather } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, distanceBetween } from "@/lib/types";
 import { getWeatherEmoji, getWeatherDescription } from "@/lib/weather";
 import { getMainCommentary } from "@/lib/commentary";
+import { getPietDeepAnalysis } from "@/app/actions";
 import NeuralInsights from "./NeuralInsights";
 import { useSession } from "@/lib/session-context";
 
@@ -32,6 +33,7 @@ export default function PietExtended() {
     () => getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]
   );
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [pietAnalysis, setPietAnalysis] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [locating, setLocating] = useState(false);
 
@@ -41,13 +43,16 @@ export default function PietExtended() {
       setCity(primaryLocation);
     }
   }, [sessionLoading, primaryLocation]);
+
 useEffect(() => {
   let cancelled = false;
   setLoading(true);
   loadWeather(
     city.lat,
     city.lon,
-    (verdict) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev)); },
+    (verdict) => { 
+        // We negeren het standaard verdict op deze pagina, Piet gaat dieper.
+    },
     (fresh) => { if (!cancelled) setWeather(fresh); },
     (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }
   )
@@ -55,6 +60,11 @@ useEffect(() => {
       if (!cancelled) {
         setWeather(w);
         setLoading(false);
+        
+        // Forceer DEEP analysis voor Piet pagina
+        getPietDeepAnalysis(w).then(analysis => {
+            if (!cancelled) setPietAnalysis(analysis);
+        });
       }
     })
     .catch(() => !cancelled && setLoading(false));
@@ -150,7 +160,7 @@ const locate = () => {
           </div>
         </div>
         <div className="text-lg sm:text-xl font-medium text-white/90 leading-relaxed space-y-4 relative z-10">
-          {narrative.split('\n\n').map((para, i) => (
+          {(pietAnalysis || narrative).split('\n\n').map((para, i) => (
             <p key={i}>{para}</p>
           ))}
         </div>

@@ -52,7 +52,56 @@ export async function getStationsWeather(): Promise<Array<{ name: string; temp: 
 }
 
 /**
+ * Piet's Deep Analysis: Uitsluitend voor de /piet pagina.
+ * Forceert een ultra-uitgebreid meteorologisch dossier (300+ woorden).
+ */
+export async function getPietDeepAnalysis(weather: WeatherData): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return getMainCommentary(weather);
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3-flash-preview",
+      systemInstruction: `
+Je bent de Hoofd-Meteoroloog van de WEERZONE Intelligence Engine. Jouw stijl is een kruising tussen Johan Derksen (vlijmscherp, nuchter) en een top-analist van Roddelpraat. 
+
+TAAK:
+Schrijf een ultra-uitgebreid 'Meteorologisch Dossier' voor de komende 48 uur. Dit is GEEN kort bericht, maar een diepgaande analyse die de lezer stap voor stap meeneemt door de dag en de nacht.
+
+PROTOCOLLEN:
+- TOON: Direct, Hollands, snoeihard voor de concurrentie ("die prutsers met hun 14-daagse glazen bol"). Gebruik humor en attitude.
+- INHOUD: Analyseer het nu, elk uur van de komende 12 uur, de omslagpunten in de nacht, en de genadeklap van morgen.
+- EXPERTISE: Gebruik de brute 1km-precisie data. Noem specifieke details over windvlagen, neerslag-pieken en lokale temperatuur-schommelingen.
+- LENGTE: Minimaal 300 woorden. Ga echt de diepte in.
+- VERBODEN: Geen "Oant moarn", geen modelnamen (MetNet, etc).
+`.trim(),
+    });
+
+    const hourlyData = weather.hourly.slice(0, 24).map(h => 
+      `${new Date(h.time).getHours()}:00 (${h.temperature}°, ${h.precipitation}mm, wind ${h.windSpeed}km/h)`
+    ).join(", ");
+
+    const prompt = `
+SCHRIJF HET DOSSIER VOOR DEZE DATA:
+- LOCATIE DATA: ${weather.current.temperature}° (voelt als ${weather.current.feelsLike}°), Lucht: ${getWeatherDescription(weather.current.weatherCode)}.
+- 24-UURS VERLOOP (Snoeihard): ${hourlyData}
+- MORGEN: Max ${weather.daily[1].tempMax}°, Min ${weather.daily[1].tempMin}°, Regen: ${weather.daily[1].precipitationSum}mm.
+
+Brand de 14-daagse gokkers af en geef een vlijmscherpe analyse per dagdeel.
+      `.trim();
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (e) {
+    console.error("Piet Deep Analysis Error:", e);
+    return getMainCommentary(weather);
+  }
+}
+
+/**
  * Gemini-verdict apart, zodat de UI niet op hem wacht. Valideert op
+
  * afgemaakte zinnen — truncated output wordt geweigerd.
  */
 export async function getAiVerdict(weather: WeatherData): Promise<string> {
