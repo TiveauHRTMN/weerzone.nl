@@ -36,6 +36,12 @@ import NLPulse from "./NLPulse";
 import LeadRescue from "./LeadRescue";
 import Footer from "./Footer";
 import dynamic from "next/dynamic";
+import { getImpactAnalysisAction } from "@/app/actions";
+import type { ImpactData } from "@/lib/impact-engine";
+
+const ImpactDashboard = dynamic(() => import("./ImpactDashboard"), {
+  loading: () => <div className="w-full h-40 bg-white/5 animate-pulse rounded-2xl" />,
+});
 
 // Lazy-load zware visuele componenten — scheelt initial JS
 const WeatherBackground = dynamic(() => import("./WeatherBackground"));
@@ -81,6 +87,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [loading, setLoading] = useState(!initialWeather);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
+  const [impactData, setImpactData] = useState<ImpactData | null>(null);
 
   const handleShare = async () => {
     if (typeof navigator.share !== 'undefined') {
@@ -118,6 +125,10 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
     }
     setLoading(true);
     load();
+    
+    // Impact Engine data laden
+    getImpactAnalysisAction(city.lat, city.lon).then(setImpactData);
+
     const interval = setInterval(load, 10 * 60000); // 10 min refresh
     return () => {
       cancelled = true;
@@ -212,6 +223,17 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
       {/* NL Pulse — Perfectly aligned with boxes */}
       <NLPulse />
+
+      {/* Impact Engine — De Antigravity Core */}
+      {impactData && (
+        <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+           <div className="flex justify-between items-center mb-4 px-1">
+              <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Fysieke Impact & Lucht</h3>
+              <div className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Powered by Antigravity AI</div>
+           </div>
+           <ImpactDashboard data={impactData} />
+        </div>
+      )}
 
       {/* ===== MAIN DASHBOARD CONTENT — Unified Gap-6 Spacing ===== */}
       <div className="flex flex-col gap-6 animate-fade-in" style={{ animationDelay: "0.15s" }}>

@@ -350,6 +350,14 @@ export async function registerUser(args: {
 }
 
 /**
+ * Impact Engine: Haalt Air Quality en Solar data op voor het dashboard.
+ */
+export async function getImpactAnalysisAction(lat: number, lon: number) {
+  const { getImpactAnalysis } = await import("@/lib/impact-engine");
+  return await getImpactAnalysis(lat, lon);
+}
+
+/**
  * Genereert een unieke weerkundige beschrijving voor een specifieke locatie.
  * Gebruikt voor Programmatic SEO om 'thin content' te voorkomen.
  */
