@@ -115,58 +115,37 @@ export async function getAiVerdict(weather: WeatherData): Promise<string> {
       const model = genAI.getGenerativeModel({
         model: "gemini-3-flash-preview",
         systemInstruction: `
-Je bent de meteoroloog van de WEERZONE Intelligence Engine. Jouw stijl is Johan Derksen / Vandaag Inside / Roddelpraat. 
-Je bent vlijmscherp, nuchter en hebt een snoeiharde mening over het weer en die prutsers van de 14-daagse verwachtingen.
+Je bent de meteoroloog van de WEERZONE Intelligence Engine. Stijl: Roddelpraat / VI / Powned — direct, vlijmscherp, eerlijk, met een snoeiharde mening. 
 
-PROTOCOLLEN:
-- TOON: Direct, Hollands, brutaal, met humor. Geen blad voor de mond.
-- GEEN SCHELDWOORDEN: Je bent scherp, maar blijft beschaafd. 
-- EXPERTISE: Je gebruikt 1km-precisie. Brand de concurrentie af die alleen maar gokt.
-- VERBODEN: Noem GEEN modelnamen (MetNet, Google). Noem GEEN "Oant moarn". 
-- LENGTE: Wees ultra-uitgebreid. Minimaal 150 woorden. Neem de tijd om de dag echt door te nemen voor de regio van de gebruiker.
+KERNREGELS:
+- TOON: Scherp, Hollands, nuchter. Geen gelul.
+- LENGTE: STRIKT MAXIMAAL 60 WOORDEN. Kort en krachtig.
+- INHOUD: Een snelle klap over nu, straks en morgen.
+- VERBODEN: Geen modelnamen, geen "Oant moarn".
 `.trim(),
       });
 
-      const next12h = weather.hourly.slice(0, 12).map(h => 
-        `${new Date(h.time).getHours()}:00 (${h.temperature}°, ${h.precipitation}mm regen, wind ${h.windSpeed}km/u)`
-      ).join(", ");
-
       const tomorrow = weather.daily[1];
       const prompt = `
-Schrijf een ultra-uitgebreide weersanalyse gebaseerd op deze data:
+Geef een vlijmscherpe, beknopte samenvatting (MAX 60 WOORDEN) voor:
+- NU: ${getWeatherDescription(weather.current.weatherCode)}, ${weather.current.temperature}°
+- VERLOOP: ${weather.hourly.slice(0, 6).map(h => h.temperature + "°").join(", ")}
+- MORGEN: Max ${tomorrow.tempMax}°, ${getWeatherDescription(tomorrow.weatherCode)}.
 
-FEITEN NU:
-Lucht: ${getWeatherDescription(weather.current.weatherCode)}
-Temp: ${weather.current.temperature}° (voelt als ${weather.current.feelsLike}°)
-Wind: ${weather.current.windSpeed} km/h
-Regen nu: ${weather.current.precipitation} mm
-
-VERLOOP KOMENDE 12 UUR (uur voor uur):
-${next12h}
-
-MORGEN (${tomorrow.date}):
-Max: ${tomorrow.tempMax}°, Min: ${tomorrow.tempMin}°
-Regen: ${tomorrow.precipitationSum} mm
-
-GEEF NU JE ANALYSE (Roddelpraat-toon, vlijmscherp, minimaal 150 woorden):
+Eindig met een eigenzinnige groet. Brand de gokkers kort af.
         `.trim();
 
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 2000, temperature: 0.85, topP: 0.95 },
-      });
-
+      const result = await model.generateContent(prompt);
       const text = result.response.text().trim().replace(/^"|"$/g, '');
       const wordCount = text.split(/\s+/).filter(Boolean).length;
       
-      if (text && wordCount > 100) {
+      if (text && wordCount < 80) {
         return text;
       }
       attempts++;
     } catch (e) {
       attempts++;
-      console.error(`AI Verdict attempt ${attempts} failed:`, e);
-      await new Promise(r => setTimeout(r, 500));
+      console.error(`AI Summary attempt ${attempts} failed:`, e);
     }
   }
   return getMainCommentary(weather);
