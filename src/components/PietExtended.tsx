@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { MapPin, RefreshCw, Activity } from "lucide-react";
 import { loadWeather } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, distanceBetween } from "@/lib/types";
