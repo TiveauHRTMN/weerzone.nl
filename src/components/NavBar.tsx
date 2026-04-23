@@ -53,6 +53,12 @@ export default function NavBar({ activeCity, isLocating }: Props) {
     <nav aria-label="Hoofdnavigatie" className="card p-1 sm:p-2">
       <ul className="nav-list flex items-stretch justify-between">
         <li className="flex-1">
+          <Link href="/" className="nav-item w-full">
+            <span className="label">Home</span>
+          </Link>
+        </li>
+        <li className="nav-divider" aria-hidden="true" />
+        <li className="flex-1">
           <button
             type="button"
             onClick={handleLocateClick}
@@ -71,21 +77,15 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         </li>
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
-          <Link href="/prijzen" className="nav-item w-full">
-            <span className="label">Prijzen</span>
-          </Link>
-        </li>
-        <li className="nav-divider" aria-hidden="true" />
-        <li className="flex-1">
           <Link
             href="/piet"
             onClick={handleLockedClick}
             className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
-            aria-label={hasSub ? "48 uur op de meter" : "48 uur — alleen voor abonnees"}
+            aria-label={hasSub ? "Piet — 48 uur op de meter" : "Piet — alleen voor abonnees"}
           >
             <span className="label flex items-center gap-1 justify-center">
               {!hasSub && <Lock className="w-3 h-3 shrink-0" aria-hidden />}
-              48 uur
+              Piet
             </span>
           </Link>
         </li>
@@ -95,18 +95,28 @@ export default function NavBar({ activeCity, isLocating }: Props) {
             href="/reed"
             onClick={handleLockedClick}
             className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
-            aria-label={hasSub ? "Alerts" : "Alerts — alleen voor abonnees"}
+            aria-label={hasSub ? "Reed — Extreme Wachter" : "Reed — alleen voor abonnees"}
           >
             <span className="label flex items-center gap-1 justify-center">
               {!hasSub && <Lock className="w-3 h-3 shrink-0" aria-hidden />}
-              Alerts
+              Reed
             </span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
         <li className="flex-1">
-          <Link href="/zakelijk" className="nav-item w-full">
-            <span className="label">Zakelijk</span>
+          <Link 
+            href="/zakelijk" 
+            className="nav-item w-full"
+            aria-label="Steve — Zakelijk Strateeg"
+          >
+            <span className="label">Steve</span>
+          </Link>
+        </li>
+        <li className="nav-divider" aria-hidden="true" />
+        <li className="flex-1">
+          <Link href="/prijzen" className="nav-item w-full">
+            <span className="label">Prijzen</span>
           </Link>
         </li>
         <li className="nav-divider" aria-hidden="true" />
@@ -125,7 +135,7 @@ export default function NavBar({ activeCity, isLocating }: Props) {
             </button>
           ) : (
             <Link href="/app/login" className="nav-item w-full">
-              <span className="label">Inloggen</span>
+              <span className="label">Login</span>
             </Link>
           )}
         </li>
