@@ -3,19 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Plus } from "lucide-react";
-import { PERSONAS, PERSONA_ORDER, formatPrice, type PersonaTier } from "@/lib/personas";
+import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import { WzNavbar, WzFooter } from "@/components/wz";
 import { displaySubCount } from "@/lib/social-proof";
 
+// Steve (B2B) is in ontwikkeling — tijdelijk verborgen, redirect via zakelijk@weerzone.nl
+const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed"];
 const HIGHLIGHT: PersonaTier = "reed";
 const BADGES: Partial<Record<PersonaTier, string>> = { reed: "Meest gekozen" };
 
 const STEPS: Array<[string, string, string]> = [
-  ["1", "Kies een abonnement", "Piet, Reed of Steve. Geen creditcard nodig. Opzeggen kan altijd."],
+  ["1", "Kies een abonnement", "Piet of Reed. Geen creditcard nodig. Opzeggen kan altijd."],
   [
     "2",
     "Vul je profiel in",
-    "Postcode en een paar vragen (hond, fiets, kelder, vestiging). Alleen wat je kwijt wilt.",
+    "Thuislocatie via GPS en een paar vragen (hond, fiets, kelder). Alleen wat je kwijt wilt.",
   ],
   ["3", "Morgen om 7:00", "Je eerste mail in je inbox. Het dashboard staat altijd klaar."],
 ];
@@ -23,11 +25,15 @@ const STEPS: Array<[string, string, string]> = [
 const FAQS: Array<[string, string]> = [
   [
     "Waarom is het nu gratis?",
-    "We zijn nog in opbouw. Je kunt je nu aanmelden zonder te betalen en zonder creditcard. Vroege aanmelders houden hun introductieprijs, ook als we binnenkort live gaan.",
+    "We zijn nog in opbouw. Je kunt je nu aanmelden zonder te betalen en zonder creditcard. Vroege aanmelders houden een gunstige prijs zodra we binnenkort live gaan.",
   ],
   [
-    "Wat is het verschil tussen Piet, Reed en Steve?",
-    "Piet schrijft een dagelijkse weermail voor thuis. Reed stuurt daarnaast alleen bericht als het weer over jouw drempel gaat. Steve doet hetzelfde voor bedrijven, inclusief advies per vestiging over openen, sluiten, inkopen of annuleren.",
+    "Wat is het verschil tussen Piet en Reed?",
+    "Piet schrijft een dagelijkse weermail voor thuis. Reed stuurt daarnaast alleen bericht als het weer over jouw drempel gaat (wind, regen, vorst, onweer).",
+  ],
+  [
+    "Is er ook een zakelijk abonnement?",
+    "Steve (voor bedrijven) is in ontwikkeling en komt apart beschikbaar. Voor zakelijk gebruik: neem contact op via zakelijk@weerzone.nl.",
   ],
   [
     "Kan ik wisselen van abonnement?",
@@ -35,7 +41,7 @@ const FAQS: Array<[string, string]> = [
   ],
   [
     "Waarom maar 48 uur vooruit?",
-    "Omdat een voorspelling verder dan 48 uur onbetrouwbaar wordt. Wij houden ons aan wat met het KNMI HARMONIE-model accuraat te zeggen is — 48 uur op een raster van 2,5 km.",
+    "Omdat een voorspelling verder dan 48 uur onbetrouwbaar wordt. Binnen 48 uur kunnen we je per GPS-locatie een scherpe voorspelling geven — daarna zegt niemand het zeker, ook wij niet.",
   ],
   [
     "Hoe gaat de betaling straks?",
@@ -43,7 +49,7 @@ const FAQS: Array<[string, string]> = [
   ],
   [
     "Wat is het verschil met Buienradar of Weerplaza?",
-    "Weerzone is reclamevrij en is afgestemd op jouw situatie: je postcode en de voorkeuren die je bij aanmelden hebt doorgegeven.",
+    "Weerzone is reclamevrij en is afgestemd op jouw GPS-locatie en de voorkeuren die je bij aanmelden hebt doorgegeven.",
   ],
 ];
 
@@ -62,11 +68,11 @@ export default function PrijzenClient() {
             Een abonnement op Weerzone
           </h1>
           <p className="wz-body max-w-[640px] mx-auto">
-            Piet voor thuis, Reed voor waarschuwingen, Steve voor je zaak. Elke ochtend een korte
-            weermail op jouw postcode. Geen reclame. Opzeggen kan maandelijks.
+            Piet voor thuis, Reed voor waarschuwingen. Elke ochtend een korte weermail op jouw
+            GPS-locatie. Geen reclame. Opzeggen kan maandelijks.
           </p>
           <p className="wz-small max-w-[560px] mx-auto mt-4">
-            Tijdelijk gratis. Vroege aanmelders houden hun introductieprijs, ook zodra we binnenkort
+            Tijdelijk gratis. Geen creditcard, geen reclame — opzeggen kan maandelijks zodra we
             live gaan.
           </p>
           <div
@@ -87,7 +93,7 @@ export default function PrijzenClient() {
           className="grid gap-5 items-stretch"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))" }}
         >
-          {PERSONA_ORDER.map((tier) => {
+          {VISIBLE_TIERS.map((tier) => {
             const p = PERSONAS[tier];
             const highlight = tier === HIGHLIGHT;
             const badge = BADGES[tier];
@@ -128,14 +134,20 @@ export default function PrijzenClient() {
                   className="rounded-xl mb-4 px-4 py-3.5"
                   style={{ background: "var(--ink-050)" }}
                 >
-                  <div className="text-[13px] mb-0.5" style={{ color: "var(--wz-text-mute)" }}>
-                    {formatPrice(p.priceCents)}/mnd, binnenkort
+                  <span
+                    className="wz-badge-sun inline-block mb-2"
+                    style={{ fontSize: 10 }}
+                  >
+                    Nu aanmelden
+                  </span>
+                  <div
+                    className="font-extrabold leading-tight tracking-tight mb-1"
+                    style={{ fontSize: 20 }}
+                  >
+                    Tijdelijk gratis
                   </div>
-                  <div className="text-[15px] font-bold">
-                    Introductieprijs: {formatPrice(p.founderPriceCents)}/mnd{" "}
-                    <span style={{ color: "var(--wz-text-mute)", fontWeight: 500 }}>
-                      · vastgezet
-                    </span>
+                  <div className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>
+                    Straks {formatPrice(p.priceCents)}/mnd — geen creditcard nodig
                   </div>
                 </div>
 
