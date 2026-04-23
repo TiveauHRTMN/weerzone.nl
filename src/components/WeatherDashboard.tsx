@@ -108,7 +108,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         city.lat,
         city.lon,
         (verdict) => {
-          if (!cancelled) setWeather((prev) => (prev ? { ...prev, aiVerdict: verdict } : prev));
+          if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
         },
         (fresh) => {
           if (!cancelled) setWeather(fresh);
@@ -291,9 +291,10 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           {/* Intelligence Briefing — Integrated directly in Hero card */}
           <div className="mt-8 pt-6 border-t border-black/5">
             <p className="font-bold text-lg sm:text-xl text-text-primary leading-[1.4] mb-6">
-              {weather.aiVerdict || getMainCommentary(weather)}
+              {weather.summaryVerdict || getMainCommentary(weather)}
             </p>
 
+            {/* Intelligence Engine Teaser */}
 
             <PietInlineTip weather={weather} />
           </div>

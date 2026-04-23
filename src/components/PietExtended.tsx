@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { MapPin, RefreshCw, Activity, BrainCircuit } from "lucide-react";
-import { loadWeather } from "@/lib/weatherCache";
+import { loadWeather, patchCacheDeep } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, distanceBetween } from "@/lib/types";
 import { getWeatherEmoji, getWeatherDescription } from "@/lib/weather";
 import { getMainCommentary } from "@/lib/commentary";
@@ -50,9 +50,7 @@ useEffect(() => {
   loadWeather(
     city.lat,
     city.lon,
-    (verdict) => { 
-        // We negeren het standaard verdict op deze pagina, Piet gaat dieper.
-    },
+    () => {}, // No summary on this page
     (fresh) => { if (!cancelled) setWeather(fresh); },
     (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }
   )
@@ -61,10 +59,27 @@ useEffect(() => {
         setWeather(w);
         setLoading(false);
         
-        // Forceer DEEP analysis voor Piet pagina
-        getPietDeepAnalysis(w).then(analysis => {
-            if (!cancelled) setPietAnalysis(analysis);
-        });
+        // Als we al een deepAnalysis hebben in cache, gebruik die
+        if (w.deepAnalysis) {
+          setPietAnalysis(w.deepAnalysis);
+        } else {
+          // Forceer DEEP analysis voor Piet pagina
+          getPietDeepAnalysis(w).then(analysis => {
+              if (!cancelled) {
+                setPietAnalysis(analysis);
+                // Update de cache met de nieuwe deepAnalysis
+                setWeather(prev => {
+                  const updated = prev ? { ...prev, deepAnalysis: analysis } : null;
+                  if (updated && typeof localStorage !== "undefined") {
+                    const k = `${city.lat.toFixed(3)},${city.lon.toFixed(3)}`;
+                    const entry = { weather: updated, ts: Date.now() };
+                    localStorage.setItem("wz_weather_v3_" + k, JSON.stringify(entry));
+                  }
+                  return updated;
+                });
+              }
+          });
+        }
       }
     })
     .catch(() => !cancelled && setLoading(false));

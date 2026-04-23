@@ -23,7 +23,8 @@ export interface WeatherData {
   sunset: string;
   uvIndex: number;
   models: ModelComparison;
-  aiVerdict?: string;
+  summaryVerdict?: string; // Korte teaser voor Homepage
+  deepAnalysis?: string;   // Uitgebreid dossier voor /piet
   neuralData?: {
     metNetNowcast?: string;
     seedScenario?: string;
