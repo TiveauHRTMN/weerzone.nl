@@ -40,8 +40,9 @@ export default function Footer() {
           <div className="col-span-2">
             <LogoFull height={40} className="mb-6 opacity-90" />
             <p className="text-white/50 text-sm max-w-xs leading-relaxed font-medium">
-              Geen reclame. Geen 14-daagse gokwerk. 
-              Puur KNMI HARMONIE data op de vierkante meter. 
+              Geen reclame. Geen vage 14-daagse gokwerkjes. 
+              Snoeiharde precisie op de vierkante meter via de 
+              <strong> WEERZONE Intelligence Engine</strong>.
               <br/><br/>
               48 uur vooruit. De rest is ruis.
             </p>
@@ -76,7 +77,7 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-6">
              <span className="text-[9px] font-bold text-white/20 uppercase">
-               Data: KNMI & Open-Meteo
+               Engine: MetNet-3 · WeatherNext 2.0 · NeuralGCM
              </span>
              <span className="text-[9px] font-bold text-white/20 uppercase">
                Uptime: 99.9%
