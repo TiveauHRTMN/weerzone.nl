@@ -77,7 +77,7 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-6">
              <span className="text-[9px] font-bold text-white/20 uppercase">
-               Engine: MetNet-3 · WeatherNext 2.0 · NeuralGCM
+               Powered by Tiveau & Google
              </span>
              <span className="text-[9px] font-bold text-white/20 uppercase">
                Uptime: 99.9%
