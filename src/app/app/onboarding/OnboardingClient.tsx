@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import { WzTextField } from "@/components/wz/WzForm";
@@ -12,12 +12,14 @@ import { WzTextField } from "@/components/wz/WzForm";
 type TopicKey = "rain" | "temp" | "wind" | "uv" | "snow";
 type TimeKey = "06:30" | "07:00" | "08:00" | "avond";
 
-const TOPICS: Array<{ k: TopicKey; t: string; d: string }> = [
+// `reed: true` markeert onderwerpen die alleen in het Reed-abonnement zitten.
+// De gebruiker mag ze aanvinken; bij checkout op Piet wordt het gated.
+const TOPICS: Array<{ k: TopicKey; t: string; d: string; reed?: boolean }> = [
   { k: "rain", t: "Regen & buien", d: "Meldingen bij regenkans boven 70%" },
   { k: "temp", t: "Temperatuur", d: "Bij hitte, vorst of scherpe wisselingen" },
-  { k: "wind", t: "Wind & storm", d: "KNMI code geel, oranje of rood" },
+  { k: "wind", t: "Wind & storm", d: "Code geel, oranje of rood", reed: true },
   { k: "uv", t: "UV & pollen", d: "Voor buitenplannen en allergieën" },
-  { k: "snow", t: "Winterweer", d: "Sneeuw, gladheid en ijsvorming" },
+  { k: "snow", t: "Winterweer", d: "Sneeuw, gladheid en ijsvorming", reed: true },
 ];
 
 const TIMES: Array<{ k: TimeKey; t: string; d: string }> = [
@@ -38,6 +40,7 @@ export default function OnboardingClient({ email }: { email: string }) {
 
   const [step, setStep] = useState(0);
   const [postcode, setPostcode] = useState("");
+  const [showPostcode, setShowPostcode] = useState(false);
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [gpsStatus, setGpsStatus] = useState<"idle" | "asking" | "ok" | "denied">("idle");
   const [authChecked, setAuthChecked] = useState(false);
@@ -59,7 +62,7 @@ export default function OnboardingClient({ email }: { email: string }) {
   const stepTitles = [
     {
       title: "Waar ben je?",
-      sub: "We gebruiken KNMI HARMONIE op een 2,5 km grid. Postcode is het snelst — GPS mag ook.",
+      sub: "We gebruiken GPS om je thuislocatie eenmalig te bepalen. Later kun je meer plekken toevoegen.",
     },
     {
       title: "Waar wil je op geattendeerd worden?",
@@ -74,11 +77,18 @@ export default function OnboardingClient({ email }: { email: string }) {
   function captureGps() {
     if (!("geolocation" in navigator)) {
       setGpsStatus("denied");
+      setShowPostcode(true);
       return;
     }
     setGpsStatus("asking");
     const safety = setTimeout(() => {
-      setGpsStatus((c) => (c === "asking" ? "denied" : c));
+      setGpsStatus((c) => {
+        if (c === "asking") {
+          setShowPostcode(true);
+          return "denied";
+        }
+        return c;
+      });
     }, 12000);
     try {
       navigator.geolocation.getCurrentPosition(
@@ -90,12 +100,14 @@ export default function OnboardingClient({ email }: { email: string }) {
         () => {
           clearTimeout(safety);
           setGpsStatus("denied");
+          setShowPostcode(true);
         },
         { enableHighAccuracy: false, timeout: 10000, maximumAge: 60 * 60 * 1000 },
       );
     } catch {
       clearTimeout(safety);
       setGpsStatus("denied");
+      setShowPostcode(true);
     }
   }
 
@@ -229,35 +241,107 @@ export default function OnboardingClient({ email }: { email: string }) {
           <p className="wz-body mb-7">{s.sub}</p>
 
           {step === 0 && (
-            <div className="grid gap-4">
-              <WzTextField
-                label="Postcode"
-                value={postcode}
-                onChange={setPostcode}
-                placeholder="1012 AB"
-                autoFocus
-                autoComplete="postal-code"
-                hint="Voor de KNMI HARMONIE-raster op 2,5 km nauwkeurig."
-              />
+            <div className="grid gap-3.5">
               <button
                 type="button"
                 onClick={captureGps}
-                disabled={gpsStatus === "asking" || gpsStatus === "ok"}
-                className="wz-btn wz-btn-ghost wz-btn-block disabled:opacity-60"
-                style={{ justifyContent: "flex-start", gap: 10 }}
+                disabled={gpsStatus === "asking"}
+                className="flex items-center gap-3.5 text-left cursor-pointer transition-colors disabled:cursor-wait"
+                style={{
+                  padding: "16px 18px",
+                  borderRadius: 14,
+                  border: `1px solid ${gpsCoords ? "var(--wz-brand)" : "var(--wz-border)"}`,
+                  background: gpsCoords ? "var(--wz-brand-soft)" : "#fff",
+                }}
               >
-                <MapPin className="w-[18px] h-[18px]" />
-                {gpsStatus === "ok" && gpsCoords
-                  ? `GPS vastgelegd (${gpsCoords.lat.toFixed(3)}, ${gpsCoords.lon.toFixed(3)})`
-                  : gpsStatus === "asking"
-                    ? "Even kijken…"
-                    : gpsStatus === "denied"
-                      ? "Niet gelukt — gebruik postcode"
-                      : "Of: deel mijn locatie"}
-                {gpsStatus === "ok" && (
-                  <Check className="w-4 h-4 ml-auto" style={{ color: "var(--wz-success)" }} />
-                )}
+                <span
+                  className="inline-flex items-center justify-center flex-none text-white"
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "50%",
+                    background: "var(--wz-brand)",
+                  }}
+                  aria-hidden="true"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                  >
+                    <circle cx="8" cy="8" r="6" />
+                    <circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none" />
+                    <path
+                      d="M8 .5v2M8 13.5v2M.5 8h2M13.5 8h2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-extrabold text-[16px] truncate">
+                    {gpsCoords
+                      ? "Thuislocatie bepaald"
+                      : gpsStatus === "asking"
+                        ? "Even kijken…"
+                        : gpsStatus === "denied"
+                          ? "GPS niet gelukt"
+                          : "Gebruik GPS voor thuislocatie"}
+                  </div>
+                  <div
+                    className="text-[13px] mt-0.5 truncate"
+                    style={{ color: "var(--wz-text-mute)" }}
+                  >
+                    {gpsCoords
+                      ? `GPS · ${gpsCoords.lat.toFixed(3)}, ${gpsCoords.lon.toFixed(3)}`
+                      : gpsStatus === "asking"
+                        ? "Browser vraagt om toestemming"
+                        : gpsStatus === "denied"
+                          ? "Geen toestemming — gebruik postcode hieronder"
+                          : "Je telefoon bepaalt eenmalig waar thuis is"}
+                  </div>
+                </div>
+                <span
+                  className="text-[12px] font-extrabold tracking-[0.06em] flex-none uppercase"
+                  style={{
+                    color: gpsCoords ? "var(--wz-brand)" : "var(--wz-text-mute)",
+                  }}
+                >
+                  {gpsStatus === "asking"
+                    ? "···"
+                    : gpsCoords
+                      ? "Wijzig"
+                      : "Zet aan →"}
+                </span>
               </button>
+
+              {!showPostcode ? (
+                <div
+                  className="text-[13px] pl-1"
+                  style={{ color: "var(--wz-text-mute)" }}
+                >
+                  Geen GPS?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowPostcode(true)}
+                    className="underline font-bold bg-transparent border-0 p-0 cursor-pointer"
+                    style={{ color: "var(--wz-brand)", font: "inherit" }}
+                  >
+                    Voer handmatig postcode in
+                  </button>
+                </div>
+              ) : (
+                <WzTextField
+                  label="Postcode"
+                  value={postcode}
+                  onChange={setPostcode}
+                  placeholder="1012 AB"
+                  autoComplete="postal-code"
+                  hint="Vier cijfers en twee letters, bijvoorbeeld 1012 AB."
+                />
+              )}
             </div>
           )}
 
@@ -283,8 +367,27 @@ export default function OnboardingClient({ email }: { email: string }) {
                       style={{ accentColor: "var(--wz-brand)" }}
                     />
                     <div className="flex-1">
-                      <div className="font-bold text-[15px]" style={{ color: "var(--wz-text)" }}>
+                      <div
+                        className="font-bold text-[15px] flex items-center gap-2"
+                        style={{ color: "var(--wz-text)" }}
+                      >
                         {o.t}
+                        {o.reed && (
+                          <span
+                            className="inline-block rounded-full uppercase"
+                            style={{
+                              background: "#fff5c2",
+                              color: "#8a6100",
+                              fontSize: 9,
+                              padding: "2px 6px",
+                              fontWeight: 800,
+                              letterSpacing: "0.04em",
+                              lineHeight: 1.3,
+                            }}
+                          >
+                            Reed
+                          </span>
+                        )}
                       </div>
                       <div className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>
                         {o.d}
