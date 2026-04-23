@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users } from "lucide-react";
+import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users, BrainCircuit } from "lucide-react";
 import { LogoFull } from "./Logo";
 import PersonaBadge from "./PersonaBadge";
 import PremiumGate from "./PremiumGate";
