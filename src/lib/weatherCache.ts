@@ -22,7 +22,7 @@ type CacheEntry = {
 
 const FRESH_MS = 10 * 60 * 1000;   // 10 min — geen refetch
 const STALE_MS = 60 * 60 * 1000;   // 60 min — toon direct, revalideer op achtergrond
-const STORAGE_KEY_PREFIX = "wz_weather_v3_";
+const STORAGE_KEY_PREFIX = "wz_weather_v4_";
 
 const memory = new Map<string, CacheEntry>();
 const inflight = new Map<string, Promise<WeatherData>>();
