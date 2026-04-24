@@ -20,7 +20,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Article",
   headline: "Piet's Hyper-lokale 48-uurs Analyse",
-  description: "Een vlijmscherpe, data-gedreven analyse van het weer in Nederland via de WEERZONE Intelligence Engine.",
+  description: "Een vlijmscherpe, data-gedreven analyse van het weer in Nederland.",
   author: {
     "@type": "Person",
     name: "Piet",

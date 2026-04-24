@@ -64,30 +64,65 @@ export async function getPietDeepAnalysis(weather: WeatherData): Promise<string>
     const model = genAI.getGenerativeModel({
       model: "gemini-3-flash-preview",
       systemInstruction: `
-    Je bent de Hoofd-Meteoroloog van de WEERZONE Intelligence Engine. Jouw stijl is beschaafd scherp: direct, nuchter en met humor, zoals aan de tafel bij Vandaag Inside. 
+Je bent Piet van Weerzone. Hyper-lokale weerman in het voetspoor van Piet Paulusma: warm, betrokken, op de hoogte van "hoe het daar nou is". Onderlaag Paulusma-vertelstijl (dichtbij de lezer, concreet, nuchter), bovenlaag Roddelpraat/VI/Powned (kort, scherp, droog, nooit zielig).
 
-    KERNREGELS (STRIKT):
-    - GEEN SCHELDWOORDEN OF GEVLOEK: Absoluut geen "vloeken" (zoals g*d, j*zus) of grove termen (zoals k*t, k*lere). Blijf een heer in het verkeer, maar dan in het weer.
-    - TOON: Direct, Hollands, ironisch over de concurrentie ("die prutsers met hun 14-daagse glazen bol"). 
-    - INHOUD: Schrijf een uitgebreid 'Meteorologisch Dossier'. Geef een diepgaande analyse die de lezer stap voor stap meeneemt.
-    - EXPERTISE: Gebruik brute 1km-precisie. Noem specifieke details over de regio.
-    - LENGTE: Minimaal 300 woorden voor het dossier.
-    - AFSLUITER: Een eigenzinnige, krachtige Hollandse groet.
-    `.trim(),
+TONALE CONSISTENTIE — STRIKT:
+- Spiegel de data. Als het zonnig is en ≥ 15° → positieve toon (prima dag, terras kan, lekker even naar buiten). Gebruik géén woorden als "troosteloos", "grijs", "ellendig" bij mooi weer.
+- Somber/nat/hard waait? Wees eerlijk, praktisch en droog — nooit dramatisch of zielig.
+- 14-daagse, glazen-bol-media, hypemakers, "weermannen met een mening": daar mag je droog op schieten. NOOIT op de gebruiker, NOOIT op een groep mensen (etniciteit, geloof, geaardheid, beperking).
+- Getallen kloppen. Als de data zegt max 16° en zon → zeg "16° in de zon, prima aprildag", niet "troosteloze bende".
+
+INHOUD:
+- Schrijf een meelezend dagdeel-verslag (ochtend / middag / avond / nacht / morgen). Geen bullet-opsommingen.
+- Leg concreet uit wat dat betekent voor je dag: kan de was buiten, moet de jas mee, is het terras aan.
+- Geef één of twee lokale details waar het kan (wind aan de kust, stadse warmte, mist in het rivierengebied). Verzin geen plaatsnamen die niet in de data staan.
+- 250–350 woorden, vloeiende paragrafen, 4–6 zinnen per paragraaf. Max 1 emoji in het hele dossier.
+
+TAAL:
+- 100% correct Nederlands. Geen anglicismen (geen "stay safe", "enjoy", "oant moarn").
+- Geen modelnamen of techniek-merken. Niet "KNMI", "HARMONIE", "MetNet", "Google", "NeuralGCM", "SEED". Ook geen "1km-precisie" of "grid-resolutie". Praat gewoon over het weer.
+- Geen scheldwoorden, geen vloeken (g*d, j*zus, k*t, k*lere zijn verboden).
+- Eigenzinnige Hollandse groet als afsluiter (bv. "Houdoe, Piet", "Nou, Piet", "Tot morgen, Piet"). Altijd ondertekenen met "Piet van Weerzone" onderaan.
+      `.trim(),
+      generationConfig: {
+        temperature: 0.6,
+        maxOutputTokens: 900,
+      },
     });
 
 
-    const hourlyData = weather.hourly.slice(0, 24).map(h => 
+    const hourlyData = weather.hourly.slice(0, 24).map(h =>
       `${new Date(h.time).getHours()}:00 (${h.temperature}°, ${h.precipitation}mm, wind ${h.windSpeed}km/h)`
     ).join(", ");
 
-    const prompt = `
-SCHRIJF HET DOSSIER VOOR DEZE DATA:
-- LOCATIE DATA: ${weather.current.temperature}° (voelt als ${weather.current.feelsLike}°), Lucht: ${getWeatherDescription(weather.current.weatherCode)}.
-- 24-UURS VERLOOP (Snoeihard): ${hourlyData}
-- MORGEN: Max ${weather.daily[1].tempMax}°, Min ${weather.daily[1].tempMin}°, Regen: ${weather.daily[1].precipitationSum}mm.
+    // Tonale-hint op basis van echte data: voorkomt "troosteloos" bij 16° + zon.
+    const maxToday = weather.daily[0]?.tempMax ?? weather.current.temperature;
+    const rainToday = weather.daily[0]?.precipitationSum ?? 0;
+    const code = weather.current.weatherCode;
+    const zonnig = code === 0 || code === 1;
+    const moodHint = (() => {
+      if (zonnig && maxToday >= 15 && rainToday < 1) return "mooi-dag";        // positief, terras, lekker
+      if (maxToday >= 20 && rainToday < 2) return "zomers";                     // opgewekt, opletten voor UV/drinken
+      if (rainToday > 5 || (code >= 95 && code <= 99)) return "pittig-nat";    // eerlijk, praktisch
+      if (maxToday < 5) return "koud";                                          // jas, warm drinken, niet dramatisch
+      return "wisselend";                                                        // nuchter, laagdrempelig
+    })();
 
-Brand de 14-daagse gokkers af en geef een vlijmscherpe analyse per dagdeel.
+    const prompt = `
+DATA VANDAAG & MORGEN (puur de cijfers, geen merken):
+- Nu: ${weather.current.temperature}° (voelt als ${weather.current.feelsLike}°), ${getWeatherDescription(weather.current.weatherCode)}.
+- Vandaag: min ${weather.daily[0]?.tempMin ?? "?"}°, max ${maxToday}°, neerslag ${rainToday} mm.
+- Verloop 24 uur: ${hourlyData}.
+- Morgen: max ${weather.daily[1].tempMax}°, min ${weather.daily[1].tempMin}°, neerslag ${weather.daily[1].precipitationSum} mm.
+
+TONALE HINT (volg deze, want hij komt uit de data): ${moodHint}.
+- "mooi-dag"    → positief, concreet, terras/wandeling/was-buiten mag genoemd.
+- "zomers"     → opgewekt, let op hitte/UV/water.
+- "pittig-nat" → eerlijk, droog, praktisch advies (jas, fiets, paraplu).
+- "koud"       → nuchter, jas mee, niet dramatisch.
+- "wisselend"  → laagdrempelig, beide scenario's benoemen.
+
+Schrijf het dossier in jouw stem. Eindig met een droge Hollandse groet en ondertekening "Piet van Weerzone".
       `.trim();
 
     const result = await model.generateContent(prompt);
@@ -114,24 +149,41 @@ export async function getAiVerdict(weather: WeatherData): Promise<string> {
       const model = genAI.getGenerativeModel({
         model: "gemini-3-flash-preview",
         systemInstruction: `
-Je bent de meteoroloog van de WEERZONE Intelligence Engine. Stijl: Roddelpraat / VI / Powned — direct, vlijmscherp, eerlijk, met een snoeiharde mening. 
+Je bent Piet van Weerzone. Warme Paulusma-basis met droge VI/Powned-randen.
 
 KERNREGELS:
-- TOON: Scherp, Hollands, nuchter. Geen gelul.
-- LENGTE: STRIKT MAXIMAAL 60 WOORDEN. Kort en krachtig.
-- INHOUD: Een snelle klap over nu, straks en morgen.
-- VERBODEN: Geen modelnamen, geen "Oant moarn".
+- TOON SPIEGELT DE DATA. Zon en ≥ 15° → opgewekt. Regen/wind → eerlijk en praktisch. Nooit "troosteloos" bij mooi weer; nooit dramatisch bij een normale bui.
+- SCHERP MAG, MAAR GERICHT. Alleen op 14-daagse / glazen-bol-media / hypemakers. Nooit op de lezer, nooit op groepen mensen.
+- Correct Nederlands, geen vloeken, geen scheldwoorden.
+- LENGTE: STRIKT MAXIMAAL 60 WOORDEN.
+- INHOUD: Nu, straks, morgen — kort, concreet.
+- VERBODEN: modelnamen (KNMI, HARMONIE, MetNet, NeuralGCM, SEED, Google), anglicismen ("oant moarn", "enjoy", "stay safe"), "1km-precisie"-achtige claims.
 `.trim(),
+        generationConfig: {
+          temperature: 0.6,
+          maxOutputTokens: 220,
+        },
       });
 
       const tomorrow = weather.daily[1];
+      const maxToday = weather.daily[0]?.tempMax ?? weather.current.temperature;
+      const rainToday = weather.daily[0]?.precipitationSum ?? 0;
+      const zonnig = weather.current.weatherCode === 0 || weather.current.weatherCode === 1;
+      const mood =
+        zonnig && maxToday >= 15
+          ? "mooi-dag"
+          : rainToday > 5
+            ? "nat"
+            : maxToday < 5
+              ? "koud"
+              : "wisselend";
       const prompt = `
-Geef een vlijmscherpe, beknopte samenvatting (MAX 60 WOORDEN) voor:
-- NU: ${getWeatherDescription(weather.current.weatherCode)}, ${weather.current.temperature}°
-- VERLOOP: ${weather.hourly.slice(0, 6).map(h => h.temperature + "°").join(", ")}
-- MORGEN: Max ${tomorrow.tempMax}°, ${getWeatherDescription(tomorrow.weatherCode)}.
+DATA:
+- Nu: ${getWeatherDescription(weather.current.weatherCode)}, ${weather.current.temperature}°.
+- Verloop komende uren: ${weather.hourly.slice(0, 6).map(h => h.temperature + "°").join(", ")}.
+- Morgen: max ${tomorrow.tempMax}°, ${getWeatherDescription(tomorrow.weatherCode)}.
 
-Eindig met een eigenzinnige groet. Brand de gokkers kort af.
+TOON: ${mood} — volg de data. Eindig met een korte Hollandse groet.
         `.trim();
 
       const result = await model.generateContent(prompt);

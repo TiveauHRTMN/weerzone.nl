@@ -37,68 +37,50 @@ export default function PietExtended() {
   const [loading, setLoading] = useState(true);
   const [locating, setLocating] = useState(false);
 
-  // Sync with primary location from session if available
   useEffect(() => {
     if (!sessionLoading && primaryLocation) {
       setCity(primaryLocation);
     }
   }, [sessionLoading, primaryLocation]);
 
-useEffect(() => {
-  let cancelled = false;
-  setLoading(true);
-  loadWeather(
-    city.lat,
-    city.lon,
-    () => {}, // No summary on this page
-    (fresh) => { if (!cancelled) setWeather(fresh); },
-    (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }
-  )
-    .then((w) => {
-      if (!cancelled) {
-        setWeather(w);
-        setLoading(false);
-        
-        // Als we al een deepAnalysis hebben in cache, gebruik die
-        if (w.deepAnalysis) {
-          setPietAnalysis(w.deepAnalysis);
-        } else {
-          // Forceer DEEP analysis voor Piet pagina
-          getPietDeepAnalysis(w).then(analysis => {
-              if (!cancelled) {
-                setPietAnalysis(analysis);
-                // Update de cache met de nieuwe deepAnalysis
-                setWeather(prev => {
-                  const updated = prev ? { ...prev, deepAnalysis: analysis } : null;
-                  if (updated && typeof localStorage !== "undefined") {
-                    const k = `${city.lat.toFixed(3)},${city.lon.toFixed(3)}`;
-                    const entry = { weather: updated, ts: Date.now() };
-                    localStorage.setItem("wz_weather_v3_" + k, JSON.stringify(entry));
-                  }
-                  return updated;
-                });
-              }
-          });
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    loadWeather(
+      city.lat,
+      city.lon,
+      () => {},
+      (fresh) => { if (!cancelled) setWeather(fresh); },
+      (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }
+    )
+      .then((w) => {
+        if (!cancelled) {
+          setWeather(w);
+          setLoading(false);
+          if (w.deepAnalysis) {
+            setPietAnalysis(w.deepAnalysis);
+          } else {
+            getPietDeepAnalysis(w).then(analysis => {
+                if (!cancelled) {
+                  setPietAnalysis(analysis);
+                  patchCacheDeep(city.lat, city.lon, analysis);
+                }
+            });
+          }
         }
-      }
-    })
-    .catch(() => !cancelled && setLoading(false));
-  return () => {
-    cancelled = true;
-  };
-}, [city]);
+      })
+      .catch(() => !cancelled && setLoading(false));
+    return () => { cancelled = true; };
+  }, [city]);
 
-const locate = () => {
-
+  const locate = () => {
     if (!("geolocation" in navigator)) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
-        
         const provisional: City = { name: "Locatie bepalen...", lat, lon };
         setCity(provisional);
-        
         reverseGeocode(lat, lon).then((c) => {
           setCity(c);
           localStorage.setItem("wz_city", JSON.stringify(c));
@@ -119,11 +101,7 @@ const locate = () => {
     );
   }
 
-  const today = weather.daily[0];
-  const tomorrow = weather.daily[1];
   const narrative = pietAnalysis || weather.summaryVerdict || getMainCommentary(weather);
-
-  // 48-uurs highlights per 6-uurs blok
   const blocks = [
     { label: "Nu", start: 0, end: 1 },
     { label: "Vanmiddag", start: 1, end: 6 },
@@ -149,12 +127,9 @@ const locate = () => {
         )}
       </div>
 
-      {/* 1. PIET'S ANALYTICAL VERDICT */}
       <div className="homecard !p-8 border-l-4 border-l-accent-cyan">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-accent-cyan/20 flex items-center justify-center text-2xl shadow-inner">
-            💬
-          </div>
+          <div className="w-12 h-12 rounded-2xl bg-accent-cyan/20 flex items-center justify-center text-2xl shadow-inner">💬</div>
           <div>
             <h2 className="homecard-kicker !text-accent-cyan !mb-0">Piet’s Analyse</h2>
             <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">
@@ -163,13 +138,10 @@ const locate = () => {
           </div>
         </div>
         <div className="text-xl sm:text-2xl font-bold text-white leading-relaxed space-y-5">
-          {(pietAnalysis || narrative).split('\n\n').map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
+          {narrative.split('\n\n').map((para, i) => <p key={i}>{para}</p>)}
         </div>
       </div>
 
-      {/* 2. PIET'S UUR-TOT-UUR FOCUS */}
       <div className="space-y-4">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 px-1">Komende Uren</h3>
         <div className="horizontal-scroll no-scrollbar -mx-4 px-4 pb-4">
@@ -184,7 +156,6 @@ const locate = () => {
         </div>
       </div>
 
-      {/* 3. THE 48-HOUR PRECISION GRID */}
       <div className="space-y-6">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 px-1 text-center">48-uurs Overzicht</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -197,36 +168,19 @@ const locate = () => {
             const midCode = slice[Math.floor(slice.length / 2)].weatherCode;
             
             return (
-              <motion.div 
-                key={b.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="homecard"
-              >
+              <motion.div key={b.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="homecard">
                 <div className="flex justify-between items-start mb-4">
                   <span className="homecard-kicker">{b.label}</span>
                   <span className="text-3xl drop-shadow-xl">{getWeatherEmoji(midCode, true)}</span>
                 </div>
-                
                 <div className="flex items-baseline gap-2 mb-4">
                   <span className="text-5xl font-black text-white tracking-tighter">{avgTemp}°</span>
                   <span className="text-[10px] font-bold text-white/40 uppercase">Gemiddeld</span>
                 </div>
-
                 <div className="homecard-strip !mt-0 !pt-4">
-                  <div className="homecard-tick">
-                    <div className="tk">Regen</div>
-                    <div className="vl !text-accent-cyan">{rainSum > 0.1 ? `${rainSum.toFixed(1)}mm` : "0.0"}</div>
-                  </div>
-                  <div className="homecard-tick">
-                    <div className="tk">Wind</div>
-                    <div className="vl">{maxWind} <span className="text-[8px] opacity-50">km/h</span></div>
-                  </div>
-                  <div className="homecard-tick">
-                    <div className="tk">UV</div>
-                    <div className="vl text-wz-sun">{weather.uvIndex.toFixed(0)}</div>
-                  </div>
+                  <div className="homecard-tick"><div className="tk">Regen</div><div className="vl !text-accent-cyan">{rainSum > 0.1 ? `${rainSum.toFixed(1)}mm` : "0.0"}</div></div>
+                  <div className="homecard-tick"><div className="tk">Wind</div><div className="vl">{maxWind} <span className="text-[8px] opacity-50">km/h</span></div></div>
+                  <div className="homecard-tick"><div className="tk">UV</div><div className="vl text-wz-sun">{weather.uvIndex.toFixed(0)}</div></div>
                 </div>
               </motion.div>
             );
@@ -235,9 +189,7 @@ const locate = () => {
       </div>
 
       <div className="pt-12 border-t border-white/10 flex justify-center">
-        <Link href="/" className="btn btn-ghost text-sm font-bold opacity-60 hover:opacity-100">
-          ← Terug naar Dashboard
-        </Link>
+        <Link href="/" className="btn btn-ghost text-sm font-bold opacity-60 hover:opacity-100">← Dashboard</Link>
       </div>
     </div>
   );
