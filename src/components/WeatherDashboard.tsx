@@ -140,7 +140,13 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
         
-
+        <header className="flex flex-col items-center mb-8 sm:mb-10 pt-2">
+          <div className="relative flex items-center justify-center">
+            <LogoFull height={72} className="sm:hidden max-w-full h-auto" />
+            <LogoFull height={112} className="hidden sm:block" />
+            {tier && <PersonaBadge tier={tier} />}
+          </div>
+        </header>
 
         <NavBar activeCity={city.name} isLocating={isLocating} />
 
@@ -151,15 +157,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                 <div className="flex flex-col items-start">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-2 py-0.5 rounded">Actueel</span>
-                    {weather.models && (
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
-                        weather.models.agreement > 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700' : 
-                        weather.models.agreement > 50 ? 'bg-amber-500/10 border-amber-500/20 text-amber-700' : 
-                        'bg-rose-500/10 border-rose-500/20 text-rose-700'
-                      }`}>
-                        {weather.models.agreement}% Consensus
-                      </span>
-                    )}
                   </div>
                   <h1 className="text-xl font-bold uppercase tracking-widest text-text-secondary mb-2">{city.name}</h1>
                   <div className="flex items-start">
