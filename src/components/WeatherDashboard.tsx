@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users } from "lucide-react";
-import { LogoFull } from "./Logo";
+import Logo from "./Logo";
 import PersonaBadge from "./PersonaBadge";
 import PremiumGate from "./PremiumGate";
 import { useSession } from "@/lib/session-context";
@@ -140,10 +140,14 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
         
-        <header className="flex flex-col items-center mb-8 sm:mb-10 pt-2">
+        <header className="flex flex-col items-center mb-6 sm:mb-10 pt-2">
           <div className="relative flex items-center justify-center">
-            <LogoFull height={72} className="sm:hidden max-w-full h-auto" />
-            <LogoFull height={112} className="hidden sm:block" />
+            <div className="sm:hidden">
+              <Logo size={56} />
+            </div>
+            <div className="hidden sm:block">
+              <Logo size={104} />
+            </div>
             {tier && <PersonaBadge tier={tier} />}
           </div>
         </header>
@@ -152,7 +156,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
         <div className="flex flex-col gap-6 animate-fade-in">
           <div className="card overflow-hidden relative group shadow-2xl border-white/40">
-            <div className="p-7 sm:p-9 relative z-[2] pt-12 sm:pt-16">
+            <div className="p-7 sm:p-9 relative z-[2] pt-10 sm:pt-16">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                 <div className="flex flex-col items-start">
                   <div className="flex items-center gap-2 mb-4">

@@ -211,10 +211,13 @@ textarea::placeholder {
   ul.nav-list::-webkit-scrollbar { display: none; }
   ul.nav-list > li {
     flex: 1 1 0 !important;
-    min-width: 65px;
+    min-width: 50px;
   }
   .nav-item {
-    padding: 0.6rem 0.1rem !important;
+    padding: 0.6rem 0.05rem !important;
+  }
+  .nav-item .label {
+    font-size: 0.55rem;
   }
   .nav-divider { display: none; }
 }
