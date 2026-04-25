@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 import { executeWWSOrchestrator } from "../src/lib/wws-orchestrator";
 import { executeBusinessOrchestrator } from "../src/lib/wws-business-orchestrator";
 import { KNMI_STATIONS } from "../src/lib/types";
+import { getSupabase } from "../src/lib/supabase";
 
 dotenv.config({ path: ".env.local" });
 
@@ -11,27 +12,56 @@ dotenv.config({ path: ".env.local" });
  * Hermes runs 24/7 in background loops to maintain the "Meteorological Truth".
  */
 async function hermesPatrol() {
+  const supabase = getSupabase();
+  if (!supabase) {
+    console.error("❌ HERMES: Supabase client initialization failed.");
+    return;
+  }
+
   console.log("🚀 HERMES: Starting WWS Patrol Loop...");
 
-  // In a real 24/7 scenario, this would be a while(true) with sleep,
-  // or triggered by a high-frequency cron.
-  
   // 1. Patrol the Ground Truth Stations (Public)
-  const patrolList = KNMI_STATIONS.slice(0, 5); // Start with top 5 for speed
+  const patrolList = KNMI_STATIONS.slice(0, 5); // Start with top 5
   
   for (const station of patrolList) {
     console.log(`📡 HERMES: Analysing Public Truth for ${station.name}...`);
-    const publicTruth = await executeWWSOrchestrator(station.lat, station.lon);
     
-    if (publicTruth) {
-      console.log(`✅ HERMES: Updated Public Truth for ${station.name} (Consensus: ${publicTruth.api_grid_1km.divergence_delta} delta)`);
-      // Here we would save to Supabase: await saveTruth(station.name, publicTruth);
+    try {
+      const publicTruth = await executeWWSOrchestrator(station.lat, station.lon);
+      
+      if (publicTruth) {
+        console.log(`✅ HERMES: Updated Public Truth for ${station.name}`);
+        
+        await supabase.from("wws_truth_cache").upsert({
+          place_name: station.name,
+          lat: station.lat,
+          lon: station.lon,
+          sector: 'public',
+          payload: publicTruth,
+          consensus_index: 100 - (publicTruth.api_grid_1km.divergence_delta * 5), // heuristic
+          divergence_delta: publicTruth.api_grid_1km.divergence_delta,
+          is_alert: publicTruth.reed_alert?.active || false,
+          valid_until: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+        });
+
+        await supabase.from("wws_patrol_log").insert({
+          action: 'public_truth_update',
+          status: 'success',
+          meta: { place: station.name, consensus: publicTruth.api_grid_1km.divergence_delta }
+        });
+      }
+    } catch (err) {
+      console.error(`❌ HERMES ERROR [Public]:`, err);
+      await supabase.from("wws_patrol_log").insert({
+        action: 'public_truth_update',
+        status: 'error',
+        meta: { place: station.name, error: String(err) }
+      });
     }
   }
 
   // 2. Patrol the Business Assets (Steve)
   console.log("💼 HERMES: Switching to Business Sector (Steve)...");
-  // Example GPS assets:
   const businessAssets = [
     { name: "Bouwplaats Utrecht", lat: 52.09, lon: 5.12 },
     { name: "Windpark Noordzee", lat: 52.36, lon: 3.34 }
@@ -39,24 +69,37 @@ async function hermesPatrol() {
 
   for (const asset of businessAssets) {
     console.log(`🛡️ HERMES: Calculating Operational Risk for ${asset.name}...`);
-    const businessVerdict = await executeBusinessOrchestrator(asset.lat, asset.lon);
+    
+    try {
+      const businessVerdict = await executeBusinessOrchestrator(asset.lat, asset.lon);
 
-    if (businessVerdict) {
-      console.log(`🏗️ STEVE Verdict for ${asset.name}: ${businessVerdict.status} - Commands: ${businessVerdict.b2b_commands.join(", ")}`);
-      
-      if (businessVerdict.status === "NO-GO") {
-        console.log(`🚨 ALERT: Hermes is triggering business webhooks for ${asset.name}!`);
-        // await triggerAlert(asset.name, businessVerdict);
+      if (businessVerdict) {
+        console.log(`🏗️ STEVE Verdict for ${asset.name}: ${businessVerdict.status}`);
+        
+        await supabase.from("wws_truth_cache").upsert({
+          place_name: asset.name,
+          lat: asset.lat,
+          lon: asset.lon,
+          sector: 'business',
+          payload: businessVerdict,
+          consensus_index: businessVerdict.confidence_index,
+          is_alert: businessVerdict.status === "NO-GO",
+          valid_until: new Date(Date.now() + 15 * 60 * 1000).toISOString()
+        });
+
+        await supabase.from("wws_patrol_log").insert({
+          action: 'business_verdict_update',
+          status: 'success',
+          meta: { place: asset.name, verdict: businessVerdict.status }
+        });
       }
+    } catch (err) {
+      console.error(`❌ HERMES ERROR [Business]:`, err);
     }
   }
 
-  console.log("🏁 HERMES: Patrol Loop Complete. Resting for 15 minutes.");
+  console.log("🏁 HERMES: Patrol Loop Complete.");
 }
 
-// Check if running directly
-if (require.main === module) {
-  hermesPatrol().catch(console.error);
-}
-
-export { hermesPatrol };
+// Run immediately
+hermesPatrol().catch(console.error);
