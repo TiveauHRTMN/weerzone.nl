@@ -155,7 +155,18 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <div className="p-7 sm:p-9 relative z-[2] pt-12 sm:pt-16">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                 <div className="flex flex-col items-start">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-2 py-0.5 rounded mb-4">Actueel</span>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-2 py-0.5 rounded">Actueel</span>
+                    {weather.models && (
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
+                        weather.models.agreement > 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700' : 
+                        weather.models.agreement > 50 ? 'bg-amber-500/10 border-amber-500/20 text-amber-700' : 
+                        'bg-rose-500/10 border-rose-500/20 text-rose-700'
+                      }`}>
+                        {weather.models.agreement}% Consensus
+                      </span>
+                    )}
+                  </div>
                   <h1 className="text-xl font-bold uppercase tracking-widest text-text-secondary mb-2">{city.name}</h1>
                   <div className="flex items-start">
                     <span className="text-8xl sm:text-9xl font-black tracking-tighter leading-none text-text-primary">{weather.current.temperature}</span>
@@ -175,14 +186,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                  </div>
               </div>
 
-              <div className="mt-2 p-4 bg-white/40 rounded-2xl border border-white/60 shadow-sm">
-                <p className="text-sm font-bold text-text-primary">
-                  {getDayProgression(weather)}
-                </p>
-                <p className="text-[11px] text-text-secondary font-medium italic mt-1">
-                  Wij tonen alleen de komende 48 uur — de periode waarin een weersvoorspelling echt klopt.
-                </p>
-              </div>
 
               <div className="pt-6 border-t border-black/5">
                 <p className="font-bold text-lg sm:text-xl text-text-primary leading-[1.4]">

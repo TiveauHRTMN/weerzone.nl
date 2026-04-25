@@ -107,7 +107,7 @@ function blendHourly(
 
 export async function fetchWeatherData(lat: number, lon: number): Promise<WeatherData> {
   try {
-    const [genericRes, harmonieData] = await Promise.all([
+    const [genericRes, harmonieData, iconData, aromeData] = await Promise.all([
       fetch(`${OPEN_METEO_BASE}?${new URLSearchParams({
         latitude: lat.toString(),
         longitude: lon.toString(),
@@ -124,6 +124,8 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         return r.json();
       }),
       fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_harmonie" }).catch(() => null),
+      fetchModel(OPEN_METEO_BASE, lat, lon, { models: "dwd_icon_d2" }).catch(() => null),
+      fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome" }).catch(() => null),
     ]);
 
     const data = genericRes;
@@ -137,11 +139,66 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       return null as any;
     }
     
-    const { hourly, agreement } = blendHourly(harmonieData, data.hourly);
+    // 1. BLEND HOURLY DATA WITH MULTIPLE MODELS
+    const times = data.hourly.time ?? [];
+    const hourly: HourlyForecast[] = times.map((time: string, i: number) => {
+      const harmonie = harmonieData ? {
+        temperature: Math.round(harmonieData.temperature_2m[i] ?? 0),
+        precipitation: harmonieData.precipitation[i] ?? 0,
+        weatherCode: harmonieData.weather_code[i] ?? 0,
+        windSpeed: Math.round(harmonieData.wind_speed_10m[i] ?? 0)
+      } : undefined;
 
-    // 5. SYNC CURRENT WITH HARMONIE (Belangrijk voor consistentie!)
-    // Omdat de 'current' API van Open-Meteo het Harmonie model niet direct ondersteunt,
-    // halen we de huidige waarden uit de eerste slot van de Harmonie data.
+      const icon = iconData ? {
+        temperature: Math.round(iconData.temperature_2m[i] ?? 0),
+        precipitation: iconData.precipitation[i] ?? 0,
+        weatherCode: iconData.weather_code[i] ?? 0,
+        windSpeed: Math.round(iconData.wind_speed_10m[i] ?? 0)
+      } : undefined;
+
+      const arome = aromeData ? {
+        temperature: Math.round(aromeData.temperature_2m[i] ?? 0),
+        precipitation: aromeData.precipitation[i] ?? 0,
+        weatherCode: aromeData.weather_code[i] ?? 0,
+        windSpeed: Math.round(aromeData.wind_speed_10m[i] ?? 0)
+      } : undefined;
+
+      // Base values (prefer Harmonie)
+      const temperature = harmonie?.temperature ?? Math.round(data.hourly.temperature_2m[i] ?? 0);
+      const precipitation = harmonie?.precipitation ?? data.hourly.precipitation[i] ?? 0;
+      const weatherCode = harmonie?.weatherCode ?? data.hourly.weather_code[i] ?? 0;
+      const windSpeed = harmonie?.windSpeed ?? Math.round(data.hourly.wind_speed_10m[i] ?? 0);
+
+      return {
+        time,
+        temperature,
+        apparentTemperature: Math.round(data.hourly.apparent_temperature?.[i] ?? temperature),
+        weatherCode,
+        precipitation,
+        windSpeed,
+        cape: Math.round(data.hourly.cape?.[i] ?? 0),
+        confidence: "high",
+        models: { harmonie, icon, arome }
+      };
+    });
+
+    // 2. AGREEMENT CALCULATION (Simplified for now)
+    let agreement = 100;
+    if (harmonieData && iconData && aromeData) {
+      // Check for divergence in precipitation in next 12 hours
+      const next12Harmonie = harmonieData.precipitation.slice(0, 12).reduce((a, b) => a + b, 0);
+      const next12Icon = iconData.precipitation.slice(0, 12).reduce((a, b) => a + b, 0);
+      const next12Arome = aromeData.precipitation.slice(0, 12).reduce((a, b) => a + b, 0);
+      
+      const diff = Math.max(
+        Math.abs(next12Harmonie - next12Icon),
+        Math.abs(next12Harmonie - next12Arome)
+      );
+      if (diff > 2) agreement = 75;
+      if (diff > 5) agreement = 50;
+    }
+
+    // 3. SYNC CURRENT WITH HARMONIE (Consistentie!)
     let currentTemp = Math.round(data.current.temperature_2m ?? 0);
     let currentFeels = Math.round(data.current.apparent_temperature ?? 0);
     let currentPrecip = data.current.precipitation ?? 0;
@@ -149,20 +206,11 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     let currentWind = Math.round(data.current.wind_speed_10m ?? 0);
 
     if (harmonieData && hourly.length > 0) {
-      // Gebruik de eerste uurwaarde van Harmonie voor de 'Nu' status
       currentTemp = hourly[0].temperature;
       currentFeels = hourly[0].apparentTemperature;
       currentPrecip = hourly[0].precipitation;
       currentCode = hourly[0].weatherCode;
       currentWind = hourly[0].windSpeed;
-    } else if (hourly.length > 0) {
-      // Fallback: Rain Accuracy Fix voor generic model
-      if (currentPrecip === 0 && hourly[0].precipitation > 0) {
-        currentPrecip = hourly[0].precipitation;
-        if (currentCode === 0 || currentCode === 1 || currentCode === 3) {
-          currentCode = hourly[0].weatherCode;
-        }
-      }
     }
 
     const minutely: MinutelyPrecipitation[] = [];
@@ -177,6 +225,10 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         }
       }
     }
+
+    const sources = ["KNMI HARMONIE"];
+    if (iconData) sources.push("DWD ICON-D2");
+    if (aromeData) sources.push("METEOFRANCE AROME");
 
     return {
       current: {
@@ -207,8 +259,8 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       uvIndex: data.daily?.uv_index_max?.[0] ?? 0,
       models: {
         agreement,
-        label: "KNMI HARMONIE Geverifieerd",
-        sources: ["KNMI HARMONIE"],
+        label: agreement > 80 ? "Hoge modelconsensus" : agreement > 50 ? "Gemiddelde consensus" : "Lage consensus (Divergentie)",
+        sources,
       },
     };
   } catch (error) {

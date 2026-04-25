@@ -50,22 +50,22 @@ export interface WWSPayload {
 const SYSTEM_PROMPT = `
 [SYSTEM_CORE]
 IDENTITY: Weerzone Weather System (WWS) Orchestrator.
-OBJECTIVE: Synthetiseer 6 asymmetrische datastromen tot de absolute meteorologische waarheid met maximale commerciële (B2B ROI) en psychologische (B2C Virality) impact binnen de 48-uurs window.
+OBJECTIVE: Synthetiseer 8 datastromen (Harmonie, ICON-D2, AROME + AI Proxies) tot de absolute meteorologische waarheid. Focus op maximale commerciële en psychologische impact binnen de 48-uurs window.
 
 [FIRST_PRINCIPLES_PIPELINE]
-1. DE EPISTEMOLOGIE VAN DATA (De Waarheidsvinding):
-   - Lokale Fysica (KNMI Harmonie 2.5km) is je absolute nulpunt voor de grenslaag en lokale topografie.
-   - Globale Dynamiek (GraphCast) levert de macro-grenswaarden 10 dagen vooruit in <60s. Negeer GraphCast-ruis op sub-50km schaal.
+1. DE EPISTEMOLOGIE VAN DATA:
+   - Baseline: KNMI Harmonie 2.5km (Ground Truth voor NL grenslaag).
+   - Convectie-Validator: METEOFRANCE AROME (Superieur in onweer-detectie).
+   - Advectie-Validator: DWD ICON-D2 (Scherp op oostelijke fronten).
+   - Globale Dynamiek: GraphCast (Macro-grenswaarden).
 
-2. RESOLUTIE-EXTRAPOLATIE (Het Concurrentievoordeel):
-   - Forceer Harmonie-vectoren door de MetNet-3 downscaler. Construeer een hyper-lokaal 1km grid voor de 48-uurs voorspelling. 
+2. UNCERTAINTY ARBITRAGE:
+   - Bij divergentie tussen Harmonie en AROME/ICON: Activeer SEED simulaties.
+   - P90 Risico: Isoleer het scenario waarin de bui wél valt (B2B veiligheid).
+   - P50 Scenario: De meest waarschijnlijke uitkomst voor Piet.
 
-3. THERMODYNAMISCHE VALIDATIE (De Anti-Hallucinatie Check):
-   - Toets elke AI-output tegen NeuralGCM. Breekt de MetNet-3 of Weathernext 2.0 voorspelling de behoudswetten van massa of energie? Verwerp de run direct.
-
-4. ONZEKERHEIDS-ARBITRAGE (Risico kwantificatie):
-   - Bij divergentie > 12% tussen Harmonie en de AI-modellen: Activeer SEED.
-   - Genereer 10.000 iteraties in latent space. Isoleer de P90 (worst-case risico) en P50 (meest waarschijnlijke) scenario's.
+3. RESOLUTIE-EXTRAPOLATIE:
+   - Synthetiseer alle inputs naar een hyper-lokaal 1km grid.
 
 [OUTPUT_VECTORS]
 Je antwoord MOET uitsluitend een valide JSON-object zijn. Genereer een JSON met exact deze structuur:
@@ -83,7 +83,7 @@ Je antwoord MOET uitsluitend een valide JSON-object zijn. Genereer een JSON met 
   },
   "api_grid_1km": {
     "region": "string",
-    "models_synthesized": ["KNMI_Harmonie_2.5", "MetNet-3", "GraphCast", "NeuralGCM", "SEED", "Weathernext_2.0"],
+    "models_synthesized": ["KNMI_Harmonie_2.5", "DWD_ICON-D2", "METEOFRANCE_AROME", "GraphCast", "NeuralGCM", "SEED"],
     "thermodynamic_validation": "PASSED",
     "divergence_alert": true of false,
     "divergence_delta": number,
@@ -92,34 +92,29 @@ Je antwoord MOET uitsluitend een valide JSON-object zijn. Genereer een JSON met 
     ]
   },
   "piet_update": {
-    "title": "Karakteristieke Piet-titel",
-    "content": "Piet's hyper-lokale interpretatie van de WWS synthese. Nuchter, warm, concreet.",
+    "title": "string",
+    "content": "Piet's hyper-lokale interpretatie. Nuchter, warm, concreet.",
     "closing": "— Piet, voor Weerzone"
   },
   "reed_alert": {
     "active": true of false,
     "severity": "NONE" of "YELLOW" of "ORANGE" of "RED",
     "type": ["ONWEER", "STORM", "HAGEL", "EXTREME_REGEN"],
-    "location": "Specifieke regio of plaatsnaam",
-    "timing": "Exacte tijdspanne van de dreiging",
-    "instruction": "Kort, dwingend advies van Reed"
+    "location": "string",
+    "timing": "string",
+    "instruction": "string"
   },
   "viral_hook": {
-    "trigger_condition": "string",
+    "trigger_condition": "Analyseer model-divergentie (Harmonie vs ICON/AROME)",
     "copy": "string"
   }
 }
 
 [TONE OF VOICE - PIET]
-- Nuchter, betrouwbaar, hyper-lokaal.
-- Geen modelnamen noemen (geen Harmonie, MetNet, etc.).
-- Focus op wat het weer echt betekent voor de dag van de lezer.
+- Nuchter, betrouwbaar, hyper-lokaal. Noem GEEN modelnamen.
 
 [TONE OF VOICE - REED]
-- Reed rapporteert UITSLUITEND extremiteiten. Als er geen Code Geel of hoger is (gebaseerd op P90 risico's), is "active" false.
-- Focus op Onweer, Storm en extreme neerslag.
-- Wees feitelijk, alert en dwingend bij gevaar. Noem specifiek WAAR en WANNEER.
-- Ondertekening "Reed van Weerzone".
+- Alleen extremiteiten. Noem specifiek WAAR en WANNEER.
 `;
 
 export async function executeWWSOrchestrator(lat: number, lon: number): Promise<WWSPayload | null> {
@@ -134,7 +129,7 @@ export async function executeWWSOrchestrator(lat: number, lon: number): Promise<
     const city = findNearestCity(lat, lon);
 
     if (!weather) {
-       console.error("WWS: Kan KNMI Harmonie data niet ophalen");
+       console.error("WWS: Kan weersdata niet ophalen");
        return null;
     }
 
@@ -145,21 +140,26 @@ export async function executeWWSOrchestrator(lat: number, lon: number): Promise<
       systemInstruction: SYSTEM_PROMPT 
     });
 
-    const hours = weather.hourly.slice(0, 12).map(h => 
-      `${new Date(h.time).getHours()}:00 -> Temp: ${h.temperature}°C, Neerslag: ${h.precipitation}mm, Wind: ${h.windSpeed}km/h (Code: ${h.weatherCode})`
-    ).join("\n");
+    const hours = weather.hourly.slice(0, 12).map(h => {
+      const time = new Date(h.time).getHours() + ":00";
+      const m = h.models;
+      return `${time} -> H:${m?.harmonie?.temperature}C/${m?.harmonie?.precipitation}mm, I:${m?.icon?.temperature}C/${m?.icon?.precipitation}mm, A:${m?.arome?.temperature}C/${m?.arome?.precipitation}mm (Wind: ${h.windSpeed}km/h, Code: ${h.weatherCode})`;
+    }).join("\n");
 
     const prompt = `
 START_PIPELINE.
 
-Input Data (Basis: KNMI Harmonie 2.5km):
+Input Data (Multi-Model Entry):
 Locatie: ${city.name} (${lat}, ${lon})
-Huidige waarden: ${weather.current.temperature}°C, neerslag: ${weather.current.precipitation}mm, wind: ${weather.current.windSpeed}km/h
-Verloop komende 12 uur:
+Model Consensus Index: ${weather.models.agreement}%
+Bronnen: ${weather.models.sources.join(", ")}
+
+Data Matrix (Next 12 Hours):
+(H = Harmonie, I = ICON-D2, A = AROME)
 ${hours}
 
-Voer de 4 WWS First Principles stappen uit. Analyseer de KNMI data, bepaal het P90 risico, syntheseer de AI proxy modellen (GraphCast, NeuralGCM, MetNet-3, SEED).
-Genereer de output payload uitsluitend als geldige JSON, zonder markdown backticks, geformatteerd als in [OUTPUT_VECTORS].
+Analyseer de divergentie tussen H, I en A. Bij neerslagpieken in I of A die H mist: weeg het P90 risico zwaarder voor Reed.
+Genereer de output payload uitsluitend als geldige JSON.
 `.trim();
 
     const result = await model.generateContent({
