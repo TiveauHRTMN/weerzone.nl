@@ -140,6 +140,38 @@ export function getKutweerScore(w: WeatherData): number {
   return getMisereScore(w).score;
 }
 
+export function getDayProgression(w: WeatherData): string {
+  const hourly = w.hourly.slice(0, 24);
+  if (hourly.length < 24) return "";
+
+  const parts = [
+    { name: "Ochtend", range: [6, 12] },
+    { name: "Middag", range: [12, 18] },
+    { name: "Avond", range: [18, 24] },
+  ];
+
+  const summaries = parts.map((part) => {
+    const periodHours = hourly.filter(
+      (_, i) => i >= part.range[0] && i < part.range[1]
+    );
+    if (periodHours.length === 0) return `${part.name} —`;
+    const avgCode =
+      periodHours.reduce((acc, h) => acc + h.weatherCode, 0) /
+      periodHours.length;
+    const maxPrecip = Math.max(...periodHours.map((h) => h.precipitation));
+
+    let desc = "";
+    if (maxPrecip > 0.5) desc = "regen";
+    else if (avgCode <= 1) desc = "zon";
+    else if (avgCode <= 3) desc = "lichte bewolking";
+    else desc = "bewolkt";
+
+    return `${part.name} ${desc}`;
+  });
+
+  return summaries.join(", ") + ".";
+}
+
 const ROTATING_QUOTES = [
   "Buienradar gokt, wij rekenen. 48 uur messcherp met KNMI HARMONIE data. De rest is ruis.",
   "Morgen wordt het beter? Dat zeiden ze gisteren ook. Geloof die 14-daagse fantasie-apps niet blind.",
