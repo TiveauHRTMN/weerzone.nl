@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Piet — Het eerlijke 48-uurs weerbericht | Weerzone",
     description:
-      "48 uur vooruit voor jouw locatie. Eerlijk, kort, persoonlijk — zonder de glazen-bol-praat van een 14-daagse.",
+      "48 uur vooruit voor jouw locatie. Eerlijk, kort, persoonlijk — geen glazen-bol-praat over twee weken vooruit.",
     images: ["/og-image.png"],
   },
 };
@@ -21,10 +21,10 @@ const jsonLd = {
   "@type": "Article",
   headline: "Piet — Hyperlokaal 48-uurs weerbericht",
   description:
-    "De dagelijkse, eerlijke weeranalyse van Piet van Weerzone voor jouw GPS-locatie. Geen 14-daagse-gok, gewoon de komende 48 uur in gewone taal.",
+    "De dagelijkse, eerlijke weeranalyse van Piet voor jouw GPS-locatie. Geen 14-daagse-gok, gewoon de komende 48 uur in gewone taal.",
   author: {
-    "@type": "Person",
-    name: "Piet van Weerzone",
+    "@type": "Organization",
+    name: "Weerzone",
   },
   publisher: {
     "@type": "Organization",
@@ -46,7 +46,7 @@ export default function PietPage() {
           <header className="flex flex-col items-center mb-10 pt-2">
             <Link href="/" className="hover:opacity-90 transition-opacity">
               <img
-                src="/logo-white.png"
+                src="/weerzone-logo.png"
                 alt="Weerzone"
                 style={{ height: "60px", width: "auto" }}
                 className="drop-shadow-md"
@@ -60,8 +60,8 @@ export default function PietPage() {
             </h1>
             <p className="text-white/90 text-lg leading-relaxed font-medium">
               De volledige 48 uur voor jouw locatie. In gewone taal, met
-              concrete tips voor je dag — zoals Piet het zelf zou
-              vertellen.
+              concrete tips voor je dag — betrouwbaar en lokaal, voor
+              elke straat van Nederland.
             </p>
           </header>
 

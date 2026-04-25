@@ -70,6 +70,21 @@ function isDaylightHour(iso: string, sunrise?: string, sunset?: string): boolean
   return t >= new Date(sunrise).getTime() && t <= new Date(sunset).getTime();
 }
 
+function renderInlineBold(text: string): React.ReactNode[] {
+  // Renders **bold** segments without a markdown library.
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) => {
+    if (p.startsWith("**") && p.endsWith("**")) {
+      return (
+        <strong key={i} className="text-white font-black">
+          {p.slice(2, -2)}
+        </strong>
+      );
+    }
+    return <span key={i}>{p}</span>;
+  });
+}
+
 function dateLabel(d: Date): string {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -722,62 +737,61 @@ export default function PietExtended() {
         </div>
       )}
 
-      {/* PIET'S ANALYSE */}
-      <div className="homecard !p-8 border-l-4 border-l-accent-cyan">
+      {/* PIET'S VERHAAL — uitgebreide narratieve weeranalyse */}
+      <div className="homecard !p-7 sm:!p-9 border-l-4 border-l-accent-cyan">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 rounded-2xl bg-accent-cyan/20 flex items-center justify-center text-2xl shadow-inner">
             💬
           </div>
           <div>
-            <h2 className="homecard-kicker !text-accent-cyan !mb-0">Piet's Analyse</h2>
+            <h2 className="homecard-kicker !text-accent-cyan !mb-0">Het volledige weerverhaal</h2>
             <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">
               {new Date().toLocaleTimeString("nl-NL", {
                 hour: "2-digit",
                 minute: "2-digit",
-              })}
+              })}{" "}
+              · ochtend → morgen
             </p>
           </div>
         </div>
-        <div className="text-xl sm:text-2xl font-bold text-white leading-relaxed space-y-5">
-          {narrative.split("\n\n").map((para, i) => (
-            <p key={i}>{para}</p>
+        <div className="text-base sm:text-lg font-medium text-white/95 leading-[1.7] space-y-4">
+          {narrative.split(/\n\n+/).map((para, i) => (
+            <p key={i}>{renderInlineBold(para)}</p>
           ))}
         </div>
       </div>
 
-      {/* DAGDEEL-SAMENVATTING (ochtend/middag/avond/nacht/morgen) */}
-      <div className="space-y-4">
-        <div className="flex items-end justify-between px-1">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-            Samenvatting per dagdeel
-          </h3>
+      {/* DAGDEEL-SAMENVATTING — 1 overzicht: ochtend/middag/avond/nacht/morgen */}
+      <div className="homecard !p-0 overflow-hidden">
+        <div className="flex items-end justify-between px-6 pt-6 pb-4">
+          <h3 className="homecard-kicker !mb-0">Ochtend → Morgen in één blik</h3>
           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-            ochtend → morgen
+            wall-clock
           </span>
         </div>
-        <div className="space-y-3">
+        <div className="divide-y divide-white/10">
           {dayparts.map((d, idx) => (
             <motion.div
               key={d.key}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.04 }}
-              className="homecard !p-5 flex gap-4 items-start"
+              className="px-6 py-4 flex gap-4 items-start"
               style={d.empty ? { opacity: 0.4 } : undefined}
             >
               <div className="flex-none w-14 text-center">
-                <div className="text-3xl drop-shadow-lg">{d.emoji}</div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mt-1">
+                <div className="text-3xl drop-shadow-lg leading-none">{d.emoji}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mt-1.5">
                   {d.window}
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3 mb-1">
+                <div className="flex items-baseline justify-between gap-3 mb-0.5">
                   <h4 className="text-base font-black text-white tracking-tight">
                     {d.label}
                   </h4>
                   {!d.empty && (
-                    <span className="text-sm font-bold text-white/60 flex-none">
+                    <span className="text-sm font-bold text-white/70 flex-none">
                       {d.tempLine}
                     </span>
                   )}
@@ -788,11 +802,11 @@ export default function PietExtended() {
                   </p>
                 ) : (
                   <>
-                    <p className="text-sm text-white/80 leading-relaxed font-medium">
+                    <p className="text-[13px] text-white/85 leading-relaxed font-medium">
                       {d.description}. {d.rainLine} {d.windLine}
                     </p>
                     {d.hint && (
-                      <p className="text-[12px] text-accent-cyan/90 font-bold mt-1.5">
+                      <p className="text-[12px] text-accent-cyan/90 font-bold mt-1">
                         → {d.hint}
                       </p>
                     )}
@@ -814,7 +828,14 @@ export default function PietExtended() {
             scroll →
           </span>
         </div>
-        <div className="horizontal-scroll no-scrollbar -mx-4 px-4 pb-4">
+        <div
+          className="flex gap-3 overflow-x-auto overflow-y-hidden -mx-4 px-4 pb-4 snap-x scroll-smooth"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-x",
+            scrollbarWidth: "none",
+          }}
+        >
           {weather.hourly.slice(0, 48).map((h, i) => {
             const d = new Date(h.time);
             const isMidnight = d.getHours() === 0;
@@ -826,7 +847,7 @@ export default function PietExtended() {
             return (
               <div
                 key={h.time}
-                className="flex flex-col items-stretch min-w-[88px] snap-start"
+                className="flex flex-col items-stretch w-[88px] flex-shrink-0 snap-start"
               >
                 {showDayLabel && (
                   <span className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1.5 pl-1">
@@ -888,84 +909,6 @@ export default function PietExtended() {
           daily={weather.daily[1]}
           hourly={tomorrowHourly}
         />
-      </div>
-
-      {/* DAGDELEN */}
-      <div className="space-y-6">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 px-1 text-center">
-          Per dagdeel
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {blocks.map((b, idx) => {
-            const slice = weather.hourly.slice(b.start, b.end);
-            if (slice.length === 0) return null;
-            const avgTemp = Math.round(
-              slice.reduce((a, h) => a + h.temperature, 0) / slice.length
-            );
-            const minFeels = Math.min(...slice.map((h) => h.apparentTemperature));
-            const maxFeels = Math.max(...slice.map((h) => h.apparentTemperature));
-            const rainSum = slice.reduce((a, h) => a + h.precipitation, 0);
-            const maxWind = Math.max(...slice.map((h) => h.windSpeed || 0));
-            const midCode = slice[Math.floor(slice.length / 2)].weatherCode;
-            const midIso = slice[Math.floor(slice.length / 2)].time;
-            const isDay = b.daytime
-              ? isDaylightHour(midIso, weather.sunrise, weather.sunset)
-              : false;
-
-            return (
-              <motion.div
-                key={b.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="homecard"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <span className="homecard-kicker">{b.label}</span>
-                  <span className="text-3xl drop-shadow-xl">
-                    {getWeatherEmoji(midCode, isDay)}
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-5xl font-black text-white tracking-tighter">
-                    {avgTemp}°
-                  </span>
-                  <span className="text-[10px] font-bold text-white/40 uppercase">
-                    Gemiddeld
-                  </span>
-                </div>
-                {minFeels !== maxFeels && (
-                  <p className="text-[11px] font-bold text-white/40 mb-4">
-                    Voelt als {minFeels}°–{maxFeels}°
-                  </p>
-                )}
-                <div className="homecard-strip !mt-0 !pt-4">
-                  <div className="homecard-tick">
-                    <div className="tk">Regen</div>
-                    <div className="vl !text-accent-cyan">
-                      {rainSum > 0.1 ? `${rainSum.toFixed(1)}mm` : "0.0"}
-                    </div>
-                  </div>
-                  <div className="homecard-tick">
-                    <div className="tk">Wind</div>
-                    <div className="vl">
-                      {maxWind}{" "}
-                      <span className="text-[8px] opacity-50">km/h</span>
-                    </div>
-                  </div>
-                  <div className="homecard-tick">
-                    <div className="tk">UV</div>
-                    <div className="vl text-wz-sun">
-                      {isDay && weather.uvIndex > 0
-                        ? weather.uvIndex.toFixed(0)
-                        : "—"}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
       </div>
 
       <div className="pt-12 border-t border-white/10 flex justify-center">

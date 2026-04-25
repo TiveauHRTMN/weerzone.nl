@@ -12,6 +12,7 @@ import { loadWeather } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData } from "@/lib/types";
 import {
   getMainCommentary,
+  getDayProgression,
   getMisereScore,
   getFietsScore,
   getOutfitAdvice,
@@ -40,6 +41,13 @@ const RainRadar = dynamic(() => import("./RainRadar"), {
   loading: () => <div className="card p-4 text-center text-xs text-text-secondary">Radar laadt…</div>,
 });
 
+interface DashboardProps {
+  initialCity?: City;
+  initialWeather?: WeatherData;
+  beforeFooter?: React.ReactNode;
+  titleOverride?: string;
+}
+
 function getSavedCity(): City | null {
   if (typeof window === "undefined") return null;
   try {
@@ -54,7 +62,7 @@ function getSavedCity(): City | null {
   return null;
 }
 
-export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride: _titleOverride }: { initialCity?: City; initialWeather?: WeatherData; beforeFooter?: React.ReactNode; titleOverride?: string } = {}) {
+export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride }: DashboardProps) {
   const [city, setCity] = useState<City>(initialCity || getSavedCity() || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [loading, setLoading] = useState(!initialWeather);
@@ -144,38 +152,39 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
         <div className="flex flex-col gap-6 animate-fade-in">
           <div className="card overflow-hidden relative group shadow-2xl border-white/40">
-            <div className="absolute top-0 left-0 w-full h-40 sm:h-48 overflow-hidden z-[1] bg-white/5 backdrop-blur-2xl">
-              <img src="/four-seasons.png" alt="Seizoenen" className="w-full h-full object-cover opacity-60" />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90 z-10" />
-            </div>
-
-            <div className="p-7 sm:p-9 relative z-[2] pt-32 sm:pt-40">
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl sm:text-3xl font-black text-text-primary tracking-tight">{city.name}</h1>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-25"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black">Actueel</span>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center mt-4">
-                <div className="flex flex-col">
+            <div className="p-7 sm:p-9 relative z-[2] pt-12 sm:pt-16">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-2 py-0.5 rounded mb-4">Actueel</span>
+                  <h1 className="text-xl font-bold uppercase tracking-widest text-text-secondary mb-2">{city.name}</h1>
                   <div className="flex items-start">
                     <span className="text-8xl sm:text-9xl font-black tracking-tighter leading-none text-text-primary">{weather.current.temperature}</span>
                     <span className="text-4xl sm:text-5xl font-black mt-3 ml-1 text-text-primary leading-none">°</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
-                     <span className="text-xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
-                     <span className="text-base font-bold text-text-secondary">· Voelt als {weather.current.feelsLike}°</span>
-                  </div>
                 </div>
-                <div className="text-8xl sm:text-9xl leading-none">{getWeatherEmoji(weather.current.weatherCode, weather.current.isDay)}</div>
+                
+                <div className="text-8xl sm:text-9xl flex items-center justify-center drop-shadow-2xl animate-float">
+                  {getWeatherEmoji(weather.current.weatherCode, weather.current.isDay)}
+                </div>
               </div>
-              
-              <div className="mt-8 pt-6 border-t border-black/5">
+
+              <div className="flex flex-col gap-1 mb-8">
+                 <div className="flex items-center gap-3">
+                   <span className="text-2xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
+                   <span className="text-sm font-bold text-text-secondary bg-black/5 px-2 py-0.5 rounded-full">Voelt als {weather.current.feelsLike}°</span>
+                 </div>
+              </div>
+
+              <div className="mt-2 p-4 bg-white/40 rounded-2xl border border-white/60 shadow-sm">
+                <p className="text-sm font-bold text-text-primary mb-1">
+                  {getDayProgression(weather)}
+                </p>
+                <p className="text-[11px] text-text-secondary font-medium italic">
+                  Wij tonen alleen de komende 48 uur — de periode waarin een weersvoorspelling echt klopt.
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-black/5">
                 <p className="font-bold text-lg sm:text-xl text-text-primary leading-[1.4]">
                   {weather.summaryVerdict || getMainCommentary(weather)}
                 </p>
@@ -269,6 +278,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           </PremiumGate>
         </div>
+        {beforeFooter}
         <Footer />
         <AmazonStickyBar weather={weather} />
       </div>
