@@ -134,9 +134,9 @@ export async function executeWWSOrchestrator(lat: number, lon: number): Promise<
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Gemin-1.5-flash is ideaal voor razendsnelle JSON structuur
+    // Gebruik de stabiele identifier om API-versie issues te voorkomen
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-3-flash-preview",
       systemInstruction: SYSTEM_PROMPT 
     });
 
