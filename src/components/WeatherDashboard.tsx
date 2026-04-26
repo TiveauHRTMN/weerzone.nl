@@ -74,31 +74,37 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      setLoading(true);
-      // Parallel laden van weer en WWS (cache-first)
-      const [data, wwsPayload] = await Promise.all([
-        loadWeather(
-            city.lat,
-            city.lon,
-            (verdict) => {
-              if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
-            },
-            (fresh) => {
-              if (!cancelled) setWeather(fresh);
-            },
-            () => {}
-          ),
-        loadWWS(city.lat, city.lon)
-      ]);
+      // SWR: Niet blokkeren met setLoading(true) als we al data hebben
+      if (!weather) setLoading(true);
 
-      if (!cancelled) {
-        setWeather(data);
-        setWWS(wwsPayload);
-        setLoading(false);
-      }
+      // Parallel laden maar we wachten niet op WWS voor de initiële render
+      loadWeather(
+        city.lat,
+        city.lon,
+        (verdict) => {
+          if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
+        },
+        (fresh) => {
+          if (!cancelled) {
+            setWeather(fresh);
+            setLoading(false);
+          }
+        },
+        () => {}
+      ).then(data => {
+        if (!cancelled) {
+            setWeather(data);
+            setLoading(false);
+        }
+      });
+
+      // WWS laden op de achtergrond (non-blocking)
+      loadWWS(city.lat, city.lon).then(wwsPayload => {
+        if (!cancelled) setWWS(wwsPayload);
+      });
     }
     load();
-    const interval = setInterval(load, 15 * 60000); // 15 min refresh
+    const interval = setInterval(load, 15 * 60000);
     return () => {
       cancelled = true;
       clearInterval(interval);
