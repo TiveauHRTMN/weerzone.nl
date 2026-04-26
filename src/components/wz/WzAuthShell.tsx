@@ -30,7 +30,7 @@ export default function WzAuthShell({
       <aside className="auth-side">
         <div className="brand-pill">
           <Image
-            src="/logo-white.png"
+            src="/brand/weerzone-logo.png"
             alt="Weerzone"
             width={120}
             height={20}
