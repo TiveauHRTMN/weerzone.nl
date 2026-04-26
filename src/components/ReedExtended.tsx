@@ -22,18 +22,27 @@ function getSavedCity(): City | null {
   return null;
 }
 
-export default function ReedExtended() {
+interface ReedProps {
+    initialWeather?: WeatherData | null;
+    initialCity?: City;
+}
+
+export default function ReedExtended({ initialWeather, initialCity }: ReedProps) {
   const [city, setCity] = useState<City>(
-    () => getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]
+    () => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]
   );
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    
+    // Alleen full loader als we echt niks hebben
+    if (!weather) {
+        setLoading(true);
+    }
     
     Promise.all([
       loadWeather(city.lat, city.lon, () => {}, (fresh) => { if (!cancelled) setWeather(fresh); }),
@@ -92,14 +101,14 @@ export default function ReedExtended() {
         )}
       </div>
 
-      {loading && (
+      {loading && !weather && (
         <div className="homecard !p-12 text-center">
            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-4 text-white/40" />
            <p className="text-sm font-bold text-white/60">Reed scant de horizon op 1km resolutie…</p>
         </div>
       )}
 
-      {!loading && !hasExtreme && (
+      {(!loading || weather) && !hasExtreme && (
         <div className="homecard border-emerald-500/30 bg-emerald-500/10 !p-8 flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6">
             <ShieldCheck className="w-8 h-8 text-emerald-400" />
@@ -127,7 +136,7 @@ export default function ReedExtended() {
         </div>
       )}
 
-      {!loading && hasExtreme && alert && (
+      {(!loading || weather) && hasExtreme && alert && (
         <div className="space-y-4">
           <div className={`homecard !p-8 border-l-8 ${
             alert.severity === "RED" ? "border-l-rose-500 bg-rose-500/10" : 

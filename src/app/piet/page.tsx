@@ -4,6 +4,8 @@ import PietExtended from "@/components/PietExtended";
 import PremiumGate from "@/components/PremiumGate";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { getCachedTruth } from "@/lib/wws-truth-server";
+import { fetchWeatherData } from "@/lib/weather";
+import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Piet — Hyperlokaal weerbericht voor jouw straat",
@@ -39,7 +41,13 @@ const jsonLd = {
 export default async function PietPage() {
   // SSR: Haal de laatste waarheid alvast op van de server
   const loc = await getSavedLocationServer();
-  const initialTruth = loc ? await getCachedTruth(loc.lat, loc.lon, 'public') : null;
+  const defaultCity = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
+  const activeLoc = loc || defaultCity;
+  
+  const [initialTruth, initialWeather] = await Promise.all([
+    getCachedTruth(activeLoc.lat, activeLoc.lon, 'public'),
+    fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => null)
+  ]);
 
   return (
     <>
@@ -70,7 +78,11 @@ export default async function PietPage() {
           </header>
 
           <PremiumGate>
-            <PietExtended initialWWS={initialTruth} />
+            <PietExtended 
+              initialWWS={initialTruth} 
+              initialWeather={initialWeather} 
+              initialCity={loc || undefined}
+            />
           </PremiumGate>
 
           <p className="mt-12 text-center text-white/50 text-xs font-medium">

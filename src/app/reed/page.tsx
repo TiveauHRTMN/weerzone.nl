@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ReedExtended from "@/components/ReedExtended";
 import PremiumGate from "@/components/PremiumGate";
+import { getSavedLocationServer } from "@/lib/location-cookies";
+import { fetchWeatherData } from "@/lib/weather";
+import { DUTCH_CITIES } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Reed — extreem weer alerts",
@@ -10,7 +13,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://weerzone.nl/reed" },
 };
 
-export default function ReedPage() {
+export default async function ReedPage() {
+  const loc = await getSavedLocationServer();
+  const defaultCity = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
+  const activeLoc = loc || defaultCity;
+  
+  const initialWeather = await fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => null);
+
   return (
     <main className="min-h-screen bg-[#4a9ee8] text-white px-4 py-8 pb-20">
       <div className="max-w-2xl mx-auto">
@@ -30,7 +39,7 @@ export default function ReedPage() {
         </header>
 
         <PremiumGate>
-          <ReedExtended />
+          <ReedExtended initialWeather={initialWeather} initialCity={loc || undefined} />
         </PremiumGate>
       </div>
     </main>

@@ -466,19 +466,26 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: DayBlockPr
   );
 }
 
-export default function PietExtended({ initialWWS }: { initialWWS?: WWSPayload | null }) {
+interface PietProps {
+  initialWWS?: WWSPayload | null;
+  initialWeather?: WeatherData | null;
+  initialCity?: City;
+}
+
+export default function PietExtended({ initialWWS, initialWeather, initialCity }: PietProps) {
   const { primaryLocation, loading: sessionLoading } = useSession();
 
   const [city, setCity] = useState<City>(
     () =>
+      initialCity ||
       getSavedCity() ||
       DUTCH_CITIES.find((c) => c.name === "De Bilt") ||
       DUTCH_CITIES[0]
   );
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(initialWWS || null);
-  const [pietAnalysis, setPietAnalysis] = useState<string | null>(null);
-  const [loading, setLoading] = useState(!initialWWS);
+  const [pietAnalysis, setPietAnalysis] = useState<string | null>(initialWeather?.deepAnalysis || null);
+  const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
@@ -490,8 +497,8 @@ export default function PietExtended({ initialWWS }: { initialWWS?: WWSPayload |
   useEffect(() => {
     let cancelled = false;
     
-    // Alleen laden als we nog geen WWS hebben of als we van stad wisselen
-    if (!weather || (city.lat !== weather.current.temperature && !wws)) {
+    // Alleen laden als we nog geen data hebben of als we van stad wisselen
+    if (!weather) {
         setLoading(true);
     }
     
@@ -504,7 +511,7 @@ export default function PietExtended({ initialWWS }: { initialWWS?: WWSPayload |
         (fresh) => { if (!cancelled) setWeather(fresh); },
         (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }
       ),
-      wws ? Promise.resolve(wws) : loadWWS(city.lat, city.lon)
+      loadWWS(city.lat, city.lon)
     ])
     .then(([w, wwsPayload]) => {
       if (!cancelled) {
@@ -568,9 +575,9 @@ export default function PietExtended({ initialWWS }: { initialWWS?: WWSPayload |
     );
   }
 
-  // summaryVerdict is de korte homepage-verdict — NIET gebruiken op /piet (bevat
-  // getDayProgression-formaat + "Wij tonen alleen…" boilerplate).
-  const narrative = wws?.piet_update?.content || pietAnalysis || null;
+  // narrative is de tekst waar de gebruiker op wacht.
+  // We tonen NOOIT de skeleton als we getMainCommentary als fallback hebben!
+  const narrative = wws?.piet_update?.content || pietAnalysis || getMainCommentary(weather);
   const narrativeTitle = wws?.piet_update?.title || "Het volledige weerverhaal";
   const narrativeClosing = wws?.piet_update?.closing || "— Piet, voor Weerzone";
 
