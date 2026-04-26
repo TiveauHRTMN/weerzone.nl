@@ -11,12 +11,8 @@ import LoadingScreen from "./LoadingScreen";
 import { loadWeather, loadWWS } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
 import {
-  getDayProgression,
-  getMisereScore,
+  getMainCommentary,
   getFietsScore,
-  getOutfitAdvice,
-  getWindComment,
-  getUvLabel,
   getBbqScore,
   getStrandScore,
   getHooikoortsScore,
@@ -24,10 +20,10 @@ import {
   getWandelScore,
 } from "@/lib/commentary";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
-import { getTemperatureComparison } from "@/lib/climate";
 import { motion, AnimatePresence } from "framer-motion";
 import AffiliateCard from "./AffiliateCard";
 import AmazonStickyBar from "./AmazonStickyBar";
+import PietInlineTip from "./PietInlineTip";
 import EmailSubscribe from "./EmailSubscribe";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
@@ -69,45 +65,44 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const [isLocating, setIsLocating] = useState(false);
   const { tier } = useSession();
 
-  useEffect(() => {
+  const loadData = useCallback(async (targetCity: City) => {
     let cancelled = false;
-    async function load() {
-      // SWR: Niet blokkeren met setLoading(true) als we al data hebben
-      if (!weather) setLoading(true);
-
-      // Parallel laden maar we wachten niet op WWS voor de initiële render
-      loadWeather(
-        city.lat,
-        city.lon,
-        (verdict) => {
-          if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
-        },
-        (fresh) => {
-          if (!cancelled) {
-            setWeather(fresh);
-            setLoading(false);
-          }
-        },
-        () => {}
-      ).then(data => {
+    
+    loadWeather(
+      targetCity.lat,
+      targetCity.lon,
+      (verdict) => {
+        if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
+      },
+      (fresh) => {
         if (!cancelled) {
-            setWeather(data);
-            setLoading(false);
+          setWeather(fresh);
+          setLoading(false);
         }
-      });
+      },
+      () => {}
+    ).then(data => {
+      if (!cancelled) {
+          setWeather(data);
+          setLoading(false);
+      }
+    });
 
-      // WWS laden op de achtergrond (non-blocking)
-      loadWWS(city.lat, city.lon).then(wwsPayload => {
-        if (!cancelled) setWWS(wwsPayload);
-      });
-    }
-    load();
-    const interval = setInterval(load, 15 * 60000);
+    loadWWS(targetCity.lat, targetCity.lon).then(wwsPayload => {
+      if (!cancelled) setWWS(wwsPayload);
+    });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const cleanupPromise = loadData(city);
+    const interval = setInterval(() => loadData(city), 15 * 60000);
     return () => {
-      cancelled = true;
+      cleanupPromise.then(fn => fn && fn());
       clearInterval(interval);
     };
-  }, [city]);
+  }, [city, loadData]);
 
   const handleLocationClick = () => {
     if (!tier) {
@@ -145,6 +140,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   }, []);
 
   if (loading || !weather) return <LoadingScreen />;
+
+  const narrative = wws?.piet_update?.content || weather.summaryVerdict || getMainCommentary(weather);
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -199,6 +196,12 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               </div>
 
 
+              <div className="pt-6 border-t border-black/5">
+                <p className="font-bold text-lg sm:text-xl text-text-primary leading-[1.4]">
+                  {narrative}
+                </p>
+                <PietInlineTip weather={weather} />
+              </div>
             </div>
           </div>
 
@@ -273,7 +276,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">🌬️ Wind</span><div className="text-2xl font-black">{weather.current.windSpeed}</div><p className="text-[9px] font-black uppercase mt-1">BFT {getWindBeaufort(weather.current.windSpeed).scale}</p></div>
               <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">🌡️ Gevoel</span><div className="text-2xl font-black">{weather.current.feelsLike}°</div></div>
               <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">💧 Vocht</span><div className="text-2xl font-black">{weather.current.humidity}%</div></div>
-              <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">🌍 Klimaat</span><div className="text-2xl font-black">{(() => { const climate = getTemperatureComparison(weather.current.temperature, new Date().getMonth()); return `${climate.diff > 0 ? '+' : ''}${climate.diff}°`; })()}</div></div>
             </div>
           </div>
 
@@ -302,7 +304,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                     <div key={hour.time} className={`border rounded-2xl p-3 flex flex-col items-center justify-between min-w-[76px] h-[120px] snap-start ${idx === 0 ? 'bg-accent-orange/10 border-accent-orange/40' : 'bg-black/[0.03] border-black/5'}`}>
                       <div className="text-[10px] font-black text-text-muted uppercase">{idx === 0 ? 'Nu' : `${h}:00`}</div>
                       <div className="text-3xl">{getWeatherEmoji(hour.weatherCode, h > 6 && h < 21)}</div>
-                      <div className="text-sm font-black">{hourlyMetric === "temp" ? hour.temperature + "°" : hourlyMetric === "rain" ? hour.precipitation.toFixed(1) : hour.windSpeed}</div>
+                      <div className="text-sm font-black">{hourlyMetric === "temp" ? hour.temperature + "°" : hourlyMetric === "rain" ? hour.precipitation.toFixed(1) + "mm" : hour.windSpeed + "km/h"}</div>
                       <div className="w-full h-1 bg-black/5 rounded-full overflow-hidden"><div className={`h-full ${hour.confidence === "high" ? "bg-accent-green" : "bg-accent-amber"}`} style={{ width: '100%' }} /></div>
                     </div>
                   );
