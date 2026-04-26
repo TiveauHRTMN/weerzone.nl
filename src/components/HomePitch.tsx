@@ -33,12 +33,11 @@ export default function HomePitch() {
         {PERSONA_ORDER.map((tier) => {
           const p = PERSONAS[tier];
           const hasPrice = p.priceCents !== undefined && p.founderPriceCents !== undefined;
-          const isComingSoon = tier === "steve";
 
           return (
             <Link
               key={tier}
-              href={isComingSoon ? "/zakelijk" : `/app/signup?tier=${tier}`}
+              href={`/app/signup?tier=${tier}`}
               className="group rounded-2xl bg-white/95 backdrop-blur p-5 sm:p-6 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all"
             >
               <div className="flex items-center gap-2 mb-3">
@@ -73,25 +72,14 @@ export default function HomePitch() {
                       Normaal {formatPrice(p.priceCents!)}/mnd, binnenkort
                     </p>
                   </>
-                ) : (
-                  <>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-black text-text-primary">
-                        In ontwikkeling
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-text-muted mt-1">
-                      Binnenkort beschikbaar voor zakelijk gebruik
-                    </p>
-                  </>
-                )}
+                ) : null}
               </div>
 
               <div
                 className="mt-4 text-center rounded-xl py-2.5 text-white font-bold text-sm group-hover:brightness-110"
                 style={{ background: p.color }}
               >
-                {isComingSoon ? "Lees meer →" : "Aanmelden →"}
+                Aanmelden →
               </div>
             </Link>
           );
