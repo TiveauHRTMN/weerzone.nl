@@ -7,7 +7,6 @@ import { Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "../NLPulse";
 import { useSession } from "@/lib/session-context";
-import { isFounderEmail } from "@/lib/founders";
 
 const LINKS: Array<{ key: string; label: string; href: string }> = [
   { key: "weer", label: "Weer", href: "/" },
@@ -26,9 +25,8 @@ function isActive(pathname: string, key: string): boolean {
 
 export default function WzNavbar() {
   const pathname = usePathname() ?? "/";
-  const { user } = useSession();
+  const { user, isFounder } = useSession();
   const [open, setOpen] = useState(false);
-  const isFounder = isFounderEmail(user?.email);
 
   return (
     <header

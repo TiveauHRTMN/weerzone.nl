@@ -9,6 +9,7 @@ import { isFounderEmail, FOUNDER_TIER } from "@/lib/founders";
 interface SessionState {
   user: User | null;
   tier: PersonaTier | null;
+  isFounder: boolean;
   primaryLocation: { name: string; lat: number; lon: number } | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -17,6 +18,7 @@ interface SessionState {
 const SessionContext = createContext<SessionState>({
   user: null,
   tier: null,
+  isFounder: false,
   primaryLocation: null,
   loading: true,
   refresh: async () => {},
@@ -30,6 +32,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [tier, setTier] = useState<PersonaTier | null>(null);
+  const [isFounder, setIsFounder] = useState(false);
   const [primaryLocation, setPrimaryLocation] = useState<{ name: string; lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +42,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
     if (!u) {
       setTier(null);
+      setIsFounder(false);
       setPrimaryLocation(null);
       setLoading(false);
       return;
@@ -65,8 +69,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       (tierRanking[b.tier] ?? 0) - (tierRanking[a.tier] ?? 0)
     );
     
+    const founderCheck = isFounderEmail(u.email);
+    setIsFounder(founderCheck);
     let t = (sortedSubs[0]?.tier ?? null) as PersonaTier | null;
-    if (!t && isFounderEmail(u.email)) t = FOUNDER_TIER;
+    if (!t && founderCheck) t = FOUNDER_TIER;
     setTier(t && PERSONA_ORDER.includes(t) ? t : null);
 
     if (locRes.data) {
@@ -92,7 +98,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SessionContext.Provider value={{ user, tier, primaryLocation, loading, refresh: hydrate }}>
+    <SessionContext.Provider value={{ user, tier, isFounder, primaryLocation, loading, refresh: hydrate }}>
       {children}
     </SessionContext.Provider>
   );
