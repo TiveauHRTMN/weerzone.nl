@@ -18,12 +18,10 @@ async function hermesPatrol() {
     return;
   }
 
-  console.log("🚀 HERMES: Starting WWS Patrol Loop...");
+  console.log(`🚀 HERMES: Starting WWS Patrol Loop for ${KNMI_STATIONS.length} stations...`);
 
-  // 1. Patrol the Ground Truth Stations (Public)
-  const patrolList = KNMI_STATIONS.slice(0, 5); // Start with top 5
-  
-  for (const station of patrolList) {
+  // 1. Patrol ALL Ground Truth Stations (Public)
+  for (const station of KNMI_STATIONS) {
     console.log(`📡 HERMES: Analysing Public Truth for ${station.name}...`);
     
     try {
@@ -38,7 +36,7 @@ async function hermesPatrol() {
           lon: station.lon,
           sector: 'public',
           payload: publicTruth,
-          consensus_index: 100 - (publicTruth.api_grid_1km.divergence_delta * 5), // heuristic
+          consensus_index: publicTruth.api_grid_1km.divergence_delta ? 100 - (publicTruth.api_grid_1km.divergence_delta * 5) : 100,
           divergence_delta: publicTruth.api_grid_1km.divergence_delta,
           is_alert: publicTruth.reed_alert?.active || false,
           valid_until: new Date(Date.now() + 30 * 60 * 1000).toISOString()
@@ -51,12 +49,7 @@ async function hermesPatrol() {
         });
       }
     } catch (err) {
-      console.error(`❌ HERMES ERROR [Public]:`, err);
-      await supabase.from("wws_patrol_log").insert({
-        action: 'public_truth_update',
-        status: 'error',
-        meta: { place: station.name, error: String(err) }
-      });
+      console.error(`❌ HERMES ERROR [Public] for ${station.name}:`, err);
     }
   }
 
