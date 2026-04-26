@@ -29,13 +29,13 @@ export default function WzAuthShell({
     <div className="auth-shell">
       <aside className="auth-side">
         <div className="brand-pill">
-          <Image 
-            src="/logo-white.png" 
-            alt="Weerzone" 
-            width={100} 
-            height={20} 
-            className="brand-logo"
+          <Image
+            src="/logo-white.png"
+            alt="Weerzone"
+            width={120}
+            height={20}
             priority
+            style={{ height: 20, width: "auto", display: "block" }}
           />
         </div>
 
