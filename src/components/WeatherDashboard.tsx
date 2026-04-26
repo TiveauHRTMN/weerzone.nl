@@ -11,7 +11,6 @@ import LoadingScreen from "./LoadingScreen";
 import { loadWeather, loadWWS } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
 import {
-  getMainCommentary,
   getDayProgression,
   getMisereScore,
   getFietsScore,
@@ -29,7 +28,6 @@ import { getTemperatureComparison } from "@/lib/climate";
 import { motion, AnimatePresence } from "framer-motion";
 import AffiliateCard from "./AffiliateCard";
 import AmazonStickyBar from "./AmazonStickyBar";
-import PietInlineTip from "./PietInlineTip";
 import EmailSubscribe from "./EmailSubscribe";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
@@ -148,11 +146,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
   if (loading || !weather) return <LoadingScreen />;
 
-  // Gebruik de korte teaser uit WWS indien beschikbaar voor razendsnelle weergave
-  const teaserVerdict = wws?.piet_update?.content 
-    ? (wws.piet_update.content.length > 250 ? wws.piet_update.content.substring(0, 247) + "..." : wws.piet_update.content)
-    : weather.summaryVerdict || getMainCommentary(weather);
-
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
@@ -206,12 +199,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               </div>
 
 
-              <div className="pt-6 border-t border-black/5">
-                <p className="font-bold text-lg sm:text-xl text-text-primary leading-[1.4]">
-                  {teaserVerdict}
-                </p>
-                <PietInlineTip weather={weather} />
-              </div>
             </div>
           </div>
 
