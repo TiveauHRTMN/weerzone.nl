@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import { WzNavbar, WzFooter } from "@/components/wz";
+import WzAuthShell from "@/components/wz/WzAuthShell";
 import { displaySubCount } from "@/lib/social-proof";
 
 const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed", "steve"];
@@ -35,18 +36,21 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
   // Founder/CEO: geen abonnement UI
   if (isFounder) {
     return (
-      <div className="wz-page min-h-screen">
-        <WzNavbar />
-        <div style={{ maxWidth: 640, margin: "0 auto", padding: "clamp(60px,8vw,100px) clamp(20px,4vw,48px)", textAlign: "center" }}>
-          <span className="badge brand" style={{ marginBottom: 20 }}>Founder toegang</span>
-          <h1 className="h-1" style={{ marginBottom: 16 }}>Je hebt volledige toegang.</h1>
-          <p className="t-body" style={{ marginBottom: 32 }}>
-            Als founder heb je Steve-niveau toegang tot alle functies van Weerzone, zonder abonnement.
+      <WzAuthShell
+        title={"Je hebt\nvolledige toegang."}
+        subtitle="Als founder heb je Steve-niveau toegang tot alle functies van Weerzone, nu en na de lancering."
+      >
+        <div className="animate-in fade-in slide-in-from-right-4 duration-500 text-center py-4">
+          <span className="badge sun" style={{ marginBottom: 24, display: "inline-flex" }}>★ Founder</span>
+          <h1 className="h-1 mb-3">Alles staat klaar.</h1>
+          <p className="t-body mb-8">
+            Je hebt toegang tot Piet, Reed en Steve — zonder abonnement, zonder creditcard.
           </p>
-          <Link href="/app" className="btn btn-primary btn-lg">Naar dashboard →</Link>
+          <Link href="/app" className="btn btn-primary btn-block btn-lg">
+            Naar dashboard →
+          </Link>
         </div>
-        <WzFooter />
-      </div>
+      </WzAuthShell>
     );
   }
 
