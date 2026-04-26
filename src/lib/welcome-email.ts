@@ -8,6 +8,11 @@ export function getWelcomeEmailHtml(email: string, tier: PersonaTier, city?: str
   const persona = PERSONAS[tier];
   // We laten Piet en Reed altijd zien in de introductie, 
   // maar sturen de persona die ze kozen als focus.
+
+  const hasPrice = persona.founderPriceCents !== undefined;
+  const pricingText = hasPrice 
+    ? `Vroege vogels houden hun prijs van ${formatPrice(persona.founderPriceCents!)}/mnd voor altijd.`
+    : "Binnenkort beschikbaar voor zakelijk gebruik.";
   
   return `
 <!DOCTYPE html>
@@ -69,7 +74,7 @@ export function getWelcomeEmailHtml(email: string, tier: PersonaTier, city?: str
 
     <div style="padding:40px;background:#f8fafc;text-align:center;border-top:1px solid #f1f5f9;">
       <p style="margin:0;font-size:14px;color:#1e293b;font-weight:900;text-transform:uppercase;letter-spacing:1px;">48 uur vooruit. De rest is ruis.</p>
-      <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Je betaalt tijdelijk niks. Vroege vogels houden hun prijs van ${formatPrice(persona.founderPriceCents)}/mnd voor altijd.</p>
+      <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Je betaalt tijdelijk niks. ${pricingText}</p>
     </div>
   </div>
 </body>

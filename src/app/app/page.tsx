@@ -70,7 +70,7 @@ export default async function AppDashboard() {
                     <>Volledige toegang <span className="text-sm font-normal text-text-muted"> — alle personas</span></>
                   ) : (
                     <>
-                      {formatPrice(persona.founderPriceCents)}
+                      {formatPrice(persona.founderPriceCents || 0)}
                       <span className="text-sm font-normal text-text-muted">
                         {" "}/ maand, voor altijd
                       </span>

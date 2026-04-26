@@ -513,7 +513,7 @@ export default function CheckoutClient({
                     color: "var(--wz-text-mute)",
                   }}
                 >
-                  {formatPrice(persona.priceCents)}/mnd
+                  {formatPrice(persona.priceCents || 0)}/mnd
                 </span>
               </div>
 
@@ -536,7 +536,7 @@ export default function CheckoutClient({
                 className="t-small"
                 style={{ textAlign: "right", marginTop: 4 }}
               >
-                Straks: {formatPrice(persona.priceCents)}/mnd · opzeggen kan
+                Straks: {formatPrice(persona.priceCents || 0)}/mnd · opzeggen kan
                 maandelijks
               </div>
 

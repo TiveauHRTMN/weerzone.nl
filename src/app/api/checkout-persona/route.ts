@@ -14,6 +14,11 @@ export async function POST(req: Request) {
     }
 
     const persona = PERSONAS[tier as PersonaTier];
+
+    if (persona.founderPriceCents === undefined) {
+      return NextResponse.json({ error: "Dit plan is momenteel niet beschikbaar voor directe aanmelding." }, { status: 400 });
+    }
+
     const supabase = await createSupabaseServerClient();
 
     const {
