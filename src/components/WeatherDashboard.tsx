@@ -238,9 +238,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           </div>
 
-          <div className="card p-4 sm:p-6 border-white/40 shadow-xl">
-            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-6 px-1">Activiteiten</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="card p-6 sm:p-8 border-white/40 shadow-xl">
+            <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-8 px-1">Activiteiten</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
               {[
                 { id: "bbq", label: "BBQ", score: getBbqScore(weather), emoji: "🍖" },
                 { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), emoji: "🤧" },
@@ -249,25 +249,25 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                 { id: "fietsen", label: "Fietsen", score: getFietsScore(weather).score, emoji: "🚲" },
                 { id: "wandelen", label: "Wandelen", score: getWandelScore(weather), emoji: "🥾" },
               ].map((item) => (
-                <div key={item.id} className="relative aspect-square rounded-2xl border border-white/60 bg-white/5 backdrop-blur-md flex flex-col items-center justify-center">
-                  <div className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black border border-white/10 ${item.score >= 7 ? 'text-accent-green' : item.score >= 5 ? 'text-accent-amber' : 'text-accent-red'}`}>
+                <div key={item.id} className="relative aspect-square rounded-3xl border border-white/60 bg-white/5 backdrop-blur-md flex flex-col items-center justify-center transition-transform hover:scale-105">
+                  <div className={`absolute -top-3 -right-3 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 border-white/20 shadow-lg ${item.score >= 7 ? 'bg-accent-green text-white' : item.score >= 5 ? 'bg-accent-amber text-white' : 'bg-accent-red text-white'}`}>
                     {item.score}
                   </div>
-                  <div className="text-5xl mb-1">{item.emoji}</div>
-                  <div className="absolute bottom-2 text-[8px] font-black text-text-muted uppercase tracking-wider">{item.label}</div>
+                  <div className="text-6xl mb-3 drop-shadow-md">{item.emoji}</div>
+                  <div className="text-[11px] font-black text-text-muted uppercase tracking-widest">{item.label}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="card p-4 sm:p-6 border-white/40 shadow-xl">
-            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-6 px-1">Details</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-6 gap-x-4">
-              <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">☀️ Zon</span><div className="text-2xl font-black">UV {weather.uvIndex.toFixed(0)}</div></div>
-              <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">🌧️ Regen</span><div className="text-2xl font-black">{weather.current.precipitation} MM</div></div>
-              <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">🌬️ Wind</span><div className="text-2xl font-black">{weather.current.windSpeed}</div><p className="text-[9px] font-black uppercase mt-1">BFT {getWindBeaufort(weather.current.windSpeed).scale}</p></div>
-              <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">🌡️ Gevoel</span><div className="text-2xl font-black">{weather.current.feelsLike}°</div></div>
-              <div className="flex flex-col"><span className="text-[10px] font-black text-text-muted uppercase mb-2">💧 Vocht</span><div className="text-2xl font-black">{weather.current.humidity}%</div></div>
+          <div className="card p-6 sm:p-8 border-white/40 shadow-xl">
+            <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-8 px-1">Details</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-10 gap-x-6">
+              <div className="flex flex-col"><span className="text-[11px] font-black text-text-muted uppercase mb-3">☀️ Zon</span><div className="text-4xl font-black text-text-primary">UV {weather.uvIndex.toFixed(0)}</div></div>
+              <div className="flex flex-col"><span className="text-[11px] font-black text-text-muted uppercase mb-3">🌧️ Regen</span><div className="text-4xl font-black text-text-primary">{weather.current.precipitation} <span className="text-xl">MM</span></div></div>
+              <div className="flex flex-col"><span className="text-[11px] font-black text-text-muted uppercase mb-3">🌬️ Wind</span><div className="text-4xl font-black text-text-primary">{weather.current.windSpeed}</div><p className="text-[10px] font-black uppercase mt-1 text-text-muted">BFT {getWindBeaufort(weather.current.windSpeed).scale}</p></div>
+              <div className="flex flex-col"><span className="text-[11px] font-black text-text-muted uppercase mb-3">🌡️ Gevoel</span><div className="text-4xl font-black text-text-primary">{weather.current.feelsLike}°</div></div>
+              <div className="flex flex-col"><span className="text-[11px] font-black text-text-muted uppercase mb-3">💧 Vocht</span><div className="text-4xl font-black text-text-primary">{weather.current.humidity}%</div></div>
             </div>
           </div>
 
