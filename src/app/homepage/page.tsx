@@ -6,6 +6,8 @@ import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   alternates: {
     canonical: "https://weerzone.nl",
