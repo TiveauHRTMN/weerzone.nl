@@ -163,35 +163,36 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         <NavBar activeCity={city.name} isLocating={isLocating} />
 
         <div className="flex flex-col gap-6 animate-fade-in">
+          {/* ACTUEEL SECTION: HERO SIZE */}
           <div className="card overflow-hidden relative group shadow-2xl border-white/40">
-            <div className="p-7 sm:p-9 relative z-[2] pt-10 sm:pt-16">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+            <div className="p-8 sm:p-12 relative z-[2] pt-12 sm:pt-20">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 mb-12">
                 <div className="flex flex-col items-start">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-2 py-0.5 rounded">Actueel</span>
+                  <div className="flex items-center gap-2 mb-6">
+                    <span className="text-[12px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-3 py-1 rounded">Actueel</span>
                     {wws && (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">Synthese Live</span>
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Synthese Live</span>
                         </div>
                     )}
                   </div>
-                  <h1 className="text-xl font-bold uppercase tracking-widest text-text-secondary mb-2">{city.name}</h1>
+                  <h1 className="text-3xl font-black uppercase tracking-[0.2em] text-text-secondary mb-3">{city.name}</h1>
                   <div className="flex items-start">
-                    <span className="text-8xl sm:text-9xl font-black tracking-tighter leading-none text-text-primary">{weather.current.temperature}</span>
-                    <span className="text-4xl sm:text-5xl font-black mt-3 ml-1 text-text-primary leading-none">°</span>
+                    <span className="text-[9rem] sm:text-[11rem] font-black tracking-tighter leading-none text-text-primary">{weather.current.temperature}</span>
+                    <span className="text-5xl sm:text-6xl font-black mt-5 ml-1 text-text-primary leading-none">°</span>
                   </div>
                 </div>
                 
-                <div className="text-8xl sm:text-9xl flex items-center justify-center drop-shadow-2xl animate-float">
+                <div className="text-[9rem] sm:text-[11rem] flex items-center justify-center drop-shadow-2xl animate-float">
                   {getWeatherEmoji(weather.current.weatherCode, weather.current.isDay)}
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1 mb-2">
-                 <div className="flex items-center gap-3">
-                   <span className="text-2xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
-                   <span className="text-sm font-bold text-text-secondary bg-black/5 px-2 py-0.5 rounded-full">Voelt als {weather.current.feelsLike}°</span>
+              <div className="flex flex-col gap-3">
+                 <div className="flex flex-wrap items-center gap-5">
+                   <span className="text-4xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
+                   <span className="text-lg font-bold text-text-secondary bg-black/5 px-4 py-1.5 rounded-full shadow-inner">Voelt als {weather.current.feelsLike}°</span>
                  </div>
               </div>
             </div>
@@ -221,17 +222,18 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               </div>
           )}
 
-          <div className="card p-4 sm:p-6 border-white/40 shadow-xl">
-            <h3 className="text-[11px] font-black text-text-primary uppercase tracking-[0.2em] mb-6 px-1">Korte Termijn</h3>
-            <div className="grid grid-cols-2 gap-4">
+          {/* KORTE TERMIJN SECTION: LARGER CARDS */}
+          <div className="card p-6 sm:p-10 border-white/40 shadow-xl">
+            <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em] mb-8 px-1">Korte Termijn</h3>
+            <div className="grid grid-cols-2 gap-6">
               {[0, 1].map((i) => (
-                <div key={i} className="flex flex-col gap-3">
-                  <div className="w-full aspect-[4/3] rounded-2xl border border-white/60 bg-white/5 backdrop-blur-md flex items-center justify-center">
-                    <span className="text-6xl">{getWeatherEmoji(weather.daily[i].weatherCode, true)}</span>
+                <div key={i} className="flex flex-col gap-4">
+                  <div className="w-full aspect-square rounded-[32px] border border-white/60 bg-white/5 backdrop-blur-md flex items-center justify-center shadow-inner transition-transform hover:scale-105">
+                    <span className="text-8xl sm:text-9xl drop-shadow-xl">{getWeatherEmoji(weather.daily[i].weatherCode, true)}</span>
                   </div>
-                  <div className="px-1 flex justify-between items-baseline">
-                    <span className="text-[11px] font-black uppercase">{i === 0 ? "Vandaag" : "Morgen"}</span>
-                    <span className="text-lg font-black">{weather.daily[i].tempMax}°</span>
+                  <div className="px-2 flex justify-between items-center">
+                    <span className="text-sm sm:text-base font-black uppercase tracking-widest text-text-secondary">{i === 0 ? "Vandaag" : "Morgen"}</span>
+                    <span className="text-3xl sm:text-4xl font-black text-text-primary">{weather.daily[i].tempMax}°</span>
                   </div>
                 </div>
               ))}
@@ -284,7 +286,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider">Komende Uren</h3>
                 <div className="flex items-center gap-1 bg-black/5 rounded-full p-0.5">
-                  {[{ k: "temp", i: <Thermometer className="w-3 h-3" /> }, { k: "rain", i: <CloudRain className="w-3 h-3" /> }, { k: "wind", i: <Wind className="w-3 h-3" /> }].map(m => (
+                  {[{ k: "temp", i: <Thermometer className="w-3.5 h-3.5" /> }, { k: "rain", i: <CloudRain className="w-3.5 h-3.5" /> }, { k: "wind", i: <Wind className="w-3.5 h-3.5" /> }].map(m => (
                     <button key={m.k} onClick={() => setHourlyMetric(m.k as any)} className={`w-7 h-7 rounded-full flex items-center justify-center ${hourlyMetric === m.k ? 'bg-white shadow-sm' : 'text-text-muted'}`}>{m.i}</button>
                   ))}
                 </div>
