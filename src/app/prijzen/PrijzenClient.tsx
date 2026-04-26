@@ -97,6 +97,9 @@ export default function PrijzenClient() {
             const p = PERSONAS[tier];
             const highlight = tier === HIGHLIGHT;
             const badge = BADGES[tier];
+            const isComingSoon = tier === "steve";
+            const hasPrice = p.priceCents !== undefined;
+
             return (
               <div
                 key={tier}
@@ -138,27 +141,39 @@ export default function PrijzenClient() {
                     className="wz-badge-sun inline-block mb-2"
                     style={{ fontSize: 10 }}
                   >
-                    Nu aanmelden
+                    {isComingSoon ? "In ontwikkeling" : "Nu aanmelden"}
                   </span>
                   <div
                     className="font-extrabold leading-tight tracking-tight mb-1"
                     style={{ fontSize: 20 }}
                   >
-                    Tijdelijk gratis
+                    {isComingSoon ? "Binnenkort" : "Tijdelijk gratis"}
                   </div>
                   <div className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>
-                    Straks {formatPrice(p.priceCents)}/mnd — geen creditcard nodig
+                    {isComingSoon || !hasPrice 
+                      ? "Geen wachtlijst, mail zakelijk@weerzone.nl" 
+                      : `Straks ${formatPrice(p.priceCents!)}/mnd — geen creditcard nodig`
+                    }
                   </div>
                 </div>
 
-                <Link
-                  href={`/app/signup?tier=${tier}`}
-                  className={`wz-btn wz-btn-block wz-btn-lg ${
-                    highlight ? "wz-btn-primary" : "wz-btn-ghost"
-                  }`}
-                >
-                  Aanmelden →
-                </Link>
+                {isComingSoon ? (
+                  <button
+                    disabled
+                    className="wz-btn wz-btn-block wz-btn-lg bg-slate-200 text-slate-500 cursor-not-allowed"
+                  >
+                    Binnenkort beschikbaar
+                  </button>
+                ) : (
+                  <Link
+                    href={`/app/signup?tier=${tier}`}
+                    className={`wz-btn wz-btn-block wz-btn-lg ${
+                      highlight ? "wz-btn-primary" : "wz-btn-ghost"
+                    }`}
+                  >
+                    Aanmelden →
+                  </Link>
+                )}
 
                 <ul className="list-none p-0 mt-5 mb-0">
                   {p.features.map((f, i) => (

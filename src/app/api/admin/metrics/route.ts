@@ -39,11 +39,10 @@ export async function GET() {
     }
   });
 
-  const monthlyIncome = 
-    (stats.piet * PERSONAS.piet.priceCents) +
-    (stats.reed * PERSONAS.reed.priceCents) +
-    (stats.steve * PERSONAS.steve.priceCents);
-
+  const monthlyIncome =
+    (stats.piet * (PERSONAS.piet.priceCents || 0)) +
+    (stats.reed * (PERSONAS.reed.priceCents || 0)) +
+    (stats.steve * (PERSONAS.steve.priceCents || 0));
   const affiliateReport = await getWeeklyReport();
 
   return NextResponse.json({

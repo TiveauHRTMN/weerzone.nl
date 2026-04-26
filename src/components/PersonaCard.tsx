@@ -13,6 +13,7 @@ interface Props {
 export default function PersonaCard({ tier, onSelect, compact = false, highlighted = false }: Props) {
   const p = PERSONAS[tier];
   const isComingSoon = tier === "steve";
+  const hasPrice = p.priceCents !== undefined && p.founderPriceCents !== undefined;
 
   return (
     <div
@@ -54,27 +55,27 @@ export default function PersonaCard({ tier, onSelect, compact = false, highlight
       {/* Prijs */}
       <div className="mb-4 pb-4 border-b border-black/10">
         <div className="flex items-baseline gap-2">
-          {isComingSoon ? (
+          {isComingSoon || !hasPrice ? (
             <span className="text-3xl font-black text-text-primary">
               Coming Soon
             </span>
           ) : (
             <>
               <span className="text-3xl font-black text-text-primary">
-                {formatPrice(p.priceCents)}
+                {formatPrice(p.priceCents!)}
               </span>
               <span className="text-sm text-text-muted">/mnd, binnenkort</span>
             </>
           )}
         </div>
         <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/5">
-          {isComingSoon ? (
+          {isComingSoon || !hasPrice ? (
             <span className="text-xs font-bold text-text-primary">
-              Beschikbaar vanaf juni '26
+              Ontwikkeling in volle gang
             </span>
           ) : (
             <span className="text-xs font-bold text-text-primary">
-              Introductieprijs: {formatPrice(p.founderPriceCents)}/mnd · vastgezet
+              Introductieprijs: {formatPrice(p.founderPriceCents!)}/mnd · vastgezet
             </span>
           )}
         </div>

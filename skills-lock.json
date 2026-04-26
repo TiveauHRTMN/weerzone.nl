@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "google-agents-cli-adk-code": {
+      "source": "google/agents-cli",
+      "sourceType": "github",
+      "computedHash": "cffa39443be27bfadd459c79ffb6b2f536843ce8c5a02995826639dbb0cd18f0"
+    }
+  }
+}

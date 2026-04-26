@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Weerzone — Auth & Abonnementen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="design-system.css" />
+<style>
+  body { background: var(--bg); min-height: 100vh; }
+
+  /* Floating prototype navigator (collapsible, doesn't break responsive) */
+  #proto-nav {
+    position: fixed; bottom: 20px; right: 20px; z-index: 200;
+    background: #0f1a2c; color: #e8edf7;
+    border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    font-family: 'Manrope', sans-serif;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
+    max-width: calc(100vw - 32px);
+  }
+  #proto-nav .head {
+    padding: 10px 14px; font-size: 12px; font-weight: 700;
+    letter-spacing:.08em; text-transform: uppercase;
+    color:#8998b9; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  }
+  #proto-nav .head span.dot { width: 8px; height: 8px; border-radius:50%; background:#5b9bff; }
+  #proto-nav .body { display: none; padding: 4px 8px 10px; max-height: 60vh; overflow-y: auto; }
+  #proto-nav.open .body { display: block; }
+  #proto-nav.open .head { border-bottom: 1px solid rgba(255,255,255,.08); }
+  #proto-nav .sec { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#6b7997; padding: 10px 8px 4px; }
+  #proto-nav a {
+    display:flex; align-items:center; gap:8px;
+    padding: 8px 10px; border-radius: 8px;
+    text-decoration:none; color:#b9c4dc; font-size:13px; font-weight:600;
+  }
+  #proto-nav a:hover { background: rgba(255,255,255,.04); color:#fff; }
+  #proto-nav a.on { background: var(--brand); color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<!-- Prototype navigator -->
+<div id="proto-nav">
+  <div class="head" onclick="document.getElementById('proto-nav').classList.toggle('open')">
+    <span style="display:flex;align-items:center;gap:8px"><span class="dot"></span> Prototype</span>
+    <span id="currentRoute" style="color:#fff;font-weight:800;text-transform:none;letter-spacing:0;font-size:12px"></span>
+  </div>
+  <div class="body">
+    <div class="sec">Onboarding</div>
+    <a data-route="signup">1 · Sign up</a>
+    <a data-route="onboarding">2 · Welkomst</a>
+    <a data-route="pricing">3 · Prijzen</a>
+    <a data-route="checkout:piet">4 · Checkout (Piet)</a>
+    <a data-route="checkout:reed">4 · Checkout (Reed)</a>
+
+    <div class="sec">Inloggen</div>
+    <a data-route="login">Inloggen</a>
+    <a data-route="reset">Wachtwoord reset</a>
+
+    <div class="sec">Account</div>
+    <a data-route="account">Profiel & instellingen</a>
+  </div>
+</div>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Components -->
+<script type="text/babel" src="components/WzChrome.jsx"></script>
+<script type="text/babel" src="components/AuthShell.jsx"></script>
+<script type="text/babel" src="components/FormFields.jsx"></script>
+<script type="text/babel" src="components/AuthScreens.jsx"></script>
+<script type="text/babel" src="components/OnboardingScreen.jsx"></script>
+<script type="text/babel" src="components/PricingScreen.jsx"></script>
+<script type="text/babel" src="components/CheckoutScreen.jsx"></script>
+<script type="text/babel" src="components/AccountScreen.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+(() => {
+  const ROUTES = {
+    signup:     { label: 'Sign up',           render: nav => <SignUpScreen nav={nav}/> },
+    login:      { label: 'Inloggen',          render: nav => <LoginScreen nav={nav}/> },
+    reset:      { label: 'Wachtwoord reset',  render: nav => <ResetScreen nav={nav}/> },
+    onboarding: { label: 'Welkomst',          render: nav => <OnboardingScreen nav={nav}/> },
+    pricing:    { label: 'Prijzen',           render: nav => <PricingScreen nav={nav}/> },
+    checkout:   { label: 'Checkout',          render: (nav, arg) => <CheckoutScreen nav={nav} planId={arg || 'piet'}/> },
+    account:    { label: 'Account',           render: nav => <AccountScreen nav={nav}/> },
+    home:       { label: 'Home',              render: nav => <PricingScreen nav={nav}/> },
+  };
+
+  let current = (localStorage.getItem('wz.proto.route') || 'pricing');
+  const setRoute = (r) => {
+    current = r;
+    localStorage.setItem('wz.proto.route', r);
+    window.scrollTo(0, 0);
+    render();
+  };
+
+  const parseRoute = (r) => {
+    const [key, arg] = String(r || '').split(':');
+    return { key, arg };
+  };
+
+  const render = () => {
+    const { key, arg } = parseRoute(current);
+    const route = ROUTES[key] || ROUTES.pricing;
+    document.getElementById('currentRoute').textContent = route.label + (arg ? ' · ' + arg : '');
+    document.querySelectorAll('[data-route]').forEach(a => {
+      a.classList.toggle('on', a.getAttribute('data-route') === current);
+    });
+    const root = window.__root || (window.__root = ReactDOM.createRoot(document.getElementById('app')));
+    root.render(route.render(setRoute, arg));
+  };
+
+  document.querySelectorAll('[data-route]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      setRoute(a.getAttribute('data-route'));
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

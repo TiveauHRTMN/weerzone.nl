@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, Clock, TrendingUp, Shield, Zap, BarChart3 } from "lucide-react";
-import B2BSignupForm from "@/components/B2BSignupForm";
+import { Building2, Clock, TrendingUp, Shield, Zap, BarChart3, Mail } from "lucide-react";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -88,12 +87,17 @@ export default function ZakelijkPage() {
           WEERZONE geeft je de komende 48 uur. Jouw locatie, op de meter. Elke ochtend in je inbox.
         </p>
 
-        <a
-          href="#aanmelden"
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-accent-orange text-text-primary font-bold text-lg hover:brightness-90 transition-all"
-        >
-          Gratis aanmelden →
-        </a>
+        <div className="inline-flex flex-col items-center gap-4">
+          <span className="px-6 py-2 rounded-full bg-white/10 border border-white/20 text-white font-bold text-sm uppercase tracking-widest">
+            In ontwikkeling — Binnenkort beschikbaar
+          </span>
+          <a
+            href="mailto:zakelijk@weerzone.nl"
+            className="text-white/60 hover:text-white transition-colors text-sm font-medium"
+          >
+            Interesse? Mail naar zakelijk@weerzone.nl
+          </a>
+        </div>
       </div>
 
       {/* Het eerlijke verhaal */}
@@ -156,8 +160,8 @@ export default function ZakelijkPage() {
 
       {/* Features */}
       <div className="max-w-4xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-black text-white text-center mb-2">Dit krijg je. Gratis.</h2>
-        <p className="text-white/40 text-center mb-8 text-sm">We zijn nieuw en willen bewijzen dat het werkt. Jij test, wij verbeteren.</p>
+        <h2 className="text-2xl font-black text-white text-center mb-2">Dit staat gepland.</h2>
+        <p className="text-white/40 text-center mb-8 text-sm">We bouwen aan de zakelijke motor van WEERZONE.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="bg-white/5 border border-white/10 rounded-xl p-5">
@@ -169,25 +173,29 @@ export default function ZakelijkPage() {
         </div>
       </div>
 
-      {/* Waarom gratis */}
-      <div className="max-w-4xl mx-auto px-4 pb-16">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 text-center">
-          <h3 className="text-xl font-black text-white mb-3">&ldquo;Waarom is dit gratis?&rdquo;</h3>
-          <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-            Omdat we liever tien bedrijven hebben die het elke dag gebruiken dan niemand die er een keer over nadenkt. Jij gebruikt het, wij leren ervan. Bevalt het? Dan praten we verder. Geen verplichtingen, geen verborgen kosten.
+      {/* Status update */}
+      <div id="aanmelden" className="max-w-2xl mx-auto px-4 pb-20 text-center">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-10 sm:p-14">
+          <div className="w-16 h-16 bg-accent-orange/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Mail className="w-8 h-8 text-accent-orange" />
+          </div>
+          <h2 className="text-3xl font-black text-white mb-4">
+            Blijf op de hoogte
+          </h2>
+          <p className="text-white/60 text-lg leading-relaxed mb-8">
+            Steve (WEERZONE Zakelijk) is momenteel in actieve ontwikkeling. We laten u weten zodra we de eerste bedrijven toelaten tot de private bèta.
+          </p>
+          <a
+            href="mailto:zakelijk@weerzone.nl?subject=Interesse%20in%20WEERZONE%20Zakelijk"
+            className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-white text-slate-900 font-bold text-lg hover:bg-accent-orange hover:text-white transition-all group"
+          >
+            Mail zakelijk@weerzone.nl
+            <Mail className="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity" />
+          </a>
+          <p className="mt-6 text-white/30 text-sm">
+            Geen kosten, geen verplichtingen. U hoort van ons zodra we live gaan.
           </p>
         </div>
-      </div>
-
-      {/* Signup form */}
-      <div id="aanmelden" className="max-w-2xl mx-auto px-4 pb-20">
-        <h2 className="text-3xl font-black text-white text-center mb-3">
-          Gewoon proberen.
-        </h2>
-        <p className="text-white/50 text-center mb-8">
-          30 seconden invullen. Morgenochtend om 08:00 je eerste weerrapport. Klaar.
-        </p>
-        <B2BSignupForm />
       </div>
 
       {/* Meet Steve + triade */}
@@ -198,10 +206,10 @@ export default function ZakelijkPage() {
             Steve. Kort. Zakelijk. Geen ruis.
           </h3>
           <p className="text-white/60 text-sm sm:text-base leading-relaxed mb-4">
-            Steve is de stem achter WEERZONE Zakelijk. Eén mail als het telt, stilte als het niet telt. Reply werkt — hij leest mee.
+            Steve is de stem achter WEERZONE Zakelijk. Eén mail als het telt, stilte als het niet telt. Reply werkt — hij leest mee zodra we live zijn.
           </p>
           <p className="text-white/50 text-sm leading-relaxed">
-            Niet zakelijk? WEERZONE heeft er nog twee:
+            Niet zakelijk? WEERZONE heeft er nog twee die wél al live zijn:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
             <Link href="/piet" className="bg-white/5 hover:bg-white/8 border border-white/10 rounded-xl p-4 transition-colors">
