@@ -32,7 +32,7 @@ export default async function AgentCockpit() {
   // Fetch WWS Truth Cache Stats
   const { data: truthStats } = await supabase
     .from("wws_truth_cache")
-    .select("sector, consensus_index, is_alert");
+    .select("id, sector, consensus_index, is_alert, place_name, created_at");
 
   const publicTruths = truthStats?.filter(t => t.sector === 'public') || [];
   const businessTruths = truthStats?.filter(t => t.sector === 'business') || [];
@@ -170,8 +170,8 @@ export default async function AgentCockpit() {
                     {businessTruths.slice(0, 5).map((truth, i) => (
                         <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 flex justify-between items-center">
                             <div>
-                                <p className="text-xs font-bold text-white/80">{truth.place_name}</p>
-                                <p className="text-[9px] text-white/40 uppercase tracking-widest">ID: {truth.id.slice(0,8)}</p>
+                                <p className="text-xs font-bold text-white/80">{(truth as {place_name?: string}).place_name ?? "—"}</p>
+                                <p className="text-[9px] text-white/40 uppercase tracking-widest">ID: {(truth.id as string).slice(0,8)}</p>
                             </div>
                             <div className="text-right">
                                 <span className={`text-[10px] font-black px-2 py-0.5 rounded ${truth.is_alert ? 'bg-rose-500 text-white' : 'bg-emerald-500/10 text-emerald-500'}`}>
