@@ -75,7 +75,7 @@ export default function WzNavbar() {
                   ★ Founder
                 </span>
               )}
-              <Link href="/app" className="wz-btn wz-btn-ghost wz-btn-sm font-bold">
+              <Link href="/app" className="btn btn-ghost btn-sm font-bold">
                 Mijn Weerzone
               </Link>
               <button
@@ -85,17 +85,17 @@ export default function WzNavbar() {
                   await supabase.auth.signOut();
                   window.location.href = "/";
                 }}
-                className="wz-btn wz-btn-primary wz-btn-sm"
+                className="btn btn-primary btn-sm"
               >
                 Log uit
               </button>
             </>
           ) : (
             <>
-              <Link href="/app/login" className="wz-btn wz-btn-ghost wz-btn-sm">
+              <Link href="/app/login" className="btn btn-ghost btn-sm">
                 Inloggen
               </Link>
-              <Link href="/app/signup" className="wz-btn wz-btn-primary wz-btn-sm">
+              <Link href="/app/signup" className="btn btn-primary btn-sm">
                 Aanmelden
               </Link>
             </>
@@ -154,7 +154,7 @@ export default function WzNavbar() {
                 <Link
                   href="/app"
                   onClick={() => setOpen(false)}
-                  className="wz-btn wz-btn-ghost wz-btn-block"
+                  className="btn btn-ghost btn-block"
                 >
                   Mijn Weerzone
                 </Link>
@@ -165,7 +165,7 @@ export default function WzNavbar() {
                     await supabase.auth.signOut();
                     window.location.href = "/";
                   }}
-                  className="wz-btn wz-btn-primary wz-btn-block"
+                  className="btn btn-primary btn-block"
                 >
                   Log uit
                 </button>
@@ -175,14 +175,14 @@ export default function WzNavbar() {
                 <Link
                   href="/app/login"
                   onClick={() => setOpen(false)}
-                  className="wz-btn wz-btn-ghost wz-btn-block"
+                  className="btn btn-ghost btn-block"
                 >
                   Inloggen
                 </Link>
                 <Link
                   href="/app/signup"
                   onClick={() => setOpen(false)}
-                  className="wz-btn wz-btn-primary wz-btn-block"
+                  className="btn btn-primary btn-block"
                 >
                   Aanmelden
                 </Link>
