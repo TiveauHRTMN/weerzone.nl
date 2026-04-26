@@ -5,6 +5,8 @@ import HomePitch from "@/components/HomePitch";
 import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isFounderEmail } from "@/lib/founders";
 
 export const dynamic = "force-dynamic";
 
@@ -76,9 +78,14 @@ const faqLd = {
 };
 
 export default async function Home() {
-  // Default city for homepage server fetch
   const defaultCity = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
-  const initialWeather = await fetchWeatherData(defaultCity.lat, defaultCity.lon).catch(() => undefined);
+  const [initialWeather, supabase] = await Promise.all([
+    fetchWeatherData(defaultCity.lat, defaultCity.lon).catch(() => undefined),
+    createSupabaseServerClient(),
+  ]);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const founder = isFounderEmail(user?.email);
 
   return (
     <>
@@ -91,10 +98,12 @@ export default async function Home() {
           initialCity={defaultCity}
           initialWeather={initialWeather}
           beforeFooter={
-            <>
-              <TrustSection />
-              <HomePitch />
-            </>
+            founder ? null : (
+              <>
+                <TrustSection />
+                <HomePitch />
+              </>
+            )
           }
         />
       </main>
