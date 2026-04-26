@@ -176,13 +176,14 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <div className="hidden sm:block">
               <Logo size={104} />
             </div>
-            {tier && <PersonaBadge tier={tier} />}
+            {isFounder ? (
+              <span className="absolute top-1/2 right-[-10px] sm:right-0 translate-x-0 sm:translate-x-1/2 -translate-y-1/2 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-black uppercase tracking-wider text-white rounded-full shadow-lg whitespace-nowrap pointer-events-none select-none z-10 border-2 border-white/90" style={{ background: "#FFB400" }}>
+                Founder
+              </span>
+            ) : (
+              tier && <PersonaBadge tier={tier} />
+            )}
           </div>
-          {isFounder && (
-            <span className="badge sun mt-2" style={{ fontSize: 11, letterSpacing: "0.08em" }}>
-              ★ Founder
-            </span>
-          )}
         </header>
 
         <NavBar activeCity={city.name} isLocating={isLocating} />
