@@ -39,6 +39,14 @@
     {
       "path": "/api/cron/social-post",
       "schedule": "10 21 * * *"
+    },
+    {
+      "path": "/api/cron/piet-morning-email",
+      "schedule": "30 5 * * *"
+    },
+    {
+      "path": "/api/cron/reed-alert-email",
+      "schedule": "0 */3 * * *"
     }
   ]
 }
