@@ -7,10 +7,9 @@ import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import { WzNavbar, WzFooter } from "@/components/wz";
 import { displaySubCount } from "@/lib/social-proof";
 
-// Steve (B2B) is in ontwikkeling — tijdelijk verborgen, redirect via zakelijk@weerzone.nl
 const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed", "steve"];
 const HIGHLIGHT: PersonaTier = "reed";
-const BADGES: Partial<Record<PersonaTier, string>> = { reed: "Meest gekozen", steve: "Coming Soon" };
+const BADGES: Partial<Record<PersonaTier, string>> = { reed: "★ Meest gekozen" };
 
 const STEPS: Array<[string, string, string]> = [
   ["1", "Kies een abonnement", "Piet of Reed. Geen creditcard nodig. Opzeggen kan altijd."],
@@ -97,8 +96,7 @@ export default function PrijzenClient() {
             const p = PERSONAS[tier];
             const highlight = tier === HIGHLIGHT;
             const badge = BADGES[tier];
-            const isComingSoon = tier === "steve";
-            const hasPrice = p.priceCents !== undefined;
+            const hasPrice = p.priceCents !== undefined && p.founderPriceCents !== undefined;
 
             return (
               <div
@@ -137,35 +135,27 @@ export default function PrijzenClient() {
                   className="rounded-xl mb-4 px-4 py-3.5"
                   style={{ background: "var(--ink-050)" }}
                 >
-                  <span
-                    className="wz-badge-sun inline-block mb-2"
-                    style={{ fontSize: 10 }}
-                  >
-                    {isComingSoon ? "In ontwikkeling" : "Nu aanmelden"}
-                  </span>
-                  <div
-                    className="font-extrabold leading-tight tracking-tight mb-1"
-                    style={{ fontSize: 20 }}
-                  >
-                    {isComingSoon ? "Binnenkort" : "Tijdelijk gratis"}
-                  </div>
-                  <div className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>
-                    {isComingSoon || !hasPrice 
-                      ? "Geen wachtlijst, mail zakelijk@weerzone.nl" 
-                      : `Straks ${formatPrice(p.priceCents!)}/mnd — geen creditcard nodig`
-                    }
-                  </div>
+                  {!hasPrice ? (
+                    <>
+                      <div className="text-[13px] mb-1" style={{ color: "var(--wz-text-mute)" }}>
+                        Prijs volgt binnenkort
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-[13px] mb-1" style={{ color: "var(--wz-text-mute)" }}>
+                        {formatPrice(p.priceCents!)}/mnd, binnenkort
+                      </div>
+                      <div className="font-bold text-[15px]">
+                        Introductieprijs:{" "}
+                        <span className="font-extrabold">{formatPrice(p.founderPriceCents!)}/mnd</span>{" "}
+                        <span style={{ color: "var(--wz-text-mute)", fontWeight: 500 }}>· vastgezet</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                {isComingSoon ? (
-                  <button
-                    disabled
-                    className="wz-btn wz-btn-block wz-btn-lg bg-slate-200 text-slate-500 cursor-not-allowed"
-                  >
-                    Binnenkort beschikbaar
-                  </button>
-                ) : (
-                  <Link
+                <Link
                     href={`/app/signup?tier=${tier}`}
                     className={`wz-btn wz-btn-block wz-btn-lg ${
                       highlight ? "wz-btn-primary" : "wz-btn-ghost"
@@ -173,7 +163,6 @@ export default function PrijzenClient() {
                   >
                     Aanmelden →
                   </Link>
-                )}
 
                 <ul className="list-none p-0 mt-5 mb-0">
                   {p.features.map((f, i) => (
