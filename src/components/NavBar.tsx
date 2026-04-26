@@ -1,17 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { Lock, PieChart, AlertTriangle, Building2, CreditCard, LogIn, LogOut } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useSession } from "@/lib/session-context";
 
 type Props = {
+  /** Toont de huidige stad in de Locatie-pill (optioneel) */
   activeCity?: string;
+  /** Knippert de Locatie-pill terwijl GPS bepaald wordt */
   isLocating?: boolean;
 };
 
+/**
+ * NavBar = één grote glass-card (zelfde stijl als .card), met items erin.
+ */
 export default function NavBar({ activeCity, isLocating }: Props) {
   const { user, tier } = useSession();
   const hasSub = !!tier;
+
+  const handleLocateClick = () => {
+    if (!hasSub) {
+      window.dispatchEvent(new CustomEvent("wz:open-persona-modal"));
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("wz:locate"));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleLockedClick = (e: React.MouseEvent) => {
     if (!hasSub) {
@@ -20,48 +34,67 @@ export default function NavBar({ activeCity, isLocating }: Props) {
     }
   };
 
+  const locateLabel = isLocating
+    ? "…"
+    : hasSub
+      ? (activeCity || "Locatie")
+      : "Locatie";
+
   return (
-    <nav aria-label="Hoofdnavigatie" className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg">
-      <ul className="flex items-center justify-between overflow-x-auto no-scrollbar px-2 py-1.5">
-        <li className="flex-1">
+    <nav aria-label="Hoofdnavigatie" className="card overflow-hidden">
+      <ul className="nav-list flex items-center justify-between overflow-x-auto no-scrollbar py-1">
+        <li className="flex-none sm:flex-1">
+          <button
+            type="button"
+            onClick={handleLocateClick}
+            className={`nav-item w-full ${isLocating ? "animate-pulse" : ""} ${!hasSub ? "opacity-70" : ""}`}
+          >
+            <span className="label truncate max-w-[50px] sm:max-w-[140px] flex items-center gap-1 justify-center">
+              {!hasSub && <Lock className="w-2.5 h-2.5 shrink-0" />}
+              {locateLabel}
+            </span>
+          </button>
+        </li>
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
           <Link
             href="/piet"
             onClick={handleLockedClick}
-            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all hover:bg-white/10 ${!hasSub ? "opacity-60" : ""}`}
+            className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
           >
-            <div className="relative">
-              <PieChart className="w-4 h-4 text-white mb-1" />
-              {!hasSub && <Lock className="w-2 h-2 text-white absolute -top-1 -right-1" />}
-            </div>
-            <span className="text-[9px] font-black uppercase tracking-tighter text-white">Piet</span>
+            <span className="label flex items-center gap-1 justify-center">
+              {!hasSub && <Lock className="w-2.5 h-2.5 shrink-0" />}
+              Piet
+            </span>
           </Link>
         </li>
-        <li className="flex-1">
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
           <Link
             href="/reed"
             onClick={handleLockedClick}
-            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all hover:bg-white/10 ${!hasSub ? "opacity-60" : ""}`}
+            className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
           >
-            <div className="relative">
-              <AlertTriangle className="w-4 h-4 text-white mb-1" />
-              {!hasSub && <Lock className="w-2 h-2 text-white absolute -top-1 -right-1" />}
-            </div>
-            <span className="text-[9px] font-black uppercase tracking-tighter text-white">Reed</span>
+            <span className="label flex items-center gap-1 justify-center">
+              {!hasSub && <Lock className="w-2.5 h-2.5 shrink-0" />}
+              Reed
+            </span>
           </Link>
         </li>
-        <li className="flex-1">
-          <Link href="/zakelijk" className="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all hover:bg-white/10">
-            <Building2 className="w-4 h-4 text-white mb-1" />
-            <span className="text-[9px] font-black uppercase tracking-tighter text-white">Steve</span>
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
+          <Link href="/zakelijk" className="nav-item w-full">
+            <span className="label">Steve</span>
           </Link>
         </li>
-        <li className="flex-1">
-          <Link href="/prijzen" className="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all hover:bg-white/10">
-            <CreditCard className="w-4 h-4 text-white mb-1" />
-            <span className="text-[9px] font-black uppercase tracking-tighter text-white">Prijzen</span>
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
+          <Link href="/prijzen" className="nav-item w-full">
+            <span className="label">Prijzen</span>
           </Link>
         </li>
-        <li className="flex-1">
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
           {user ? (
             <button
               onClick={async () => {
@@ -70,15 +103,13 @@ export default function NavBar({ activeCity, isLocating }: Props) {
                 await supabase.auth.signOut();
                 window.location.reload();
               }}
-              className="w-full flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all hover:bg-white/10"
+              className="nav-item w-full"
             >
-              <LogOut className="w-4 h-4 text-white mb-1" />
-              <span className="text-[9px] font-black uppercase tracking-tighter text-white">Logout</span>
+              <span className="label">Log uit</span>
             </button>
           ) : (
-            <Link href="/app/login" className="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all hover:bg-white/10">
-              <LogIn className="w-4 h-4 text-white mb-1" />
-              <span className="text-[9px] font-black uppercase tracking-tighter text-white">Login</span>
+            <Link href="/app/login" className="nav-item w-full">
+              <span className="label">Login</span>
             </Link>
           )}
         </li>
