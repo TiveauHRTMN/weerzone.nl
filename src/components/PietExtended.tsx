@@ -37,6 +37,15 @@ import { getMainCommentary } from "@/lib/commentary";
 import { getPietDeepAnalysis } from "@/app/actions";
 import { useSession } from "@/lib/session-context";
 
+// "Witte wolk" card-stijl — zichtbaar helder op blauwe /piet achtergrond
+const cloudCard: React.CSSProperties = {
+  background: "rgba(255,255,255,0.22)",
+  border: "1px solid rgba(255,255,255,0.35)",
+  borderRadius: 20,
+  backdropFilter: "blur(16px)",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
+};
+
 function getSavedCity(): City | null {
   if (typeof window === "undefined") return null;
   try {
@@ -389,7 +398,7 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: DayBlockPr
   const bft = getWindBeaufort(maxWind);
 
   return (
-    <div className="homecard !p-6">
+    <div className="!p-6" style={cloudCard}>
       <div className="flex items-center justify-between mb-4">
         <span className="homecard-kicker !mb-0">{title}</span>
         <span className="text-3xl drop-shadow-xl">
@@ -457,7 +466,7 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: DayBlockPr
   );
 }
 
-export default function PietExtended() {
+export default function PietExtended({ initialWWS }: { initialWWS?: WWSPayload | null }) {
   const { primaryLocation, loading: sessionLoading } = useSession();
 
   const [city, setCity] = useState<City>(
@@ -467,9 +476,9 @@ export default function PietExtended() {
       DUTCH_CITIES[0]
   );
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [wws, setWWS] = useState<WWSPayload | null>(null);
+  const [wws, setWWS] = useState<WWSPayload | null>(initialWWS || null);
   const [pietAnalysis, setPietAnalysis] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialWWS);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
@@ -480,7 +489,11 @@ export default function PietExtended() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    
+    // Alleen laden als we nog geen WWS hebben of als we van stad wisselen
+    if (!weather || (city.lat !== weather.current.temperature && !wws)) {
+        setLoading(true);
+    }
     
     // Parallel laden van weer en WWS
     Promise.all([
@@ -491,7 +504,7 @@ export default function PietExtended() {
         (fresh) => { if (!cancelled) setWeather(fresh); },
         (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }
       ),
-      loadWWS(city.lat, city.lon)
+      wws ? Promise.resolve(wws) : loadWWS(city.lat, city.lon)
     ])
     .then(([w, wwsPayload]) => {
       if (!cancelled) {
@@ -548,15 +561,16 @@ export default function PietExtended() {
 
   if (loading || !weather) {
     return (
-      <div className="homecard !p-6 text-center">
+      <div className="!p-6 text-center" style={cloudCard}>
         <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-white/80" />
-        <p className="text-sm text-white/70">Piet verzint iets slims…</p>
+        <p className="text-sm text-white/70">Piet laadt jouw locatie…</p>
       </div>
     );
   }
 
-  // WWS Piet update is primair, anders deep analysis, anders summary
-  const narrative = wws?.piet_update?.content || pietAnalysis || weather.summaryVerdict || getMainCommentary(weather);
+  // summaryVerdict is de korte homepage-verdict — NIET gebruiken op /piet (bevat
+  // getDayProgression-formaat + "Wij tonen alleen…" boilerplate).
+  const narrative = wws?.piet_update?.content || pietAnalysis || null;
   const narrativeTitle = wws?.piet_update?.title || "Het volledige weerverhaal";
   const narrativeClosing = wws?.piet_update?.closing || "— Piet, voor Weerzone";
 
@@ -607,7 +621,7 @@ export default function PietExtended() {
       </div>
 
       {/* NU-HERO */}
-      <div className="homecard !p-7 sm:!p-9">
+      <div className="!p-7 sm:!p-9" style={cloudCard}>
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
             <span className="homecard-kicker">Nu in {city.name}</span>
@@ -756,32 +770,55 @@ export default function PietExtended() {
       )}
 
       {/* PIET'S VERHAAL — uitgebreide narratieve weeranalyse */}
-      <div className="homecard !p-7 sm:!p-9 border-l-4 border-l-accent-cyan">
+      <div
+        className="rounded-[20px] border-l-4 border-l-accent-cyan !p-7 sm:!p-9"
+        style={{
+          background: "rgba(255,255,255,0.22)",
+          border: "1px solid rgba(255,255,255,0.35)",
+          borderLeftWidth: 4,
+          borderLeftColor: "var(--accent-cyan, #38bdf8)",
+          backdropFilter: "blur(16px)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+        }}
+      >
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-accent-cyan/20 flex items-center justify-center text-2xl shadow-inner">
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner">
             💬
           </div>
           <div>
             <h2 className="homecard-kicker !text-accent-cyan !mb-0">{narrativeTitle}</h2>
-            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">
+            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mt-1">
               {new Date().toLocaleTimeString("nl-NL", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}{" "}
-              · WWS Update
+              · ochtend → morgen
             </p>
           </div>
         </div>
-        <div className="text-base sm:text-lg font-medium text-white/95 leading-[1.7] space-y-4">
-          {narrative.split(/\n\n+/).map((para, i) => (
-            <p key={i}>{renderInlineBold(para)}</p>
-          ))}
-          <p className="pt-4 text-white/40 italic text-sm">{narrativeClosing}</p>
-        </div>
+        {narrative ? (
+          <div className="text-base sm:text-lg font-medium text-white leading-[1.7] space-y-4">
+            {narrative.split(/\n\n+/).map((para, i) => (
+              <p key={i}>{renderInlineBold(para)}</p>
+            ))}
+            <p className="pt-4 text-white/50 italic text-sm">{narrativeClosing}</p>
+          </div>
+        ) : (
+          // Skeleton terwijl Piet aan het schrijven is
+          <div className="space-y-3 animate-pulse">
+            <div className="h-4 bg-white/20 rounded-full w-full" />
+            <div className="h-4 bg-white/20 rounded-full w-5/6" />
+            <div className="h-4 bg-white/20 rounded-full w-full" />
+            <div className="h-4 bg-white/15 rounded-full w-4/5" />
+            <div className="mt-5 h-4 bg-white/20 rounded-full w-full" />
+            <div className="h-4 bg-white/20 rounded-full w-3/4" />
+            <p className="text-xs text-white/40 pt-2">Piet schrijft jouw dagdeel-overzicht…</p>
+          </div>
+        )}
       </div>
 
       {/* DAGDEEL-SAMENVATTING — 1 overzicht: ochtend/middag/avond/nacht/morgen */}
-      <div className="homecard !p-0 overflow-hidden">
+      <div className="!p-0 overflow-hidden" style={{ ...cloudCard, padding: 0 }}>
         <div className="flex items-end justify-between px-6 pt-6 pb-4">
           <h3 className="homecard-kicker !mb-0">De dagdelen</h3>
           <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
@@ -875,11 +912,11 @@ export default function PietExtended() {
                 )}
                 {!showDayLabel && <span className="block h-[18px] mb-1.5" />}
                 <div
-                  className="homecard !p-4 bg-white/5 border-white/10 flex flex-col items-center"
+                  className="flex flex-col items-center !p-4"
                   style={
                     isFirst
-                      ? { borderColor: "rgba(56,189,248,0.6)", background: "rgba(56,189,248,0.12)" }
-                      : undefined
+                      ? { ...cloudCard, borderColor: "rgba(56,189,248,0.7)", background: "rgba(56,189,248,0.25)", padding: 16 }
+                      : { ...cloudCard, background: "rgba(255,255,255,0.18)", padding: 16 }
                   }
                 >
                   <span className="text-[10px] font-black text-white/50 mb-2">
