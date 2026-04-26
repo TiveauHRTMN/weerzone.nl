@@ -20,10 +20,11 @@ const getEmoji = (code: number) => {
 };
 
 const getDesc = (code: number) => {
+  if (code >= 95) return "Zwaar Onweer";
+  if (code >= 71) return "Sneeuw";
+  if (code >= 51) return "Regenachtig";
   if (code === 0) return "Heerlijk Zonnig";
   if (code <= 3) return "Licht Bewolkt";
-  if (code >= 51) return "Regenachtig";
-  if (code >= 95) return "Zwaar Onweer";
   return "Bewolkt";
 };
 
@@ -42,8 +43,11 @@ export async function GET(req: NextRequest) {
     const format: Format = SIZES[formatParam] ? formatParam : "x";
     const SIZE = SIZES[format];
     const cityName = searchParams.get("city") || "Nederland";
+    
+    const lat = parseFloat(searchParams.get("lat") || "52.11");
+    const lon = parseFloat(searchParams.get("lon") || "5.18");
 
-    const w = await fetchWeather(52.11, 5.18);
+    const w = await fetchWeather(lat, lon);
     const temp = Math.round(w.current.temperature_2m);
     const code = w.current.weather_code;
     const emoji = getEmoji(code);

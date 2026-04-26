@@ -112,7 +112,7 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         latitude: lat.toString(),
         longitude: lon.toString(),
         current: CURRENT_PARAMS,
-        hourly: HOURLY_PARAMS,
+        hourly: HOURLY_PARAMS + ",apparent_temperature",
         daily: DAILY_PARAMS,
         minutely_15: "precipitation",
         forecast_minutely_15: "24",
@@ -206,11 +206,15 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     let currentWind = Math.round(data.current.wind_speed_10m ?? 0);
 
     if (harmonieData && hourly.length > 0) {
-      currentTemp = hourly[0].temperature;
-      currentFeels = hourly[0].apparentTemperature;
-      currentPrecip = hourly[0].precipitation;
-      currentCode = hourly[0].weatherCode;
-      currentWind = hourly[0].windSpeed;
+      const currentApiTime = data.current.time;
+      const currentIndex = times.indexOf(currentApiTime);
+      const targetIndex = currentIndex !== -1 ? currentIndex : 0;
+
+      currentTemp = hourly[targetIndex].temperature;
+      currentFeels = hourly[targetIndex].apparentTemperature;
+      currentPrecip = hourly[targetIndex].precipitation;
+      currentCode = hourly[targetIndex].weatherCode;
+      currentWind = hourly[targetIndex].windSpeed;
     }
 
     const minutely: MinutelyPrecipitation[] = [];
@@ -343,7 +347,8 @@ function degreesToDirection(deg: number): string {
 
 export function getWeatherEmoji(code: number, isDay: boolean = true): string {
   if (code === 0) return isDay ? "☀️" : "🌙";
-  if (code <= 3) return isDay ? "⛅" : "☁️";
+  if (code === 1 || code === 2) return isDay ? "⛅" : "☁️";
+  if (code === 3) return "☁️";
   if (code <= 48) return "🌫️";
   if (code <= 57) return "🌦️";
   if (code <= 67) return "🌧️";

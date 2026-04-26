@@ -7,7 +7,11 @@ import {
   generatePersonaBrief,
   type WeatherSnapshot,
 } from "@/lib/persona-brief";
-import { buildPersonaEmailHtml, type EmailAmazonTip } from "@/lib/persona-email";
+import {
+  buildPersonaEmailHtml,
+  type EmailAmazonTip,
+  type EmailWeatherData,
+} from "@/lib/persona-email";
 import { matchProducts } from "@/lib/amazon-matcher";
 import { productHref, parseEmojiImage } from "@/lib/amazon-catalog";
 
@@ -193,7 +197,40 @@ export async function GET(request: NextRequest) {
         // negeer — tip is optioneel
       }
 
-      const html = buildPersonaEmailHtml(sub.tier, brief, city, unsubscribeUrl, amazonTip);
+      const emailWeather: EmailWeatherData = {
+        current: {
+          temperature: weather.current.temperature,
+          feelsLike: weather.current.feelsLike,
+          windSpeed: weather.current.windSpeed,
+          windDirection: weather.current.windDirection,
+          precipitation: weather.current.precipitation,
+          humidity: weather.current.humidity,
+          cloudCover: weather.current.cloudCover,
+          weatherCode: weather.current.weatherCode,
+          isDay: weather.current.isDay,
+        },
+        daily: {
+          tempMax: weather.daily[0].tempMax,
+          tempMin: weather.daily[0].tempMin,
+          precipitationSum: weather.daily[0].precipitationSum,
+          weatherCode: weather.daily[0].weatherCode,
+          windSpeedMax: weather.daily[0].windSpeedMax,
+          sunHours: weather.daily[0].sunHours,
+        },
+        sunrise: weather.sunrise,
+        sunset: weather.sunset,
+        uvIndex: weather.uvIndex,
+        hourly: weather.hourly.slice(0, 48).map((h) => ({
+          time: h.time,
+          temperature: h.temperature,
+          precipitation: h.precipitation,
+          windSpeed: h.windSpeed ?? 0,
+          weatherCode: h.weatherCode,
+          cape: h.cape,
+        })),
+      };
+
+      const html = buildPersonaEmailHtml(sub.tier, brief, city, unsubscribeUrl, amazonTip, emailWeather);
 
       const fromName = PERSONAS[sub.tier].name;
       const { data: mail, error: mailErr } = await resend.emails.send({

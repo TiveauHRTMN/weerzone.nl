@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PietExtended from "@/components/PietExtended";
 import PremiumGate from "@/components/PremiumGate";
+import { getSavedLocationServer } from "@/lib/location-cookies";
+import { getCachedTruth } from "@/lib/wws-truth-server";
 
 export const metadata: Metadata = {
   title: "Piet — Hyperlokaal weerbericht voor jouw straat",
@@ -34,7 +36,11 @@ const jsonLd = {
   datePublished: new Date().toISOString().split("T")[0],
 };
 
-export default function PietPage() {
+export default async function PietPage() {
+  // SSR: Haal de laatste waarheid alvast op van de server
+  const loc = await getSavedLocationServer();
+  const initialTruth = loc ? await getCachedTruth(loc.lat, loc.lon, 'public') : null;
+
   return (
     <>
       <script
@@ -64,7 +70,7 @@ export default function PietPage() {
           </header>
 
           <PremiumGate>
-            <PietExtended />
+            <PietExtended initialWWS={initialTruth} />
           </PremiumGate>
 
           <p className="mt-12 text-center text-white/50 text-xs font-medium">

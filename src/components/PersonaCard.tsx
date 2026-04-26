@@ -12,6 +12,7 @@ interface Props {
 
 export default function PersonaCard({ tier, onSelect, compact = false, highlighted = false }: Props) {
   const p = PERSONAS[tier];
+  const isComingSoon = tier === "steve";
 
   return (
     <div
@@ -53,15 +54,29 @@ export default function PersonaCard({ tier, onSelect, compact = false, highlight
       {/* Prijs */}
       <div className="mb-4 pb-4 border-b border-black/10">
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-black text-text-primary">
-            {formatPrice(p.priceCents)}
-          </span>
-          <span className="text-sm text-text-muted">/mnd, binnenkort</span>
+          {isComingSoon ? (
+            <span className="text-3xl font-black text-text-primary">
+              Coming Soon
+            </span>
+          ) : (
+            <>
+              <span className="text-3xl font-black text-text-primary">
+                {formatPrice(p.priceCents)}
+              </span>
+              <span className="text-sm text-text-muted">/mnd, binnenkort</span>
+            </>
+          )}
         </div>
         <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/5">
-          <span className="text-xs font-bold text-text-primary">
-            Introductieprijs: {formatPrice(p.founderPriceCents)}/mnd · vastgezet
-          </span>
+          {isComingSoon ? (
+            <span className="text-xs font-bold text-text-primary">
+              Beschikbaar vanaf juni '26
+            </span>
+          ) : (
+            <span className="text-xs font-bold text-text-primary">
+              Introductieprijs: {formatPrice(p.founderPriceCents)}/mnd · vastgezet
+            </span>
+          )}
         </div>
       </div>
 
@@ -85,11 +100,14 @@ export default function PersonaCard({ tier, onSelect, compact = false, highlight
       {/* CTA */}
       <button
         type="button"
+        disabled={isComingSoon}
         onClick={() => onSelect?.(tier)}
-        className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all hover:brightness-110 active:scale-[0.98]"
-        style={{ background: p.color }}
+        className={`w-full py-3 rounded-xl font-bold text-white text-sm transition-all ${
+          isComingSoon ? "bg-slate-400 cursor-not-allowed" : "hover:brightness-110 active:scale-[0.98]"
+        }`}
+        style={!isComingSoon ? { background: p.color } : {}}
       >
-        Aanmelden →
+        {isComingSoon ? "Binnenkort beschikbaar" : "Aanmelden →"}
       </button>
     </div>
   );

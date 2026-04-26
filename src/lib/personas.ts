@@ -71,8 +71,8 @@ export const PERSONAS: Record<PersonaTier, PersonaConfig> = {
     tagline: "Insanely great weather intelligence.",
     description:
       "Steve vertaalt het weer naar een perfecte bedrijfsbeslissing. Geïnspireerd door Steve Jobs: perfectionistisch, visionair en minimalistisch. Hij gebruikt NeuralGCM om de ruis te filteren en de 'one more thing' in je zakelijke planning te vinden.",
-    priceCents: 4999,
-    founderPriceCents: 2900,
+    priceCents: 14900,
+    founderPriceCents: 9900,
     features: [
       "NeuralGCM Strategische Planning (15 dagen)",
       "Minimalistisch dashboard (Jobs-stijl)",

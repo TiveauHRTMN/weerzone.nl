@@ -8,9 +8,9 @@ import { WzNavbar, WzFooter } from "@/components/wz";
 import { displaySubCount } from "@/lib/social-proof";
 
 // Steve (B2B) is in ontwikkeling — tijdelijk verborgen, redirect via zakelijk@weerzone.nl
-const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed"];
+const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed", "steve"];
 const HIGHLIGHT: PersonaTier = "reed";
-const BADGES: Partial<Record<PersonaTier, string>> = { reed: "Meest gekozen" };
+const BADGES: Partial<Record<PersonaTier, string>> = { reed: "Meest gekozen", steve: "Coming Soon" };
 
 const STEPS: Array<[string, string, string]> = [
   ["1", "Kies een abonnement", "Piet of Reed. Geen creditcard nodig. Opzeggen kan altijd."],
