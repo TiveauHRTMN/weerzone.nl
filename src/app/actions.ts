@@ -454,7 +454,7 @@ export async function getLocationSEOContent(placeName: string, province: string,
 
     // 3. Store in cache for next time
     if (text) {
-      await supabase
+      const { error: upsertErr } = await supabase
         .from("seo_injections")
         .upsert({
           place_name: placeName,
@@ -462,8 +462,8 @@ export async function getLocationSEOContent(placeName: string, province: string,
           ai_strategy: text,
           meta_description: `Actueel weerbericht voor ${placeName}.`,
           json_ld: {}
-        }, { onConflict: 'place_name,province' })
-        .catch(e => console.error("SEO cache write failed:", e));
+        }, { onConflict: 'place_name,province' });
+      if (upsertErr) console.error("SEO cache write failed:", upsertErr);
     }
 
     return text;
