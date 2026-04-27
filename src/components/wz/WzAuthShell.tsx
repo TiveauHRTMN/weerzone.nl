@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
+import WzLogo from "./WzLogo";
 
 interface Quote {
   text: string;
@@ -96,6 +97,10 @@ export default function WzAuthShell({
       </aside>
       <main className="auth-panel">
         <div className="auth-inner">
+          {/* Mobile-only logo — left panel is hidden on small screens */}
+          <div className="auth-mobile-logo">
+            <WzLogo height={18} />
+          </div>
           {children}
           {footer && <div className="mt-5 text-center text-sm" style={{ color: "var(--wz-text-soft)" }}>{footer}</div>}
         </div>
