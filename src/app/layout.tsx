@@ -96,7 +96,6 @@ export const metadata: Metadata = {
 
 import { getSupabase } from "@/lib/supabase";
 import AffiliateBanner from "@/components/AffiliateBanner";
-import WzNavbar from "@/components/wz/WzNavbar";
 
 export default async function RootLayout({
   children,
@@ -144,7 +143,6 @@ export default async function RootLayout({
             />
           )}
 
-          <WzNavbar />
           {children}
           <CookieBanner />
           <InstallPrompt />
