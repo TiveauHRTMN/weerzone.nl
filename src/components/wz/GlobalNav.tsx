@@ -14,7 +14,13 @@ export default function GlobalNav() {
   return (
     <div>
       <NLPulse />
-      <div className="px-3 pt-2 pb-2" style={{ borderBottom: "1px solid var(--wz-border)" }}>
+      <div
+        className="px-3 pt-2 pb-2"
+        style={{
+          background: "rgba(255,255,255,0.92)",
+          borderBottom: "1px solid var(--wz-border)",
+        }}
+      >
         <div className="max-w-2xl mx-auto flex flex-col items-center gap-2">
           <WzLogo />
           <NavBar />
