@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { formatPrice, type PersonaConfig } from "@/lib/personas";
-import { WzNavbar, WzFooter } from "@/components/wz";
+import { WzFooter } from "@/components/wz";
 import { reverseGeocode } from "@/lib/types";
 import { confirmCheckout } from "./actions";
 
@@ -106,7 +106,6 @@ export default function CheckoutClient({
   if (done) {
     return (
       <div className="wz-page">
-        <WzNavbar />
         <div
           className="flex items-center justify-center"
           style={{ padding: 40, minHeight: 500 }}
@@ -167,7 +166,6 @@ export default function CheckoutClient({
 
   return (
     <div className="wz-page">
-      <WzNavbar />
 
       <div
         style={{

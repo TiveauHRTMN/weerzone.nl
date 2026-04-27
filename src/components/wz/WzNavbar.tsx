@@ -23,10 +23,14 @@ function isActive(pathname: string, key: string): boolean {
   return false;
 }
 
+const AUTH_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", "/auth"];
+
 export default function WzNavbar() {
   const pathname = usePathname() ?? "/";
   const { user, isFounder } = useSession();
   const [open, setOpen] = useState(false);
+
+  if (AUTH_PATHS.some((p) => pathname.startsWith(p))) return null;
 
   return (
     <header

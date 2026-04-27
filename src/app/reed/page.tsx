@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import ReedExtended from "@/components/ReedExtended";
 import PremiumGate from "@/components/PremiumGate";
-import WzNavbar from "@/components/wz/WzNavbar";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { fetchWeatherData } from "@/lib/weather";
 import { DUTCH_CITIES } from "@/lib/types";
@@ -22,7 +21,6 @@ export default async function ReedPage() {
 
   return (
     <>
-      <WzNavbar />
       <main className="min-h-screen bg-[#4a9ee8] text-white px-4 py-8 pb-20">
       <div className="max-w-2xl mx-auto">
         <header className="mb-6">

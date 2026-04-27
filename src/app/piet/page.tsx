@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import PietExtended from "@/components/PietExtended";
 import PremiumGate from "@/components/PremiumGate";
-import WzNavbar from "@/components/wz/WzNavbar";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { getCachedTruth } from "@/lib/wws-truth-server";
 import { fetchWeatherData } from "@/lib/weather";
@@ -55,7 +54,6 @@ export default async function PietPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <WzNavbar />
       <main className="min-h-screen bg-[#3b7ff0] text-white px-4 py-8 pb-20">
         <div className="max-w-2xl mx-auto">
           <header className="mb-10">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
-import { WzNavbar, WzFooter } from "@/components/wz";
+import { WzFooter } from "@/components/wz";
 import WzAuthShell from "@/components/wz/WzAuthShell";
 import { displaySubCount } from "@/lib/social-proof";
 
@@ -59,7 +59,6 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
     const p = PERSONAS[userTier];
     return (
       <div className="wz-page min-h-screen">
-        <WzNavbar />
         <div style={{ maxWidth: 640, margin: "0 auto", padding: "clamp(60px,8vw,100px) clamp(20px,4vw,48px)", textAlign: "center" }}>
           <span className="badge ok" style={{ marginBottom: 20 }}>Actief abonnement</span>
           <h1 className="h-1" style={{ marginBottom: 16 }}>Je bent {p.name}-abonnee.</h1>
@@ -79,7 +78,6 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
     const reed = PERSONAS.reed;
     return (
       <div className="wz-page min-h-screen">
-        <WzNavbar />
         <div style={{ maxWidth: 560, margin: "0 auto", padding: "clamp(60px,8vw,100px) clamp(20px,4vw,48px)" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <span className="badge brand" style={{ marginBottom: 16 }}>Huidig abonnement</span>
@@ -144,7 +142,6 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
   // Niet ingelogd: toon alle abonnementen
   return (
     <div className="wz-page min-h-screen">
-      <WzNavbar />
 
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(40px,6vw,80px) clamp(20px,4vw,48px) 48px" }}>
 
