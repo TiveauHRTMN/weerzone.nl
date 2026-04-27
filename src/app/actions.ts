@@ -22,33 +22,55 @@ export async function getWeather(lat: number, lon: number): Promise<WeatherData>
  * Haalt de actuele temperatuur op voor alle KNMI-landstations in één batch.
  * Gebruikt voor de landelijke ticker.
  */
-export async function getStationsWeather(): Promise<Array<{ name: string; temp: number }>> {
+export async function getStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number }>> {
   const { KNMI_STATIONS } = await import("@/lib/types");
-  
+
   const lats = KNMI_STATIONS.map(s => s.lat).join(",");
   const lons = KNMI_STATIONS.map(s => s.lon).join(",");
-  
+
   try {
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m&timezone=Europe/Amsterdam`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code&timezone=Europe/Amsterdam`,
       { next: { revalidate: 600 } } // 10 min cache
     );
-    
+
     if (!res.ok) throw new Error("Open-Meteo batch fetch failed");
-    
+
     const data = await res.json();
-    
+
     // Open-Meteo retourneert een array als we meerdere coördinaten sturen
     const results = Array.isArray(data) ? data : [data];
-    
+
     return KNMI_STATIONS.map((s, i) => ({
       name: s.name.replace(" vliegbasis", "").replace(" Airport", ""),
-      temp: Math.round(results[i].current.temperature_2m)
+      temp: Math.round(results[i].current.temperature_2m),
+      weatherCode: results[i].current.weather_code ?? 0,
     }));
   } catch (error) {
     console.error("getStationsWeather error:", error);
     return [];
   }
+}
+
+/**
+ * Geeft de dichtstbijzijnde bekende plaats (met provincie) voor gegeven coördinaten.
+ * Gebruikt Haversine-afstand over ALL_PLACES.
+ */
+export async function getNearestPlace(lat: number, lon: number): Promise<{ name: string; province: string; slug: string } | null> {
+  const { ALL_PLACES, placeSlug } = await import("@/lib/places-data");
+  let nearest = ALL_PLACES[0];
+  let minDist = Infinity;
+  for (const p of ALL_PLACES) {
+    const dLat = (p.lat - lat) * Math.PI / 180;
+    const dLon = (p.lon - lon) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat * Math.PI / 180) * Math.cos(p.lat * Math.PI / 180) *
+      Math.sin(dLon / 2) ** 2;
+    const dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 6371;
+    if (dist < minDist) { minDist = dist; nearest = p; }
+  }
+  return nearest ? { name: nearest.name, province: nearest.province, slug: placeSlug(nearest.name) } : null;
 }
 
 /**
