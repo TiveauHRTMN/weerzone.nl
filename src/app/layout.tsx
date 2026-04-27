@@ -8,6 +8,7 @@ import GlobalPersonaModal from "@/components/GlobalPersonaModal";
 import { Providers } from "./providers";
 import PostHogPageView from "@/components/PostHogPageView";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const ADSENSE_CLIENT = "ca-pub-6187487207780127";
@@ -151,6 +152,7 @@ export default async function RootLayout({
           <FounderBanner />
           <GlobalPersonaModal />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
