@@ -411,8 +411,28 @@ export async function getImpactAnalysisAction(lat: number, lon: number) {
 /**
  * Genereert een unieke weerkundige beschrijving voor een specifieke locatie.
  * Gebruikt voor Programmatic SEO om 'thin content' te voorkomen.
+ * BEVAT CACHING: Checkt eerst Supabase om API kosten/latency te minimaliseren.
  */
 export async function getLocationSEOContent(placeName: string, province: string, character?: string): Promise<string> {
+  const supabase = createSupabaseAdminClient();
+  
+  // 1. Check cache (gebruik de ai_strategy kolom of meta_description als fallback)
+  try {
+    const { data: existing } = await supabase
+      .from("seo_injections")
+      .select("ai_strategy, meta_description")
+      .eq("place_name", placeName)
+      .eq("province", province)
+      .maybeSingle();
+
+    if (existing?.ai_strategy) {
+      return existing.ai_strategy;
+    }
+  } catch (err) {
+    console.error("SEO cache check failed:", err);
+  }
+
+  // 2. No cache? Call Gemini
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return `Bekijk het actuele weer in ${placeName}. Vooruitzichten per uur exclusief van het KNMI.`;
 
@@ -430,7 +450,23 @@ export async function getLocationSEOContent(placeName: string, province: string,
     `.trim();
 
     const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const text = result.response.text().trim();
+
+    // 3. Store in cache for next time
+    if (text) {
+      await supabase
+        .from("seo_injections")
+        .upsert({
+          place_name: placeName,
+          province: province,
+          ai_strategy: text,
+          meta_description: `Actueel weerbericht voor ${placeName}.`,
+          json_ld: {}
+        }, { onConflict: 'place_name,province' })
+        .catch(e => console.error("SEO cache write failed:", e));
+    }
+
+    return text;
   } catch (error) {
     console.error("getLocationSEOContent error:", error);
     return `Het weer in ${placeName} (${province}) wordt beïnvloed door lokale geografische factoren. Wij tonen de nauwkeurigste actuele voorspelling voor uw locatie.`;

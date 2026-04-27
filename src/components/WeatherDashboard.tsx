@@ -25,7 +25,6 @@ import AffiliateCard from "./AffiliateCard";
 import AmazonStickyBar from "./AmazonStickyBar";
 import PietInlineTip from "./PietInlineTip";
 import EmailSubscribe from "./EmailSubscribe";
-import NavBar from "./NavBar";
 import Footer from "./Footer";
 import dynamic from "next/dynamic";
 
@@ -77,36 +76,59 @@ const DetailItem = ({ label, value, subValue, icon, unit }: { label: string, val
 );
 
 export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride }: DashboardProps) {
-  const [city, setCity] = useState<City>(initialCity || getSavedCity() || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
+  const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
   const [loading, setLoading] = useState(!initialWeather);
+  const [error, setError] = useState(false);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
   const { tier, isFounder } = useSession();
 
+  // Fix hydration mismatch: Sync city from localStorage after mount
+  useEffect(() => {
+    const saved = getSavedCity();
+    if (saved && !initialCity) {
+      setCity(saved);
+    }
+  }, [initialCity]);
+
   const loadData = useCallback(async (targetCity: City) => {
     let cancelled = false;
+    setError(false);
     
-    loadWeather(
-      targetCity.lat,
-      targetCity.lon,
-      (verdict) => {
-        if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
-      },
-      (fresh) => {
-        if (!cancelled) {
-          setWeather(fresh);
-          setLoading(false);
-        }
-      },
-      () => {}
-    ).then(data => {
+    try {
+      const dataPromise = loadWeather(
+        targetCity.lat,
+        targetCity.lon,
+        (verdict) => {
+          if (!cancelled) setWeather((prev) => (prev ? { ...prev, summaryVerdict: verdict } : prev));
+        },
+        (fresh) => {
+          if (!cancelled) {
+            setWeather(fresh);
+            setLoading(false);
+          }
+        },
+        () => {}
+      );
+
+      const data = await dataPromise;
       if (!cancelled) {
+        if (!data) {
+          setError(true);
+        } else {
           setWeather(data);
-          setLoading(false);
+        }
+        setLoading(false);
       }
-    });
+    } catch (err) {
+      console.error("loadData error:", err);
+      if (!cancelled) {
+        setError(true);
+        setLoading(false);
+      }
+    }
 
     loadWWS(targetCity.lat, targetCity.lon).then(wwsPayload => {
       if (!cancelled) setWWS(wwsPayload);
@@ -159,6 +181,25 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
     return () => window.removeEventListener("wz:locate", fn);
   }, []);
 
+  if (error && !weather) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 backdrop-blur-md border border-white/20">
+          <AlertTriangle className="text-accent-orange w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-black text-white mb-2 uppercase tracking-wider">Oeps! Geen verbinding</h2>
+        <p className="text-white/60 text-sm max-w-[280px] mb-6">We kunnen de weersgegevens voor {city.name} momenteel niet ophalen.</p>
+        <button 
+          onClick={() => loadData(city)}
+          className="btn btn-primary"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Probeer opnieuw
+        </button>
+      </div>
+    );
+  }
+
   if (loading || !weather) return <LoadingScreen />;
 
   const narrative = wws?.piet_update?.content || weather.summaryVerdict || getMainCommentary(weather);
@@ -185,8 +226,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             )}
           </div>
         </header>
-
-        <NavBar activeCity={city.name} isLocating={isLocating} />
 
         <div className="flex flex-col gap-6 animate-fade-in">
           {/* ACTUEEL SECTION: HERO SIZE */}
