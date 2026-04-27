@@ -3,8 +3,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users, Terminal, Droplets } from "lucide-react";
-import Logo from "./Logo";
-import PersonaBadge from "./PersonaBadge";
 import PremiumGate from "./PremiumGate";
 import { useSession } from "@/lib/session-context";
 import LoadingScreen from "./LoadingScreen";
@@ -83,7 +81,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const [error, setError] = useState(false);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
-  const { tier, isFounder } = useSession();
+  const { tier } = useSession();
 
   // Fix hydration mismatch: Sync city from localStorage after mount
   useEffect(() => {
@@ -209,23 +207,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
       <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
         
-        <header className="flex flex-col items-center mb-6 sm:mb-10 pt-2">
-          <div className="relative flex items-center justify-center">
-            <div className="sm:hidden">
-              <Logo size={56} />
-            </div>
-            <div className="hidden sm:block">
-              <Logo size={104} />
-            </div>
-            {isFounder ? (
-              <span className="absolute top-1/2 right-[-10px] sm:right-0 translate-x-0 sm:translate-x-1/2 -translate-y-1/2 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-black uppercase tracking-wider text-white rounded-full shadow-lg whitespace-nowrap pointer-events-none select-none z-10 border-2 border-white/90" style={{ background: "#FFB400" }}>
-                Founder
-              </span>
-            ) : (
-              tier && <PersonaBadge tier={tier} />
-            )}
-          </div>
-        </header>
 
         <div className="flex flex-col gap-6 animate-fade-in">
           {/* ACTUEEL SECTION: HERO SIZE */}
