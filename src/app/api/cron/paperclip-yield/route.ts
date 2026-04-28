@@ -1,56 +1,70 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAgentAction } from "@/lib/agent-logger";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Paperclip: Revenue & Yield Optimizer.
- * Analyseert click-data om te bepalen welke producten het beste presteren bij welk weer.
+ * Paperclip: Revenue & Yield Optimizer (Upgraded)
+ * Deep analysis of CTR and conversion patterns to optimize affiliate placement.
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (process.env.NODE_ENV === "production" && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   if (!supabase) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
   try {
-    // 1. Haal top presterende producten op per categorie
-    const { data: topPerformers } = await supabase
+    // 1. Fetch performance aggregates
+    const { data: performers } = await supabase
       .from("affiliate_performance")
       .select("*")
-      .order("clicks", { ascending: false })
-      .limit(20);
+      .order("clicks", { ascending: false });
 
-    if (!topPerformers || topPerformers.length === 0) {
-      return NextResponse.json({ status: "No data to optimize yet" });
+    if (!performers || performers.length === 0) {
+      return NextResponse.json({ status: "Insufficient data for yield optimization" });
     }
 
-    // 2. Analyseer yield (simpel: meeste clicks = winnaar)
-    const bestByCat: Record<string, string> = {};
-    topPerformers.forEach(p => {
-      if (!bestByCat[p.weather_category]) {
-        bestByCat[p.weather_category] = p.product_id;
+    // 2. Identify the "Alpha" product (Best CTR / High Volume)
+    const bestOverall = performers[0];
+    
+    // 3. Category analysis
+    const categories = ["regen", "zon", "wind", "kou", "onweer"];
+    const optimizationMap: Record<string, any> = {};
+
+    categories.forEach(cat => {
+      const bestInCat = performers
+        .filter(p => p.weather_category === cat)
+        .sort((a, b) => (b.clicks / (b.impressions || 1)) - (a.clicks / (a.impressions || 1)))[0];
+      
+      if (bestInCat) {
+        optimizationMap[cat] = {
+          product_id: bestInCat.product_id,
+          ctr: ((bestInCat.clicks / (bestInCat.impressions || 1)) * 100).toFixed(2) + "%",
+          volume: bestInCat.impressions
+        };
       }
     });
 
-    // 3. Log de bevindingen
+    // 4. Log "Strategic Pivot"
     await logAgentAction(
       "Paperclip",
-      "system_check",
-      `Paperclip heeft de Yield Audit voltooid. Top categorie: ${Object.keys(bestByCat).join(", ")}.`,
+      "yield_optimized",
+      `Paperclip heeft de advertentie-yield geoptimaliseerd. Alpha product: ${bestOverall.product_id}. Categorieën gedekt: ${Object.keys(optimizationMap).length}.`,
       { 
-        optimizationData: bestByCat,
-        totalClickRecords: topPerformers.length
+        alpha_product: bestOverall.product_id,
+        category_map: optimizationMap,
+        total_tracked_products: performers.length
       }
     );
 
     return NextResponse.json({
-      status: "Paperclip Optimization Complete",
-      insights: bestByCat
+      status: "Paperclip Yield Optimization Complete",
+      top_performer: bestOverall.product_id,
+      strategy: optimizationMap
     });
 
   } catch (e: any) {

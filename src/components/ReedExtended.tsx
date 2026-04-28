@@ -102,35 +102,35 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
       </div>
 
       {loading && !weather && (
-        <div className="homecard !p-12 text-center">
-           <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-4 text-white/40" />
-           <p className="text-sm font-bold text-white/60">Reed scant de horizon op 1km resolutie…</p>
+        <div className="card !p-12 text-center">
+           <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-4 text-text-secondary" />
+           <p className="text-sm font-bold text-text-secondary">Reed scant de horizon op 1km resolutie…</p>
         </div>
       )}
 
       {(!loading || weather) && !hasExtreme && (
-        <div className="homecard border-emerald-500/30 bg-emerald-500/10 !p-8 flex flex-col items-center text-center">
+        <div className="card border-emerald-500/30 bg-emerald-500/10 !p-8 flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6">
             <ShieldCheck className="w-8 h-8 text-emerald-400" />
           </div>
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2">Extreme Index: Groen</p>
-          <h2 className="text-3xl font-black text-white mb-4">Geen extremen in {city.name}</h2>
-          <p className="text-white/60 max-w-md leading-relaxed">
+          <h2 className="text-3xl font-black text-text-primary mb-4">Geen extremen in {city.name}</h2>
+          <p className="text-text-secondary max-w-md leading-relaxed">
             Reed ziet momenteel geen storm, onweer of andere gevaarlijke situaties in de data. 
             Onze P90 SEED-simulaties blijven binnen de veilige marges voor de komende 48 uur.
           </p>
-          <div className="mt-8 pt-8 border-t border-white/5 w-full flex justify-center gap-8">
+          <div className="mt-8 pt-8 border-t border-black/5 w-full flex justify-center gap-8">
              <div className="text-center">
-                <p className="text-[10px] font-black text-white/20 uppercase mb-1">Onweer</p>
-                <Zap className="w-5 h-5 text-white/10 mx-auto" />
+                <p className="text-[10px] font-black text-text-muted uppercase mb-1">Onweer</p>
+                <Zap className="w-5 h-5 text-text-muted mx-auto" />
              </div>
              <div className="text-center">
-                <p className="text-[10px] font-black text-white/20 uppercase mb-1">Storm</p>
-                <Wind className="w-5 h-5 text-white/10 mx-auto" />
+                <p className="text-[10px] font-black text-text-muted uppercase mb-1">Storm</p>
+                <Wind className="w-5 h-5 text-text-muted mx-auto" />
              </div>
              <div className="text-center">
-                <p className="text-[10px] font-black text-white/20 uppercase mb-1">Neerslag</p>
-                <CloudRain className="w-5 h-5 text-white/10 mx-auto" />
+                <p className="text-[10px] font-black text-text-muted uppercase mb-1">Neerslag</p>
+                <CloudRain className="w-5 h-5 text-text-muted mx-auto" />
              </div>
           </div>
         </div>
@@ -138,57 +138,57 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
 
       {(!loading || weather) && hasExtreme && alert && (
         <div className="space-y-4">
-          <div className={`homecard !p-8 border-l-8 ${
-            alert.severity === "RED" ? "border-l-rose-500 bg-rose-500/10" : 
-            alert.severity === "ORANGE" ? "border-l-orange-500 bg-orange-500/10" : "border-l-amber-500 bg-amber-500/10"
+          <div className={`card !p-8 border-l-8 ${
+            alert.severity === "RED" ? "border-l-rose-500 bg-rose-500/5" : 
+            alert.severity === "ORANGE" ? "border-l-orange-500 bg-orange-500/5" : "border-l-amber-500 bg-amber-500/5"
           }`}>
             <div className="flex items-center gap-3 mb-6">
               <AlertTriangle className={`w-6 h-6 ${
                 alert.severity === "RED" ? "text-rose-500" : 
                 alert.severity === "ORANGE" ? "text-orange-500" : "text-amber-500"
               }`} />
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">
                 WWS EXTREEM ALERT · {alert.severity}
               </span>
             </div>
             
-            <h2 className="text-4xl font-black text-white leading-tight mb-2">
+            <h2 className="text-4xl font-black text-text-primary leading-tight mb-2">
               {alert.type.join(" & ")}
             </h2>
-            <p className="text-xl font-bold text-white/80 mb-6">{alert.location} · {alert.timing}</p>
+            <p className="text-xl font-bold text-text-secondary mb-6">{alert.location} · {alert.timing}</p>
             
-            <div className="bg-black/20 rounded-2xl p-6 border border-white/5">
-               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Instructie van Reed</p>
-               <p className="text-lg font-medium text-white italic">"{alert.instruction}"</p>
-               <p className="text-[10px] text-white/20 mt-4 uppercase">— Reed van Weerzone</p>
+            <div className="bg-black/5 rounded-2xl p-6 border border-black/5">
+               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Instructie van Reed</p>
+               <p className="text-lg font-medium text-text-primary italic">"{alert.instruction}"</p>
+               <p className="text-[10px] text-text-muted mt-4 uppercase">— Reed van Weerzone</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              {weather?.current && (
-                <div className="homecard !p-6">
-                   <p className="text-[10px] font-black text-white/30 uppercase mb-4">Actuele Impact</p>
+                <div className="card !p-6">
+                   <p className="text-[10px] font-black text-text-muted uppercase mb-4">Actuele Impact</p>
                    <div className="space-y-4">
                       <div className="flex items-center justify-between">
                          <div className="flex items-center gap-2">
-                            <Wind className="w-4 h-4 text-white/40" />
-                            <span className="text-sm font-bold text-white/60">Windvlagen</span>
+                            <Wind className="w-4 h-4 text-text-muted" />
+                            <span className="text-sm font-bold text-text-secondary">Windvlagen</span>
                          </div>
-                         <span className="text-lg font-black text-white">{weather.current.windGusts} km/h</span>
+                         <span className="text-lg font-black text-text-primary">{weather.current.windGusts} km/h</span>
                       </div>
                       <div className="flex items-center justify-between">
                          <div className="flex items-center gap-2">
-                            <Thermometer className="w-4 h-4 text-white/40" />
-                            <span className="text-sm font-bold text-white/60">Gevoelstemp</span>
+                            <Thermometer className="w-4 h-4 text-text-muted" />
+                            <span className="text-sm font-bold text-text-secondary">Gevoelstemp</span>
                          </div>
-                         <span className="text-lg font-black text-white">{weather.current.feelsLike}°</span>
+                         <span className="text-lg font-black text-text-primary">{weather.current.feelsLike}°</span>
                       </div>
                    </div>
                 </div>
              )}
-             <div className="homecard !p-6 bg-slate-900">
+             <div className="card !p-6 bg-slate-900">
                 <p className="text-[10px] font-black text-emerald-400 uppercase mb-4 tracking-widest">Technisch Dossier</p>
-                <div className="text-[11px] text-white/40 space-y-1 font-mono">
+                <div className="text-[11px] text-slate-400 space-y-1 font-mono">
                    <p>LATENCY: 120ms</p>
                    <p>MODELS: HARMONIE, METNET-3</p>
                    <p>ACCURACY: 1KM GRID</p>

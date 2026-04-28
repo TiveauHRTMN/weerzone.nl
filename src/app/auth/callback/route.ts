@@ -8,18 +8,18 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/app";
+  const rawNext = searchParams.get("next") ?? "/app";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/app";
 
   if (code) {
     console.log(`[AUTH-CALLBACK] Exchanging code for session...`);
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser();
       console.log(`[AUTH-CALLBACK] Success! User: ${user?.email}`);
-      const redirectUrl = new URL(next, origin);
-      return NextResponse.redirect(redirectUrl.href);
+      return NextResponse.redirect(`${origin}${next}`);
     } else {
       console.error(`[AUTH-CALLBACK] Error exchanging code:`, error.message);
     }

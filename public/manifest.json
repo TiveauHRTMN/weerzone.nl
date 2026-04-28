@@ -14,13 +14,13 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/favicon-icon.png",
-      "sizes": "192x192",
+      "src": "/weerzone-icon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon-icon.png",
+      "src": "/weerzone-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

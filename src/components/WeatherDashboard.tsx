@@ -37,6 +37,7 @@ interface DashboardProps {
   initialWeather?: WeatherData;
   beforeFooter?: React.ReactNode;
   titleOverride?: string;
+  hideWeatherInfo?: boolean;
 }
 
 function getSavedCity(): City | null {
@@ -53,27 +54,53 @@ function getSavedCity(): City | null {
   return null;
 }
 
-const DetailItem = ({ label, value, subValue, icon, unit }: { label: string, value: string | number, subValue?: string, icon: React.ReactNode, unit?: string }) => (
-  <div className="flex flex-col group transition-all duration-300">
-    <div className="flex items-center gap-2 mb-4">
-      <div className="w-7 h-7 rounded-lg bg-black/[0.04] flex items-center justify-center text-text-muted group-hover:bg-black/[0.08] transition-colors">
-        {React.cloneElement(icon as React.ReactElement<{ size?: number; strokeWidth?: number }>, { size: 14, strokeWidth: 3 })}
-      </div>
-      <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.15em]">{label}</span>
-    </div>
-    <div className="flex items-baseline gap-1">
-      <div className="text-4xl font-black text-text-primary tracking-tighter">{value}</div>
-      {unit && <span className="text-lg font-black text-text-muted uppercase ml-0.5">{unit}</span>}
-    </div>
-    {subValue && (
-      <div className="mt-3 inline-flex items-center px-2 py-0.5 rounded-md bg-black/[0.03] border border-black/5 w-fit">
-        <span className="text-[9px] font-black text-text-muted uppercase tracking-widest leading-none py-0.5">{subValue}</span>
-      </div>
-    )}
-  </div>
-);
+const TILE_PALETTE: Record<string, { tint: string; accent: string }> = {
+  "Zon":    { tint: "rgba(245,158,11,0.10)",  accent: "#f59e0b" },
+  "Regen":  { tint: "rgba(6,182,212,0.09)",   accent: "#06b6d4" },
+  "Wind":   { tint: "rgba(100,116,139,0.09)", accent: "#64748b" },
+  "Gevoel": { tint: "rgba(239,68,68,0.08)",   accent: "#f97316" },
+  "Vocht":  { tint: "rgba(14,165,233,0.10)",  accent: "#0ea5e9" },
+};
 
-export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride }: DashboardProps) {
+const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
+  label: string; value: string | number; subValue?: string;
+  icon: React.ReactNode; unit?: string; fillPct?: number;
+}) => {
+  const { tint, accent } = TILE_PALETTE[label] ?? { tint: "rgba(0,0,0,0.04)", accent: "#64748b" };
+  return (
+    <div
+      className="flex flex-col rounded-3xl border border-white/60 overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
+      style={{ background: tint, backdropFilter: "blur(8px)" }}
+    >
+      <div className="p-4 sm:p-5 flex flex-col gap-3 flex-1">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${accent}22` }}>
+            {React.cloneElement(icon as React.ReactElement<{ size?: number; strokeWidth?: number; color?: string }>, {
+              size: 15, strokeWidth: 2.5, color: accent,
+            })}
+          </div>
+          <span className="text-[9px] font-black text-text-muted uppercase tracking-[0.15em]">{label}</span>
+        </div>
+        <div className="flex items-baseline gap-1 leading-none">
+          <span className="text-3xl sm:text-4xl font-black text-text-primary tracking-tighter">{value}</span>
+          {unit && <span className="text-sm font-black uppercase ml-0.5" style={{ color: accent }}>{unit}</span>}
+        </div>
+        {subValue && (
+          <div className="inline-flex items-center px-2 py-0.5 rounded-lg w-fit" style={{ background: `${accent}18` }}>
+            <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: accent }}>{subValue}</span>
+          </div>
+        )}
+      </div>
+      {fillPct !== undefined && (
+        <div className="mx-4 mb-3 h-1 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.07)" }}>
+          <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(fillPct, 100)}%`, background: accent }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride, hideWeatherInfo }: DashboardProps) {
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
@@ -145,10 +172,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   }, [city, loadData]);
 
   const handleLocationClick = () => {
-    if (!tier) {
-      window.dispatchEvent(new CustomEvent("wz:open-persona-modal"));
-      return;
-    }
     if (!("geolocation" in navigator)) return;
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -160,15 +183,17 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         reverseGeocode(lat, lon).then((geoCity) => {
           setCity(geoCity);
           localStorage.setItem("wz_city", JSON.stringify(geoCity));
+          window.dispatchEvent(new CustomEvent("wz:city-updated"));
         }).catch(() => {});
       },
       () => setIsLocating(false),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60 * 60000 }
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60 * 60000 }
     );
   };
 
   useEffect(() => {
     localStorage.setItem("wz_city", JSON.stringify({ name: city.name, lat: city.lat, lon: city.lon }));
+    window.dispatchEvent(new CustomEvent("wz:city-updated"));
   }, [city]);
 
   const locateRef = useRef(handleLocationClick);
@@ -209,8 +234,10 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         
 
         <div className="flex flex-col gap-6 animate-fade-in">
-          {/* ACTUEEL SECTION: HERO SIZE */}
-          <div className="card overflow-hidden relative group shadow-2xl border-white/40">
+          {!hideWeatherInfo && (
+            <>
+              {/* ACTUEEL SECTION: HERO SIZE */}
+              <div className="card overflow-hidden relative group shadow-2xl border-white/40">
             <div className="p-8 sm:p-12 relative z-[2] pt-12 sm:pt-20">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 mb-12">
                 <div className="flex flex-col items-start">
@@ -254,7 +281,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                       </div>
                       <span className="text-[9px] font-bold text-white/20 uppercase">Model consensus: {wws.api_grid_1km.divergence_delta === 0 ? 'Optimal' : 'Divergent'}</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {wws.api_grid_1km.forecast.slice(0, 3).map((f, i) => (
                           <div key={i} className="flex flex-col">
                               <span className="text-[9px] font-black text-white/30 uppercase mb-1">{new Date(f.time).getHours()}:00</span>
@@ -308,14 +335,43 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           </div>
 
-          <div className="card p-6 sm:p-8 border-white/40 shadow-xl">
-            <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-10 px-1">Details</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-12 gap-x-8">
-              <DetailItem label="Zon" value={`UV ${weather.uvIndex.toFixed(0)}`} icon={<Sun />} />
-              <DetailItem label="Regen" value={weather.current.precipitation} unit="MM" icon={<CloudRain />} />
-              <DetailItem label="Wind" value={weather.current.windSpeed} unit="KM/H" subValue={`BFT ${getWindBeaufort(weather.current.windSpeed).scale}`} icon={<Wind />} />
-              <DetailItem label="Gevoel" value={weather.current.feelsLike} unit="°" icon={<Thermometer />} />
-              <DetailItem label="Vocht" value={weather.current.humidity} unit="%" icon={<Droplets />} />
+          <div className="card p-5 sm:p-7 border-white/40 shadow-xl">
+            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.25em] mb-4 px-1">Details</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <DetailItem
+                label="Zon"
+                value={`UV ${weather.uvIndex.toFixed(0)}`}
+                icon={<Sun />}
+                fillPct={(weather.uvIndex / 11) * 100}
+              />
+              <DetailItem
+                label="Regen"
+                value={weather.current.precipitation}
+                unit="MM"
+                icon={<CloudRain />}
+                fillPct={Math.min((Number(weather.current.precipitation) / 10) * 100, 100)}
+              />
+              <DetailItem
+                label="Wind"
+                value={weather.current.windSpeed}
+                unit="KM/H"
+                subValue={`BFT ${getWindBeaufort(weather.current.windSpeed).scale}`}
+                icon={<Wind />}
+                fillPct={(getWindBeaufort(weather.current.windSpeed).scale / 12) * 100}
+              />
+              <DetailItem
+                label="Gevoel"
+                value={weather.current.feelsLike}
+                unit="°"
+                icon={<Thermometer />}
+              />
+              <DetailItem
+                label="Vocht"
+                value={weather.current.humidity}
+                unit="%"
+                icon={<Droplets />}
+                fillPct={Number(weather.current.humidity)}
+              />
             </div>
           </div>
 
@@ -323,35 +379,84 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           <AffiliateCard weather={weather} placeName={city.name} />
 
           <PremiumGate>
-            <div className="card p-4">
+            <div className="space-y-4">
+              {/* Rain radar */}
               {weather.minutely && weather.minutely.length > 0 && (
-                <div className="mb-6 pb-6 border-b border-black/5">
+                <div className="card p-5 border-white/40 shadow-xl">
                   <RainRadar data={weather.minutely} />
                 </div>
               )}
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider">Komende Uren</h3>
-                <div className="flex items-center gap-1 bg-black/5 rounded-full p-0.5">
-                  {[{ k: "temp", i: <Thermometer className="w-3.5 h-3.5" /> }, { k: "rain", i: <CloudRain className="w-3.5 h-3.5" /> }, { k: "wind", i: <Wind className="w-3.5 h-3.5" /> }].map(m => (
-                    <button key={m.k} onClick={() => setHourlyMetric(m.k as any)} className={`w-7 h-7 rounded-full flex items-center justify-center ${hourlyMetric === m.k ? 'bg-white shadow-sm' : 'text-text-muted'}`}>{m.i}</button>
-                  ))}
+
+              {/* Hourly forecast */}
+              <div className="card p-5 sm:p-6 border-white/40 shadow-xl">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.25em]">Komende Uren</h3>
+                  <div className="flex items-center gap-0.5 rounded-2xl border border-white/60 p-0.5" style={{ background: "rgba(255,255,255,0.3)" }}>
+                    {[
+                      { k: "temp", i: <Thermometer className="w-3.5 h-3.5" /> },
+                      { k: "rain", i: <CloudRain className="w-3.5 h-3.5" /> },
+                      { k: "wind", i: <Wind className="w-3.5 h-3.5" /> },
+                    ].map(m => (
+                      <button
+                        key={m.k}
+                        onClick={() => setHourlyMetric(m.k as "temp" | "rain" | "wind")}
+                        className="w-7 h-7 rounded-xl flex items-center justify-center transition-all"
+                        style={{
+                          background: hourlyMetric === m.k ? "rgba(255,255,255,0.85)" : "transparent",
+                          color: hourlyMetric === m.k ? "var(--text-primary)" : "var(--text-muted)",
+                          boxShadow: hourlyMetric === m.k ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                        }}
+                      >
+                        {m.i}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="horizontal-scroll no-scrollbar py-2 -mx-2 px-2 flex gap-3 overflow-x-auto snap-x snap-mandatory">
-                {weather.hourly.slice(0, 16).map((hour, idx) => {
-                  const h = new Date(hour.time).getHours();
-                  return (
-                    <div key={hour.time} className={`border rounded-2xl p-3 flex flex-col items-center justify-between min-w-[76px] h-[120px] snap-start ${idx === 0 ? 'bg-accent-orange/10 border-accent-orange/40' : 'bg-black/[0.03] border-black/5'}`}>
-                      <div className="text-[10px] font-black text-text-muted uppercase">{idx === 0 ? 'Nu' : `${h}:00`}</div>
-                      <div className="text-3xl">{getWeatherEmoji(hour.weatherCode, h > 6 && h < 21)}</div>
-                      <div className="text-sm font-black">{hourlyMetric === "temp" ? hour.temperature + "°" : hourlyMetric === "rain" ? hour.precipitation.toFixed(1) + "mm" : hour.windSpeed + "km/h"}</div>
-                      <div className="w-full h-1 bg-black/5 rounded-full overflow-hidden"><div className={`h-full ${hour.confidence === "high" ? "bg-accent-green" : "bg-accent-amber"}`} style={{ width: '100%' }} /></div>
-                    </div>
-                  );
-                })}
+
+                <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
+                  {(() => {
+                    const nowHour = new Date()
+                      .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+                      .slice(0, 13).replace(" ", "T"); // "2025-04-28T17"
+                    const startIdx = Math.max(0, weather.hourly.findIndex(h => h.time >= nowHour));
+                    return weather.hourly.slice(startIdx, startIdx + 16);
+                  })().map((hour, idx) => {
+                    const h   = new Date(hour.time).getHours();
+                    const isNow = idx === 0;
+                    return (
+                      <div
+                        key={hour.time}
+                        className="flex flex-col items-center gap-2 rounded-2xl border px-2.5 py-3 snap-start shrink-0 w-[72px] transition-all"
+                        style={{
+                          background: isNow ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.10)",
+                          borderColor: isNow ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
+                          boxShadow: isNow ? "0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)" : "none",
+                        }}
+                      >
+                        <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: isNow ? "#f59e0b" : "var(--text-muted)" }}>
+                          {isNow ? "Nu" : `${h}:00`}
+                        </span>
+                        <span className="text-3xl leading-none">{getWeatherEmoji(hour.weatherCode, h > 6 && h < 21)}</span>
+                        <div className="flex items-baseline gap-0.5 leading-none">
+                          <span className="text-sm font-black text-text-primary">
+                            {hourlyMetric === "temp" ? hour.temperature : hourlyMetric === "rain" ? hour.precipitation.toFixed(1) : hour.windSpeed}
+                          </span>
+                          <span className="text-[9px] font-black text-text-muted">
+                            {hourlyMetric === "temp" ? "°" : hourlyMetric === "rain" ? "mm" : "km"}
+                          </span>
+                        </div>
+                        <div className="w-full h-0.5 rounded-full overflow-hidden bg-black/[0.06]">
+                          <div className={`h-full rounded-full ${hour.confidence === "high" ? "bg-accent-green" : "bg-accent-amber"}`} style={{ width: "100%" }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </PremiumGate>
+          </>
+          )}
         </div>
         {beforeFooter}
         <Footer />

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import WeatherDashboard from "@/components/WeatherDashboard";
 import PietExtended from "@/components/PietExtended";
 import PremiumGate from "@/components/PremiumGate";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { getCachedTruth } from "@/lib/wws-truth-server";
 import { fetchWeatherData } from "@/lib/weather";
 import { DUTCH_CITIES } from "@/lib/types";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Piet — Hyperlokaal weerbericht voor jouw straat",
@@ -25,27 +27,38 @@ const jsonLd = {
   headline: "Piet — Hyperlokaal 48-uurs weerbericht",
   description:
     "De dagelijkse, eerlijke weeranalyse van Piet voor jouw GPS-locatie. Geen 14-daagse-gok, gewoon de komende 48 uur in gewone taal.",
-  author: {
-    "@type": "Organization",
-    name: "Weerzone",
-  },
+  author: { "@type": "Organization", name: "Weerzone" },
   publisher: {
     "@type": "Organization",
     name: "Weerzone",
-    logo: "https://weerzone.nl/favicon-icon.png",
+    logo: "https://weerzone.nl/weerzone-icon.png",
   },
   datePublished: new Date().toISOString().split("T")[0],
 };
 
 export default async function PietPage() {
-  // SSR: Haal de laatste waarheid alvast op van de server
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let profile = null;
+  if (user) {
+    const { data } = await supabase
+      .from("user_profile")
+      .select("full_name")
+      .eq("id", user.id)
+      .maybeSingle();
+    profile = data;
+  }
+
+  const greetingName = profile?.full_name?.split(" ")[0] || "jou";
+
   const loc = await getSavedLocationServer();
   const defaultCity = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
   const activeLoc = loc || defaultCity;
-  
+
   const [initialTruth, initialWeather] = await Promise.all([
-    getCachedTruth(activeLoc.lat, activeLoc.lon, 'public'),
-    fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => null)
+    getCachedTruth(activeLoc.lat, activeLoc.lon, "public"),
+    fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => null),
   ]);
 
   return (
@@ -54,32 +67,42 @@ export default async function PietPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="min-h-screen bg-[#3b7ff0] text-white px-4 py-8 pb-20">
-        <div className="max-w-2xl mx-auto">
-          <header className="mb-10">
-            <h1 className="text-5xl sm:text-6xl font-black leading-tight mb-4 tracking-tighter">
-              Piet
-            </h1>
-            <p className="text-white/90 text-lg leading-relaxed font-medium">
-              De volledige 48 uur voor jouw locatie. In gewone taal, met
-              concrete tips voor je dag — betrouwbaar en lokaal, voor
-              elke straat van Nederland.
-            </p>
-          </header>
+      <main>
+        <WeatherDashboard
+          initialCity={activeLoc}
+          initialWeather={initialWeather ?? undefined}
+          hideWeatherInfo={true}
+          beforeFooter={
+            <div className="space-y-6">
+              {/* Persona intro */}
+              <div className="card p-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-text-muted mb-1">
+                  WEERZONE Persona · 48 uur
+                </p>
+                <h2 className="text-3xl font-black text-text-primary leading-tight">
+                  Piet &amp; {greetingName}
+                </h2>
+                <p className="text-text-secondary text-sm leading-relaxed mt-2">
+                  De volledige 48 uur voor jouw locatie — in gewone taal, met
+                  concrete tips voor je dag. Betrouwbaar en lokaal, voor elke
+                  straat van Nederland.
+                </p>
+              </div>
 
-          <PremiumGate>
-            <PietExtended 
-              initialWWS={initialTruth} 
-              initialWeather={initialWeather} 
-              initialCity={loc || undefined}
-            />
-          </PremiumGate>
+              <PremiumGate>
+                <PietExtended
+                  initialWWS={initialTruth}
+                  initialWeather={initialWeather}
+                  initialCity={loc || undefined}
+                />
+              </PremiumGate>
 
-          <p className="mt-12 text-center text-white/50 text-xs font-medium">
-            Verder dan 48 uur kijken we niet vooruit. Dan wordt het gokken
-            — en dat doen we niet.
-          </p>
-        </div>
+              <p className="text-center text-white/40 text-xs font-medium pb-4">
+                Verder dan 48 uur kijken we niet vooruit — dan wordt het gokken.
+              </p>
+            </div>
+          }
+        />
       </main>
     </>
   );

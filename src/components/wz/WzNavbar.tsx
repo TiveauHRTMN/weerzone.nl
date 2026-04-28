@@ -75,11 +75,6 @@ export default function WzNavbar() {
         <div className="flex items-center justify-end gap-2">
           {user ? (
             <>
-              {isFounder && (
-                <span className="badge sun" style={{ fontSize: 11, padding: "4px 10px", letterSpacing: "0.08em" }}>
-                  ★ Founder
-                </span>
-              )}
               <Link href="/app" className="btn btn-ghost btn-sm font-bold">
                 Mijn Weerzone
               </Link>
@@ -153,11 +148,6 @@ export default function WzNavbar() {
           <div className="grid gap-2 mt-3 pt-3 border-t" style={{ borderColor: "var(--wz-border)" }}>
             {user ? (
               <>
-                {isFounder && (
-                  <span className="badge sun text-center" style={{ fontSize: 11, padding: "4px 10px", letterSpacing: "0.08em" }}>
-                    ★ Founder
-                  </span>
-                )}
                 <Link href="/app" onClick={() => setOpen(false)} className="btn btn-ghost btn-block">
                   Mijn Weerzone
                 </Link>

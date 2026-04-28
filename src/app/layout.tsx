@@ -29,10 +29,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://weerzone.nl"),
   icons: {
     icon: [
-      { url: "/favicon-icon.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/weerzone-icon.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/favicon-icon.png",
-    apple: "/favicon-icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/weerzone-icon.png",
   },
   title: {
     default: "WEERZONE | De nauwkeurigste weersvoorspelling van Nederland",

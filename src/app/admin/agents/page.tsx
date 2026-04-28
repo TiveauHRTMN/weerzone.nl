@@ -71,6 +71,9 @@ export default async function AgentCockpit() {
             <p className="text-white/40 text-sm font-medium tracking-widest uppercase">Management dashboard voor AI-medewerkers</p>
           </div>
           <div className="flex gap-4">
+            <Link href="/admin/architect" className="text-xs font-black px-4 py-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 rounded-full hover:bg-purple-500/20 transition-all uppercase tracking-widest">
+              Architect Mode
+            </Link>
             <Link href="/admin/b2b" className="text-xs font-black px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all uppercase tracking-widest">
               B2B Assets
             </Link>

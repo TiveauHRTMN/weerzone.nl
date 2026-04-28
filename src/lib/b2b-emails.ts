@@ -72,22 +72,22 @@ const GEAR: Record<string, GearItem[]> = {
 function buildGearHtml(industry: string): string {
   const items = GEAR[industry] || GEAR.bouw;
   const rows = items.map(i => `
-    <a href="${i.href}" target="_blank" rel="sponsored noopener" style="display:block;padding:12px 14px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;text-decoration:none;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:24px;">${i.emoji}</span>
-        <div style="flex:1;">
-          <p style="margin:0;font-size:13px;font-weight:800;color:#1e293b;line-height:1.3;">${i.title}</p>
-          <p style="margin:2px 0 0;font-size:11px;color:#64748b;line-height:1.4;">${i.desc}</p>
-        </div>
-        <span style="color:#f59e0b;font-size:14px;font-weight:900;">→</span>
-      </div>
+    <a href="${i.href}" target="_blank" rel="sponsored noopener" style="display:block;padding:16px;background:#ffffff;border:1.5px solid #f1f5f9;border-radius:16px;margin-bottom:12px;text-decoration:none;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td style="width:44px;vertical-align:middle;font-size:32px;line-height:1;">${i.emoji}</td>
+        <td style="vertical-align:middle;padding-left:12px;">
+          <div style="font-size:14px;font-weight:900;color:#0f172a;line-height:1.2;">${i.title}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">${i.desc}</div>
+        </td>
+        <td style="width:24px;vertical-align:middle;text-align:right;color:#f59e0b;font-weight:900;">→</td>
+      </tr></table>
     </a>
   `).join("");
   return `
-    <div style="background:#f8fafc;border-radius:12px;padding:18px;margin:20px 0;border:1px solid #e2e8f0;">
-      <p style="margin:0 0 4px;font-size:11px;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">Uitrusting die meewerkt</p>
-      <p style="margin:0 0 14px;font-size:12px;color:#64748b;">Branche-specifiek, getest door collega's. Amazon-partnerlinks.</p>
+    <div style="background:#f8fafc;border-radius:24px;padding:24px;margin:32px 0;border:1px solid #e2e8f0;">
+      <div style="font-size:10px;color:#94a3b8;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;">Uitrusting die meewerkt</div>
       ${rows}
+      <div style="font-size:10px;color:#94a3b8;margin-top:8px;text-align:center;">Branche-specifiek geselecteerd · Amazon Partner</div>
     </div>
   `;
 }
@@ -122,129 +122,129 @@ const HOOKS: Record<B2BIndustry, IndustryHook> = {
     oneLiner: "Stop met gokken op droog weer. Weet het.",
     bullets: [
       "48-uurs regenvoorspelling per locatie",
-      "Windsnelheid per uur (belangrijk voor hoogbouw)",
-      "Dagelijkse email om 08:00 met jouw werkgebied",
+      "Windsnelheid per uur (hoogbouw-veiligheid)",
+      "Dagelijkse briefing voor jouw regio",
     ],
   },
   bouw: {
     headline: "Beton storten bij vorst kost duizenden euro's",
-    painPoint: "Kraanwerk bij te veel wind, stortwerk bij vrieskou, dakwerk bij regen — elke fout kost tijd en geld.",
-    solution: "WEERZONE levert KNMI HARMONIE-data op 2,5 km resolutie. Je weet per uur of het veilig is om door te werken.",
+    painPoint: "Kraanwerk bij te veel wind of stortwerk bij vrieskou — elke inschattingsfout kost direct rendement.",
+    solution: "WEERZONE levert hyper-lokale data op 1x1km grid. Je ziet per uur exact wanneer de wind gaat liggen of de vorst invalt.",
     oneLiner: "De bouwplaats draait door. Het weer beslist niet meer.",
     bullets: [
-      "Windsnelheid per uur (kraanwerk-drempel instelbaar)",
+      "Windsnelheid per uur (kraan-drempels)",
       "Neerslagvoorspelling per 15 minuten",
       "Vorstmelding 48 uur vooruit",
     ],
   },
   horeca: {
-    headline: "Leeg terras bij bewolking, tekort aan personeel bij zon",
-    painPoint: "Personeel inplannen op basis van een 14-daagse die niet klopt. Te veel mensen op een regendag, te weinig als het 25° wordt.",
-    solution: "Plan je terras-personeel op basis van 48-uurs weerdata. Elke dag om 08:00 weet je precies wat je die dag nodig hebt.",
+    headline: "Leeg terras bij bewolking, personeelstekort bij zon",
+    painPoint: "Personeel inplannen op basis van een 14-daagse die niet klopt. Te veel mensen op een regendag, te weinig als het plotseling 25° wordt.",
+    solution: "Plan je terras-bezetting op basis van 48-uurs weerdata. Elke ochtend weet je precies wat je nodig hebt voor die dag.",
     oneLiner: "Personeelskosten omlaag. Terrasomzet omhoog.",
     bullets: [
-      "Temperatuur en zon per uur — plan je terrascapaciteit",
-      "Regenalert — dekzeilen en parasols op tijd",
-      "48u vooruit = inkoop afstemmen op weersomstandigheden",
+      "Temperatuur en zonuren per uur",
+      "Regenalerts voor parasol-management",
+      "48u inkoop-optimalisatie",
     ],
   },
   evenementen: {
     headline: "Eén onverwachte bui kan een heel event ruïneren",
     painPoint: "Noodtenten bestellen op het laatste moment kost het dubbele. Bezoekers die weglopen door regen komen niet terug.",
-    solution: "48 uur is genoeg om operationele beslissingen te nemen. Tenten, beveiliging, noodplannen — allemaal op tijd.",
+    solution: "48 uur is genoeg om operationele beslissingen te nemen. Tenten, beveiliging en noodplannen staan klaar op basis van data.",
     oneLiner: "Geen verrassing. Geen paniek. Geen schade.",
     bullets: [
-      "Neerslagkans per uur — plan je opbouw en afbouw",
-      "Windstoten-alert — podium en tenten beveiligen",
-      "Onweersrisico — bliksemprotocol op tijd activeren",
+      "Neerslagkans per uur (op- en afbouw)",
+      "Windstoten-alert voor podiumveiligheid",
+      "Onweersrisico en bliksemprotocol",
     ],
   },
   agrarisch: {
     headline: "Oogsten bij regen vernietigt opbrengst",
-    painPoint: "Spuiten bij wind is geldverspilling. Maaien op een nat veld beschadigt de bodem. Te laat oogsten door onverwachte regen kost de helft van je opbrengst.",
-    solution: "WEERZONE geeft je per uur de exacte neerslag, wind en temperatuur voor jouw perceel. Plan op data, niet op gevoel.",
+    painPoint: "Spuiten bij wind is verspilling. Maaien op een nat veld beschadigt de bodem. Te laat oogsten kost de helft van je marge.",
+    solution: "WEERZONE geeft je per uur de exacte neerslag en wind voor jouw perceel. Plan op data, niet op onderbuikgevoel.",
     oneLiner: "Het veld wacht niet. Jouw planning ook niet.",
     bullets: [
-      "Neerslag per uur — plan zaai-, spuit- en oogstmomenten",
-      "Windsnelheid — effectief spuiten vereist <3 Bft",
-      "Vorstmelding — gewassen beschermen voor het te laat is",
+      "Neerslag per uur (zaai- en oogstmomenten)",
+      "Windsnelheid onder 3 Bft (spuit-window)",
+      "Vorstmelding voor gewasbescherming",
     ],
   },
   transport: {
     headline: "Elke stilstaande vrachtwagen kost €500 per dag",
     painPoint: "Gladheid, storm, mist — weergerelateerde uitval kost de transportsector miljoenen per jaar.",
-    solution: "48-uurs weerdata per route. Je chauffeurs weten vooraf wat ze tegenkomen. Jij plant je vloot efficiënter.",
+    solution: "48-uurs weerdata per route. Je chauffeurs weten vooraf wat ze tegenkomen. Jij plant je vloot op maximale efficiëntie.",
     oneLiner: "De route kent geen verrassingen meer.",
     bullets: [
-      "Gladheidsrisico per regio — nachtvorst 48u vooruit",
-      "Windstoten — bijzonder voertuig-advies automatisch",
-      "Mistmelding — vertragingen voorspellen en communiceren",
+      "Gladheidsrisico per regio",
+      "Windstoten-advies voor voertuigen",
+      "Mistmeldingen voor route-communicatie",
     ],
   },
   sport: {
     headline: "Training annuleren op het laatste moment is amateuristisch",
-    painPoint: "Spelers die voor niets komen, velden die beschadigd raken door regen, competitiewedstrijden die te laat worden afgelast.",
-    solution: "Communiceer 48 uur van tevoren. Velden sparen, planning optimaliseren, spelers en ouders op tijd informeren.",
+    painPoint: "Spelers die voor niets komen, velden die kapot gelopen worden bij regen, ouders die te laat geïnformeerd zijn.",
+    solution: "Communiceer 48 uur van tevoren met zekerheid. Velden sparen, planning strak en iedereen tijdig op de hoogte.",
     oneLiner: "Professionele planning begint bij het weer.",
     bullets: [
-      "Neerslag en veldcondities — 48u vooruit",
-      "Onweersrisico — veiligheidsprotocol tijdig activeren",
-      "Temperatuuralerts — hittemaatregelen of vorstbescherming",
+      "Veldcondities-voorspelling 48u vooruit",
+      "Onweers-veiligheidsprotocol",
+      "Temperatuuralerts voor hitte of kou",
     ],
   },
   schoonmaak: {
     headline: "Gevelreiniging bij regen is twee keer hetzelfde werk",
     painPoint: "Ruitenreiniging, gevelreiniging, terrasreiniging — alles afhankelijk van droog weer. Fout plannen = dubbel werk.",
-    solution: "Plan je buitenklussen op basis van 48-uurs droogperiodes. Nooit meer een dag verspillen aan weer dat niet meewerkt.",
+    solution: "Plan je buitenklussen op basis van 48-uurs droogperiodes. Nooit meer een dag verspillen aan een verloren rit.",
     oneLiner: "Één keer goed. Niet twee keer over.",
     bullets: [
-      "Droogperiodes per dag — plan buitenwerk efficiënt",
-      "Windsnelheid — hoogwerker alleen bij veilige condities",
-      "Regenradar — weet wanneer je binnen moet beginnen",
+      "48u droog-window voor buitenwerk",
+      "Windsnelheid voor hoogwerker-veiligheid",
+      "Regenradar-integratie per uur",
     ],
   },
   schildersbedrijf: {
     headline: "Buitenwerk bij regen = verspilde verf én tijd",
     painPoint: "Latex droogt niet onder 10°C. Regen op natte verf betekent opnieuw beginnen. Een verkeerde planning kost materiaal en uren.",
-    solution: "WEERZONE toont droogperiodes, temperatuur en luchtvochtigheid per uur. Plan je buitenwerk wanneer het écht kan.",
+    solution: "WEERZONE toont droogwindows, temperatuur en luchtvochtigheid per uur. Plan je klus wanneer de verf écht droogt.",
     oneLiner: "De verf droogt. Gegarandeerd.",
     bullets: [
-      "Temperatuur per uur — minimaal 10°C voor buitenwerk",
-      "Luchtvochtigheid — droogtijden berekenen",
-      "48-uurs droog-window — plan je grootste klussen",
+      "Temperatuur per uur (minimaal 10°C)",
+      "Luchtvochtigheid voor droogtijd",
+      "48-uurs regenvrije periodes",
     ],
   },
   dakdekker: {
     headline: "Op een nat dak werken is levensgevaarlijk",
-    painPoint: "Uitglijden op natte dakpannen, materiaal dat niet hecht bij regen, klussen die halverwege worden afgebroken.",
-    solution: "Weet 48 uur vooruit wanneer het dak droog en veilig is. Plan je team, materiaal en kraan op het juiste moment.",
+    painPoint: "Uitglijden op natte pannen, materiaal dat niet hecht bij regen, klussen die halverwege worden afgebroken.",
+    solution: "Weet exact wanneer het dak droog en veilig is. Plan je team, materiaal en kraan op het enige juiste moment.",
     oneLiner: "Veilig omhoog. Elke dag.",
     bullets: [
-      "Regenvrije periodes — plan dakreparaties met zekerheid",
-      "Windsnelheid — maximaal Bft 5 voor dakwerk",
-      "Vorstmelding — dakbedekking hecht niet bij vrieskou",
+      "Regenvrije periodes per locatie",
+      "Windsnelheid drempel (max Bft 5)",
+      "Vorstmelding voor hechting",
     ],
   },
   tuinonderhoud: {
     headline: "Gras maaien bij regen, snoeien bij storm — zinloos",
-    painPoint: "Klanten verwachten een strak gazon, maar jij kunt niet maaien als het veld drassig is. Snoeien bij harde wind is gevaarlijk.",
-    solution: "Plan je routes per dag op basis van weer per locatie. Droge dagen voor gazonwerk, windstille dagen voor snoeiwerk.",
+    painPoint: "Klanten verwachten resultaat, maar maaien op een drassig veld is onmogelijk. Snoeien bij wind is gevaarlijk.",
+    solution: "Plan je routes op basis van weer per locatie. Droge dagen voor gazonwerk, windstille dagen voor snoeiwerk.",
     oneLiner: "De tuin wordt perfect. Het weer werkt mee.",
     bullets: [
-      "Droog-periodes per dag — gazononderhoud plannen",
-      "Windsnelheid — veilig snoeien en kappen",
-      "Vorstmelding — plantbescherming op tijd regelen",
+      "Gazononderhoud droog-periodes",
+      "Veiligheid voor boomverzorging",
+      "Plantbescherming bij nachtvorst",
     ],
   },
   bezorging: {
-    headline: "Gladheid, storm, extreme hitte — je chauffeurs verdienen bescherming",
-    painPoint: "Pakketbezorgers op gladde wegen, fietskoeriers in stormwind, voedsel dat bevriest of oververhit raakt.",
-    solution: "Geef je team 48 uur vooruit de weersituatie. Routes aanpassen, extra tijd inplannen, veiligheid voorop.",
+    headline: "Gladheid of storm — je koeriers verdienen bescherming",
+    painPoint: "Pakketbezorgers op gladde wegen, fietskoeriers in stormwind, voedsel dat bevriest onderweg.",
+    solution: "Geef je team 48 uur vooruit de weersituatie. Routes aanpassen, extra tijd inplannen en veiligheid garanderen.",
     oneLiner: "Veilig bezorgen. Bij elk weer.",
     bullets: [
-      "Gladheidsrisico per uur — route-aanpassingen op tijd",
-      "Windstoten — fietskoeriers veilig inplannen",
-      "Extreme temperatuur — productbescherming activeren",
+      "Gladheidsrisico route-planning",
+      "Windstoten-alert voor tweewielers",
+      "Extreme temperatuur-alerts",
     ],
   },
 };
@@ -255,7 +255,6 @@ export function getIndustryHook(industry: B2BIndustry): IndustryHook {
 
 export type OutreachStage = 1 | 2 | 3;
 
-// Lichte type-ref — full type woont in b2b-relevance
 interface WeatherSnippetLike {
   city: string;
   temp: number;
@@ -276,11 +275,10 @@ export function getB2BSubject(
   const hook = HOOKS[industry];
   const location = city ? ` in ${city}` : "";
 
-  // Stage 1 met event → event-in-subject (hoogste open rate)
   if (stage === 1 && snippet?.event) {
     return `⚠️ ${snippet.event.label}${location} — voor ${industry}`;
   }
-  if (stage === 2) return `Korte herinnering: ${hook?.headline ?? "WEERZONE"}${location}`;
+  if (stage === 2) return `Eén ding: ${hook?.headline ?? "WEERZONE"}${location}`;
   if (stage === 3) return `Laatste mail van mij${location}`;
   if (!hook) return "48-uurs weerdata voor jouw bedrijf — WEERZONE";
   return `${hook.headline}${location}`;
@@ -289,33 +287,38 @@ export function getB2BSubject(
 function buildWeatherSnippetHtml(snippet: WeatherSnippetLike | null | undefined): string {
   if (!snippet) return "";
   const eventPill = snippet.event
-    ? `<div style="margin-top:10px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;">
-         <p style="margin:0;font-size:12px;color:#991b1b;font-weight:800;text-transform:uppercase;letter-spacing:1px;">⚠️ Alert voor ${snippet.city}</p>
-         <p style="margin:4px 0 0;font-size:13px;color:#7f1d1d;font-weight:700;line-height:1.4;">${snippet.event.label}</p>
+    ? `<div style="margin-top:16px;padding:12px 16px;background:rgba(239,68,68,0.1);border:1.5px solid rgba(239,68,68,0.2);border-radius:12px;">
+         <p style="margin:0;font-size:11px;color:#ef4444;font-weight:900;text-transform:uppercase;letter-spacing:1px;">⚠️ Impact Alert: ${snippet.city}</p>
+         <p style="margin:4px 0 0;font-size:14px;color:#991b1b;font-weight:800;line-height:1.4;">${snippet.event.label}</p>
        </div>`
     : "";
   return `
-    <div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:12px;padding:16px 18px;margin:0 0 20px;">
-      <p style="margin:0 0 6px;font-size:10px;color:#0e7490;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">Live 48-uurs voor ${snippet.city}</p>
-      <p style="margin:0;font-size:14px;color:#0c4a6e;line-height:1.5;">
-        Nu <strong>${Math.round(snippet.temp)}°</strong> · ${snippet.desc} ·
-        <strong>${Math.round(snippet.tempMin)}°/${Math.round(snippet.tempMax)}°</strong> ·
-        wind tot <strong>${Math.round(snippet.windMax)} km/u</strong> ·
-        neerslag <strong>${snippet.rain48h.toFixed(1)}mm</strong>
-      </p>
+    <div style="background:#0f172a;border-radius:20px;padding:24px;margin:0 0 32px;box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:900;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;">Real-time 48u Monitor: ${snippet.city}</div>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+        <td style="vertical-align:top;">
+            <div style="font-size:44px;font-weight:900;color:#ffffff;line-height:1;letter-spacing:-0.03em;">${Math.round(snippet.temp)}<span style="color:#3b7ff0;">°</span></div>
+            <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);margin-top:4px;">${snippet.desc}</div>
+        </td>
+        <td style="vertical-align:top;text-align:right;">
+            <div style="font-size:12px;font-weight:800;color:#ffffff;margin-bottom:2px;">${Math.round(snippet.tempMin)}° / ${Math.round(snippet.tempMax)}°</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:700;">DAGRANGE</div>
+        </td>
+      </tr></table>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);display:table;width:100%;">
+        <div style="display:table-cell;width:50%;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:800;text-transform:uppercase;margin-bottom:2px;">Max Wind</div>
+            <div style="font-size:14px;color:#ffffff;font-weight:800;">${Math.round(snippet.windMax)} km/u</div>
+        </div>
+        <div style="display:table-cell;width:50%;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:800;text-transform:uppercase;margin-bottom:2px;">Neerslag</div>
+            <div style="font-size:14px;color:#ffffff;font-weight:800;">${snippet.rain48h.toFixed(1)} mm</div>
+        </div>
+      </div>
       ${eventPill}
     </div>
   `;
 }
-
-// ============================================================
-// Steve-persona (afgeleid van Steve Jobs):
-// - Korte declaratieve zinnen.
-// - Geen marketing-taal. Geen "oplossingen", geen "synergy".
-// - Minachting voor ruis, 14-daagse voorspellingen, dashboards.
-// - "Het werkt gewoon." Herhaal kernbelofte.
-// - One more thing → altijd als subtiele close.
-// ============================================================
 
 export const STEVE_PROMPT = `
 Role: Steve van WEERZONE Zakelijk.
@@ -328,11 +331,6 @@ STIJL:
 - Minachting voor complexiteit en ruis.
 - Herhaal de kernbelofte: 48 uur. De rest is ruis.
 - Sluit af met één scherpe zin. Geen call-to-actions-stapels.
-
-REGELS:
-- Max 60 woorden.
-- Geen emoji's in tekstbody.
-- Geen bullet-lists in outreach-tekst (die zitten al in de template).
 `.trim();
 
 function stageCopy(stage: OutreachStage, hook: IndustryHook, businessName: string, snippet: WeatherSnippetLike | null | undefined) {
@@ -378,86 +376,79 @@ export function getB2BEmailHtml(
   const bulletsHtml = hook.bullets
     .map(
       (b) =>
-        `<li style="padding:6px 0;color:#475569;font-size:14px;line-height:1.5;">${b}</li>`
+        `<div style="padding:8px 0;border-bottom:1px solid #f1f5f9;display:table;width:100%;">
+            <div style="display:table-cell;width:24px;vertical-align:top;color:#3b7ff0;font-weight:900;">✓</div>
+            <div style="display:table-cell;font-size:14px;color:#475569;font-weight:600;">${b}</div>
+         </div>`
     )
     .join("");
 
   return `<!DOCTYPE html>
 <html lang="nl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:520px;margin:0 auto;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<meta name="color-scheme" content="light">
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%;">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;box-shadow:0 4px 30px rgba(0,0,0,0.02);">
 
     <!-- HEADER -->
-    <div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:32px 24px 28px;text-align:center;">
-      <img src="https://weerzone.nl/logo-full.png" alt="WEERZONE" style="height:32px;width:auto;margin-bottom:6px;opacity:0.9;" />
-      <p style="color:rgba(255,255,255,0.5);font-size:9px;margin:0 0 24px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Data Intelligence · 48-uurs Impact Monitor</p>
-      <h1 style="color:#ffffff;font-size:24px;font-weight:900;margin:0;line-height:1.3;">${copy.headline}</h1>
+    <div style="background:#020617;padding:48px 40px;text-align:left;">
+      <img src="https://weerzone.nl/logo-white.png" alt="WEERZONE" style="height:24px;width:auto;margin-bottom:24px;display:block;" />
+      <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:3px;margin-bottom:16px;">STRATEGIC INTEL</div>
+      <h1 style="color:#ffffff;font-size:32px;font-weight:900;margin:0;line-height:1.1;letter-spacing:-0.03em;">${copy.headline}</h1>
     </div>
 
-    <!-- ONE-LINER -->
-    <div style="background:#f59e0b;padding:12px 24px;text-align:center;">
-      <p style="margin:0;font-size:13px;color:#1e293b;font-weight:700;">${hook.oneLiner}</p>
+    <!-- ACCENT BAR -->
+    <div style="background:#f59e0b;padding:14px 40px;">
+      <div style="font-size:13px;color:#020617;font-weight:900;text-transform:uppercase;letter-spacing:1px;">${hook.oneLiner}</div>
     </div>
 
-    <!-- BODY -->
-    <div style="background:#ffffff;padding:28px 24px;">
+    <!-- CONTENT -->
+    <div style="padding:40px;">
       ${snippetHtml}
 
-      <p style="margin:0 0 16px;font-size:15px;color:#1e293b;font-weight:700;">${stage === 1 ? `Beste ${businessName},` : copy.intro}</p>
+      <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:20px;">${stage === 1 ? `Beste ${businessName},` : copy.intro}</div>
 
-      <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;white-space:pre-line;">${stage === 1 ? hook.painPoint : copy.body}</p>
+      <div style="font-size:15px;color:#475569;line-height:1.7;white-space:pre-line;font-weight:500;margin-bottom:24px;">${stage === 1 ? hook.painPoint : copy.body}</div>
 
-      ${stage === 1 ? `<p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">${hook.solution}</p>` : (copy.proof ? `<p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.6;">${copy.proof}</p>` : "")}
+      ${stage === 1 ? `<div style="font-size:15px;color:#475569;line-height:1.7;font-weight:500;margin-bottom:24px;">${hook.solution}</div>` : (copy.proof ? `<div style="font-size:15px;color:#475569;line-height:1.7;font-weight:800;margin-bottom:24px;">${copy.proof}</div>` : "")}
 
-      ${stage === 1 ? `<!-- WAT JE KRIJGT -->
-      <div style="background:#f8fafc;border-radius:12px;padding:20px;margin:20px 0;border:1px solid #e2e8f0;">
-        <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Wat je krijgt voor ${location}</p>
-        <ul style="margin:0;padding-left:20px;list-style:none;">
+      ${stage === 1 ? `
+      <!-- SPEC SPECS -->
+      <div style="margin-bottom:32px;">
+        <div style="font-size:11px;color:#94a3b8;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;">Wat je krijgt voor ${location}</div>
+        <div style="border-top:1px solid #f1f5f9;">
           ${bulletsHtml}
-        </ul>
+        </div>
       </div>
 
-      <p style="margin:0 0 8px;font-size:14px;color:#475569;line-height:1.6;">Eén mail per dag. Gratis. Stop wanneer je wil.</p>
+      <div style="font-size:14px;color:#94a3b8;font-weight:600;margin-bottom:32px;font-style:italic;">Eén mail per dag. Geen ruis. Geen kosten.</div>
 
       ${buildGearHtml(industry)}` : ""}
-    </div>
 
-    <!-- CTA -->
-    <div style="background:#ffffff;padding:0 24px 28px;text-align:center;">
-      <a href="https://weerzone.nl/zakelijk" style="display:block;padding:16px;background:#f59e0b;color:#1e293b;font-weight:800;font-size:15px;border-radius:12px;text-decoration:none;text-align:center;box-shadow:0 4px 16px rgba(245,158,11,0.3);">
-        ${stage === 3 ? "Zie wat je mist →" : stage === 2 ? "Aanmelden (30 sec) →" : "Gratis aanmelden →"}
-      </a>
-      <p style="margin:20px 0 0;font-size:13px;color:#475569;"><strong>Steve · WEERZONE Zakelijk</strong><br><span style="font-size:11px;color:#94a3b8;font-weight:400;">Reply werkt — ik lees mee.</span></p>
-    </div>
-
-    <!-- TRUST -->
-    <div style="background:#f8fafc;padding:20px 24px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
-      <table cellpadding="0" cellspacing="0" border="0" style="width:100%;"><tr>
-        <td style="text-align:center;padding:0 8px;">
-          <p style="margin:0;font-size:20px;">🛡️</p>
-          <p style="margin:4px 0 0;font-size:10px;color:#64748b;font-weight:600;">KNMI HARMONIE</p>
-        </td>
-        <td style="text-align:center;padding:0 8px;">
-          <p style="margin:0;font-size:20px;">📡</p>
-          <p style="margin:4px 0 0;font-size:10px;color:#64748b;font-weight:600;">2,5 km resolutie</p>
-        </td>
-        <td style="text-align:center;padding:0 8px;">
-          <p style="margin:0;font-size:20px;">⏰</p>
-          <p style="margin:4px 0 0;font-size:10px;color:#64748b;font-weight:600;">Elke ochtend 08:00</p>
-        </td>
-      </tr></table>
+      <!-- CTA -->
+      <div style="text-align:center;margin-top:40px;">
+        <a href="https://weerzone.nl/zakelijk" style="display:inline-block;padding:22px 48px;background:#f59e0b;color:#020617;font-weight:900;font-size:16px;border-radius:16px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;box-shadow:0 10px 25px rgba(245,158,11,0.25);">
+          ${stage === 3 ? "Zie wat je mist →" : stage === 2 ? "Aanmelden (30 sec) →" : "Gratis aanmelden →"}
+        </a>
+        <div style="margin-top:32px;">
+            <div style="font-size:14px;font-weight:900;color:#0f172a;">Steve</div>
+            <div style="font-size:12px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:1px;">WEERZONE Zakelijk</div>
+        </div>
+      </div>
     </div>
 
     <!-- FOOTER -->
-    <div style="padding:20px 24px;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#94a3b8;">
-        WEERZONE.nl — 48 uur. De rest is ruis.<br>
-        <span style="font-size:10px;">Dit bericht is verstuurd omdat jouw bedrijf profiteert van nauwkeurige weerdata.</span>
-      </p>
-      <p style="margin:10px 0 0;font-size:11px;">
-        <a href="${unsubscribeUrl}" style="color:#94a3b8;text-decoration:underline;">Geen interesse? Schrijf je uit.</a>
-      </p>
+    <div style="background:#f8fafc;padding:48px 40px;text-align:center;border-top:1px solid #f1f5f9;">
+      <div style="font-size:10px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:3px;margin-bottom:16px;">48 UUR · DE REST IS RUIS</div>
+      <div style="font-size:11px;color:#94a3b8;line-height:1.6;max-width:320px;margin:0 auto;">
+        Je ontvangt deze mail omdat jouw bedrijf in de sector ${industry} direct geraakt wordt door weersinvloeden.
+      </div>
+      <div style="margin-top:24px;">
+        <a href="${unsubscribeUrl}" style="font-size:11px;font-weight:800;color:#64748b;text-decoration:none;text-transform:uppercase;letter-spacing:1px;">Uitschrijven</a>
+      </div>
     </div>
 
   </div>

@@ -10,18 +10,17 @@ import LocatieButton from "@/components/wz/LocatieButton";
 import { useSession } from "@/lib/session-context";
 import type { PersonaTier } from "@/lib/personas";
 
+const LOGO_H = 24;
+const BTN_H = 36;
+
 const TIER_COLOR: Record<string, string> = {
   piet:    "#10b981",
   reed:    "#ef4444",
   steve:   "#0ea5e9",
   founder: "#8b5cf6",
 };
-
 const TIER_LABEL: Record<string, string> = {
-  piet:    "P",
-  reed:    "R",
-  steve:   "S",
-  founder: "★",
+  piet: "P", reed: "R", steve: "S", founder: "★",
 };
 
 function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: boolean }) {
@@ -31,17 +30,16 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
 
   return (
     <div className="relative inline-flex shrink-0">
-      <WzLogo height={34} />
+      <WzLogo height={LOGO_H} />
       {color && label && (
         <span
           className="absolute -right-2 -top-1.5 flex items-center justify-center text-white font-black"
           style={{
-            width: 18,
-            height: 18,
+            width: 16, height: 16,
             borderRadius: "999px",
-            fontSize: 10,
+            fontSize: 9,
             background: color,
-            border: "2px solid white",
+            border: "2px solid rgba(255,255,255,0.9)",
             lineHeight: 1,
           }}
         >
@@ -52,23 +50,31 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
   );
 }
 
-const LINKS = [
-  { key: "home",     label: "Home",     href: "/" },
-  { key: "piet",     label: "Piet",     href: "/piet" },
-  { key: "reed",     label: "Reed",     href: "/reed" },
-  { key: "steve",    label: "Steve",    href: "/zakelijk" },
-  { key: "contact",  label: "Contact",  href: "/contact" },
-  ];
+const PERSONA_LINKS = [
+  { key: "piet",  label: "Piet",  href: "/piet" },
+  { key: "reed",  label: "Reed",  href: "/reed" },
+  { key: "steve", label: "Steve", href: "/zakelijk" },
+];
+const STATIC_LINKS = [
+  { key: "contact", label: "Contact", href: "/contact" },
+];
 
-  function isActive(pathname: string, key: string) {
-  if (key === "home")     return pathname === "/";
-  if (key === "piet")     return pathname.startsWith("/piet");
-  if (key === "reed")     return pathname.startsWith("/reed");
-  if (key === "steve")    return pathname.startsWith("/zakelijk");
-  if (key === "contact")  return pathname.startsWith("/contact");
+function isActive(pathname: string, key: string) {
+  if (key === "piet")    return pathname.startsWith("/piet");
+  if (key === "reed")    return pathname.startsWith("/reed");
+  if (key === "steve")   return pathname.startsWith("/zakelijk");
+  if (key === "contact") return pathname.startsWith("/contact");
   return false;
-  }
+}
+
 const HIDDEN_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", "/auth"];
+
+const GLASS_BTN = {
+  background: "rgba(255,255,255,0.6)",
+  border: "1px solid rgba(255,255,255,0.8)",
+  color: "var(--text-primary)",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+} as const;
 
 export default function GlobalNav() {
   const pathname = usePathname() ?? "/";
@@ -77,46 +83,59 @@ export default function GlobalNav() {
 
   if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
 
+  const isHomepage = pathname === "/homepage" || pathname === "/";
+  const LINKS = isHomepage ? STATIC_LINKS : [...PERSONA_LINKS, ...STATIC_LINKS];
+
   return (
     <header
       className="sticky top-0 z-50"
       style={{
-        background: "rgba(255,255,255,0.96)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        borderBottom: "1px solid var(--wz-border)",
-        boxShadow: "0 2px 12px rgba(15,26,44,.07), 0 1px 3px rgba(15,26,44,.04)",
+        background: "rgba(255,255,255,0.88)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255,255,255,0.5)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)",
+        color: "var(--text-primary)",
       }}
     >
       <NLPulse />
       {/* Desktop */}
-      <div className="hidden md:flex items-center justify-between max-w-[1200px] mx-auto px-5 py-2.5 gap-4">
-        {/* Logo met tier badge */}
+      <div className="hidden md:flex items-center max-w-[1200px] mx-auto px-5 py-2" style={{ gap: 12 }}>
+
         <LogoBadge tier={tier} isFounder={isFounder} />
 
-        {/* Nav + auth rechts */}
-        <nav className="flex items-center gap-0.5">
-          <LocatieButton active={pathname.startsWith("/weer")} />
-          {LINKS.map(l => (
-            <Link
-              key={l.key}
-              href={l.href}
-              className="px-3 py-1.5 rounded-xl text-sm font-semibold transition-colors"
-              style={{
-                color: isActive(pathname, l.key) ? "var(--wz-brand)" : "var(--ink-700)",
-                background: isActive(pathname, l.key) ? "var(--wz-brand-soft)" : "transparent",
-              }}
-            >
-              {l.label}
-            </Link>
-          ))}
+        <div className="w-px self-stretch my-1.5" style={{ background: "rgba(0,0,0,0.08)" }} />
 
+        <nav className="flex items-center gap-0.5 flex-1">
+          <LocatieButton active={pathname.startsWith("/weer")} />
+          {LINKS.map(l => {
+            const active = isActive(pathname, l.key);
+            return (
+              <Link
+                key={l.key}
+                href={l.href}
+                className="px-3 py-1.5 rounded-2xl text-[11px] font-black uppercase transition-all"
+                style={{
+                  letterSpacing: "0.08em",
+                  color: active ? "var(--text-primary)" : "rgba(15,26,44,0.5)",
+                  background: active ? "rgba(255,255,255,0.7)" : "transparent",
+                  border: active ? "1px solid rgba(255,255,255,0.9)" : "1px solid transparent",
+                  boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)" : "none",
+                }}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="flex items-center gap-2">
           {user ? (
             <>
               <Link
                 href="/app"
-                className="ml-2 px-3 py-1.5 rounded-xl text-sm font-semibold transition-colors"
-                style={{ color: "var(--ink-700)" }}
+                className="inline-flex items-center px-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all hover:brightness-95"
+                style={{ height: BTN_H, ...GLASS_BTN }}
               >
                 Mijn Weerzone
               </Link>
@@ -126,81 +145,92 @@ export default function GlobalNav() {
                   await createSupabaseBrowserClient().auth.signOut();
                   window.location.href = "/";
                 }}
-                className="ml-1 px-3 py-1.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: "var(--wz-brand)" }}
+                className="inline-flex items-center px-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white transition-opacity hover:opacity-90"
+                style={{ background: "var(--wz-brand)", height: BTN_H }}
               >
                 Log uit
               </button>
             </>
-          ) : (
+          ) : !isHomepage && (
             <>
               <Link
                 href="/app/login"
-                className="ml-2 px-3 py-1.5 rounded-xl text-sm font-semibold transition-colors"
-                style={{ color: "var(--ink-700)" }}
+                className="inline-flex items-center px-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all hover:brightness-95"
+                style={{ height: BTN_H, ...GLASS_BTN }}
               >
                 Inloggen
               </Link>
               <Link
                 href="/app/signup"
-                className="ml-1 px-3 py-1.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                style={{ background: "var(--wz-brand)" }}
+                className="inline-flex items-center px-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white transition-opacity hover:opacity-90"
+                style={{ background: "var(--wz-brand)", height: BTN_H }}
               >
                 Aanmelden
               </Link>
             </>
           )}
-        </nav>
+        </div>
       </div>
 
-      {/* Mobiel */}
-      <div
-        className="md:hidden grid items-center px-4 py-2.5"
-        style={{ gridTemplateColumns: "1fr auto 1fr" }}
-      >
-        <div />
+      {/* Mobile */}
+      <div className="md:hidden flex items-center justify-between gap-2 px-4 py-2.5">
         <LogoBadge tier={tier} isFounder={isFounder} />
-        <div className="flex justify-end">
+        <div className="flex items-center gap-2">
+          <LocatieButton compact active={pathname.startsWith("/weer")} />
           <button
             type="button"
             onClick={() => setOpen(v => !v)}
             aria-label="Menu"
-            className="w-9 h-9 flex items-center justify-center rounded-xl border"
-            style={{ borderColor: "var(--wz-border)", color: "var(--ink-700)" }}
+            className="w-9 h-9 flex items-center justify-center rounded-2xl transition-all"
+            style={open
+              ? { background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)", color: "var(--text-primary)" }
+              : { ...GLASS_BTN }
+            }
           >
             {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobiel menu */}
+      {/* Mobile menu */}
       {open && (
-        <div className="md:hidden px-4 pb-4 border-t" style={{ borderColor: "var(--wz-border)" }}>
-          <nav className="grid gap-0.5 pt-2">
+        <div
+          className="md:hidden px-4 pb-4 pt-2"
+          style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+        >
+          <nav className="grid gap-0.5 mb-3">
             <LocatieButton active={pathname.startsWith("/weer")} />
-            {LINKS.map(l => (
-              <Link
-                key={l.key}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="px-3.5 py-3 rounded-xl text-[15px] font-semibold"
-                style={{
-                  color: isActive(pathname, l.key) ? "var(--wz-brand)" : "var(--ink-800)",
-                  background: isActive(pathname, l.key) ? "var(--wz-brand-soft)" : "transparent",
-                }}
-              >
-                {l.label}
-              </Link>
-            ))}
+            {LINKS.map(l => {
+              const active = isActive(pathname, l.key);
+              return (
+                <Link
+                  key={l.key}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="px-3.5 py-3 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all"
+                  style={{
+                    color: active ? "var(--text-primary)" : "rgba(15,26,44,0.55)",
+                    background: active ? "rgba(255,255,255,0.7)" : "transparent",
+                    border: active ? "1px solid rgba(255,255,255,0.9)" : "1px solid transparent",
+                    boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)" : "none",
+                  }}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
           </nav>
-          <div className="grid gap-2 mt-3 pt-3 border-t" style={{ borderColor: "var(--wz-border)" }}>
+          <div
+            className="grid grid-cols-2 gap-2 pt-3"
+            style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}
+          >
             {user ? (
               <>
                 <Link
                   href="/app"
                   onClick={() => setOpen(false)}
-                  className="py-2.5 rounded-xl text-center text-sm font-semibold border"
-                  style={{ borderColor: "var(--wz-border)", color: "var(--ink-800)" }}
+                  className="py-2.5 rounded-2xl text-center text-[11px] font-black uppercase tracking-widest transition-all hover:brightness-95"
+                  style={GLASS_BTN}
                 >
                   Mijn Weerzone
                 </Link>
@@ -210,26 +240,26 @@ export default function GlobalNav() {
                     await createSupabaseBrowserClient().auth.signOut();
                     window.location.href = "/";
                   }}
-                  className="py-2.5 rounded-xl text-sm font-bold text-white"
+                  className="py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white"
                   style={{ background: "var(--wz-brand)" }}
                 >
                   Log uit
                 </button>
               </>
-            ) : (
+            ) : !isHomepage && (
               <>
                 <Link
                   href="/app/login"
                   onClick={() => setOpen(false)}
-                  className="py-2.5 rounded-xl text-center text-sm font-semibold border"
-                  style={{ borderColor: "var(--wz-border)", color: "var(--ink-800)" }}
+                  className="py-2.5 rounded-2xl text-center text-[11px] font-black uppercase tracking-widest transition-all hover:brightness-95"
+                  style={GLASS_BTN}
                 >
                   Inloggen
                 </Link>
                 <Link
                   href="/app/signup"
                   onClick={() => setOpen(false)}
-                  className="py-2.5 rounded-xl text-center text-sm font-bold text-white"
+                  className="py-2.5 rounded-2xl text-center text-[11px] font-black uppercase tracking-widest text-white"
                   style={{ background: "var(--wz-brand)" }}
                 >
                   Aanmelden

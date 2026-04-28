@@ -55,27 +55,24 @@ export default function PersonaCard({ tier, onSelect, compact = false, highlight
       {/* Prijs */}
       <div className="mb-4 pb-4 border-b border-black/10">
         <div className="flex items-baseline gap-2">
-          {isComingSoon || !hasPrice ? (
+          {isComingSoon ? (
             <span className="text-3xl font-black text-text-primary">
               Coming Soon
             </span>
           ) : (
-            <>
-              <span className="text-3xl font-black text-text-primary">
-                {formatPrice(p.priceCents!)}
-              </span>
-              <span className="text-sm text-text-muted">/mnd, binnenkort</span>
-            </>
+            <span className="text-3xl font-black text-text-primary">
+              Gratis
+            </span>
           )}
         </div>
         <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/5">
-          {isComingSoon || !hasPrice ? (
+          {isComingSoon ? (
             <span className="text-xs font-bold text-text-primary">
               Ontwikkeling in volle gang
             </span>
           ) : (
             <span className="text-xs font-bold text-text-primary">
-              Introductieprijs: {formatPrice(p.founderPriceCents!)}/mnd · vastgezet
+              Tijdelijk gratis te proberen
             </span>
           )}
         </div>

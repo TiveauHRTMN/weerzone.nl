@@ -1,85 +1,89 @@
 import { NextResponse } from "next/server";
-import { ALL_PLACES } from "@/lib/places-data";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAgentAction } from "@/lib/agent-logger";
 
 export const dynamic = "force-dynamic";
 
+const PROVINCES = [
+  "Noord-Holland", "Zuid-Holland", "Utrecht", "Noord-Brabant", 
+  "Gelderland", "Overijssel", "Flevoland", "Groningen", 
+  "Friesland", "Drenthe", "Zeeland", "Limburg"
+];
+
 /**
- * OpenClaw Harvester: Autonomous Location Discovery
- * Zoekt naar nieuwe micro-locaties rondom bestaande bekende locaties.
+ * OpenClaw Harvester: Autonomous Location Discovery (Upgraded)
+ * Systematic discovery that rotates through provinces to avoid timeouts.
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (process.env.NODE_ENV === "production" && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   if (!supabase) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
   try {
-    // 1. Kies een willekeurige 'seed' locatie uit onze 9000+ lijst
-    const seed = ALL_PLACES[Math.floor(Math.random() * ALL_PLACES.length)];
+    // 1. Determine which province to patrol today (rotate based on day of year)
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    const province = PROVINCES[dayOfYear % PROVINCES.length];
     
-    // 2. Query Open-Meteo Geocoding voor locaties in de buurt van de seed
-    // We gebruiken de naam van de seed om 'vage' variaties te vinden die we misschien nog niet hebben
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(seed.name)}&count=10&language=nl&country=NL`;
+    console.log(`🕵️‍♂️ OpenClaw: Patrolling ${province}...`);
+
+    // 2. Search for common suffixes in this province to find micro-locaties
+    const searchTerms = ["dorp", "buurt", "wijk", "straat", "park"];
+    const randomTerm = searchTerms[Math.floor(Math.random() * searchTerms.length)];
+    const query = `${randomTerm} ${province}`;
+
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=20&language=nl&country=NL`;
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.results) {
-      return NextResponse.json({ status: "No new locations found", seed: seed.name });
-    }
+    const newlyDiscovered: string[] = [];
+    const elements = data.results || [];
 
-    const discovered = [];
-    for (const loc of data.results) {
-      // Check of we deze al hebben in onze statische lijst of DB
-      const existsInStatic = ALL_PLACES.some(p => p.name.toLowerCase() === loc.name.toLowerCase() && p.province.toLowerCase() === (loc.admin1 || "").toLowerCase());
-      
-      if (!existsInStatic) {
-        // Dubbel-check in DB
-        const { data: existingDB } = await supabase
-          .from("discovered_places")
-          .select("id")
-          .eq("name", loc.name)
-          .eq("province", loc.admin1 || "Onbekend")
-          .maybeSingle();
+    for (const loc of elements) {
+      // Basic filter: must be in the target province (approximate check)
+      if (loc.admin1 !== province && province !== "Utrecht") continue; // Utrecht is both province and city, tricky
 
-        if (!existingDB) {
-          // INSERT!
-          const { error } = await supabase.from("discovered_places").insert({
-            name: loc.name,
-            province: loc.admin1 || "Onbekend",
-            lat: loc.latitude,
-            lon: loc.longitude,
-            source: "openclaw_harvester",
-            metadata: {
-              elevation: loc.elevation,
-              feature_code: loc.feature_code,
-              timezone: loc.timezone
-            }
-          });
+      const { data: existingDB } = await supabase
+        .from("discovered_places")
+        .select("id")
+        .eq("name", loc.name)
+        .maybeSingle();
 
-          if (!error) discovered.push(loc.name);
-        }
+      if (!existingDB) {
+        const { error } = await supabase.from("discovered_places").insert({
+          name: loc.name,
+          province: loc.admin1 || province,
+          lat: loc.latitude,
+          lon: loc.longitude,
+          source: "openclaw_systematic_patrol",
+          metadata: { 
+            elevation: loc.elevation, 
+            timezone: loc.timezone,
+            feature_code: loc.feature_code,
+            population: loc.population
+          }
+        });
+        
+        if (!error) newlyDiscovered.push(loc.name);
       }
     }
 
-    if (discovered.length > 0) {
+    if (newlyDiscovered.length > 0) {
       await logAgentAction(
         "OpenClaw",
-        "lead_found",
-        `OpenClaw Harvester heeft ${discovered.length} nieuwe micro-locaties ontdekt rondom ${seed.name}.`,
-        { discovered, seed: seed.name }
+        "location_discovered",
+        `OpenClaw heeft ${newlyDiscovered.length} nieuwe locaties ontdekt tijdens de patrouille in ${province}.`,
+        { province, count: newlyDiscovered.length, locations: newlyDiscovered }
       );
     }
 
     return NextResponse.json({
-      status: "Harvester Cycle Complete",
-      seed: seed.name,
-      newlyDiscoveredCount: discovered.length,
-      locations: discovered
+      status: `OpenClaw Patrol in ${province} Complete`,
+      newCount: newlyDiscovered.length,
+      locations: newlyDiscovered
     });
 
   } catch (e: any) {

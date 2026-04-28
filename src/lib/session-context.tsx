@@ -72,8 +72,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const founderCheck = isFounderEmail(u.email);
     setIsFounder(founderCheck);
     let t = (sortedSubs[0]?.tier ?? null) as PersonaTier | null;
-    if (!t && founderCheck) t = FOUNDER_TIER;
-    setTier(t && PERSONA_ORDER.includes(t) ? t : null);
+    if (founderCheck) t = FOUNDER_TIER;
+    setTier(t && (PERSONA_ORDER.includes(t as any) || t === 'steve') ? t : null);
 
     if (locRes.data) {
       setPrimaryLocation({

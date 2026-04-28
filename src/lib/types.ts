@@ -51,6 +51,7 @@ export interface HourlyForecast {
     harmonie?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
     icon?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
     arome?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
+    google?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
   };
 }
 

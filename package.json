@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx tsx scripts/gen-sitemap.ts && next build",
+    "build": "next build",
     "start": "next start"
   },
   "dependencies": {
@@ -13,6 +13,7 @@
     "@react-email/render": "^2.0.7",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.2",
+    "@vercel/analytics": "^2.0.1",
     "cheerio": "^1.2.0",
     "code": "^5.2.4",
     "dotenv": "^17.4.2",
@@ -29,6 +30,7 @@
     "tsx": "^4.21.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

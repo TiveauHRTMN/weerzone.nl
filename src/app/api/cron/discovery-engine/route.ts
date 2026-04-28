@@ -13,88 +13,74 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (process.env.NODE_ENV === "production" && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const supabase = createSupabaseAdminClient();
   
   try {
-    // 1. Zoek locaties die we al hebben verwerkt
+    // 1. Zoek locaties die we nog niet geanalyseerd hebben (location_metadata)
     const { data: processed } = await supabase
       .from("location_metadata")
-      .select("name");
+      .select("place_name");
     
-    const processedNames = new Set((processed || []).map(p => p.name));
+    const processedNames = new Set((processed || []).map(p => p.place_name));
 
-    // 2. Selecteer een willekeurige set plaatsen die we NOG NIET hebben
-    const candidates = ALL_PLACES.filter(p => !processedNames.has(p.name)).slice(0, 50);
-    const target = candidates[Math.floor(Math.random() * candidates.length)];
+    // Selecteer een batch van 10 kandidaten
+    const targets = ALL_PLACES.filter(p => !processedNames.has(p.name)).slice(0, 10);
 
-    if (!target) {
+    if (targets.length === 0) {
       return NextResponse.json({ status: "No discovery needed", count: 0 });
     }
 
-    // 2. AI Analyse van de locatie
-    let discoveryLog = `OpenClaw heeft een micro-locatie geanalyseerd: ${target.name}.`;
-    let suggestedCharacter: Place["character"] = "inland";
-
+    // 2. AI Analyse van de batch
     const apiKey = process.env.GEMINI_API_KEY;
     if (apiKey) {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const prompt = `
         Je bent OpenClaw, de Discovery Agent van WEERZONE.nl.
-        Je analyseert de locatie: ${target.name} in de provincie ${target.province}.
-        Coördinaten: ${target.lat}, ${target.lon}.
+        Analyseer deze locaties: ${targets.map(t => t.name).join(", ")}.
         
-        Is dit een kustplaats, landinwaarts, stedelijk of hooggelegen gebied? 
-        Kies uit: coastal, inland, highland, urban.
-        Geef ook een KORTE reden (1 zin).
-        Antwoord in JSON formaat: {"type": "...", "reason": "..."}
+        Bepaal per locatie: Is dit coastal, inland, highland of urban?
+        Antwoord in een JSON array van objecten: [{"name": "...", "type": "...", "reason": "..."}]
       `.trim();
       
       const result = await model.generateContent(prompt);
       const responseText = result.response.text().trim();
       try {
-        const json = JSON.parse(responseText.replace(/```json|```/g, ""));
-        suggestedCharacter = json.type;
-        discoveryLog = `OpenClaw heeft ${target.name} geïdentificeerd als '${json.type}'. Reden: ${json.reason}`;
+        const results = JSON.parse(responseText.replace(/```json|```/g, ""));
+        
+        for (const res of results) {
+          const target = targets.find(t => t.name === res.name);
+          if (!target) continue;
+
+          await supabase.from("location_metadata").upsert({
+            place_name: target.name,
+            province: target.province,
+            lat: target.lat,
+            lon: target.lon,
+            character: res.type,
+            discovery_reason: `OpenClaw: ${res.reason}`,
+            last_seo_update: new Date().toISOString()
+          });
+        }
+
+        await logAgentAction(
+          "OpenClaw",
+          "location_discovered",
+          `Batch-audit voltooid voor ${results.length} locaties.`,
+          { locations: results.map((r: any) => r.name) }
+        );
+
+        return NextResponse.json({ status: "Batch Discovery Complete", count: results.length });
       } catch (e) {
-        console.error("JSON Parse error in OpenClaw:", responseText);
+        console.error("JSON Parse error in OpenClaw Batch:", responseText);
       }
     }
 
-    // 3. Log de ontdekking
-    await logAgentAction(
-      "OpenClaw",
-      "system_check",
-      discoveryLog,
-      { 
-        place: target.name, 
-        province: target.province,
-        suggestedType: suggestedCharacter,
-        discoveryType: "micro_location_audit"
-      }
-    );
-
-    // 4. PERSISTEER NAAR DATABASE
-    await supabase.from("location_metadata").upsert({
-      place_name: target.name,
-      province: target.province,
-      lat: target.lat,
-      lon: target.lon,
-      character: suggestedCharacter,
-      discovery_reason: discoveryLog,
-      last_seo_update: new Date().toISOString()
-    });
-
-    return NextResponse.json({
-      status: "Discovery Cycle Complete",
-      discovered: target.name,
-      character: suggestedCharacter,
-      log: discoveryLog
-    });
+    return NextResponse.json({ status: "Fallback or No AI key" });
   } catch (e: any) {
     console.error("OpenClaw Error:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });

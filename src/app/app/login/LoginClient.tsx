@@ -95,16 +95,16 @@ export default function LoginClient() {
     }
   }
 
-  async function handleGoogle() {
+  async function handleOAuth(provider: "google" | "apple") {
     setSubmitError(null);
     setLoading(true);
     const redirectTo = `${window.location.origin}/auth/callback?next=/app`;
     const { error: oauthErr } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider,
       options: { redirectTo },
     });
     if (oauthErr) {
-      setSubmitError("Google-login is tijdelijk niet beschikbaar. Gebruik e-mail!");
+      setSubmitError("Inloggen via sociale provider is tijdelijk niet beschikbaar. Gebruik e-mail.");
       setLoading(false);
     }
   }
@@ -114,7 +114,7 @@ export default function LoginClient() {
       <h1 className="h-1 mb-2">Welkom terug.</h1>
       <p className="t-body mb-6">Voer je e-mailadres in om verder te gaan.</p>
 
-      <WzSocialButtons onGoogle={handleGoogle} loading={loading} />
+      <WzSocialButtons onGoogle={() => handleOAuth("google")} onApple={() => handleOAuth("apple")} loading={loading} />
       <WzDivider>of gebruik e-mail</WzDivider>
 
       <form onSubmit={handleEmailNext} noValidate>

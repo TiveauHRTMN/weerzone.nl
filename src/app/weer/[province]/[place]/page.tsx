@@ -3,9 +3,12 @@ import type { Metadata } from "next";
 import { ALL_PLACES, findPlace, placeSlug, nearbyPlaces, PROVINCE_LABELS, type Province } from "@/lib/places-data";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
+import ProvinceTopCities from "@/components/ProvinceTopCities";
+import LocalComparison from "@/components/LocalComparison";
 import ZakelijkCTA from "@/components/ZakelijkCTA";
 import { getLocationSEOContent } from "@/app/actions";
 import { fetchWeatherData } from "@/lib/weather";
+import { getWeatherDescription } from "@/lib/weather";
 import Link from "next/link";
 
 interface PageProps {
@@ -29,6 +32,8 @@ export function generateStaticParams() {
 
 import { getHermesSEO } from "@/lib/seo";
 
+export const revalidate = 300;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { province, place: slug } = await params;
   const place = findPlace(province, slug);
@@ -37,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const provLabel = PROVINCE_LABELS[province as Province] || province;
   const hermesSEO = await getHermesSEO(place.name, province);
 
-  const title = `Weer ${place.name} — Actueel weerbericht vandaag en morgen`;
+  const title = `Weer ${place.name} | 10x Nauwkeuriger op Straatniveau | WeerZone`;
   const description = hermesSEO?.meta_description || `Weer in ${place.name} (${provLabel}). De nauwkeurigste 48-uurs weersvoorspelling van Nederland, op 1 bij 1 kilometer. Temperatuur, regen, wind en UV — per uur bijgewerkt.`;
 
   return {
@@ -81,10 +86,17 @@ const TOP_CITIES = [
   "Zwolle", "Zoetermeer", "Leiden", "Dordrecht", "'s-Hertogenbosch"
 ];
 
+import { headers } from "next/headers";
+
 export default async function PlaceWeatherPage({ params }: PageProps) {
   const { province, place: slug } = await params;
   let place = findPlace(province, slug);
   
+  // Bot detectie voor besparen API limits
+  const headersList = await headers();
+  const userAgent = headersList.get("user-agent")?.toLowerCase() || "";
+  const isBot = /googlebot|bingbot|yandex|baiduspider|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator/i.test(userAgent);
+
   // Als niet in statische lijst, check DB (OpenClaw's vondsten)
   if (!place) {
     const { getSupabase } = await import("@/lib/supabase");
@@ -116,7 +128,8 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   const isTopCity = TOP_CITIES.includes(place.name);
 
   // Initial weather fetch on server for instant LCP & Disaster SEO
-  const initialWeather = await fetchWeatherData(place.lat, place.lon).catch(() => undefined);
+  // Bij bots skippen we de zware modellen om API limits (429) te voorkomen
+  const initialWeather = await fetchWeatherData(place.lat, place.lon, isBot).catch(() => undefined);
 
   // Hermes Disaster SEO: Dynamic Schema Injection
   let schemaTitle = `Weer ${place.name} — WEERZONE`;
@@ -135,44 +148,42 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   // Structured data: WeatherForecast (voor Google rich results)
   const weatherForecastLd = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: schemaTitle,
-    description: schemaDesc,
-    url: `https://weerzone.nl/weer/${province}/${slug}`,
-    dateModified: new Date().toISOString(),
-    inLanguage: "nl",
-    isPartOf: {
-      "@type": "WebSite",
-      name: "WEERZONE",
-      url: "https://weerzone.nl",
-    },
-    about: {
+    "@type": "WeatherForecast",
+    "name": `Weersverwachting ${place.name}`,
+    "url": `https://weerzone.nl/weer/${province}/${slug}`,
+    "datePublished": new Date().toISOString(),
+    "dateModified": new Date().toISOString(),
+    "contentLocation": {
       "@type": "City",
-      name: place.name,
-      geo: {
+      "name": place.name,
+      "geo": {
         "@type": "GeoCoordinates",
-        latitude: place.lat,
-        longitude: place.lon,
-      },
-      containedInPlace: {
-        "@type": "AdministrativeArea",
-        name: provLabel,
-        containedInPlace: {
-          "@type": "Country",
-          name: "Nederland",
-        },
-      },
+        "latitude": place.lat,
+        "longitude": place.lon,
+      }
     },
-    provider: {
+    "currentWeather": initialWeather ? {
+      "@type": "PropertyValue",
+      "name": "Temperatuur",
+      "value": `${initialWeather.current.temperature}°C`,
+      "description": getWeatherDescription(initialWeather.current.weatherCode)
+    } : undefined,
+    "forecast": initialWeather?.daily.slice(0, 3).map(d => ({
+      "@type": "PropertyValue",
+      "name": d.date,
+      "value": `${d.tempMax}°C / ${d.tempMin}°C`,
+      "description": getWeatherDescription(d.weatherCode)
+    })),
+    "provider": {
       "@type": "Organization",
-      name: "WEERZONE",
-      url: "https://weerzone.nl",
-      logo: "https://weerzone.nl/favicon-icon.png",
+      "name": "WEERZONE",
+      "url": "https://weerzone.nl",
+      "logo": "https://weerzone.nl/weerzone-icon.png",
     },
   };
 
-  // FAQ Schema voor Top Cities (SEO Boost)
-  const faqLd = isTopCity ? {
+  // FAQ Schema voor ALLE locaties (SEO Boost)
+  const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
@@ -189,11 +200,11 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
         name: `Wanneer gaat het regenen in ${place.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `De neerslagverwachting voor ${place.name} vind je per uur op WEERZONE. Onze data toont exact wanneer buien beginnen en eindigen.`,
+          text: `De neerslagverwachting voor ${place.name} vind je per uur op WEERZONE. Onze data toont exact wanneer buien beginnen en eindigen op straatniveau.`,
         },
       },
     ],
-  } : null;
+  };
 
   // Breadcrumb
   const breadcrumbLd = {
@@ -209,6 +220,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   const city = { name: place.name, lat: place.lat, lon: place.lon };
   const hermesSEO = await getHermesSEO(place.name, province);
+  const seoContent = await getLocationSEOContent(place.name, provLabel, place.character);
 
 
   return (
@@ -234,22 +246,55 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
           <span className="text-white/80">{place.name}</span>
         </nav>
 
-        <WeatherDashboard initialCity={city} initialWeather={initialWeather} />
+        <WeatherDashboard 
+          initialCity={place} 
+          initialWeather={initialWeather} 
+          beforeFooter={
+            <div className="space-y-6 pt-10">
+              {/* Action Grid: Piet & Zakelijk side-by-side */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link 
+                  href={`/app/signup?tier=piet&city=${encodeURIComponent(place.name)}`}
+                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-accent-orange text-slate-900 shadow-xl hover:scale-[1.02] transition-all text-center border border-white/20"
+                >
+                  <span className="text-3xl mb-3">📬</span>
+                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Activeer Piet's brief</span>
+                  <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest italic">Gratis voor {place.name}</span>
+                </Link>
 
-        {/* AI Programmatic SEO Content */}
-        <section className="max-w-4xl mx-auto px-4 py-8 border-t border-white/5">
-          <div className="bg-slate-900/50 rounded-2xl p-6 border border-white/10">
-            <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-              <span className="text-accent-cyan">ℹ️</span> Weer in {place.name}: Lokaal karakter
-            </h2>
-            <div className="text-white/70 leading-relaxed italic">
-              {await getLocationSEOContent(place.name, provLabel, place.character)}
+                <Link 
+                  href="/zakelijk"
+                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 border border-white/10 text-white shadow-xl hover:scale-[1.02] transition-all text-center backdrop-blur-sm"
+                >
+                  <span className="text-3xl mb-3">💼</span>
+                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Zakelijk weerrapport</span>
+                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest italic">Planning voor bedrijven</span>
+                </Link>
+              </div>
+
+              {/* Lokaal Karakter */}
+              <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
+                <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="text-accent-cyan">ℹ️</span> Weer in {place.name}: Lokaal karakter
+                </h2>
+                <div className="text-white/60 text-xs leading-relaxed italic mb-6">
+                  {seoContent}
+                </div>
+
+                {initialWeather && (
+                  <LocalComparison 
+                    cityName={place.name} 
+                    province={province} 
+                    localTemp={initialWeather.current.temperature} 
+                  />
+                )}
+              </div>
+
+              <ProvinceTopCities province={province} currentCity={place.name} />
+              <NearbyLinks currentCity={place.name} places={nearbyPlaces(place, 12)} />
             </div>
-          </div>
-        </section>
-
-        <ZakelijkCTA cityName={place.name} />
-        <NearbyLinks currentCity={place.name} places={nearbyPlaces(place, 8)} />
+          }
+        />
       </main>
     </>
   );

@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import HomePitch from "@/components/HomePitch";
 import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { isFounderEmail } from "@/lib/founders";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600; // 10 minute cache
 
 export const metadata: Metadata = {
   alternates: {
@@ -34,7 +31,7 @@ const orgLd = {
   "@type": "Organization",
   name: "WEERZONE",
   url: "https://weerzone.nl",
-  logo: "https://weerzone.nl/favicon-icon.png",
+  logo: "https://weerzone.nl/weerzone-icon.png",
   sameAs: [],
 };
 
@@ -78,14 +75,10 @@ const faqLd = {
 };
 
 export default async function Home() {
-  const defaultCity = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
-  const [initialWeather, supabase] = await Promise.all([
-    fetchWeatherData(defaultCity.lat, defaultCity.lon).catch(() => undefined),
-    createSupabaseServerClient(),
-  ]);
-
-  const { data: { user } } = await supabase.auth.getUser();
-  const founder = isFounderEmail(user?.email);
+  // No hardcoded default city — WeatherDashboard reads localStorage on client.
+  // We prefetch Amsterdam as a warm server-side initial for SEO/LCP.
+  const amsterdam = DUTCH_CITIES.find(c => c.name === "Amsterdam") || DUTCH_CITIES[0];
+  const initialWeather = await fetchWeatherData(amsterdam.lat, amsterdam.lon).catch(() => undefined);
 
   return (
     <>
@@ -95,15 +88,13 @@ export default async function Home() {
       />
       <main>
         <WeatherDashboard
-          initialCity={defaultCity}
+          initialCity={amsterdam}
           initialWeather={initialWeather}
           beforeFooter={
-            founder ? null : (
-              <>
-                <TrustSection />
-                <HomePitch />
-              </>
-            )
+            <>
+              <TrustSection />
+              <HomePitch />
+            </>
           }
         />
       </main>

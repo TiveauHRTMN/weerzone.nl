@@ -8,7 +8,49 @@ import { Resend } from "resend";
 import { getWelcomeEmailHtml } from "@/lib/welcome-email";
 import { getBrandedMagicLinkHtml } from "@/lib/magic-link-email";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { PersonaTier } from "@/lib/personas";
+
+/**
+ * Update het profiel van de ingelogde gebruiker.
+ */
+export async function updateProfile(args: {
+  fullName?: string;
+  postcode?: string;
+  lat?: number;
+  lon?: number;
+}) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Niet ingelogd");
+
+  const updates: any = {
+    updated_at: new Date().toISOString(),
+  };
+  if (args.fullName !== undefined) updates.full_name = args.fullName;
+  if (args.postcode !== undefined) updates.postcode = args.postcode;
+  if (args.lat !== undefined) updates.primary_lat = args.lat;
+  if (args.lon !== undefined) updates.primary_lon = args.lon;
+
+  const { error } = await supabase
+    .from("user_profile")
+    .update(updates)
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Profile update error:", error);
+    return { ok: false, error: error.message };
+  }
+
+  // Ook auth metadata bijwerken voor consistentie
+  if (args.fullName) {
+    await supabase.auth.updateUser({
+      data: { full_name: args.fullName }
+    });
+  }
+
+  return { ok: true };
+}
 
 /**
  * SNELLE weer-fetch. Geen AI. Open-Meteo cached 5 min (via fetch revalidate).

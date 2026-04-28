@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 import { executeWWSOrchestrator } from "../src/lib/wws-orchestrator";
 import { executeBusinessOrchestrator } from "../src/lib/wws-business-orchestrator";
 import { KNMI_STATIONS } from "../src/lib/types";
-import { getSupabase } from "../src/lib/supabase";
+import { getSupabaseAdmin } from "../src/lib/supabase";
 
 dotenv.config({ path: ".env.local" });
 
@@ -12,7 +12,7 @@ dotenv.config({ path: ".env.local" });
  * Hermes runs 24/7 in background loops to maintain the "Meteorological Truth".
  */
 async function hermesPatrol() {
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   if (!supabase) {
     console.error("❌ HERMES: Supabase client initialization failed.");
     return;

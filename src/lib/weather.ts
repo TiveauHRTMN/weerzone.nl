@@ -1,6 +1,7 @@
 import type { WeatherData, HourlyForecast, MinutelyPrecipitation } from "./types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
+import { fetchGoogleWeather, mapGoogleWeatherConditionToWMO } from "./google-weather";
 
 const OPEN_METEO_BASE = "https://api.open-meteo.com/v1/forecast";
 const DWD_ICON_BASE = "https://api.open-meteo.com/v1/dwd-icon";
@@ -103,9 +104,10 @@ function blendHourly(
   return { hourly, agreement: 100 };
 }
 
-export async function fetchWeatherData(lat: number, lon: number): Promise<WeatherData> {
+export async function fetchWeatherData(lat: number, lon: number, isBot: boolean = false): Promise<WeatherData> {
   try {
-    const [genericRes, harmonieData, iconData, aromeData] = await Promise.all([
+    // Basis API Call (altijd vereist)
+    const fetchPromises: Promise<any>[] = [
       fetch(`${OPEN_METEO_BASE}?${new URLSearchParams({
         latitude: lat.toString(),
         longitude: lon.toString(),
@@ -120,11 +122,64 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
       })}`, { cache: "no-store" }).then(r => {
         if (!r.ok) return null;
         return r.json();
-      }),
-      fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_harmonie" }).catch(() => null),
-      fetchModel(OPEN_METEO_BASE, lat, lon, { models: "dwd_icon_d2" }).catch(() => null),
-      fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome" }).catch(() => null),
-    ]);
+      })
+    ];
+
+    // Zware extra modellen: Sla deze over als een bot (zoals Googlebot) de pagina crawlt
+    // Dit bespaart 75% van de Open-Meteo requests en voorkomt 429 Rate Limits
+    if (!isBot) {
+      fetchPromises.push(
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_harmonie" }).catch(() => null),
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "dwd_icon_d2" }).catch(() => null),
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome" }).catch(() => null),
+        fetchGoogleWeather(lat, lon).catch(() => null)
+      );
+    }
+
+    const results = await Promise.all(fetchPromises);
+    const genericRes = results[0];
+    const harmonieData = isBot ? null : results[1];
+    const iconData = isBot ? null : results[2];
+    const aromeData = isBot ? null : results[3];
+    const googleDataRaw = isBot ? null : results[4];
+
+    // Formatteer Google Data om net zo makkelijk aan te roepen als Open-Meteo arrays
+    let googleData: any = null;
+    if (googleDataRaw?.forecastHours && genericRes?.hourly?.time) {
+      googleData = {
+        temperature: [],
+        precipitation: [],
+        weatherCode: [],
+        windSpeed: []
+      };
+      // We assumes the forecastHours align roughly with the next 48 hours, but we map by matching the start hour
+      const times = genericRes.hourly.time;
+      for (const t of times) {
+        // t is bv "2025-02-06T15:00"
+        // Google startTime is bv "2025-02-06T15:00:00Z"
+        // We match op het uur
+        const isoTime = new Date(t + "Z").toISOString(); // dit kan afwijken qua timezone
+        // Makkelijkste is itereren
+        const dt = new Date(t).getTime();
+        const gHour = googleDataRaw.forecastHours.find((g: any) => {
+          const gTime = new Date(g.interval.startTime).getTime();
+          // Ligt de tijd binnen dit interval?
+          return dt >= gTime && dt < new Date(g.interval.endTime).getTime();
+        });
+        
+        if (gHour) {
+          googleData.temperature.push(gHour.temperature?.degrees ?? 0);
+          googleData.precipitation.push(gHour.precipitation?.qpf?.quantity ?? 0);
+          googleData.weatherCode.push(mapGoogleWeatherConditionToWMO(gHour.weatherCondition?.type ?? ""));
+          googleData.windSpeed.push(gHour.wind?.speed?.value ?? 0);
+        } else {
+          googleData.temperature.push(0);
+          googleData.precipitation.push(0);
+          googleData.weatherCode.push(0);
+          googleData.windSpeed.push(0);
+        }
+      }
+    }
 
     const data = genericRes;
     if (!data || !data.hourly || !data.daily || !data.current) {
@@ -161,6 +216,13 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         windSpeed: Math.round(aromeData.wind_speed_10m[i] ?? 0)
       } : undefined;
 
+      const google = googleData ? {
+        temperature: Math.round(googleData.temperature[i] ?? 0),
+        precipitation: googleData.precipitation[i] ?? 0,
+        weatherCode: googleData.weatherCode[i] ?? 0,
+        windSpeed: Math.round(googleData.windSpeed[i] ?? 0)
+      } : undefined;
+
       // Base values (prefer Harmonie)
       const temperature = harmonie?.temperature ?? Math.round(data.hourly.temperature_2m[i] ?? 0);
       const precipitation = harmonie?.precipitation ?? data.hourly.precipitation[i] ?? 0;
@@ -176,7 +238,7 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         windSpeed,
         cape: Math.round(data.hourly.cape?.[i] ?? 0),
         confidence: "high",
-        models: { harmonie, icon, arome }
+        models: { harmonie, icon, arome, google }
       };
     });
 
@@ -184,9 +246,9 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     let agreement = 100;
     if (harmonieData && iconData && aromeData) {
       // Check for divergence in precipitation in next 12 hours
-      const next12Harmonie = harmonieData.precipitation.slice(0, 12).reduce((a, b) => a + b, 0);
-      const next12Icon = iconData.precipitation.slice(0, 12).reduce((a, b) => a + b, 0);
-      const next12Arome = aromeData.precipitation.slice(0, 12).reduce((a, b) => a + b, 0);
+      const next12Harmonie = harmonieData.precipitation.slice(0, 12).reduce((a: number, b: number) => a + b, 0);
+      const next12Icon = iconData.precipitation.slice(0, 12).reduce((a: number, b: number) => a + b, 0);
+      const next12Arome = aromeData.precipitation.slice(0, 12).reduce((a: number, b: number) => a + b, 0);
       
       const diff = Math.max(
         Math.abs(next12Harmonie - next12Icon),
@@ -236,6 +298,7 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
     const sources = ["KNMI HARMONIE"];
     if (iconData) sources.push("DWD ICON-D2");
     if (aromeData) sources.push("METEOFRANCE AROME");
+    if (googleData) sources.push("GOOGLE WEATHER API");
 
     return {
       current: {

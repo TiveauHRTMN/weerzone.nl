@@ -166,6 +166,7 @@ function computeDayparts(
 
 interface Theme {
   pageBg: string;
+  headerBg: string;
   cardBg: string;
   cardBorder: string;
   accent: string;
@@ -180,8 +181,9 @@ interface Theme {
 function getTheme(tier: PersonaTier): Theme {
   if (tier === "reed") {
     return {
-      pageBg: "#0f172a",
-      cardBg: "#1e293b",
+      pageBg: "#020617",
+      headerBg: "linear-gradient(180deg, #1e1b4b 0%, #020617 100%)",
+      cardBg: "#0f172a",
       cardBorder: "rgba(239,68,68,0.25)",
       accent: "#ef4444",
       accentText: "#ffffff",
@@ -193,16 +195,17 @@ function getTheme(tier: PersonaTier): Theme {
     };
   }
   return {
-    pageBg: "#3b7ff0",
-    cardBg: "rgba(0,0,0,0.14)",
-    cardBorder: "rgba(255,255,255,0.12)",
-    accent: "#38bdf8",
-    accentText: "#0f172a",
-    textPrimary: "#ffffff",
-    textMuted: "rgba(255,255,255,0.75)",
-    textLabel: "rgba(255,255,255,0.4)",
-    narrativeBorder: "#38bdf8",
-    ctaBg: "rgba(0,0,0,0.25)",
+    pageBg: "#f8fafc",
+    headerBg: "linear-gradient(180deg, #3b7ff0 0%, #2a5fc4 100%)",
+    cardBg: "#ffffff",
+    cardBorder: "rgba(0,0,0,0.06)",
+    accent: "#3b7ff0",
+    accentText: "#ffffff",
+    textPrimary: "#0f172a",
+    textMuted: "#475569",
+    textLabel: "#94a3b8",
+    narrativeBorder: "#3b7ff0",
+    ctaBg: "#3b7ff0",
   };
 }
 
@@ -244,63 +247,48 @@ export function buildPersonaEmailHtml(
       wd.sunrise || (typeof wd.uvIndex === "number" && wd.uvIndex > 0);
 
     heroHtml = `
-<div style="background:${t.cardBg};border:1px solid ${t.cardBorder};border-radius:20px;padding:28px 28px 24px;margin-bottom:14px;">
-  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:${t.textLabel};margin-bottom:12px;">Nu in ${esc(city)}</div>
+<div style="background:${t.cardBg};border:1px solid ${t.cardBorder};border-radius:24px;padding:32px;margin-bottom:20px;box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+  <div style="display:table;width:100%;margin-bottom:20px;">
+    <div style="display:table-cell;vertical-align:middle;">
+        <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:4px;">Micro-voorspelling</div>
+        <div style="font-size:24px;font-weight:900;color:${t.textPrimary};letter-spacing:-0.02em;">${esc(city)}</div>
+    </div>
+    <div style="display:table-cell;vertical-align:middle;text-align:right;">
+        <div style="display:inline-block;background:rgba(16,185,129,0.1);color:#10b981;font-size:10px;font-weight:900;padding:4px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:1px;">1x1km Grid Precisie</div>
+    </div>
+  </div>
+
   <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
     <td style="vertical-align:bottom;">
-      <div style="font-size:80px;font-weight:900;color:${t.textPrimary};line-height:1;letter-spacing:-0.03em;">${esc(wd.current.temperature)}°</div>
-      <div style="font-size:14px;font-weight:700;color:${t.textMuted};margin-top:6px;">${esc(desc)}${esc(feelsLine)}</div>
+      <div style="font-size:88px;font-weight:900;color:${t.textPrimary};line-height:0.9;letter-spacing:-0.05em;">${esc(wd.current.temperature)}<span style="color:${t.accent};">°</span></div>
+      <div style="font-size:16px;font-weight:700;color:${t.textMuted};margin-top:12px;">${esc(desc)}${esc(feelsLine)}</div>
     </td>
     <td style="vertical-align:bottom;text-align:right;padding-bottom:4px;">
-      <div style="font-size:56px;line-height:1;">${emoji}</div>
+      <div style="font-size:72px;line-height:1;filter:drop-shadow(0 10px 15px rgba(0,0,0,0.1));">${emoji}</div>
     </td>
   </tr></table>
 
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:20px;padding-top:20px;border-top:1px solid ${t.cardBorder};">
-    <tr>
-      <td style="width:50%;padding-right:12px;padding-bottom:14px;vertical-align:top;">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:5px;">Wind</div>
-        <div style="font-size:15px;font-weight:700;color:${t.textPrimary};">${esc(wd.current.windSpeed)} km/h</div>
-        <div style="font-size:11px;color:${t.textLabel};">${esc(bft.scale)} bft · ${esc(bft.label.toLowerCase())}</div>
-      </td>
-      <td style="width:50%;padding-bottom:14px;vertical-align:top;">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:5px;">Neerslag</div>
-        <div style="font-size:15px;font-weight:700;color:${t.textPrimary};">${wd.current.precipitation > 0 ? `${wd.current.precipitation.toFixed(1)} mm` : "Droog"}</div>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding-right:12px;padding-bottom:${showSunRow ? "14px" : "0"};vertical-align:top;">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:5px;">Dag max / min</div>
-        <div style="font-size:15px;font-weight:700;color:${t.textPrimary};">${esc(wd.daily.tempMax)}° <span style="color:${t.textLabel};font-size:13px;">/ ${esc(wd.daily.tempMin)}°</span></div>
-      </td>
-      <td style="padding-bottom:${showSunRow ? "14px" : "0"};vertical-align:top;">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:5px;">Vochtigheid</div>
-        <div style="font-size:15px;font-weight:700;color:${t.textPrimary};">${esc(wd.current.humidity)}%</div>
-      </td>
-    </tr>
-    ${
-      showSunRow
-        ? `<tr>
-      <td style="padding-right:12px;vertical-align:top;">
-        ${
-          wd.sunrise
-            ? `<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:5px;">Zon op / onder</div>
-        <div style="font-size:15px;font-weight:700;color:${t.textPrimary};">${fmtTime(wd.sunrise)}${wd.sunset ? ` / ${fmtTime(wd.sunset)}` : ""}</div>`
-            : ""
-        }
-      </td>
-      <td style="vertical-align:top;">
-        ${
-          typeof wd.uvIndex === "number" && wd.uvIndex > 0
-            ? `<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:5px;">UV</div>
-        <div style="font-size:15px;font-weight:700;color:${t.textPrimary};">UV ${esc(Math.round(wd.uvIndex))}</div>`
-            : ""
-        }
-      </td>
-    </tr>`
-        : ""
-    }
-  </table>
+  <div style="margin-top:32px;padding-top:24px;border-top:1px solid ${t.cardBorder};">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <tr>
+            <td style="width:33%;padding-right:10px;">
+                <div style="font-size:10px;font-weight:800;color:${t.textLabel};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Wind</div>
+                <div style="font-size:15px;font-weight:900;color:${t.textPrimary};">${esc(wd.current.windSpeed)}<span style="font-size:10px;font-weight:700;margin-left:2px;">KM/H</span></div>
+                <div style="font-size:10px;color:${t.textLabel};font-weight:700;">${esc(bft.scale)} BFT</div>
+            </td>
+            <td style="width:33%;padding-right:10px;">
+                <div style="font-size:10px;font-weight:800;color:${t.textLabel};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Regen</div>
+                <div style="font-size:15px;font-weight:900;color:${t.textPrimary};">${wd.current.precipitation > 0 ? `${wd.current.precipitation.toFixed(1)}` : "0.0"}<span style="font-size:10px;font-weight:700;margin-left:2px;">MM</span></div>
+                <div style="font-size:10px;color:${t.textLabel};font-weight:700;">ACTUEEL</div>
+            </td>
+            <td style="width:33%;">
+                <div style="font-size:10px;font-weight:800;color:${t.textLabel};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Lucht</div>
+                <div style="font-size:15px;font-weight:900;color:${t.textPrimary};">${esc(wd.current.humidity)}<span style="font-size:10px;font-weight:700;margin-left:2px;">%</span></div>
+                <div style="font-size:10px;color:${t.textLabel};font-weight:700;">VOCHT</div>
+            </td>
+        </tr>
+    </table>
+  </div>
 </div>`;
   }
 
@@ -310,21 +298,21 @@ export function buildPersonaEmailHtml(
     .filter(Boolean)
     .map(
       (line) =>
-        `<p style="margin:0 0 10px 0;font-size:16px;line-height:1.7;color:${t.textMuted};">${esc(line)}</p>`,
+        `<p style="margin:0 0 16px 0;font-size:17px;line-height:1.6;color:${t.textMuted};font-weight:500;">${esc(line)}</p>`,
     )
     .join("");
 
   const bulletsHtml =
     brief.details.length > 0
-      ? `<div style="margin-top:18px;">` +
+      ? `<div style="margin-top:24px;padding:24px;background:rgba(0,0,0,0.02);border-radius:16px;">` +
         brief.details
           .map(
             (detail) => `
-      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;"><tr>
-        <td style="vertical-align:top;padding-right:10px;padding-top:7px;">
-          <div style="width:6px;height:6px;border-radius:50%;background:${t.accent};"></div>
+      <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;"><tr>
+        <td style="vertical-align:top;padding-right:12px;padding-top:6px;">
+          <div style="width:8px;height:8px;border-radius:2px;background:${t.accent};"></div>
         </td>
-        <td><div style="font-size:14px;line-height:1.55;color:${t.textMuted};">${esc(detail)}</div></td>
+        <td><div style="font-size:15px;line-height:1.5;color:${t.textPrimary};font-weight:600;">${esc(detail)}</div></td>
       </tr></table>`,
           )
           .join("") +
@@ -332,13 +320,19 @@ export function buildPersonaEmailHtml(
       : "";
 
   const narrativeHtml = `
-<div style="background:${t.cardBg};border:1px solid ${t.cardBorder};border-left:4px solid ${t.narrativeBorder};border-radius:20px;padding:28px;margin-bottom:14px;">
-  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:${t.textLabel};margin-bottom:12px;">Het weerverhaal</div>
-  <div style="font-size:18px;font-weight:800;color:${t.textPrimary};margin-bottom:16px;line-height:1.3;">${esc(brief.greeting)}</div>
+<div style="background:${t.cardBg};border:1px solid ${t.cardBorder};border-radius:24px;padding:32px;margin-bottom:20px;box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+  <div style="display:table;width:100%;margin-bottom:20px;">
+    <div style="display:table-cell;vertical-align:middle;">
+        <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:${t.textLabel};margin-bottom:4px;">Briefing van ${esc(p.name)}</div>
+        <div style="font-size:22px;font-weight:900;color:${t.textPrimary};line-height:1.2;letter-spacing:-0.02em;">${esc(brief.greeting)}</div>
+    </div>
+  </div>
+  
   ${verdictHtml}
   ${bulletsHtml}
-  <div style="margin-top:20px;padding-top:16px;border-top:1px solid ${t.cardBorder};">
-    <div style="font-size:13px;color:${t.textLabel};font-style:italic;">${esc(brief.closing)}</div>
+  
+  <div style="margin-top:24px;padding-top:20px;border-top:1px solid ${t.cardBorder};text-align:right;">
+    <div style="font-size:14px;color:${t.textPrimary};font-weight:800;font-style:italic;">— ${esc(brief.closing)}</div>
   </div>
 </div>`;
 
@@ -346,24 +340,24 @@ export function buildPersonaEmailHtml(
   let daypartsHtml = "";
   if (dayparts.length > 0) {
     daypartsHtml = `
-<div style="background:${t.cardBg};border:1px solid ${t.cardBorder};border-radius:20px;overflow:hidden;margin-bottom:14px;">
-  <div style="padding:20px 24px 12px;">
-    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:${t.textLabel};">De dagdelen</div>
+<div style="background:${t.cardBg};border:1px solid ${t.cardBorder};border-radius:24px;overflow:hidden;margin-bottom:20px;box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+  <div style="padding:24px 32px 12px;">
+    <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:${t.textLabel};">De komende uren</div>
   </div>
   ${dayparts
     .map(
       (dp, i) => `
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="${i > 0 ? `border-top:1px solid ${t.cardBorder};` : ""}">
     <tr>
-      <td style="width:56px;text-align:center;vertical-align:middle;padding:14px 8px;">
-        <div style="font-size:28px;line-height:1;">${dp.emoji}</div>
+      <td style="width:72px;text-align:center;vertical-align:middle;padding:20px 0;">
+        <div style="font-size:32px;line-height:1;">${dp.emoji}</div>
       </td>
-      <td style="vertical-align:middle;padding:14px 0;">
-        <div style="font-size:14px;font-weight:800;color:${t.textPrimary};">${esc(dp.label)}</div>
-        <div style="font-size:12px;color:${t.textLabel};margin-top:2px;">${esc(dp.window)} · ${esc(dp.rainLine)}</div>
+      <td style="vertical-align:middle;padding:20px 0;">
+        <div style="font-size:16px;font-weight:900;color:${t.textPrimary};letter-spacing:-0.01em;">${esc(dp.label)}</div>
+        <div style="font-size:13px;color:${t.textLabel};margin-top:2px;font-weight:600;">${esc(dp.window)} · <span style="color:${dp.rainLine === 'Droog' ? '#10b981' : t.accent};">${esc(dp.rainLine)}</span></div>
       </td>
-      <td style="vertical-align:middle;padding:14px 20px 14px 8px;text-align:right;">
-        <div style="font-size:14px;font-weight:700;color:${t.textMuted};">${esc(dp.tempLine)}</div>
+      <td style="vertical-align:middle;padding:20px 32px 20px 8px;text-align:right;">
+        <div style="font-size:18px;font-weight:900;color:${t.textPrimary};letter-spacing:-0.02em;">${esc(dp.tempLine)}</div>
       </td>
     </tr>
   </table>`,
@@ -376,39 +370,35 @@ export function buildPersonaEmailHtml(
   const ctaUrl =
     tier === "reed" ? "https://weerzone.nl/reed" : "https://weerzone.nl/piet";
   const ctaHtml = `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:20px;">
-  <tr>
-    <td style="text-align:center;padding:4px 0 16px;">
-      <a href="${esc(ctaUrl)}" style="display:inline-block;background:${t.ctaBg};color:#ffffff;text-decoration:none;font-weight:800;padding:16px 32px;border-radius:14px;font-size:15px;border:1px solid ${t.cardBorder};">
-        Bekijk de volledige 48-uurs analyse &#8594;
-      </a>
-    </td>
-  </tr>
-</table>`;
+<div style="margin-bottom:32px;text-align:center;">
+    <a href="${esc(ctaUrl)}" style="display:inline-block;background:${t.ctaBg};color:#ffffff;text-decoration:none;font-weight:900;padding:20px 40px;border-radius:16px;font-size:16px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 10px 25px ${tier === 'reed' ? 'rgba(239,68,68,0.3)' : 'rgba(59,127,240,0.3)'};">
+        Volledige 48-uurs Analyse &#8594;
+    </a>
+</div>`;
 
   // ---- AMAZON TIP ----
   let amazonHtml = "";
   if (amazonTip) {
     const tipBg = amazonTip.color
-      ? `${amazonTip.color}22`
-      : "rgba(245,158,11,0.15)";
+      ? `${amazonTip.color}15`
+      : "rgba(245,158,11,0.08)";
     const tipBorder = amazonTip.color
-      ? `${amazonTip.color}55`
-      : "rgba(245,158,11,0.4)";
+      ? `${amazonTip.color}44`
+      : "rgba(245,158,11,0.2)";
     amazonHtml = `
-<div style="margin-bottom:16px;">
-  <a href="${esc(amazonTip.url)}" target="_blank" rel="noopener sponsored" style="display:block;text-decoration:none;color:inherit;border:1px solid ${tipBorder};background:${tipBg};border-radius:16px;padding:16px 18px;">
-    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,158,11,0.9);font-weight:800;margin-bottom:8px;">${esc(p.name)}'s tip · Amazon</div>
+<div style="margin-bottom:24px;">
+  <a href="${esc(amazonTip.url)}" target="_blank" rel="noopener sponsored" style="display:block;text-decoration:none;color:inherit;border:1.5px dashed ${tipBorder};background:${tipBg};border-radius:20px;padding:24px;">
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;font-weight:900;margin-bottom:12px;">${esc(p.name)}'s Essential · Amazon</div>
     <table cellpadding="0" cellspacing="0" border="0"><tr>
-      ${amazonTip.emoji ? `<td style="padding-right:14px;vertical-align:middle;font-size:36px;line-height:1;">${amazonTip.emoji}</td>` : ""}
+      ${amazonTip.emoji ? `<td style="padding-right:20px;vertical-align:middle;font-size:44px;line-height:1;">${amazonTip.emoji}</td>` : ""}
       <td style="vertical-align:middle;">
-        <div style="font-size:14px;font-weight:800;color:${t.textPrimary};line-height:1.3;">${esc(amazonTip.title)}</div>
-        ${amazonTip.subtitle ? `<div style="font-size:12px;color:${t.textMuted};margin-top:3px;">${esc(amazonTip.subtitle)}</div>` : ""}
-        <div style="font-size:13px;font-weight:800;color:rgba(245,158,11,0.9);margin-top:6px;">${amazonTip.price ? esc(amazonTip.price) + " · " : ""}Bekijk op Amazon &#8594;</div>
+        <div style="font-size:16px;font-weight:900;color:${t.textPrimary};line-height:1.2;margin-bottom:4px;">${esc(amazonTip.title)}</div>
+        ${amazonTip.subtitle ? `<div style="font-size:13px;color:${t.textMuted};font-weight:500;">${esc(amazonTip.subtitle)}</div>` : ""}
+        <div style="font-size:14px;font-weight:900;color:#f59e0b;margin-top:10px;">${amazonTip.price ? esc(amazonTip.price) + " · " : ""}Bekijk op Amazon &#8594;</div>
       </td>
     </tr></table>
   </a>
-  <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;text-align:center;">Als je hier iets koopt, krijgt WEERZONE een kleine commissie. Prijs blijft gelijk.</div>
+  <div style="font-size:10px;color:${t.textLabel};margin-top:10px;text-align:center;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Powered by WEERZONE Affiliate Engine</div>
 </div>`;
   }
 
@@ -418,40 +408,54 @@ export function buildPersonaEmailHtml(
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="color-scheme" content="dark"/>
+<meta name="color-scheme" content="${tier === 'reed' ? 'dark' : 'light'}"/>
 <title>${esc(brief.subject)}</title>
 </head>
-<body style="margin:0;padding:0;background:${t.pageBg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;">
-<div style="max-width:600px;margin:0 auto;padding:20px 16px 32px;">
+<body style="margin:0;padding:0;background:${t.pageBg};font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;">
+<div style="max-width:600px;margin:0 auto;">
 
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:16px;"><tr>
-    <td style="vertical-align:middle;">
-      <div style="font-size:13px;font-weight:900;color:rgba(255,255,255,0.9);letter-spacing:0.05em;">WEERZONE</div>
-    </td>
-    <td style="text-align:right;vertical-align:middle;">
-      <div style="font-size:11px;font-weight:700;color:${t.textLabel};">${esc(city)} · ${esc(date)}</div>
-    </td>
-  </tr></table>
-
-  <div style="margin-bottom:18px;">
-    <span style="display:inline-block;background:${t.accent};color:${t.accentText};font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;padding:4px 12px;border-radius:100px;">${esc(p.name)} · ${esc(p.label)}</span>
+  <!-- HEADER BRANDING -->
+  <div style="background:${t.headerBg};padding:40px 32px 60px;text-align:center;">
+    <img src="https://weerzone.nl/logo-white.png" alt="WEERZONE" style="height:28px;width:auto;margin-bottom:20px;display:inline-block;" />
+    <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:3px;">48 UUR VOORUIT · DE REST IS RUIS</div>
   </div>
 
-  ${heroHtml}
+  <div style="padding:0 20px;margin-top:-30px;">
+    
+    <div style="margin-bottom:20px;text-align:center;">
+        <span style="display:inline-block;background:${t.accent};color:${t.accentText};font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;padding:6px 16px;border-radius:100px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">${esc(p.name)} · ${esc(p.label)}</span>
+    </div>
 
-  ${narrativeHtml}
+    ${heroHtml}
 
-  ${daypartsHtml}
+    ${narrativeHtml}
 
-  ${ctaHtml}
+    ${daypartsHtml}
 
-  ${amazonHtml}
+    ${ctaHtml}
 
-  <div style="padding:8px 0;text-align:center;font-size:11px;color:rgba(255,255,255,0.25);">
-    Je dagelijkse ${esc(p.label.toLowerCase())} brief. 48 uur vooruit. De rest is ruis.<br/>
-    <a href="${esc(unsubscribeUrl)}" style="color:rgba(255,255,255,0.25);text-decoration:underline;">Uitschrijven</a>
+    ${amazonHtml}
+
+    <!-- FOOTER -->
+    <div style="padding:40px 32px;text-align:center;border-top:1px solid ${t.cardBorder};">
+      <div style="font-size:12px;font-weight:800;color:${t.textPrimary};margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">WEERZONE INTEL</div>
+      <div style="font-size:13px;color:${t.textLabel};line-height:1.6;max-width:300px;margin:0 auto 20px;">
+        Je ontvangt deze dagelijkse briefing omdat je bent aangemeld als Founder voor de regio ${esc(city)}.
+      </div>
+      <div style="display:table;width:100%;max-width:240px;margin:0 auto;">
+        <div style="display:table-cell;padding:0 10px;">
+            <a href="https://weerzone.nl/app" style="font-size:11px;font-weight:900;color:${t.accent};text-decoration:none;text-transform:uppercase;letter-spacing:1px;">Dashboard</a>
+        </div>
+        <div style="display:table-cell;padding:0 10px;border-left:1px solid ${t.cardBorder};">
+            <a href="${esc(unsubscribeUrl)}" style="font-size:11px;font-weight:900;color:${t.textLabel};text-decoration:none;text-transform:uppercase;letter-spacing:1px;">Uitschrijven</a>
+        </div>
+      </div>
+      <div style="margin-top:32px;font-size:10px;font-weight:700;color:${t.textLabel};text-transform:uppercase;letter-spacing:2px;">
+        &copy; ${new Date().getFullYear()} Tiveau & Google Intelligence
+      </div>
+    </div>
+
   </div>
-
 </div>
 </body>
 </html>`;

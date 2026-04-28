@@ -33,10 +33,13 @@ export default function ContactForm() {
 
   if (status === "ok") {
     return (
-      <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6 text-center">
-        <div className="text-4xl mb-2">✅</div>
-        <p className="font-black text-white text-xl mb-1">Verstuurd.</p>
-        <p className="text-sm text-white/70">We lezen alles en antwoorden binnen 24u op werkdagen.</p>
+      <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-8 text-center animate-fade-in">
+        <div className="text-5xl mb-4">📥</div>
+        <p className="font-black text-white text-2xl mb-2">Bericht ontvangen!</p>
+        <p className="text-white/70 leading-relaxed">
+          We hebben je gegevens in goede orde ontvangen. Check je inbox voor een bevestiging. 
+          We antwoorden doorgaans binnen 24 uur op werkdagen.
+        </p>
       </div>
     );
   }

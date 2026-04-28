@@ -4,7 +4,7 @@ import Image from "next/image";
 export function LogoIcon({ size = 40, className = "" }: { size?: number; className?: string }) {
   return (
     <Image
-      src="/favicon-icon.png"
+      src="/weerzone-icon.png"
       alt="WEERZONE"
       width={size}
       height={size}

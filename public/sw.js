@@ -36,8 +36,8 @@ async function checkWeatherAlarm(cityName, lat, lon) {
 
       self.registration.showNotification("WEERZONE — Regen op komst", {
         body: `Regen verwacht in ${cityName} om ${timeStr}. Paraplu mee!`,
-        icon: "/favicon-icon.png",
-        badge: "/favicon-icon.png",
+        icon: "/weerzone-icon.png",
+        badge: "/weerzone-icon.png",
         tag: "rain-alert",
         renotify: false,
         data: { url: `https://weerzone.nl` },

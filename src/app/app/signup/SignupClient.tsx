@@ -84,13 +84,13 @@ export default function SignupClient() {
     router.replace(nextAfterSignup());
   }
 
-  async function handleGoogle() {
+  async function handleOAuth(provider: "google" | "apple") {
     setSubmitError(null);
     setLoading(true);
     const tierParam = preTier ? `&tier=${preTier}` : "";
     const redirectTo = `${window.location.origin}/auth/callback?next=/app/onboarding${tierParam}`;
     const { error: oauthErr } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider,
       options: { redirectTo },
     });
     if (oauthErr) {
@@ -122,7 +122,7 @@ export default function SignupClient() {
       <h1 className="h-1 mb-2">Maak een account</h1>
       <p className="t-body mb-6">Gratis proberen — geen creditcard nodig.</p>
 
-      <WzSocialButtons onGoogle={handleGoogle} loading={loading} />
+      <WzSocialButtons onGoogle={() => handleOAuth("google")} onApple={() => handleOAuth("apple")} loading={loading} />
       <WzDivider />
 
       <form onSubmit={handleSubmit} noValidate>

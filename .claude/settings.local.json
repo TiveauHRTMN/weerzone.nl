@@ -123,7 +123,15 @@
       "Bash(git status *)",
       "Bash(git check-ignore *)",
       "Bash(git checkout *)",
-      "Bash(node -e \"const p = require\\('./node_modules/next/package.json'\\); console.log\\(p.version\\)\")"
+      "Bash(node -e \"const p = require\\('./node_modules/next/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(vercel *)",
+      "Bash(node -e \"const p = require\\('./src/lib/places.json'\\); console.log\\('Total:', p.length\\); console.log\\(p.filter\\(x => x.province === 'noord-holland'\\).slice\\(0,10\\).map\\(x => x.name\\).join\\(', '\\)\\)\")",
+      "Bash(node *)",
+      "Bash(sed -n '14,18p' C:/Users/rwnhr/kutweer/src/app/api/cron/discovery-engine/route.ts)",
+      "Bash(sed -n '12,16p' C:/Users/rwnhr/kutweer/src/app/api/cron/openclaw-harvester/route.ts)",
+      "Bash(sed -n '11,15p' C:/Users/rwnhr/kutweer/src/app/api/cron/paperclip-yield/route.ts)",
+      "Bash(sed -n '12,16p' C:/Users/rwnhr/kutweer/src/app/api/cron/performance-control/route.ts)",
+      "Bash(sed -n '28,32p' C:/Users/rwnhr/kutweer/src/app/api/cron/b2b-hunter/route.ts)"
     ]
   }
 }

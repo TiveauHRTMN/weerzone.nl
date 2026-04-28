@@ -43,6 +43,26 @@
     {
       "path": "/api/cron/reed-alert-email",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/openclaw-harvester",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/discovery-engine",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/performance-control",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/paperclip-yield",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/hermes-patrol",
+      "schedule": "0 1 * * *"
     }
   ]
 }

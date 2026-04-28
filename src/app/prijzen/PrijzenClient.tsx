@@ -22,7 +22,7 @@ const STEPS: Array<[string, string, string]> = [
 ];
 
 const FAQS: Array<[string, string]> = [
-  ["Waarom is het nu gratis?", "We zijn nog in opbouw. Je kunt je nu aanmelden zonder te betalen en zonder creditcard. Vroege aanmelders houden hun introductieprijs, ook zodra we binnenkort live gaan."],
+  ["Waarom is het nu gratis?", "We zijn nog in opbouw. Je kunt je nu gratis aanmelden zonder creditcard."],
   ["Wat is het verschil tussen Piet, Reed en Steve?", "Piet schrijft een dagelijkse weermail voor thuis. Reed stuurt daarnaast alleen bericht als het weer over jouw drempel gaat. Steve doet hetzelfde voor bedrijven, inclusief advies per vestiging."],
   ["Kan ik wisselen van abonnement?", "Ja. Je kunt maandelijks upgraden of downgraden via je account. Als je nu bij de eerste aanmeldingen zit, behoud je de lage aanmeldprijs van je nieuwe abonnement."],
   ["Waarom maar 48 uur vooruit?", "Omdat een voorspelling verder dan 48 uur onbetrouwbaar wordt. Wij houden ons aan wat met het KNMI HARMONIE-model accuraat te zeggen is — 48 uur op een raster van 2,5 km."],
@@ -147,7 +147,6 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
 
         {/* Hero */}
         <div style={{ textAlign: "center", marginBottom: "clamp(32px,4vw,56px)" }}>
-          <span className="badge sun" style={{ marginBottom: 16 }}>★ Nu nog gratis aanmelden</span>
           <h1 className="h-display" style={{ marginTop: 14, marginBottom: 14, fontSize: "clamp(32px,5vw,52px)" }}>
             Een abonnement op Weerzone
           </h1>
@@ -155,15 +154,8 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
             Piet voor thuis, Reed voor waarschuwingen, Steve voor je zaak. Elke ochtend een korte weermail op jouw postcode. Geen reclame. Opzeggen kan maandelijks.
           </p>
           <p className="t-small" style={{ maxWidth: 560, margin: "16px auto 0" }}>
-            Tijdelijk gratis. Vroege aanmelders houden hun introductieprijs, ook zodra we binnenkort live gaan.
+            Nu tijdelijk gratis te proberen.
           </p>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 10, marginTop: 20,
-            padding: "8px 16px", background: "#fff", border: "1px solid var(--border)", borderRadius: 999,
-          }}>
-            <span style={{ fontWeight: 800, fontSize: 15 }}>{subCount.toLocaleString("nl-NL")}</span>
-            <span className="t-small" style={{ margin: 0 }}>Nederlanders staan al op de lijst</span>
-          </div>
         </div>
 
         {/* Plans */}

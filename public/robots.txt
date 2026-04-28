@@ -4,7 +4,9 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /auth/
-Disallow: /*?* # Voorkom indexering van tracking params
+Disallow: /app/
+# Voorkom indexering van tracking params
+Disallow: /*?*
 
 # Sitemaps
 Sitemap: https://weerzone.nl/sitemap.xml

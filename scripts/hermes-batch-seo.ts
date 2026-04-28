@@ -1,7 +1,7 @@
 import { ALL_PLACES } from "../src/lib/places-data";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as dotenv from "dotenv";
-import { getSupabase } from "../src/lib/supabase";
+import { getSupabaseAdmin } from "../src/lib/supabase";
 
 dotenv.config({ path: ".env.local" });
 
@@ -20,7 +20,7 @@ async function run() {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
 
   // We doen dit in batches van 10 voor de prompt om tokens te besparen en context te behouden
   const batchSize = 10;

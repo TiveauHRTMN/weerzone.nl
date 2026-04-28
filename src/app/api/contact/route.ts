@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getContactConfirmationHtml } from "@/lib/contact-email";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
     const safeEmail = String(email).slice(0, 200);
     const safeMsg = String(message).slice(0, 5000);
 
+    // 1. Stuur mail naar info@weerzone.nl (interne melding)
     await resend.emails.send({
       from: "WEERZONE Contact <info@weerzone.nl>",
       to: "info@weerzone.nl",
@@ -28,6 +30,20 @@ export async function POST(req: Request) {
       subject: `Contact via weerzone.nl — ${safeName}`,
       text: `Van: ${safeName} <${safeEmail}>\n\n${safeMsg}`,
     });
+
+    // 2. Stuur automatische bevestiging naar de gebruiker
+    try {
+      await resend.emails.send({
+        from: "WEERZONE <info@weerzone.nl>",
+        to: safeEmail,
+        subject: "Bedankt voor je bericht — WEERZONE",
+        html: getContactConfirmationHtml(safeName),
+      });
+    } catch (autoReplyError) {
+      // Als de auto-reply faalt, willen we niet de hele route laten crashen, 
+      // zolang de interne mail maar verstuurd is.
+      console.error("Auto-reply error:", autoReplyError);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -9,9 +9,9 @@ export function getWelcomeEmailHtml(email: string, tier: PersonaTier, city?: str
   // We laten Piet en Reed altijd zien in de introductie, 
   // maar sturen de persona die ze kozen als focus.
 
-  const hasPrice = persona.founderPriceCents !== undefined;
+  const hasPrice = persona.priceCents !== undefined;
   const pricingText = hasPrice 
-    ? `Vroege vogels houden hun prijs van ${formatPrice(persona.founderPriceCents!)}/mnd voor altijd.`
+    ? `Nu tijdelijk gratis te proberen. Straks ${formatPrice(persona.priceCents!)}/mnd.`
     : "Binnenkort beschikbaar voor zakelijk gebruik.";
   
   return `

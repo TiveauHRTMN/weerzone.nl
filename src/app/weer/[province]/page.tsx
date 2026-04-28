@@ -132,19 +132,31 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
                 Steden in {label}
               </h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {places.map((place) => (
-                <Link
-                  key={place.name}
-                  href={`/weer/${province}/${placeSlug(place.name)}`}
-                  className="card p-4 hover:scale-[1.02] transition-transform active:scale-[0.98]"
-                >
-                  <span className="text-sm font-bold text-text-primary line-clamp-1">
-                    {place.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            {Object.entries(
+              places.reduce((acc, place) => {
+                const firstLetter = place.name.charAt(0).toUpperCase();
+                if (!acc[firstLetter]) acc[firstLetter] = [];
+                acc[firstLetter].push(place);
+                return acc;
+              }, {} as Record<string, typeof places>)
+            ).sort(([a], [b]) => a.localeCompare(b)).map(([letter, letterPlaces]) => (
+              <div key={letter} className="mb-10">
+                <h3 className="text-xl font-black text-white/50 mb-4 border-b border-white/10 pb-2">{letter}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {letterPlaces.map((place) => (
+                    <Link
+                      key={place.name}
+                      href={`/weer/${province}/${placeSlug(place.name)}`}
+                      className="card p-4 hover:scale-[1.02] transition-transform active:scale-[0.98] border border-white/5"
+                    >
+                      <span className="text-sm font-bold text-text-primary line-clamp-1">
+                        {place.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         }
       />

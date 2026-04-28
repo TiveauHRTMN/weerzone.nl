@@ -37,7 +37,7 @@ export default function WeatherAlarm({ city }: Props) {
         if (lastShown !== key) {
           new Notification("WEERZONE — Regen op komst", {
             body: `Regen verwacht in ${city.name} om ${t}. Paraplu mee!`,
-            icon: "/favicon-icon.png",
+            icon: "/weerzone-icon.png",
             tag: "wz-rain",
           });
           localStorage.setItem("wz_alarm_last_rain", key);
@@ -53,7 +53,7 @@ export default function WeatherAlarm({ city }: Props) {
         if (lastShown !== key) {
           new Notification("WEERZONE — Onweer!", {
             body: `Onweer verwacht in ${city.name} rond ${t}. Ga naar binnen.`,
-            icon: "/favicon-icon.png",
+            icon: "/weerzone-icon.png",
             tag: "wz-storm",
           });
           localStorage.setItem("wz_alarm_last_storm", key);

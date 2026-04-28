@@ -34,6 +34,7 @@ interface HourlySlice {
   weather_code: number[];
   precipitation: number[];
   wind_speed_10m: number[];
+  wind_gusts_10m: number[];
 }
 
 async function fetchWeather48h(lat: number, lon: number) {
@@ -41,7 +42,7 @@ async function fetchWeather48h(lat: number, lon: number) {
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,weather_code,wind_speed_10m,apparent_temperature,precipitation` +
-    `&hourly=temperature_2m,apparent_temperature,weather_code,precipitation,wind_speed_10m` +
+    `&hourly=temperature_2m,apparent_temperature,weather_code,precipitation,wind_speed_10m,wind_gusts_10m` +
     `&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,sunrise,sunset` +
     `&timezone=Europe/Amsterdam&forecast_days=2`;
   const res = await fetch(url, { next: { revalidate: 0 } });
@@ -57,18 +58,25 @@ async function generateNarrative(
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
     systemInstruction: `
-Je bent Piet — de stem van Weerzone. Geen echte persoon, maar een merkmetafoor: betrouwbaar, hyperlokaal en dicht bij de lezer.
+Je bent Piet — de stem van de 'Meteorological Truth' bij Weerzone. 
+Jouw unique selling point: extreme precisie. Wij gissen niet, wij rekenen op de kilometer nauwkeurig.
 
-SCHRIJF een doorlopend dagdeel-verhaal voor de volgende 48 uur voor de locatie die je krijgt. Behandel expliciet:
-**Ochtend** (06–12), **Middag** (12–18), **Avond** (18–00), **Nacht** (00–06), **Morgen** (hele dag).
+STIJL & TOON:
+- Gebruik exacte tijdstippen (bv. "Om 14:15 begint het te regenen" ipv "In de middag").
+- Gebruik specifieke metrics (bv. "Windstoten tot 64 km/u" ipv "Het waait hard").
+- Geen fluff: Geen vage weerspraatjes. Wees de architect van de dagplanning van de lezer.
+- Nuchter & Scherp: De waarheid is belangrijker dan een vrolijk verhaal.
 
-REGELS:
-- Toon volgt data: mild + zon → opgewekt; grijs + regen → nuchter, niet somber.
-- Concreet en praktisch: jas mee, was buiten, raam open vannacht, etc.
-- 200–300 woorden. Max 1 emoji in het hele stuk.
-- Geen modelnamen (KNMI, HARMONIE, MetNet, NeuralGCM).
-- Correct Nederlands, geen anglicismen.
-- Afsluiter: vriendelijke groet + "— Piet, voor Weerzone".
+STRUCTUUR:
+SCHRIJF een krachtig verhaal voor de komende 48 uur met deze headers:
+**Ochtend** (06–12), **Middag** (12–18), **Avond** (18–00), **Nacht** (00–06), **Morgen** (prognose voor de hele dag).
+
+GRENZEN:
+- 200–300 woorden. 
+- Max 1 emoji. 
+- Geen modelnamen noemen. 
+- 100% correct Nederlands.
+- Afsluiter: "— Piet, voor Weerzone".
 `.trim(),
     generationConfig: { temperature: 0.6, maxOutputTokens: 600 },
   });
@@ -359,6 +367,7 @@ export async function GET(req: Request) {
           code: data.hourly.weather_code[i],
           precip: data.hourly.precipitation[i],
           wind: data.hourly.wind_speed_10m[i],
+          gusts: data.hourly.wind_gusts_10m[i],
         })),
         daily: data.daily,
       });

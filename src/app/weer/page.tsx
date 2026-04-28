@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Weer in Nederland — 48 uur vooruit per provincie en stad | WEERZONE",
+  title: "Weer in Nederland — 48 uur vooruit per provincie en stad",
   description:
     "Bekijk het actuele weerbericht voor alle 12 provincies en meer dan 9.000 locaties in Nederland. De nauwkeurigste 48-uurs voorspelling, op 1 bij 1 kilometer.",
   keywords: [
