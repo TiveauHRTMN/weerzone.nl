@@ -13,7 +13,6 @@ export default function GlobalNav() {
 
   return (
     <div className="sticky top-0 z-50">
-      <NLPulse />
       <div
         className="px-3 pt-2 pb-2"
         style={{
@@ -28,6 +27,7 @@ export default function GlobalNav() {
           <NavBar />
         </div>
       </div>
+      <NLPulse />
     </div>
   );
 }
