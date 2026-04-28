@@ -13,7 +13,6 @@ export default function GlobalNav() {
 
   return (
     <div className="sticky top-0 z-50">
-      <NLPulse />
       <div
         className="px-3 pt-2 pb-2"
         style={{
@@ -26,6 +25,11 @@ export default function GlobalNav() {
         <div className="max-w-2xl mx-auto flex flex-col items-center gap-2">
           <WzLogo />
           <NavBar />
+        </div>
+      </div>
+      <div className="px-3 pb-2 pt-1" style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div className="max-w-2xl mx-auto">
+          <NLPulse light />
         </div>
       </div>
     </div>
