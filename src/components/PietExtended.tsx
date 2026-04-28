@@ -36,6 +36,7 @@ import { getMainCommentary } from "@/lib/commentary";
 import { getPietDeepAnalysis } from "@/app/actions";
 import { useSession } from "@/lib/session-context";
 import ModelPluim from "@/components/ModelPluim";
+import { persistCity } from "@/lib/persist-city";
 
 // "Witte wolk" card-stijl — zichtbaar helder op blauwe /piet achtergrond
 const cloudCard: React.CSSProperties = {
@@ -398,7 +399,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
       const { latitude: lat, longitude: lon } = pos.coords;
       const provisional: City = { name: "Locatie bepalen...", lat, lon };
       setCity(provisional);
-      reverseGeocode(lat, lon).then((c) => { setCity(c); localStorage.setItem("wz_city", JSON.stringify(c)); setLocating(false); }).catch(() => setLocating(false));
+      reverseGeocode(lat, lon).then((c) => { setCity(c); persistCity(c); setLocating(false); }).catch(() => setLocating(false));
     }, () => setLocating(false), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   };
 

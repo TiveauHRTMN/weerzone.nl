@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MapPin, Loader2, AlertCircle } from "lucide-react";
+import { persistCity } from "@/lib/persist-city";
 
 interface Props {
   active?: boolean;
@@ -64,7 +65,7 @@ export default function LocatieButton({ active = false, compact = false }: Props
           if (place?.province && place?.slug) {
             setFound(place.name);
             setState("found");
-            localStorage.setItem("wz_city", JSON.stringify(place));
+            persistCity(place);
             setTimeout(() => {
               window.location.href = `/weer/${place.province}/${place.slug}`;
             }, 800);

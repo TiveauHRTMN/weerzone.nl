@@ -6,6 +6,7 @@ import { MapPin, AlertTriangle, ShieldCheck, Zap, Wind, CloudRain, Thermometer, 
 import { loadWeather, loadWWS, patchCacheDeep } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
 import { useSession } from "@/lib/session-context";
+import { persistCity } from "@/lib/persist-city";
 
 type Alert = { icon: React.ReactNode; title: string; detail: string; severity: "red" | "orange" };
 
@@ -93,11 +94,11 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         const { latitude: lat, longitude: lon } = pos.coords;
         const prov: City = { name: "Jouw locatie", lat, lon };
         setCity(prov);
-        localStorage.setItem("wz_city", JSON.stringify(prov));
+        persistCity(prov);
         setLocating(false);
         reverseGeocode(lat, lon).then((c) => {
           setCity(c);
-          localStorage.setItem("wz_city", JSON.stringify(c));
+          persistCity(c);
         }).catch(() => {});
       },
       () => setLocating(false),

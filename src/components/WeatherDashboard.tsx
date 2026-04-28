@@ -54,6 +54,8 @@ function getSavedCity(): City | null {
   return null;
 }
 
+import { persistCity } from "@/lib/persist-city";
+
 const TILE_PALETTE: Record<string, { tint: string; accent: string }> = {
   "Zon":    { tint: "rgba(245,158,11,0.10)",  accent: "#f59e0b" },
   "Regen":  { tint: "rgba(6,182,212,0.09)",   accent: "#06b6d4" },
@@ -109,6 +111,19 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
   const { tier } = useSession();
+  const hourlyScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = hourlyScrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // al horizontaal
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   // Fix hydration mismatch: Sync city from localStorage after mount
   useEffect(() => {
@@ -182,7 +197,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
         setIsLocating(false);
         reverseGeocode(lat, lon).then((geoCity) => {
           setCity(geoCity);
-          localStorage.setItem("wz_city", JSON.stringify(geoCity));
+          persistCity(geoCity);
           window.dispatchEvent(new CustomEvent("wz:city-updated"));
         }).catch(() => {});
       },
@@ -413,7 +428,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                   </div>
                 </div>
 
-                <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
+                <div ref={hourlyScrollRef} className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
                   {(() => {
                     const nowHour = new Date()
                       .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })

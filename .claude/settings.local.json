@@ -131,7 +131,8 @@
       "Bash(sed -n '12,16p' C:/Users/rwnhr/kutweer/src/app/api/cron/openclaw-harvester/route.ts)",
       "Bash(sed -n '11,15p' C:/Users/rwnhr/kutweer/src/app/api/cron/paperclip-yield/route.ts)",
       "Bash(sed -n '12,16p' C:/Users/rwnhr/kutweer/src/app/api/cron/performance-control/route.ts)",
-      "Bash(sed -n '28,32p' C:/Users/rwnhr/kutweer/src/app/api/cron/b2b-hunter/route.ts)"
+      "Bash(sed -n '28,32p' C:/Users/rwnhr/kutweer/src/app/api/cron/b2b-hunter/route.ts)",
+      "Bash(git config *)"
     ]
   }
 }
