@@ -13,7 +13,11 @@ export default function GlobalNav() {
 
   return (
     <div>
-      <NLPulse />
+      <div style={{ background: "var(--wz-blue-deep)" }} className="px-3 py-1.5">
+        <div className="max-w-2xl mx-auto">
+          <NLPulse />
+        </div>
+      </div>
       <div
         className="px-3 pt-2 pb-2"
         style={{
