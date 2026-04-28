@@ -12,7 +12,7 @@ export default function GlobalNav() {
   if (HIDDEN_PATHS.some((p) => pathname.startsWith(p))) return null;
 
   return (
-    <div>
+    <div className="relative z-10">
       <div style={{ background: "var(--wz-blue-deep)" }} className="px-3 py-1.5">
         <div className="max-w-2xl mx-auto">
           <NLPulse />
