@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
+import NLPulse from "@/components/NLPulse";
 import LocatieButton from "@/components/wz/LocatieButton";
 import { useSession } from "@/lib/session-context";
 import type { PersonaTier } from "@/lib/personas";
@@ -94,6 +95,7 @@ export default function GlobalNav() {
         color: "var(--text-primary)",
       }}
     >
+      <NLPulse />
       {/* Desktop */}
       <div className="hidden md:flex items-center max-w-[1200px] mx-auto px-5 py-2" style={{ gap: 12 }}>
 
