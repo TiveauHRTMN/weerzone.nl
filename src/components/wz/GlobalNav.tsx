@@ -12,7 +12,7 @@ export default function GlobalNav() {
   if (HIDDEN_PATHS.some((p) => pathname.startsWith(p))) return null;
 
   return (
-    <div>
+    <div className="sticky top-0 z-50">
       <NLPulse />
       <div
         className="px-3 pt-2 pb-2"
