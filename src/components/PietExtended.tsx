@@ -327,7 +327,7 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: { title: s
 interface PietProps { initialWWS?: WWSPayload | null; initialWeather?: WeatherData | null; initialCity?: City; }
 
 export default function PietExtended({ initialWWS, initialWeather, initialCity }: PietProps) {
-  const { primaryLocation, loading: sessionLoading, user } = useSession();
+  const { primaryLocation, loading: sessionLoading, user, tier, isFounder } = useSession();
   const [city, setCity] = useState<City>(() => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(initialWWS || null);
@@ -351,6 +351,12 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
         setLoading(false);
         if (wwsPayload?.piet_update?.content) { setPietAnalysis(wwsPayload.piet_update.content); return; }
         if (w.deepAnalysis) { setPietAnalysis(w.deepAnalysis); return; }
+
+        // SECURITY & COST CONTROL: Voer Vertex AI uitsluitend uit voor betalende abonnees of de Founder
+        const hasPaidTier = tier === "piet" || tier === "reed" || tier === "steve" || isFounder;
+        if (!hasPaidTier) {
+           return; // Niet-betalende gebruikers zien wazige content, we besparen Vertex AI kosten.
+        }
 
         // Haal live data op van Gemini 1.5 Pro via onze Vertex AI route
         fetch('/api/persona/piet', {

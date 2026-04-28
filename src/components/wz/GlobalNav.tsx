@@ -50,12 +50,11 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
   );
 }
 
-const PERSONA_LINKS = [
-  { key: "piet",  label: "Piet",  href: "/piet" },
-  { key: "reed",  label: "Reed",  href: "/reed" },
-  { key: "steve", label: "Steve", href: "/zakelijk" },
-];
-const STATIC_LINKS = [
+const LINKS = [
+  { key: "piet",    label: "Piet",    href: "/piet" },
+  { key: "reed",    label: "Reed",    href: "/reed" },
+  { key: "steve",   label: "Steve",   href: "/zakelijk" },
+  { key: "about",   label: "About",   href: "/over" },
   { key: "contact", label: "Contact", href: "/contact" },
 ];
 
@@ -63,6 +62,7 @@ function isActive(pathname: string, key: string) {
   if (key === "piet")    return pathname.startsWith("/piet");
   if (key === "reed")    return pathname.startsWith("/reed");
   if (key === "steve")   return pathname.startsWith("/zakelijk");
+  if (key === "about")   return pathname.startsWith("/over");
   if (key === "contact") return pathname.startsWith("/contact");
   return false;
 }
@@ -83,9 +83,6 @@ export default function GlobalNav() {
 
   if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
 
-  const isHomepage = pathname === "/homepage" || pathname === "/";
-  const LINKS = isHomepage ? STATIC_LINKS : [...PERSONA_LINKS, ...STATIC_LINKS];
-
   return (
     <header
       className="sticky top-0 z-50"
@@ -98,7 +95,6 @@ export default function GlobalNav() {
         color: "var(--text-primary)",
       }}
     >
-      <NLPulse />
       {/* Desktop */}
       <div className="hidden md:flex items-center max-w-[1200px] mx-auto px-5 py-2" style={{ gap: 12 }}>
 
@@ -151,7 +147,7 @@ export default function GlobalNav() {
                 Log uit
               </button>
             </>
-          ) : !isHomepage && (
+          ) : (
             <>
               <Link
                 href="/app/login"
@@ -246,7 +242,7 @@ export default function GlobalNav() {
                   Log uit
                 </button>
               </>
-            ) : !isHomepage && (
+            ) : (
               <>
                 <Link
                   href="/app/login"
