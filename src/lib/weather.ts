@@ -65,9 +65,7 @@ async function fetchModel(
   });
 
   try {
-    const res = await fetch(`${url}?${params}`, {
-      next: { revalidate: 300 },
-    });
+    const res = await fetch(`${url}?${params}`, { cache: "no-store" });
     if (!res.ok) return null;
     const data = await res.json();
     return data.hourly as RawModelHourly;
@@ -115,11 +113,11 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
         hourly: HOURLY_PARAMS + ",apparent_temperature",
         daily: DAILY_PARAMS,
         minutely_15: "precipitation",
-        forecast_minutely_15: "24",
+        forecast_minutely_15: "96",
         timezone: "Europe/Amsterdam",
         forecast_days: "2",
         forecast_hours: "48",
-      })}`, { next: { revalidate: 300 } }).then(r => {
+      })}`, { cache: "no-store" }).then(r => {
         if (!r.ok) return null;
         return r.json();
       }),
@@ -219,9 +217,14 @@ export async function fetchWeatherData(lat: number, lon: number): Promise<Weathe
 
     const minutely: MinutelyPrecipitation[] = [];
     if (data.minutely_15?.time && data.minutely_15?.precipitation) {
-      const currentApiTime = data.current?.time ?? data.minutely_15.time[0];
+      // Use the actual current time in Amsterdam timezone so cached/stale API responses
+      // never cause the radar to show historical data instead of forecasted data.
+      const nowAmsterdam = new Date()
+        .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
+        .replace(" ", "T")
+        .slice(0, 16);
       for (let i = 0; i < data.minutely_15.time.length; i++) {
-        if (data.minutely_15.time[i] >= currentApiTime) {
+        if (data.minutely_15.time[i] >= nowAmsterdam) {
           minutely.push({
             time: data.minutely_15.time[i],
             precipitation: data.minutely_15.precipitation[i] ?? 0,
