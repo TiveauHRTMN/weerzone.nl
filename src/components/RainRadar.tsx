@@ -80,6 +80,10 @@ function getSummary(data: MinutelyPrecipitation[]): {
       subtext: "Ga nu als je droog wilt blijven.",
       accent:  "#ef4444",
       tint:    "rgba(239,68,68,0.09)",
+    };
+  }
+
+  return {
     icon:    <Sun className="w-5 h-5" style={{ color: "#f59e0b", opacity: 0.6 }} />,
     text:    "Grotendeels droog",
     subtext: "Misschien een spatje, maar geen drama.",

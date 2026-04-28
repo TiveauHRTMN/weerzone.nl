@@ -327,11 +327,12 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: { title: s
 interface PietProps { initialWWS?: WWSPayload | null; initialWeather?: WeatherData | null; initialCity?: City; }
 
 export default function PietExtended({ initialWWS, initialWeather, initialCity }: PietProps) {
-  const { primaryLocation, loading: sessionLoading } = useSession();
+  const { primaryLocation, loading: sessionLoading, user } = useSession();
   const [city, setCity] = useState<City>(() => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(initialWWS || null);
   const [pietAnalysis, setPietAnalysis] = useState<string | null>(initialWeather?.deepAnalysis || null);
+  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
   const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
 
@@ -349,12 +350,40 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
         setWWS(wwsPayload);
         setLoading(false);
         if (wwsPayload?.piet_update?.content) { setPietAnalysis(wwsPayload.piet_update.content); return; }
-        if (w.deepAnalysis) setPietAnalysis(w.deepAnalysis);
-        else getPietDeepAnalysis(w).then((analysis) => { if (!cancelled) { setPietAnalysis(analysis); patchCacheDeep(city.lat, city.lon, analysis); } });
+        if (w.deepAnalysis) { setPietAnalysis(w.deepAnalysis); return; }
+
+        // Haal live data op van Gemini 1.5 Pro via onze Vertex AI route
+        fetch('/api/persona/piet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ weather: w, city: city.name, userName: user?.user_metadata?.full_name || 'gebruiker' })
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (!cancelled && data.narrative) {
+              setAiNarrative(data.narrative);
+              patchCacheDeep(city.lat, city.lon, data.narrative);
+            } else if (!cancelled) {
+              // Fallback als Gemini faalt
+              getPietDeepAnalysis(w).then((analysis) => { 
+                setPietAnalysis(analysis); 
+                patchCacheDeep(city.lat, city.lon, analysis); 
+              });
+            }
+          })
+          .catch((err) => {
+             console.error("Vertex AI Error:", err);
+             if (!cancelled) {
+                getPietDeepAnalysis(w).then((analysis) => { 
+                  setPietAnalysis(analysis); 
+                  patchCacheDeep(city.lat, city.lon, analysis); 
+                });
+             }
+          });
       }
     }).catch(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
-  }, [city]);
+  }, [city, user?.user_metadata?.full_name]);
 
   const locate = () => {
     if (!("geolocation" in navigator)) return;
@@ -372,7 +401,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
 
   if (loading || !weather) return <div className="!p-6 text-center" style={cloudCard}><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-text-secondary" /><p className="text-sm text-text-secondary">Piet laadt jouw locatie…</p></div>;
 
-  const narrative = wws?.piet_update?.content || pietAnalysis || getMainCommentary(weather);
+  const narrative = aiNarrative || wws?.piet_update?.content || pietAnalysis || getMainCommentary(weather);
   const narrativeTitle = wws?.piet_update?.title || "Het volledige weerverhaal";
   const narrativeClosing = wws?.piet_update?.closing || "— Piet, voor Weerzone";
 

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    16 zonnestralen, wiskundig exact verdeeld om 360°.
+    Elke straal loopt van innerRadius=165 naar outerRadius=240.
+    Hoeken: 0, 22.5, 45, 67.5, ... 337.5 graden (vanaf boven, met de klok mee).
+  -->
+  <g stroke="#FFD700" stroke-width="18" stroke-linecap="round">
+    <!-- 0° -->
+    <line x1="256" y1="91" x2="256" y2="16"/>
+    <!-- 22.5° -->
+    <line x1="319.1" y1="103.6" x2="347.8" y2="34.3"/>
+    <!-- 45° -->
+    <line x1="372.7" y1="139.3" x2="425.7" y2="86.3"/>
+    <!-- 67.5° -->
+    <line x1="408.4" y1="192.9" x2="477.7" y2="164.2"/>
+    <!-- 90° -->
+    <line x1="421" y1="256" x2="496" y2="256"/>
+    <!-- 112.5° -->
+    <line x1="408.4" y1="319.1" x2="477.7" y2="347.8"/>
+    <!-- 135° -->
+    <line x1="372.7" y1="372.7" x2="425.7" y2="425.7"/>
+    <!-- 157.5° -->
+    <line x1="319.1" y1="408.4" x2="347.8" y2="477.7"/>
+    <!-- 180° -->
+    <line x1="256" y1="421" x2="256" y2="496"/>
+    <!-- 202.5° -->
+    <line x1="192.9" y1="408.4" x2="164.2" y2="477.7"/>
+    <!-- 225° -->
+    <line x1="139.3" y1="372.7" x2="86.3" y2="425.7"/>
+    <!-- 247.5° -->
+    <line x1="103.6" y1="319.1" x2="34.3" y2="347.8"/>
+    <!-- 270° -->
+    <line x1="91" y1="256" x2="16" y2="256"/>
+    <!-- 292.5° -->
+    <line x1="103.6" y1="192.9" x2="34.3" y2="164.2"/>
+    <!-- 315° -->
+    <line x1="139.3" y1="139.3" x2="86.3" y2="86.3"/>
+    <!-- 337.5° -->
+    <line x1="192.9" y1="103.6" x2="164.2" y2="34.3"/>
+  </g>
+  <!-- Gele cirkel -->
+  <circle cx="256" cy="256" r="145" fill="#FFD700"/>
+  <!-- W letter — y=322 = optisch gecentreerd (baseline positioning, cap-height ~144px) -->
+  <text x="256" y="322" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="200" fill="#000">W</text>
+</svg>
