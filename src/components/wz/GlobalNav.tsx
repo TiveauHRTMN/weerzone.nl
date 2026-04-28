@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
-import NLPulse from "@/components/NLPulse";
 import LocatieButton from "@/components/wz/LocatieButton";
 import { useSession } from "@/lib/session-context";
 import type { PersonaTier } from "@/lib/personas";
@@ -266,7 +265,6 @@ export default function GlobalNav() {
         </div>
       )}
 
-      <NLPulse />
     </header>
   );
 }

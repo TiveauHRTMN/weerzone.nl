@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, AlertTriangle, ShieldCheck, Zap, Wind, CloudRain, Thermometer } from "lucide-react";
-import { loadWeather, loadWWS } from "@/lib/weatherCache";
+import { MapPin, AlertTriangle, ShieldCheck, Zap, Wind, CloudRain, Thermometer, ShieldAlert } from "lucide-react";
+import { loadWeather, loadWWS, patchCacheDeep } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
+import { useSession } from "@/lib/session-context";
 
 type Alert = { icon: React.ReactNode; title: string; detail: string; severity: "red" | "orange" };
 
@@ -28,11 +29,13 @@ interface ReedProps {
 }
 
 export default function ReedExtended({ initialWeather, initialCity }: ReedProps) {
+  const { user, tier, isFounder } = useSession();
   const [city, setCity] = useState<City>(
     () => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]
   );
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
+  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
   const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
 
@@ -53,12 +56,34 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         setWeather(w);
         setWWS(wwsPayload);
         setLoading(false);
+
+        // Reed AI: Alleen voor abonnees of Founder
+        const hasPaidTier = tier === "piet" || tier === "reed" || tier === "steve" || isFounder;
+        if (hasPaidTier && !aiNarrative) {
+            fetch('/api/persona/reed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    weather: w, 
+                    city: city.name, 
+                    userName: user?.user_metadata?.full_name || 'gebruiker' 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!cancelled && data.narrative) {
+                    setAiNarrative(data.narrative);
+                    patchCacheDeep(city.lat, city.lon, data.narrative);
+                }
+            })
+            .catch(err => console.error("Reed AI Error:", err));
+        }
       }
     })
     .catch(() => !cancelled && setLoading(false));
 
     return () => { cancelled = true; };
-  }, [city]);
+  }, [city, tier, isFounder, user?.user_metadata?.full_name]);
 
   const locate = () => {
     if (!("geolocation" in navigator)) return;
@@ -108,32 +133,34 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         </div>
       )}
 
+      {/* Reed AI Risico-Analyse */}
       {(!loading || weather) && !hasExtreme && (
-        <div className="card border-emerald-500/30 bg-emerald-500/10 !p-8 flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6">
-            <ShieldCheck className="w-8 h-8 text-emerald-400" />
-          </div>
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2">Extreme Index: Groen</p>
-          <h2 className="text-3xl font-black text-text-primary mb-4">Geen extremen in {city.name}</h2>
-          <p className="text-text-secondary max-w-md leading-relaxed">
-            Reed ziet momenteel geen storm, onweer of andere gevaarlijke situaties in de data. 
-            Onze P90 SEED-simulaties blijven binnen de veilige marges voor de komende 48 uur.
-          </p>
-          <div className="mt-8 pt-8 border-t border-black/5 w-full flex justify-center gap-8">
-             <div className="text-center">
-                <p className="text-[10px] font-black text-text-muted uppercase mb-1">Onweer</p>
-                <Zap className="w-5 h-5 text-text-muted mx-auto" />
-             </div>
-             <div className="text-center">
-                <p className="text-[10px] font-black text-text-muted uppercase mb-1">Storm</p>
-                <Wind className="w-5 h-5 text-text-muted mx-auto" />
-             </div>
-             <div className="text-center">
-                <p className="text-[10px] font-black text-text-muted uppercase mb-1">Neerslag</p>
-                <CloudRain className="w-5 h-5 text-text-muted mx-auto" />
-             </div>
-          </div>
-        </div>
+         <div className="animate-fade-in mb-6">
+            {aiNarrative ? (
+              <div className="card border-l-4 border-l-emerald-500 !p-8">
+                 <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                       <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <div>
+                       <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">Status: Veilig</h3>
+                       <p className="text-[10px] font-bold text-text-muted/60 uppercase">Gevalideerd rapport door Reed</p>
+                    </div>
+                 </div>
+                 <div className="text-lg font-medium text-text-primary leading-relaxed space-y-4">
+                    {aiNarrative.split(/\n\n+/).map((para, i) => <p key={i}>{para}</p>)}
+                 </div>
+                 <p className="text-[10px] text-text-muted mt-8 uppercase tracking-widest">— Reed Expert Systeem</p>
+              </div>
+            ) : (
+               (tier || isFounder) && (
+                 <div className="card !p-8 animate-pulse flex items-center gap-4">
+                    <ShieldAlert className="w-5 h-5 text-text-muted" />
+                    <p className="text-sm font-bold text-text-muted uppercase tracking-widest">Reed stelt een risico-rapport op…</p>
+                 </div>
+               )
+            )}
+         </div>
       )}
 
       {(!loading || weather) && hasExtreme && alert && (
