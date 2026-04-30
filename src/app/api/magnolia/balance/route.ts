@@ -1,24 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { isFounderEmail } from "@/lib/founders";
-
-const HELIUS_RPC_URL = process.env.HELIUS_RPC_URL!;
-const WALLET_ADDRESS = process.env.MAGNOLIA_WALLET_ADDRESS || "DkXHDeAjgXWKFcqpG7ziJ4D9gWEW5ifxjNfq3A6kJg1K";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!isFounderEmail(user?.email)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const HELIUS_RPC_URL = process.env.HELIUS_RPC_URL;
+  const WALLET_ADDRESS = process.env.MAGNOLIA_WALLET_ADDRESS || "DkXHDeAjgXWKFcqpG7ziJ4D9gWEW5ifxjNfq3A6kJg1K";
 
   if (!HELIUS_RPC_URL) {
+    console.error("❌ Magnolia API Error: HELIUS_RPC_URL is missing in environment variables.");
     return NextResponse.json({ error: "HELIUS_RPC_URL not configured" }, { status: 500 });
   }
 
   try {
-    // Haal SOL balans op
+    // 1. Haal SOL balans op
     const solResponse = await fetch(HELIUS_RPC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -30,10 +22,14 @@ export async function GET() {
       }),
     });
     
+    if (!solResponse.ok) {
+        throw new Error(`Helius SOL request failed: ${solResponse.status}`);
+    }
+
     const solData = await solResponse.json();
     const solBalance = (solData.result?.value || 0) / 1000000000;
 
-    // Haal token balans (USDC) op
+    // 2. Haal token balans (USDC) op - Gebruik de juiste mint: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
     const tokensResponse = await fetch(HELIUS_RPC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -43,11 +39,15 @@ export async function GET() {
         method: 'getTokenAccountsByOwner',
         params: [
           WALLET_ADDRESS,
-          { mint: 'EPjFW36vnC7H1VSEmG6vSP9nbt1uEAL65951Pn666ob' }, // USDC mint
+          { mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' }, 
           { encoding: 'jsonParsed' }
         ],
       }),
     });
+
+    if (!tokensResponse.ok) {
+        throw new Error(`Helius Tokens request failed: ${tokensResponse.status}`);
+    }
 
     const tokensData = await tokensResponse.json();
     let usdcBalance = 0;
@@ -59,10 +59,12 @@ export async function GET() {
     return NextResponse.json({
         sol: solBalance,
         usdc: usdcBalance,
-        wallet: WALLET_ADDRESS
+        wallet: WALLET_ADDRESS,
+        timestamp: new Date().toISOString()
     });
 
   } catch (error: any) {
+    console.error("❌ Magnolia API Crash:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

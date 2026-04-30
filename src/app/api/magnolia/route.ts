@@ -4,13 +4,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { isFounderEmail } from "@/lib/founders";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!isFounderEmail(user?.email)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const admin = createSupabaseAdminClient();
     const { data, error } = await admin

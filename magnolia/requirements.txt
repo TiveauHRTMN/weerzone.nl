@@ -1,0 +1,6 @@
+google-genai
+python-dotenv
+httpx
+anthropic
+base58
+solders
