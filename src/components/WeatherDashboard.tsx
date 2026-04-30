@@ -287,6 +287,19 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             </div>
           </div>
 
+          {/* Narrative: Piet-commentaar of algemene samenvatting */}
+          {narrative && (
+            <div className="card px-6 py-5 border-white/40 shadow-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
+                  {wws ? "Piet — Live Analyse" : "Samenvatting"}
+                </span>
+              </div>
+              <p className="text-base font-medium text-text-primary leading-relaxed">{narrative}</p>
+            </div>
+          )}
+
           {/* WWS Micro-Dossier (indien beschikbaar) */}
           {wws && (
               <div className="card p-5 bg-slate-900 border-slate-800 overflow-hidden relative">
