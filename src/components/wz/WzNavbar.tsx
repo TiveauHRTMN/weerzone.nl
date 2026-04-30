@@ -9,9 +9,9 @@ import NLPulse from "../NLPulse";
 import { useSession } from "@/lib/session-context";
 
 const LINKS: Array<{ key: string; label: string; href: string }> = [
-  { key: "piet", label: "Piet", href: "/piet" },
-  { key: "reed", label: "Reed", href: "/reed" },
-  { key: "steve", label: "Steve", href: "/zakelijk" },
+  { key: "piet", label: "Jouw Weer", href: "/piet" },
+  { key: "reed", label: "Waarschuwingen", href: "/reed" },
+  { key: "steve", label: "Zakelijk", href: "/zakelijk" },
   { key: "prijzen", label: "Prijzen", href: "/prijzen" },
 ];
 

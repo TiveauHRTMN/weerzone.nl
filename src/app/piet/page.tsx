@@ -2,19 +2,15 @@ import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import PietExtended from "@/components/PietExtended";
 import PremiumGate from "@/components/PremiumGate";
+import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES } from "@/lib/types";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Piet — Hyperlokaal weerbericht voor jouw straat",
+  title: "Jouw Weer — Hyperlokaal weerbericht voor jouw straat",
   description:
-    "Een eerlijke, korte weerbrief voor de komende 48 uur op jouw GPS-locatie. In gewone taal, zonder reclame, zonder gokwerk over twee weken vooruit.",
+    "Een eerlijk, persoonlijk weerbericht voor de komende 48 uur op jouw GPS-locatie. In gewone taal, zonder reclame, zonder gokwerk over twee weken vooruit.",
   alternates: { canonical: "https://weerzone.nl/piet" },
-  openGraph: {
-    title: "Piet — Het eerlijke 48-uurs weerbericht | Weerzone",
-    description:
-      "48 uur vooruit voor jouw locatie. Eerlijk, kort, persoonlijk — geen glazen-bol-praat over twee weken vooruit.",
-    images: ["/og-image.png"],
-  },
 };
 
 const jsonLd = {
@@ -24,16 +20,31 @@ const jsonLd = {
   description:
     "De dagelijkse, eerlijke weeranalyse van Piet voor jouw GPS-locatie. Geen 14-daagse-gok, gewoon de komende 48 uur in gewone taal.",
   author: { "@type": "Organization", name: "Weerzone" },
-  publisher: {
-    "@type": "Organization",
-    name: "Weerzone",
-    logo: "https://weerzone.nl/weerzone-icon.png",
-  },
   datePublished: new Date().toISOString().split("T")[0],
 };
 
-export default function PietPage() {
-  const activeLoc = DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
+export default async function PietPage() {
+  // Snelle, non-blocking server calls
+  const loc = await getSavedLocationServer().catch(() => null);
+  const activeLoc = loc || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
+  
+  let greetingName = "jou";
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData?.user) {
+        const { data: profile } = await supabase
+            .from("user_profile")
+            .select("full_name")
+            .eq("id", userData.user.id)
+            .maybeSingle();
+        if (profile?.full_name) {
+            greetingName = profile.full_name.split(" ")[0];
+        }
+    }
+  } catch (e) {
+    // Silent fail, we use default greeting
+  }
 
   return (
     <>
@@ -50,10 +61,10 @@ export default function PietPage() {
               {/* Persona intro */}
               <div className="card p-6">
                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-text-muted mb-1">
-                  WEERZONE Persona · 48 uur
+                  Weerzone · 48 uur
                 </p>
                 <h2 className="text-3xl font-black text-text-primary leading-tight">
-                  Piet
+                  Jouw Weer{greetingName !== "jou" ? `, ${greetingName}` : ""}
                 </h2>
                 <p className="text-text-secondary text-sm leading-relaxed mt-2">
                   De volledige 48 uur voor jouw locatie — in gewone taal, met
@@ -63,7 +74,7 @@ export default function PietPage() {
               </div>
 
               <PremiumGate>
-                <PietExtended />
+                <PietExtended initialCity={loc || undefined} />
               </PremiumGate>
 
               <p className="text-center text-white/40 text-xs font-medium pb-4">
