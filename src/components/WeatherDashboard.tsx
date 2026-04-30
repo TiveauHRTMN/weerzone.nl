@@ -71,8 +71,8 @@ const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
   const { tint, accent } = TILE_PALETTE[label] ?? { tint: "rgba(0,0,0,0.04)", accent: "#64748b" };
   return (
     <div
-      className="flex flex-col rounded-3xl border border-white/60 overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
-      style={{ background: tint, backdropFilter: "blur(8px)" }}
+      className="flex flex-col rounded-3xl border border-black/8 overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
+      style={{ background: tint }}
     >
       <div className="p-4 sm:p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-center gap-2">
@@ -333,7 +333,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <div className="grid grid-cols-2 gap-6">
               {[0, 1].map((i) => (
                 <div key={i} className="flex flex-col gap-4">
-                  <div className="w-full aspect-square rounded-[32px] border border-white/60 bg-white/5 backdrop-blur-md flex items-center justify-center shadow-inner transition-transform hover:scale-105">
+                  <div className="w-full aspect-square rounded-[32px] border border-black/8 bg-black/[0.03] flex items-center justify-center shadow-sm transition-transform hover:scale-105">
                     <span className="text-8xl sm:text-9xl drop-shadow-xl">{getWeatherEmoji(weather.daily[i].weatherCode, true)}</span>
                   </div>
                   <div className="px-2 flex justify-between items-center">
@@ -346,7 +346,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           </div>
 
           <div className="card p-6 sm:p-8 border-white/40 shadow-xl">
-            <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-8 px-1">Activiteiten</h3>
+            <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em] mb-8 px-1">Activiteiten</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
               {[
                 { id: "bbq", label: "BBQ", score: getBbqScore(weather), emoji: "🍖", hint: "Temperatuur, wind en regen gecombineerd." },
@@ -365,7 +365,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                     onClick={() => setActiveActivity(isOpen ? null : item.id)}
                     onMouseEnter={() => setActiveActivity(item.id)}
                     onMouseLeave={() => setActiveActivity(null)}
-                    className="relative aspect-square rounded-3xl border border-white/60 bg-white/5 backdrop-blur-md flex flex-col items-center justify-center transition-transform hover:scale-105 focus:outline-none"
+                    className="relative aspect-square rounded-3xl border border-black/8 bg-black/[0.03] flex flex-col items-center justify-center transition-transform hover:scale-105 focus:outline-none"
                   >
                     <div className={`absolute -top-3 -right-3 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 border-white/20 shadow-lg ${item.score >= 7 ? 'bg-accent-green text-white' : item.score >= 5 ? 'bg-accent-amber text-white' : 'bg-accent-red text-white'}`}>
                       {item.score}
@@ -386,7 +386,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           </div>
 
           <div className="card p-5 sm:p-7 border-white/40 shadow-xl">
-            <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.25em] mb-4 px-1">Details</h3>
+            <h3 className="text-[10px] font-black text-text-primary uppercase tracking-[0.25em] mb-4 px-1">Details</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <DetailItem
                 label="Zon"
@@ -484,9 +484,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                         key={hour.time}
                         className="flex flex-col items-center gap-2 rounded-2xl border px-2.5 py-3 snap-start shrink-0 w-[72px] transition-all"
                         style={{
-                          background: isNow ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.10)",
-                          borderColor: isNow ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
-                          boxShadow: isNow ? "0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)" : "none",
+                          background: isNow ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.04)",
+                          borderColor: isNow ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.07)",
+                          boxShadow: isNow ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
                         }}
                       >
                         <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: isNow ? "#f59e0b" : "var(--text-muted)" }}>
