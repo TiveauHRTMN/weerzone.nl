@@ -92,21 +92,31 @@ export default function LocatieButton({ active = false, compact = false }: Props
   }
 
   if (compact) {
+    const cityLabel = state === "loading" ? null
+      : state === "error" ? null
+      : state === "found" ? (found ?? currentCity)
+      : currentCity;
+
     return (
       <button
         onClick={handleClick}
         disabled={state === "loading" || state === "found"}
         aria-label="Spring naar jouw locatie"
-        className="w-9 h-9 flex items-center justify-center rounded-xl border transition-colors disabled:opacity-60"
+        className="flex items-center gap-1 h-9 px-2.5 rounded-xl border transition-all disabled:opacity-60"
         style={{
           borderColor: state === "error" ? "#ef4444" : active ? "var(--wz-brand)" : "var(--wz-border)",
           color: state === "error" ? "#ef4444" : active ? "var(--wz-brand)" : "var(--ink-700)",
           background: state === "found" ? "#dcfce7" : active ? "var(--wz-brand-soft)" : "transparent",
         }}
       >
-        {state === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-        {state === "error"   && <AlertCircle className="w-4 h-4" />}
-        {(state === "idle" || state === "found") && <MapPin className="w-4 h-4" />}
+        {state === "loading" && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+        {state === "error"   && <AlertCircle className="w-4 h-4 shrink-0" />}
+        {(state === "idle" || state === "found") && <MapPin className="w-4 h-4 shrink-0" />}
+        {cityLabel && (
+          <span className="text-[11px] font-black max-w-[80px] truncate leading-none">
+            {cityLabel}
+          </span>
+        )}
       </button>
     );
   }

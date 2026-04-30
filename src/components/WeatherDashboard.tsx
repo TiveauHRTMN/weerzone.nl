@@ -110,6 +110,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const [error, setError] = useState(false);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
+  const [activeActivity, setActiveActivity] = useState<string | null>(null);
   const { tier } = useSession();
   const hourlyScrollRef = useRef<HTMLDivElement>(null);
 
@@ -332,21 +333,39 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
             <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] mb-8 px-1">Activiteiten</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
               {[
-                { id: "bbq", label: "BBQ", score: getBbqScore(weather), emoji: "🍖" },
-                { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), emoji: "🤧" },
-                { id: "strand", label: "Strand", score: getStrandScore(weather), emoji: "🏖️" },
-                { id: "terras", label: "Terras", score: getTerrasScore(weather), emoji: "🍻" },
-                { id: "fietsen", label: "Fietsen", score: getFietsScore(weather).score, emoji: "🚲" },
-                { id: "wandelen", label: "Wandelen", score: getWandelScore(weather), emoji: "🥾" },
-              ].map((item) => (
-                <div key={item.id} className="relative aspect-square rounded-3xl border border-white/60 bg-white/5 backdrop-blur-md flex flex-col items-center justify-center transition-transform hover:scale-105">
-                  <div className={`absolute -top-3 -right-3 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 border-white/20 shadow-lg ${item.score >= 7 ? 'bg-accent-green text-white' : item.score >= 5 ? 'bg-accent-amber text-white' : 'bg-accent-red text-white'}`}>
-                    {item.score}
-                  </div>
-                  <div className="text-6xl mb-3 drop-shadow-md">{item.emoji}</div>
-                  <div className="text-[11px] font-black text-text-muted uppercase tracking-widest">{item.label}</div>
-                </div>
-              ))}
+                { id: "bbq", label: "BBQ", score: getBbqScore(weather), emoji: "🍖", hint: "Temperatuur, wind en regen gecombineerd." },
+                { id: "pollen", label: "Hooikoorts", score: getHooikoortsScore(weather), emoji: "🤧", hint: "Risico op pollenklachten vandaag." },
+                { id: "strand", label: "Strand", score: getStrandScore(weather), emoji: "🏖️", hint: "Zon, temperatuur en wind aan zee." },
+                { id: "terras", label: "Terras", score: getTerrasScore(weather), emoji: "🍻", hint: "Droog, warm en niet te winderig." },
+                { id: "fietsen", label: "Fietsen", score: getFietsScore(weather).score, emoji: "🚲", hint: "Wind, regen en zicht voor fietsers." },
+                { id: "wandelen", label: "Wandelen", score: getWandelScore(weather), emoji: "🥾", hint: "Droog pad, aangenaam en niet te warm." },
+              ].map((item) => {
+                const label = item.score >= 8 ? "Uitstekend" : item.score >= 6 ? "Goed" : item.score >= 4 ? "Matig" : "Slecht";
+                const isOpen = activeActivity === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveActivity(isOpen ? null : item.id)}
+                    onMouseEnter={() => setActiveActivity(item.id)}
+                    onMouseLeave={() => setActiveActivity(null)}
+                    className="relative aspect-square rounded-3xl border border-white/60 bg-white/5 backdrop-blur-md flex flex-col items-center justify-center transition-transform hover:scale-105 focus:outline-none"
+                  >
+                    <div className={`absolute -top-3 -right-3 w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 border-white/20 shadow-lg ${item.score >= 7 ? 'bg-accent-green text-white' : item.score >= 5 ? 'bg-accent-amber text-white' : 'bg-accent-red text-white'}`}>
+                      {item.score}
+                    </div>
+                    <div className="text-6xl mb-3 drop-shadow-md">{item.emoji}</div>
+                    <div className="text-[11px] font-black text-text-muted uppercase tracking-widest">{item.label}</div>
+                    {isOpen && (
+                      <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 w-40 z-10 px-3 py-2 rounded-2xl text-center pointer-events-none"
+                        style={{ background: "rgba(15,26,44,0.88)", backdropFilter: "blur(8px)" }}>
+                        <p className="text-[11px] font-black text-white leading-none mb-1">{label}</p>
+                        <p className="text-[10px] text-white/60 leading-snug">{item.hint}</p>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -433,6 +452,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                   </div>
                 </div>
 
+                <div className="relative">
                 <div ref={hourlyScrollRef} className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
                   {(() => {
                     const nowHour = new Date()
@@ -471,6 +491,9 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                       </div>
                     );
                   })}
+                </div>
+                <div className="absolute inset-y-0 right-0 w-10 pointer-events-none rounded-r-2xl"
+                  style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.85))" }} />
                 </div>
               </div>
             </div>
