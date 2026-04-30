@@ -517,47 +517,80 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
           {/* REED GATE: EXTREMITIES & CAPE */}
           <PremiumGate tierRequired="reed">
-             <div className="card p-6 sm:p-8 bg-slate-900 border-rose-500/20 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Zap className="w-20 h-20 text-rose-500" />
-                </div>
-                <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Zap className="w-4 h-4 text-rose-500 fill-rose-500" />
-                        <h3 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em]">Tactical Extremities</h3>
-                    </div>
+            {(() => {
+              const cape = weather.hourly[0]?.cape ?? 0;
+              const precip = weather.current.precipitation;
+              const lightningRisk = weather.neuralData?.lightningRisk ?? 0;
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
-                            <span className="text-[9px] font-black text-white/70 uppercase tracking-widest text-center sm:text-left">Onweers-potentieel (CAPE)</span>
-                            <div className="flex items-baseline gap-2 justify-center sm:justify-start">
-                                <span className="text-3xl font-black text-white">0</span>
-                                <span className="text-xs font-bold text-white/40 uppercase">J/KG</span>
-                            </div>
-                            <div className="w-full h-1 bg-white/10 rounded-full mt-1">
-                                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '5%' }} />
-                            </div>
+              const capeLabel = cape === 0 ? "Geen" : cape < 500 ? "Zwak" : cape < 1500 ? "Matig" : "Sterk";
+              const capePct = Math.min(100, (cape / 3000) * 100);
+              const capeColor = cape === 0 ? "#10b981" : cape < 500 ? "#f59e0b" : cape < 1500 ? "#f97316" : "#ef4444";
+
+              const precipLabel = precip === 0 ? "Droog" : precip < 1 ? "Licht" : precip < 5 ? "Matig" : "Zwaar";
+              const precipPct = Math.min(100, (precip / 20) * 100);
+              const precipColor = precip === 0 ? "#10b981" : precip < 1 ? "#3b82f6" : precip < 5 ? "#f97316" : "#ef4444";
+
+              const isAlert = cape > 1500 || precip > 5 || lightningRisk > 60;
+              const reedVerdict = isAlert
+                ? `Verhoogde activiteit gedetecteerd bij ${city.name}. Blijf de situatie volgen.`
+                : `Geen gevaarlijke condities bij ${city.name}. Veilig voor buitenactiviteiten.`;
+
+              return (
+                <div className="card p-6 bg-slate-900 border-rose-500/20 shadow-2xl">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-rose-400 fill-rose-400" />
+                      <span className="text-[10px] font-black text-rose-400 uppercase tracking-[0.3em]">Reed — Extreme Condities</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${isAlert ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/15 text-emerald-400"}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${isAlert ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`} />
+                      {isAlert ? "Let op" : "Veilig"}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/8 flex flex-col gap-3">
+                      <span className="text-[9px] font-black text-white/50 uppercase tracking-widest">Onweer</span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-black text-white">{cape}</span>
+                        <span className="text-[10px] font-bold text-white/30">J/kg</span>
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-[10px] font-bold" style={{ color: capeColor }}>{capeLabel}</span>
                         </div>
-
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
-                            <span className="text-[9px] font-black text-white/70 uppercase tracking-widest text-center sm:text-left">Neerslag Intensiteit</span>
-                            <div className="flex items-baseline gap-2 justify-center sm:justify-start">
-                                <span className="text-3xl font-black text-white">Licht</span>
-                                <span className="text-xs font-bold text-white/40 uppercase">STATUS</span>
-                            </div>
-                            <div className="w-full h-1 bg-white/10 rounded-full mt-1">
-                                <div className="h-full bg-blue-500 rounded-full" style={{ width: '15%' }} />
-                            </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${capePct}%`, background: capeColor }} />
                         </div>
+                      </div>
                     </div>
 
-                    <div className="mt-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center">
-                        <p className="text-[10px] font-bold text-rose-200 leading-relaxed italic">
-                            "Reed van WEERZONE: Geen verhoogde bliksem-activiteit gedetecteerd binnen een straal van 50km rond {city.name}. Veilige condities voor outdoor operaties."
-                        </p>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/8 flex flex-col gap-3">
+                      <span className="text-[9px] font-black text-white/50 uppercase tracking-widest">Neerslag nu</span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-black text-white">{precip.toFixed(1)}</span>
+                        <span className="text-[10px] font-bold text-white/30">mm/u</span>
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-[10px] font-bold" style={{ color: precipColor }}>{precipLabel}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(precipPct, precip > 0 ? 8 : 0)}%`, background: precipColor }} />
+                        </div>
+                      </div>
                     </div>
+                  </div>
+
+                  <div className={`flex items-start gap-3 p-3.5 rounded-xl border ${isAlert ? "bg-rose-500/10 border-rose-500/20" : "bg-white/5 border-white/10"}`}>
+                    <Zap className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${isAlert ? "text-rose-400" : "text-emerald-400"}`} />
+                    <p className="text-[11px] font-semibold leading-relaxed" style={{ color: isAlert ? "#fca5a5" : "#86efac" }}>
+                      {reedVerdict}
+                    </p>
+                  </div>
                 </div>
-             </div>
+              );
+            })()}
           </PremiumGate>
           </>
           )}
