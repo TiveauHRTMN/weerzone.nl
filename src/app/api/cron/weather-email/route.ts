@@ -231,7 +231,7 @@ export async function GET(req: Request) {
       
       if (genAI) {
         try {
-          const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+          const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
           const result = await model.generateContent({
             contents: [{ role: "user", parts: [{ text: `${PIET_PROMPT}\n\nSTAD: ${first.city}\nWEER: ${JSON.stringify(weatherData.current)}` }] }]
           });

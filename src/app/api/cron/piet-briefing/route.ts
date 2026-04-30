@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     const topDeal = deals[0];
 
     // 4. AI Copy (Piet Style)
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `
       Je bent Piet van WEERZONE. Een nuchtere, betrouwbare weerman. 
       STIJL: Behulpzaam, nuchter en respectvol. Focus op de feiten en wat het weer betekent voor de dag van de lezer.

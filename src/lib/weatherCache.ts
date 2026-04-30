@@ -20,8 +20,9 @@ type CacheEntry = {
   ts: number;
 };
 
-const FRESH_MS = 10 * 60 * 1000;   // 10 min — geen refetch
-const STALE_MS = 60 * 60 * 1000;   // 60 min — toon direct, revalideer op achtergrond
+const FRESH_MS = 10 * 60 * 1000;       // 10 min — geen refetch
+const STALE_MS = 60 * 60 * 1000;       // 60 min — toon direct, revalideer op achtergrond
+const EMERGENCY_MS = 4 * 60 * 60 * 1000; // 4 uur — noodcache bij API-uitval
 const STORAGE_KEY_PREFIX = "wz_weather_v5_";
 
 const memory = new Map<string, CacheEntry>();
@@ -161,7 +162,16 @@ export async function loadWeather(
   const existing = inflight.get(k);
   if (existing) return existing;
 
-  const promise = fetchAndCache(lat, lon, onSummary, onNeural);
+  // EMERGENCY cache: stale data > 60min maar < 4uur — toon direct bij API-uitval
+  const emergencyCached = cached && now - cached.ts < EMERGENCY_MS ? cached : null;
+
+  const promise = fetchAndCache(lat, lon, onSummary, onNeural).catch((err) => {
+    if (emergencyCached) {
+      console.warn("fetchAndCache failed, using emergency cache:", err?.message);
+      return emergencyCached.weather;
+    }
+    throw err;
+  });
   inflight.set(k, promise);
   try {
     return await promise;

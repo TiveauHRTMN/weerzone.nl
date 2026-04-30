@@ -56,8 +56,8 @@ export async function executeBusinessOrchestrator(lat: number, lon: number): Pro
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-3-flash-preview",
-      systemInstruction: BUSINESS_PROMPT 
+      model: "gemini-2.0-flash",
+      systemInstruction: BUSINESS_PROMPT
     });
 
     const hours = weather.hourly.slice(0, 12).map(h => {

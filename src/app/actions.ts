@@ -126,7 +126,7 @@ export async function getPietDeepAnalysis(weather: WeatherData): Promise<string>
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.0-flash",
       systemInstruction: `
 Je bent Piet — de stem van Weerzone. Betrouwbaar, hyperlokaal en nuchter. 
 
@@ -204,20 +204,20 @@ export async function getAiVerdict(weather: WeatherData): Promise<string> {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({
-        model: "gemini-3-flash-preview",
+        model: "gemini-2.0-flash",
         systemInstruction: `
 Je bent Piet — de stem van Weerzone. Toon: behulpzaam, nuchter en respectvol. Piet is geen echte persoon maar een merkmetafoor voor betrouwbaar, hyperlokaal weer.
 
 KERNREGELS:
 - TOON: De toon volgt de data. Wees eerlijk en praktisch. Vermijd beledigingen of kleinerende taal.
-- Correct Nederlands.
-- LENGTE: STRIKT MAXIMAAL 60 WOORDEN.
-- INHOUD: Nu, straks, morgen — kort en krachtig.
-- AFSLUITER: Een vriendelijke Hollandse groet.
+- Correct Nederlands, geen meteorologisch jargon.
+- LENGTE: Schrijf 3-4 zinnen (60-100 woorden). Niet korter dan 3 zinnen.
+- INHOUD: Nu, straks, morgen — wat betekent dit voor de lezer?
+- AFSLUITER: Een korte, vriendelijke Hollandse groet.
 `.trim(),
         generationConfig: {
           temperature: 0.6,
-          maxOutputTokens: 220,
+          maxOutputTokens: 400,
         },
       });
 
@@ -235,18 +235,19 @@ KERNREGELS:
               : "wisselend";
       const prompt = `
 DATA:
-- Nu: ${getWeatherDescription(weather.current.weatherCode)}, ${weather.current.temperature}°.
-- Verloop komende uren: ${weather.hourly.slice(0, 6).map(h => h.temperature + "°").join(", ")}.
-- Morgen: max ${tomorrow.tempMax}°, ${getWeatherDescription(tomorrow.weatherCode)}.
+- Nu: ${getWeatherDescription(weather.current.weatherCode)}, ${weather.current.temperature}°, voelt als ${weather.current.feelsLike}°.
+- Wind: ${weather.current.windSpeed} km/u.
+- Komende uren: ${weather.hourly.slice(0, 6).map(h => `${new Date(h.time).getHours()}u ${h.temperature}°`).join(", ")}.
+- Morgen: max ${tomorrow?.tempMax ?? "?"}°, ${getWeatherDescription(tomorrow?.weatherCode ?? 0)}.
 
-TOON: ${mood} — volg de data. Eindig met een korte Hollandse groet.
+TOON: ${mood} — volg de data. Schrijf minimaal 3 zinnen. Eindig met een korte Hollandse groet.
         `.trim();
 
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim().replace(/^"|"$/g, '');
       const wordCount = text.split(/\s+/).filter(Boolean).length;
-      
-      if (text && wordCount < 80) {
+
+      if (text && wordCount >= 20 && wordCount < 120) {
         return text;
       }
       attempts++;
@@ -502,7 +503,7 @@ export async function getLocationSEOContent(placeName: string, province: string,
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
       Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
@@ -545,7 +546,7 @@ export async function getProvinceVerdict(provinceLabel: string): Promise<string>
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
       Je bent de meteoroloog van WEERZONE. Schrijf een KORTE, krachtige samenvatting (1-2 zinnen) over wat ${provinceLabel} als provincie weerkundig uniek maakt.

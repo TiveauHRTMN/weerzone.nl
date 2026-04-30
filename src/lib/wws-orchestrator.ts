@@ -134,9 +134,8 @@ export async function executeWWSOrchestrator(lat: number, lon: number): Promise<
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Switch naar gemini-3.1-flash-lite-preview voor ultra-snelle performance
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-3.1-flash-lite-preview",
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
       systemInstruction: SYSTEM_PROMPT 
     });
 

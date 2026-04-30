@@ -241,7 +241,10 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
   if (loading || !weather) return <LoadingScreen />;
 
-  const narrative = wws?.piet_update?.content || weather.summaryVerdict || getMainCommentary(weather);
+  const summaryWords = weather.summaryVerdict?.split(/\s+/).filter(Boolean).length ?? 0;
+  const narrative = wws?.piet_update?.content
+    || (summaryWords >= 20 ? weather.summaryVerdict : null)
+    || getMainCommentary(weather);
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
