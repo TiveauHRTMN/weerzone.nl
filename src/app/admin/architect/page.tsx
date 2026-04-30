@@ -31,10 +31,28 @@ export default async function ArchitectMode() {
       name: "OpenClaw: Harvester",
       endpoint: "/api/cron/openclaw-harvester",
       schedule: "02:00 Daily",
-      description: "Systematic province-by-province micro-location discovery.",
+      description: "Systematic geodata discovery (villages, suburbs) for SEO.",
       status: "Operational",
       target: "discovered_places",
       color: "border-blue-500/30 text-blue-400"
+    },
+    {
+      name: "OpenClaw: B2B Hunter",
+      endpoint: "/api/b2b/discover",
+      schedule: "07:00 Mon-Fri",
+      description: "Searches Google Places for businesses impacted by weather.",
+      status: "Active",
+      target: "b2b_leads",
+      color: "border-orange-500/30 text-orange-400"
+    },
+    {
+      name: "Steve: B2B Outreach",
+      endpoint: "/api/b2b/outreach",
+      schedule: "09:00 Mon-Fri",
+      description: "Sends industry-specific weather intelligence to leads.",
+      status: "Active",
+      target: "Resend API",
+      color: "border-amber-500/30 text-amber-400"
     },
     {
       name: "Discovery Engine",

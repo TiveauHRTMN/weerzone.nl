@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users, Terminal, Droplets } from "lucide-react";
+import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users, Terminal, Droplets, Zap } from "lucide-react";
 import PremiumGate from "./PremiumGate";
 import { useSession } from "@/lib/session-context";
 import LoadingScreen from "./LoadingScreen";
@@ -393,19 +393,24 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
           <EmailSubscribe city={city} />
           <AffiliateCard weather={weather} placeName={city.name} />
 
-          <PremiumGate>
-            <div className="space-y-4">
+          {/* PIET GATE: GRID & RADAR */}
+          <PremiumGate tierRequired="piet">
+            <div className="space-y-6">
               {/* Rain radar */}
               {weather.minutely && weather.minutely.length > 0 && (
-                <div className="card p-5 border-white/40 shadow-xl">
+                <div className="card p-5 border-white/40 shadow-xl overflow-hidden">
+                  <div className="flex items-center gap-2 mb-4 px-1">
+                    <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">Live Regen-Precisie</h3>
+                  </div>
                   <RainRadar data={weather.minutely} />
                 </div>
               )}
 
               {/* Hourly forecast */}
               <div className="card p-5 sm:p-6 border-white/40 shadow-xl">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.25em]">Komende Uren</h3>
+                <div className="flex justify-between items-center mb-6 px-1">
+                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">Uur-voor-uur Details</h3>
                   <div className="flex items-center gap-0.5 rounded-2xl border border-white/60 p-0.5" style={{ background: "rgba(255,255,255,0.3)" }}>
                     {[
                       { k: "temp", i: <Thermometer className="w-3.5 h-3.5" /> },
@@ -432,7 +437,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                   {(() => {
                     const nowHour = new Date()
                       .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
-                      .slice(0, 13).replace(" ", "T"); // "2025-04-28T17"
+                      .slice(0, 13).replace(" ", "T"); 
                     const startIdx = Math.max(0, weather.hourly.findIndex(h => h.time >= nowHour));
                     return weather.hourly.slice(startIdx, startIdx + 16);
                   })().map((hour, idx) => {
@@ -469,6 +474,51 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                 </div>
               </div>
             </div>
+          </PremiumGate>
+
+          {/* REED GATE: EXTREMITIES & CAPE */}
+          <PremiumGate tierRequired="reed">
+             <div className="card p-6 sm:p-8 bg-slate-900 border-rose-500/20 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Zap className="w-20 h-20 text-rose-500" />
+                </div>
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Zap className="w-4 h-4 text-rose-500 fill-rose-500" />
+                        <h3 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em]">Tactical Extremities</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
+                            <span className="text-[9px] font-black text-white/70 uppercase tracking-widest text-center sm:text-left">Onweers-potentieel (CAPE)</span>
+                            <div className="flex items-baseline gap-2 justify-center sm:justify-start">
+                                <span className="text-3xl font-black text-white">0</span>
+                                <span className="text-xs font-bold text-white/40 uppercase">J/KG</span>
+                            </div>
+                            <div className="w-full h-1 bg-white/10 rounded-full mt-1">
+                                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '5%' }} />
+                            </div>
+                        </div>
+
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
+                            <span className="text-[9px] font-black text-white/70 uppercase tracking-widest text-center sm:text-left">Neerslag Intensiteit</span>
+                            <div className="flex items-baseline gap-2 justify-center sm:justify-start">
+                                <span className="text-3xl font-black text-white">Licht</span>
+                                <span className="text-xs font-bold text-white/40 uppercase">STATUS</span>
+                            </div>
+                            <div className="w-full h-1 bg-white/10 rounded-full mt-1">
+                                <div className="h-full bg-blue-500 rounded-full" style={{ width: '15%' }} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center">
+                        <p className="text-[10px] font-bold text-rose-200 leading-relaxed italic">
+                            "Reed van WEERZONE: Geen verhoogde bliksem-activiteit gedetecteerd binnen een straal van 50km rond {city.name}. Veilige condities voor outdoor operaties."
+                        </p>
+                    </div>
+                </div>
+             </div>
           </PremiumGate>
           </>
           )}

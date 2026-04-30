@@ -1,74 +1,94 @@
 "use client";
 
-import { Lock, Sparkles } from "lucide-react";
+import { Lock, Sparkles, Zap, Map } from "lucide-react";
 import { useSession } from "@/lib/session-context";
+import { type PersonaTier } from "@/lib/personas";
+
+interface PremiumGateProps {
+  children: React.ReactNode;
+  tierRequired?: PersonaTier; // null = any sub, 'piet' = piet or better, 'reed' = reed only
+}
 
 /**
- * Gate rond premium-content. Abonnees (tier != null) zien gewoon `children`.
- * Non-subs zien een teaser: children met heavy blur + overlay met upgrade-CTA.
- *
- * Gebruik:
- *   <PremiumGate>
- *     ...uur-per-uur details, radar, fiets/misère, detail grid...
- *   </PremiumGate>
+ * Gate rond premium-content.
+ * Maakt onderscheid tussen Piet (Intelligence) en Reed (Extremiteiten).
  */
-export default function PremiumGate({ children }: { children: React.ReactNode }) {
+export default function PremiumGate({ children, tierRequired }: PremiumGateProps) {
   const { tier, loading } = useSession();
 
-  // Tijdens hydratie: render niks om flash van ongated content te voorkomen
+  // Tijdens hydratie: render niks om flash te voorkomen
   if (loading) return null;
 
-  if (tier) return <>{children}</>;
+  // Access check
+  const hasAccess = () => {
+    if (!tier) return false;
+    if (!tierRequired) return true; // Any tier is fine
+    if (tierRequired === "piet") return tier === "piet" || tier === "reed" || tier === "steve";
+    if (tierRequired === "reed") return tier === "reed" || tier === "steve";
+    return tier === tierRequired;
+  };
+
+  if (hasAccess()) return <>{children}</>;
 
   const openModal = () => {
     window.dispatchEvent(new CustomEvent("wz:open-persona-modal"));
   };
 
+  // UI varianten gebaseerd op wat er achter de gate zit
+  const isExtremities = tierRequired === 'reed';
+
   return (
-    <div className="relative">
-      {/* Teaser: blurred premium content, niet interactief */}
+    <div className="relative group">
+      {/* Teaser: blurred content */}
       <div
         aria-hidden
-        className="pointer-events-none select-none blur-md opacity-70 max-h-[480px] overflow-hidden"
+        className="pointer-events-none select-none blur-xl opacity-40 max-h-[320px] overflow-hidden rounded-[32px] transition-all duration-700 group-hover:blur-2xl"
         style={{
-          maskImage:
-            "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage:
-            "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0) 100%)",
+          maskImage: "linear-gradient(180deg, black 0%, transparent 90%)",
+          WebkitMaskImage: "linear-gradient(180deg, black 0%, transparent 90%)",
         }}
       >
         {children}
       </div>
 
-      {/* CTA-kaart over de teaser */}
-      <div className="absolute inset-x-0 bottom-0 flex items-end justify-center pb-6 px-4">
-        <div className="card p-6 max-w-md w-full text-center shadow-2xl bg-white/95 backdrop-blur-md">
+      {/* Intuïtieve Overlay */}
+      <div className="absolute inset-0 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm bg-white/80 backdrop-blur-2xl border border-white/50 rounded-[40px] p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-transform duration-500 group-hover:scale-[1.02]">
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-white"
-            style={{
-              background:
-                "linear-gradient(135deg, #22c55e 0%, #ef4444 50%, #3b82f6 100%)",
-            }}
+            className={`w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg rotate-3 group-hover:rotate-6 transition-transform duration-500 ${
+              isExtremities 
+                ? "bg-gradient-to-br from-rose-500 to-orange-600" 
+                : "bg-gradient-to-br from-blue-500 to-emerald-500"
+            }`}
           >
-            <Sparkles className="w-6 h-6" />
+            {isExtremities ? <Zap className="w-8 h-8 fill-current" /> : <Map className="w-8 h-8" />}
           </div>
-          <h3 className="text-lg font-black text-text-primary mb-1 flex items-center justify-center gap-2">
-            <Lock className="w-4 h-4 text-text-muted" />
-            Alleen voor abonnees
+
+          <h3 className="text-xl font-black text-slate-900 mb-2 flex items-center justify-center gap-2 tracking-tight">
+            <Lock className="w-4 h-4 text-slate-400" />
+            {isExtremities ? "Tactical Intel" : "Piet's Precisie"}
           </h3>
-          <p className="text-sm text-text-secondary mb-4">
-            Uur-voor-uur, regenradar en werkramen horen bij een abonnement op
-            Piet, Reed of Steve. Aanmelden kost nu niks.
+          
+          <p className="text-sm text-slate-600 mb-8 leading-relaxed font-medium">
+            {isExtremities 
+              ? "Onweersrisico (CAPE), extreme neerslag en bliksem-detectie zijn exclusief voor Reed-leden."
+              : "Het 48-uurs grid, de regenradar en micro-data zijn onderdeel van de Piet & Reed upgrades."}
           </p>
+
           <button
             type="button"
             onClick={openModal}
-            className="inline-block rounded-full px-6 py-2.5 bg-accent-orange text-white font-black text-sm hover:bg-accent-orange/90 transition-colors"
+            className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-md active:scale-95 ${
+                isExtremities
+                ? "bg-rose-500 text-white hover:bg-rose-600 shadow-rose-200"
+                : "bg-accent-orange text-slate-900 hover:brightness-95 shadow-orange-100"
+            }`}
           >
-            Aanmelden →
+            Upgrade naar {isExtremities ? "Reed" : "Piet"} →
           </button>
-          <p className="text-[10px] text-text-muted uppercase tracking-wider mt-3">
-            Gratis · geen creditcard
+          
+          <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-6">
+            Founder deal · Tijdelijk gratis
           </p>
         </div>
       </div>

@@ -115,8 +115,8 @@ export default function RainRadar({ data }: RainRadarProps) {
           <div className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: summary.accent }}>
             Focus: Neerslag
           </div>
-          <div className="text-sm font-black text-text-primary leading-tight">{summary.text}</div>
-          <div className="text-[11px] text-text-secondary mt-0.5">{summary.subtext}</div>
+          <div className="text-sm font-black text-slate-950 leading-tight">{summary.text}</div>
+          <div className="text-[11px] text-slate-700 font-medium mt-0.5">{summary.subtext}</div>
         </div>
       </div>
 
