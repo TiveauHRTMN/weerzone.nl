@@ -532,27 +532,27 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                 : `Geen gevaarlijke condities bij ${city.name}.`;
 
               return (
-                <div className="rounded-3xl p-6 shadow-2xl" style={{ background: "#111827", border: "1px solid rgba(244,63,94,0.2)" }}>
+                <div className="card p-6 border-white/40 shadow-xl">
                   <div className="flex items-center gap-2 mb-5">
-                    <Zap className="w-4 h-4 text-rose-400 fill-rose-400" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: "#fb7185" }}>Reed</span>
+                    <Zap className="w-4 h-4 text-rose-500 fill-rose-500" />
+                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em]">Reed</span>
                   </div>
 
                   <div className="mb-5">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isAlert ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`} />
-                      <span className="text-2xl font-black" style={{ color: "#f1f5f9" }}>{statusLabel}</span>
+                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isAlert ? "bg-rose-500 animate-pulse" : "bg-emerald-500"}`} />
+                      <span className="text-2xl font-black text-text-primary">{statusLabel}</span>
                     </div>
-                    <p className="text-sm font-medium leading-relaxed pl-[22px]" style={{ color: isAlert ? "#fca5a5" : "#6ee7b7" }}>
+                    <p className="text-sm font-medium leading-relaxed pl-[22px] text-text-secondary">
                       {reedVerdict}
                     </p>
                   </div>
 
                   <div className="flex gap-2 flex-wrap pl-[22px]">
-                    <span className="text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "#cbd5e1" }}>
+                    <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-black/5 text-text-secondary">
                       ⚡ {capeLabel}
                     </span>
-                    <span className="text-[11px] font-bold px-3 py-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.1)", color: "#cbd5e1" }}>
+                    <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-black/5 text-text-secondary">
                       🌧 {precipLabel}
                     </span>
                   </div>
