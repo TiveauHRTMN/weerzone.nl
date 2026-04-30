@@ -3,8 +3,8 @@
 :root {
   --bg-primary: #0ea5e9;
   --bg-secondary: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.96);
-  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-card: rgba(255, 255, 255, 0.88);
+  --bg-card-hover: rgba(255, 255, 255, 0.96);
   --text-primary: #0f172a;
   --text-secondary: #1e293b;
   --text-muted: #475569;
