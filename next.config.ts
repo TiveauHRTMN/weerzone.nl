@@ -27,13 +27,18 @@ const securityHeaders = [
     value: "strict-origin-when-cross-origin",
   },
   {
-    // Minimaliseert attack surface door hardware/API access uit te schakelen
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(self), browsing-topics=()",
   },
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: "/piet", destination: "/jouwweer", permanent: true },
+      { source: "/reed", destination: "/waarschuwingen", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

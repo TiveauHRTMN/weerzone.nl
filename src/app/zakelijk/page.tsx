@@ -246,7 +246,7 @@ export default function ZakelijkPage() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Link
-                  href="/piet"
+                  href="/jouwweer"
                   className="rounded-2xl p-4 transition-all hover:scale-[1.01]"
                   style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}
                 >
@@ -254,7 +254,7 @@ export default function ZakelijkPage() {
                   <p className="text-text-muted text-xs">Dagelijks weerbericht voor thuis. Nuchter, kort, zonder drama.</p>
                 </Link>
                 <Link
-                  href="/reed"
+                  href="/waarschuwingen"
                   className="rounded-2xl p-4 transition-all hover:scale-[1.01]"
                   style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}
                 >

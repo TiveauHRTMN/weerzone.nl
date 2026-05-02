@@ -2,6 +2,7 @@ import os
 import json
 import time
 import sys
+import httpx
 from google import genai
 from google.genai import types
 
@@ -13,6 +14,10 @@ import kiloclaw_scraper
 import paperclip_optimizer
 import hermes_logger
 import kamino_vault
+import guardian_jito
+import banker_jlp
+import hunter_polymarket
+import fleet_orchestrator
 
 client = genai.Client(api_key=config.GEMINI_API_KEY) if config.GEMINI_API_KEY else None
 
@@ -28,67 +33,102 @@ def get_market_context():
     print("Market: Kiloclaw marktanalyse starten...", flush=True)
     sol_market_data = kiloclaw_scraper.claw_market_data(config.SOL_MINT)
     trending_pairs = kiloclaw_scraper.scan_trending_pairs()
+
+    # 3-HEADED MONSTER DATA GATHERING
+    print("Market: 3-Headed Monster tools activeren...", flush=True)
+    jito_stats = guardian_jito.get_jito_yield()
+    jlp_stats = banker_jlp.get_jlp_yield()
+    polymarket_opps = hunter_polymarket.scan_polymarket_opportunities(limit=5)
     
     return {
         "wallet_address": wallet,
         "sol_balance": balance_data.get("sol_balance", 0),
         "tokens": balance_data.get("tokens", []),
         "live_market_data": {"SOL": sol_market_data, "trending": trending_pairs},
+        "protocols_data": {
+            "guardian_jito": jito_stats,
+            "banker_jlp": jlp_stats,
+            "hunter_polymarket": polymarket_opps
+        },
         "limits": {
             "MIN_SOL_RESERVE": config.MIN_SOL_RESERVE,
             "MAX_TRADE_SOL": config.MAX_TRADE_SOL
         },
-        "current_focus": "GOD MODE: Maximize Profit. Use conviction-based sizing. Front-run narratives.",
+        "current_focus": "3-HEADED MONSTER: Passive Income & Asymmetric Arbitrage.",
     }
 
 def analyze_and_decide(context):
-    if not client:
+    if not config.OPENROUTER_API_KEY:
+        print("❌ Geen OpenRouter API key gevonden.", flush=True)
         return None
 
-    print(f"Magnolia: Syndicaat-data verwerken met {config.GEMINI_MODEL} in GOD MODE...", flush=True)
+    print(f"Magnolia: Syndicaat-data verwerken met {config.OPENROUTER_MODEL} via OpenRouter...", flush=True)
     
     prompt = f"""
-    Je bent Magnolia, de Supreme Commander van het Weerzone Crypto Syndicaat op Solana.
-    Je staat in GOD MODE. Je bent niet langer gebonden aan statische volumes; je zoekt naar de hoogste ROI.
-    
+    Je bent Magnolia, een 3-Headed AI-Agent aangestuurd door Gemini 3 Flash infrastructuur (nu via OpenRouter).
+    Je bent de kapitein van een vloot: Hermes (Executie) en Paperclip (Geheugen/Context).
+    Je missie: €2.700 passieve cashflow per maand tegen 1 januari 2027 voor Rowano.
+
+    DE VLOOT:
+    - **Hermes**: Jouw handen. Verstuurt orders naar Solana/Polygon.
+    - **Paperclip**: Jouw geheugen. Slaat elke trade en winst op. Blokkeert 'revenge trading' en emotionele gokken.
+
+    JE PROTOCOLLEN:
+    1. **The Guardian (SOL/JitoSOL)**: Gebruik Hermes voor staking. Genereer 'Airdrop-warmte'. Paperclip monitort Jupuary 2027 criteria.
+       - JitoSOL Mint: J1toso9Y9YvrtbC9GLSiykxy9T9pGpFUn8pCH69R6YcE
+    2. **The Banker (JLP)**: Beheer liquiditeit op Jupiter via Hermes. Incasseer fees van traders. Paperclip houdt dagelijkse yield bij.
+       - JLP Mint: 27G8MtK7VtTcCHkpASjSDdkWWYfoqT6ggEuKidVJidD4
+    3. **The Hunter (Polymarket - Vitalik Methode)**: Scan via Hermes APIs. Zoek naar 'Anti-Insanity' trades (short hype, buy 'No').
+
     ON-CHAIN CONTEXT & PANOPTICON VISION:
     {json.dumps(context, indent=2)}
 
-    STRATEGISCHE OPDRACHT:
-    1. **Panopticon Analyse**: Bekijk de 'trending' tokens. Als een token extreme momentum toont, wees bereid om SOL daarheen te swappen voor een snelle flip.
-    2. **Conviction-Based Sizing**: Je bepaalt zelf hoeveel SOL je inzet (maximaal {config.MAX_TRADE_SOL} SOL per trade), gebaseerd op je overtuiging (Conviction Score 0-100%).
-       - Bij 90% conviction zet je het maximum in.
-       - Bij 20% conviction (puur voor volume/airdrop) zet je 0.01 in.
-       - Laat ALTIJD minimaal {config.MIN_SOL_RESERVE} SOL in de wallet voor gas.
-    3. **Oogsten**: Als je portfolio winst laat zien op altcoins, swap dan agressief terug naar SOL (of USDC) om winst veilig te stellen.
-    4. **Chain of Thought**: Schrijf eerst een 'Macro Thesis', dan een 'Risico Analyse', en bepaal pas dan je actie.
+    DWINGENDE UITVOERINGSREGELS:
+    - Directe Actie: Hermes voert alleen trades uit met een wiskundig 'Unfair Advantage'.
+    - Geen Ruis: Rapporteer alleen in ROI en concrete getallen.
+    - Zelfcorrectie: Analyseer na elke trade: "Was dit ratio of emotie?" Gebruik Paperclip om fouten uit 2024 te vermijden.
 
     Antwoord ALTIJD en ALLEEN in JSON formaat met deze velden:
     {{
-        "macro_thesis": "Jouw visie op de huidige data",
-        "risk_analysis": "Wat kan er misgaan?",
-        "conviction_score_pct": 85,
+        "macro_thesis": "Guardian/Banker/Hunter visie",
+        "self_correction_audit": "Ratio vs Emotie check",
         "action": "SWAP" | "HOLD" | "SCAN_AIRDROPS" | "DEPOSIT_KAMINO",
         "params": {{
             "from": "MINT_ADDRESS",
             "to": "MINT_ADDRESS",
             "amount_sol": 0.05
-        }}
+        }},
+        "paperclip_memory_note": "Wat moet Paperclip onthouden van deze move?"
     }}
     """
 
     try:
-        response = client.models.generate_content(
-            model=config.GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
+        with httpx.Client(timeout=45.0) as client:
+            res = client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": config.OPENROUTER_MODEL,
+                    "messages": [{"role": "user", "content": prompt}]
+                }
             )
-        )
-        
-        return json.loads(response.text)
+            res.raise_for_status()
+            data = res.json()
+            content = data['choices'][0]['message']['content']
+            
+            # Sommige modellen zetten JSON in code blocks
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0].strip()
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0].strip()
+            
+            return json.loads(content)
+            
     except Exception as e:
-        print(f"❌ Magnolia Hersenfout: {e}", flush=True)
+        print(f"❌ Magnolia Hersenfout (OpenRouter): {e}", flush=True)
         return None
 
 def execute_decision(decision, current_sol_balance, tokens):
@@ -96,8 +136,20 @@ def execute_decision(decision, current_sol_balance, tokens):
         
     action = decision.get("action")
     print(f"\n🧠 God Mode Thesis: {decision.get('macro_thesis')}", flush=True)
-    print(f"⚖️ Conviction: {decision.get('conviction_score_pct')}% | Action: {action}", flush=True)
+    print(f"⚖️ Audit: {decision.get('self_correction_audit')}", flush=True)
+    print(f"⚖️ Action: {action}", flush=True)
+
+    # Paperclip: Sla de gedachte op
+    note = decision.get("paperclip_memory_note", "")
+    if note:
+        fleet_orchestrator.paperclip.remember(note)
     
+    # Paperclip Audit Check
+    is_safe, audit_msg = fleet_orchestrator.paperclip.audit(decision)
+    if not is_safe:
+        print(f"🛑 Paperclip Veto: {audit_msg}", flush=True)
+        return
+
     if action == "SWAP":
         params = decision.get("params", {})
         try:
@@ -186,8 +238,8 @@ def run_syndicate():
         except Exception as e:
             print(f"❌ Systeemfout: {e}", flush=True)
 
-        print("\n😴 Magnolia analyseert de volgende zet (30s rust)...", flush=True)
-        time.sleep(30)
+        print("\n😴 Magnolia analyseert de volgende zet (15m rust)...", flush=True)
+        time.sleep(900)
 
 if __name__ == "__main__":
     run_syndicate()

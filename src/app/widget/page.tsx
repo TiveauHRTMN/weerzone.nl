@@ -23,6 +23,7 @@ export default async function WidgetPage({
   ) || DUTCH_CITIES[0];
 
   const weather = await fetchWeatherData(cityObj.lat, cityObj.lon);
+  if (!weather) return <html><body><div style={{ padding: "16px", color: "#666" }}>Weerdata tijdelijk niet beschikbaar.</div></body></html>;
   const emoji = getWeatherEmoji(weather.current.weatherCode, weather.current.isDay);
   const desc = getWeatherDescription(weather.current.weatherCode);
 

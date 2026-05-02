@@ -58,7 +58,7 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
           <Link
-            href="/piet"
+            href="/jouwweer"
             onClick={handleLockedClick}
             className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
           >
@@ -71,7 +71,7 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
           <Link
-            href="/reed"
+            href="/waarschuwingen"
             onClick={handleLockedClick}
             className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
           >

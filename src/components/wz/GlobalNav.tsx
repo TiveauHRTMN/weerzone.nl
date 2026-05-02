@@ -51,16 +51,16 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
 }
 
 const LINKS = [
-  { key: "piet",    label: "Jouw Weer",      href: "/piet" },
-  { key: "reed",    label: "Waarschuwingen", href: "/reed" },
+  { key: "piet",    label: "Jouw Weer",      href: "/jouwweer" },
+  { key: "reed",    label: "Waarschuwingen", href: "/waarschuwingen" },
   { key: "steve",   label: "Zakelijk",       href: "/zakelijk" },
   { key: "about",   label: "About",   href: "/over" },
   { key: "contact", label: "Contact", href: "/contact" },
 ];
 
 function isActive(pathname: string, key: string) {
-  if (key === "piet")    return pathname.startsWith("/piet");
-  if (key === "reed")    return pathname.startsWith("/reed");
+  if (key === "piet")    return pathname.startsWith("/jouwweer");
+  if (key === "reed")    return pathname.startsWith("/waarschuwingen");
   if (key === "steve")   return pathname.startsWith("/zakelijk");
   if (key === "about")   return pathname.startsWith("/over");
   if (key === "contact") return pathname.startsWith("/contact");

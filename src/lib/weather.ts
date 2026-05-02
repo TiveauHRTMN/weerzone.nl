@@ -66,7 +66,7 @@ async function fetchModel(
   });
 
   try {
-    const res = await fetch(`${url}?${params}`, { cache: "no-store" });
+    const res = await fetch(`${url}?${params}`, { next: { revalidate: 600 } });
     if (!res.ok) return null;
     const data = await res.json();
     return data.hourly as RawModelHourly;
@@ -104,30 +104,44 @@ function blendHourly(
   return { hourly, agreement: 100 };
 }
 
-export async function fetchWeatherData(lat: number, lon: number, isBot: boolean = false): Promise<WeatherData> {
-  try {
-    // Basis API Call (altijd vereist)
-    const fetchPromises: Promise<any>[] = [
-      fetch(`${OPEN_METEO_BASE}?${new URLSearchParams({
-        latitude: lat.toString(),
-        longitude: lon.toString(),
-        current: CURRENT_PARAMS,
-        hourly: HOURLY_PARAMS + ",apparent_temperature",
-        daily: DAILY_PARAMS,
-        minutely_15: "precipitation",
-        forecast_minutely_15: "96",
-        timezone: "Europe/Amsterdam",
-        forecast_days: "2",
-        forecast_hours: "48",
-      })}`, { cache: "no-store" }).then(r => {
-        if (!r.ok) return null;
-        return r.json();
-      })
-    ];
+export async function fetchWeatherData(lat: number, lon: number, isBot: boolean = false, forceHighRes: boolean = false): Promise<WeatherData> {
+  // Skip live API calls during Next.js build-time static generation
+  if (process.env.NEXT_PHASE === 'phase-production-build') return null as any;
 
-    // Zware extra modellen: Sla deze over als een bot (zoals Googlebot) de pagina crawlt
-    // Dit bespaart 75% van de Open-Meteo requests en voorkomt 429 Rate Limits
-    if (!isBot) {
+  const attemptFetch = async (): Promise<any> => {
+    const url = `${OPEN_METEO_BASE}?${new URLSearchParams({
+      latitude: lat.toString(),
+      longitude: lon.toString(),
+      current: CURRENT_PARAMS,
+      hourly: HOURLY_PARAMS + ",apparent_temperature",
+      daily: DAILY_PARAMS,
+      minutely_15: "precipitation",
+      forecast_minutely_15: "96",
+      timezone: "Europe/Amsterdam",
+      forecast_days: "2",
+      forecast_hours: "48",
+    })}`;
+    try {
+      const res = await fetch(url, { next: { revalidate: 600 } });
+      if (!res.ok) {
+        console.error("Open-Meteo non-ok", res.status, url.slice(0, 80));
+        return null;
+      }
+      return await res.json();
+    } catch (e) {
+      console.error("Open-Meteo fetch error", e instanceof Error ? e.message : String(e));
+      return null;
+    }
+  };
+
+  try {
+    const genericRes = await attemptFetch();
+
+    const fetchPromises: Promise<any>[] = [Promise.resolve(genericRes)];
+
+    // Zware extra modellen: alleen ophalen als expliciet gevraagd (forceHighRes)
+    // of bij bots nooit. Default = alleen het basismodel → geen rate limiting.
+    if (!isBot && forceHighRes) {
       fetchPromises.push(
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_harmonie" }).catch(() => null),
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: "dwd_icon_d2" }).catch(() => null),
@@ -137,15 +151,22 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
     }
 
     const results = await Promise.all(fetchPromises);
-    const genericRes = results[0];
-    const harmonieData = isBot ? null : results[1];
-    const iconData = isBot ? null : results[2];
-    const aromeData = isBot ? null : results[3];
-    const googleDataRaw = isBot ? null : results[4];
+    const coreData = results[0];
+
+    // Defensive check for core data
+    if (!coreData || !coreData.current || !coreData.hourly) {
+      console.error("fetchWeatherData: Core Open-Meteo data failed", { hasRes: !!coreData });
+      return null as any;
+    }
+
+    const harmonieData = (!isBot && results[1]) || null;
+    const iconData = (!isBot && results[2]) || null;
+    const aromeData = (!isBot && results[3]) || null;
+    const googleDataRaw = (!isBot && results[4]) || null;
 
     // Formatteer Google Data om net zo makkelijk aan te roepen als Open-Meteo arrays
     let googleData: any = null;
-    if (googleDataRaw?.forecastHours && genericRes?.hourly?.time) {
+    if (googleDataRaw?.forecastHours && Array.isArray(googleDataRaw.forecastHours) && coreData?.hourly?.time) {
       googleData = {
         temperature: [],
         precipitation: [],
@@ -153,15 +174,11 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
         windSpeed: []
       };
       // We assumes the forecastHours align roughly with the next 48 hours, but we map by matching the start hour
-      const times = genericRes.hourly.time;
+      const times = coreData.hourly.time;
       for (const t of times) {
-        // t is bv "2025-02-06T15:00"
-        // Google startTime is bv "2025-02-06T15:00:00Z"
-        // We match op het uur
-        const isoTime = new Date(t + "Z").toISOString(); // dit kan afwijken qua timezone
-        // Makkelijkste is itereren
         const dt = new Date(t).getTime();
         const gHour = googleDataRaw.forecastHours.find((g: any) => {
+          if (!g?.interval?.startTime || !g?.interval?.endTime) return false;
           const gTime = new Date(g.interval.startTime).getTime();
           // Ligt de tijd binnen dit interval?
           return dt >= gTime && dt < new Date(g.interval.endTime).getTime();
@@ -181,39 +198,36 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
       }
     }
 
-    const data = genericRes;
+    const data = coreData;
     if (!data || !data.hourly || !data.daily || !data.current) {
-      console.error("fetchWeatherData: Missing critical data fields", { 
-        hasData: !!data, 
-        hasHourly: !!data?.hourly, 
-        hasDaily: !!data?.daily,
-        hasCurrent: !!data?.current
-      });
+      // Laatste strohalm: probeer tenminste iets terug te geven als de API structuur gek doet
+      console.error("fetchWeatherData: Missing critical data fields", { hasData: !!data });
+      if (data?.current) return { current: data.current, hourly: [], daily: [], minutely: [], models: { agreement: 0, label: "Geen data", sources: [] } } as any;
       return null as any;
     }
     
     // 1. BLEND HOURLY DATA WITH MULTIPLE MODELS
     const times = data.hourly.time ?? [];
     const hourly: HourlyForecast[] = times.map((time: string, i: number) => {
-      const harmonie = harmonieData ? {
+      const harmonie = (harmonieData && Array.isArray(harmonieData.temperature_2m)) ? {
         temperature: Math.round(harmonieData.temperature_2m[i] ?? 0),
-        precipitation: harmonieData.precipitation[i] ?? 0,
-        weatherCode: harmonieData.weather_code[i] ?? 0,
-        windSpeed: Math.round(harmonieData.wind_speed_10m[i] ?? 0)
+        precipitation: harmonieData.precipitation?.[i] ?? 0,
+        weatherCode: harmonieData.weather_code?.[i] ?? 0,
+        windSpeed: Math.round(harmonieData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
-      const icon = iconData ? {
+      const icon = (iconData && Array.isArray(iconData.temperature_2m)) ? {
         temperature: Math.round(iconData.temperature_2m[i] ?? 0),
-        precipitation: iconData.precipitation[i] ?? 0,
-        weatherCode: iconData.weather_code[i] ?? 0,
-        windSpeed: Math.round(iconData.wind_speed_10m[i] ?? 0)
+        precipitation: iconData.precipitation?.[i] ?? 0,
+        weatherCode: iconData.weather_code?.[i] ?? 0,
+        windSpeed: Math.round(iconData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
-      const arome = aromeData ? {
+      const arome = (aromeData && Array.isArray(aromeData.temperature_2m)) ? {
         temperature: Math.round(aromeData.temperature_2m[i] ?? 0),
-        precipitation: aromeData.precipitation[i] ?? 0,
-        weatherCode: aromeData.weather_code[i] ?? 0,
-        windSpeed: Math.round(aromeData.wind_speed_10m[i] ?? 0)
+        precipitation: aromeData.precipitation?.[i] ?? 0,
+        weatherCode: aromeData.weather_code?.[i] ?? 0,
+        windSpeed: Math.round(aromeData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
       const google = googleData ? {
@@ -223,11 +237,11 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
         windSpeed: Math.round(googleData.windSpeed[i] ?? 0)
       } : undefined;
 
-      // Base values (prefer Harmonie)
-      const temperature = harmonie?.temperature ?? Math.round(data.hourly.temperature_2m[i] ?? 0);
-      const precipitation = harmonie?.precipitation ?? data.hourly.precipitation[i] ?? 0;
-      const weatherCode = harmonie?.weatherCode ?? data.hourly.weather_code[i] ?? 0;
-      const windSpeed = harmonie?.windSpeed ?? Math.round(data.hourly.wind_speed_10m[i] ?? 0);
+      // Base values (prefer Harmonie, but fallback to Generic)
+      const temperature = (harmonie && typeof harmonie.temperature === 'number') ? harmonie.temperature : Math.round(data.hourly.temperature_2m[i] ?? 0);
+      const precipitation = (harmonie && typeof harmonie.precipitation === 'number') ? harmonie.precipitation : (data.hourly.precipitation?.[i] ?? 0);
+      const weatherCode = (harmonie && typeof harmonie.weatherCode === 'number') ? harmonie.weatherCode : (data.hourly.weather_code?.[i] ?? 0);
+      const windSpeed = (harmonie && typeof harmonie.windSpeed === 'number') ? harmonie.windSpeed : Math.round(data.hourly.wind_speed_10m?.[i] ?? 0);
 
       return {
         time,
@@ -237,18 +251,18 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
         precipitation,
         windSpeed,
         cape: Math.round(data.hourly.cape?.[i] ?? 0),
-        confidence: "high",
+        confidence: harmonie ? "high" : "medium",
         models: { harmonie, icon, arome, google }
       };
     });
 
     // 2. AGREEMENT CALCULATION (Simplified for now)
     let agreement = 100;
-    if (harmonieData && iconData && aromeData) {
+    if (harmonieData?.precipitation && iconData?.precipitation && aromeData?.precipitation) {
       // Check for divergence in precipitation in next 12 hours
-      const next12Harmonie = harmonieData.precipitation.slice(0, 12).reduce((a: number, b: number) => a + b, 0);
-      const next12Icon = iconData.precipitation.slice(0, 12).reduce((a: number, b: number) => a + b, 0);
-      const next12Arome = aromeData.precipitation.slice(0, 12).reduce((a: number, b: number) => a + b, 0);
+      const next12Harmonie = (harmonieData.precipitation || []).slice(0, 12).reduce((a: number, b: number) => a + b, 0);
+      const next12Icon = (iconData.precipitation || []).slice(0, 12).reduce((a: number, b: number) => a + b, 0);
+      const next12Arome = (aromeData.precipitation || []).slice(0, 12).reduce((a: number, b: number) => a + b, 0);
       
       const diff = Math.max(
         Math.abs(next12Harmonie - next12Icon),
@@ -270,11 +284,13 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
       const currentIndex = times.indexOf(currentApiTime);
       const targetIndex = currentIndex !== -1 ? currentIndex : 0;
 
-      currentTemp = hourly[targetIndex].temperature;
-      currentFeels = hourly[targetIndex].apparentTemperature;
-      currentPrecip = hourly[targetIndex].precipitation;
-      currentCode = hourly[targetIndex].weatherCode;
-      currentWind = hourly[targetIndex].windSpeed;
+      if (hourly[targetIndex]) {
+        currentTemp = hourly[targetIndex].temperature;
+        currentFeels = hourly[targetIndex].apparentTemperature;
+        currentPrecip = hourly[targetIndex].precipitation;
+        currentCode = hourly[targetIndex].weatherCode;
+        currentWind = hourly[targetIndex].windSpeed;
+      }
     }
 
     const minutely: MinutelyPrecipitation[] = [];
@@ -416,7 +432,7 @@ export function getWeatherEmoji(code: number, isDay: boolean = true): string {
   if (code === 1 || code === 2) return isDay ? "⛅" : "☁️";
   if (code === 3) return "☁️";
   if (code <= 48) return "🌫️";
-  if (code <= 57) return "🌦️";
+  if (code <= 55) return "🌦️";
   if (code <= 67) return "🌧️";
   if (code <= 77) return "❄️";
   if (code <= 82) return "⛈️";

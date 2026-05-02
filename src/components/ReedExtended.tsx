@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MapPin, AlertTriangle, ShieldCheck, Zap, Wind, CloudRain, Thermometer, ShieldAlert } from "lucide-react";
 import { loadWeather, loadWWS, patchCacheDeep } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
+import type { KNMIWarning } from "@/lib/knmi-warnings";
 import { useSession } from "@/lib/session-context";
 import { persistCity } from "@/lib/persist-city";
 
@@ -37,6 +38,7 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
   const [aiNarrative, setAiNarrative] = useState<string | null>(null);
+  const [knmiWarnings, setKnmiWarnings] = useState<KNMIWarning[]>([]);
   const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
 
@@ -48,8 +50,14 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         setLoading(true);
     }
     
+    // Fetch KNMI official warnings in parallel
+    fetch(`/api/knmi-warnings?lat=${city.lat}&lon=${city.lon}`)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setKnmiWarnings(data.warnings ?? []); })
+      .catch(() => {});
+
     Promise.all([
-      loadWeather(city.lat, city.lon, () => {}, (fresh) => { if (!cancelled) setWeather(fresh); }),
+      loadWeather(city.lat, city.lon, () => {}, (fresh) => { if (!cancelled) setWeather(fresh); }, undefined, true),
       loadWWS(city.lat, city.lon)
     ])
     .then(([w, wwsPayload]) => {
@@ -131,6 +139,49 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         <div className="card !p-12 text-center">
            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-4 text-text-secondary" />
            <p className="text-sm font-bold text-text-secondary">Reed scant de horizon op 1km resolutie…</p>
+        </div>
+      )}
+
+      {/* Officiële KNMI Waarschuwingen */}
+      {knmiWarnings.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-text-muted">
+            Officiële KNMI Waarschuwingen
+          </p>
+          {knmiWarnings.map((w, i) => (
+            <div
+              key={i}
+              className={`card !p-5 border-l-4 flex items-start gap-4 ${
+                w.severity === "RED"
+                  ? "border-l-rose-500 bg-rose-500/5"
+                  : w.severity === "ORANGE"
+                  ? "border-l-orange-500 bg-orange-500/5"
+                  : "border-l-amber-400 bg-amber-400/5"
+              }`}
+            >
+              <AlertTriangle
+                className={`w-5 h-5 mt-0.5 shrink-0 ${
+                  w.severity === "RED"
+                    ? "text-rose-500"
+                    : w.severity === "ORANGE"
+                    ? "text-orange-500"
+                    : "text-amber-400"
+                }`}
+              />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${
+                    w.severity === "RED" ? "text-rose-500" : w.severity === "ORANGE" ? "text-orange-500" : "text-amber-400"
+                  }`}>
+                    Code {w.severity === "RED" ? "Rood" : w.severity === "ORANGE" ? "Oranje" : "Geel"} · {w.type}
+                  </span>
+                  <span className="text-[10px] text-text-muted">· {w.province}</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary leading-snug">{w.description}</p>
+              </div>
+            </div>
+          ))}
+          <p className="text-[10px] text-text-muted text-right">Bron: KNMI · vernieuwt elke 5 min</p>
         </div>
       )}
 

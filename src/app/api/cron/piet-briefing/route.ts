@@ -175,6 +175,10 @@ export async function GET(request: Request) {
       `
     });
 
+    // 6. Paperclip Heartbeat
+    const { logPaperclipHeartbeat } = await import("@/lib/agent-logger");
+    await logPaperclipHeartbeat("Piet Briefing", "healthy");
+
     return NextResponse.json({ success: true, timestamp: new Date().toISOString() });
   } catch (err: any) {
     console.error("Master Briefing Error:", err);

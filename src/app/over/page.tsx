@@ -56,14 +56,14 @@ export default function OverPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   {
-                    href: "/piet",
+                    href: "/jouwweer",
                     name: "Piet",
                     tag: "48-uurs weerbericht",
                     desc: "Een dagelijks, eerlijk weerbericht voor jouw locatie. In gewone taal, zonder reclame.",
                     color: "#10b981",
                   },
                   {
-                    href: "/reed",
+                    href: "/waarschuwingen",
                     name: "Reed",
                     tag: "Extreem weer alerts",
                     desc: "Alleen een melding als het er echt om gaat: storm, onweer, hitte of strenge vorst.",

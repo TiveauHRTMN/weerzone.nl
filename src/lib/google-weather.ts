@@ -7,7 +7,8 @@ export async function fetchGoogleWeather(lat: number, lon: number) {
       next: { revalidate: 300 }
     });
     if (!res.ok) {
-        console.warn("Google Weather API Error", res.status, await res.text());
+        const body = await res.json().catch(() => ({}));
+        console.warn("Google Weather API Error", res.status, body?.error?.status ?? body?.error?.message ?? "");
         return null;
     }
     const data = await res.json();

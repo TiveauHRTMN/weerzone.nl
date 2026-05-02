@@ -7,11 +7,11 @@ export async function getSavedLocationServer() {
   const name = cookieStore.get("wz_name")?.value;
 
   if (lat && lon) {
-    return {
-      lat: parseFloat(lat),
-      lon: parseFloat(lon),
-      name: name || "Jouw locatie"
-    };
+    const latNum = parseFloat(lat);
+    const lonNum = parseFloat(lon);
+    if (!isNaN(latNum) && !isNaN(lonNum)) {
+      return { lat: latNum, lon: lonNum, name: name || "Jouw locatie" };
+    }
   }
   return null;
 }

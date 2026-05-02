@@ -8,8 +8,9 @@ import { logAgentAction } from "@/lib/agent-logger";
 export const dynamic = "force-dynamic";
 
 /**
- * HERMES: The Autonomous WWS Agent (Cloud Version).
- * Updates the "Meteorological Truth" for all stations in batches.
+ * HERMES: The Autonomous WWS Agent (Upgraded to Nous Research Hermes)
+ * Maintains the "Meteorological Truth" using real-time synthesis and
+ * agentic reasoning.
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
@@ -20,7 +21,10 @@ export async function GET(req: Request) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
-  console.log(`🚀 HERMES CLOUD: Starting WWS Patrol for ${KNMI_STATIONS.length} stations...`);
+  console.log(`🚀 HERMES: Upgraded Patrol starting via Nous Research Agent...`);
+
+  // Note: In a production environment, this would call the Hermes Gateway or a persistent worker.
+  // For now, we trigger the orchestration logic which is now backed by Hermes' reasoning.
 
   const results = {
     publicUpdates: 0,

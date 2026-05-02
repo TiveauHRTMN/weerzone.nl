@@ -2,10 +2,11 @@ import httpx
 import time
 
 def test_jupiter():
-    url = "https://quote-api.jup.ag/v6/quote"
+    # We gebruiken de public endpoint die ook in jupiter_swap.py staat
+    url = "https://public.jupiterapi.com/quote"
     params = {
         "inputMint": "So11111111111111111111111111111111111111112",
-        "outputMint": "EPjFW36vnC7H1VSEmG6vSP9nbt1uEAL65951Pn666ob",
+        "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", # Correcte USDC Mint
         "amount": "10000000",
         "slippageBps": 50
     }

@@ -14,8 +14,17 @@ def evaluate_trade(swap_params, current_sol_balance):
     # Risico 1: Gas Fee & Rent Reserve
     # Solana transacties kosten gas. Als we te weinig SOL overhouden, brickt de wallet.
     MIN_SOL_RESERVE = 0.01 
-    if current_sol_balance - amount_sol < MIN_SOL_RESERVE:
-        reason = f"Onvoldoende SOL reserve. Huidig: {current_sol_balance}, Na trade: {current_sol_balance - amount_sol}. Minimum: {MIN_SOL_RESERVE}."
+    
+    # Als 'from' SOL is, trekken we het af. Als 'to' SOL is, tellen we het op (of negeren we de aftrek).
+    from_mint = swap_params.get("from")
+    to_mint = swap_params.get("to")
+    
+    projected_balance = current_sol_balance
+    if from_mint == "So11111111111111111111111111111111111111112":
+        projected_balance -= amount_sol
+    
+    if projected_balance < MIN_SOL_RESERVE:
+        reason = f"Onvoldoende SOL reserve. Huidig: {current_sol_balance}, Geprojecteerd: {projected_balance}. Minimum: {MIN_SOL_RESERVE}."
         print(f"🖇️ Paperclip BLOKKEERT: {reason}")
         return False, reason
         

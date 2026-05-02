@@ -38,15 +38,6 @@ import { useSession } from "@/lib/session-context";
 import ModelPluim from "@/components/ModelPluim";
 import { persistCity } from "@/lib/persist-city";
 
-// "Witte wolk" card-stijl — zichtbaar helder op blauwe /piet achtergrond
-const cloudCard: React.CSSProperties = {
-  background: "var(--bg-card)",
-  border: "1px solid var(--card-border)",
-  borderRadius: "var(--card-radius)",
-  backdropFilter: "blur(16px)",
-  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
-  color: "var(--text-primary)",
-};
 
 function getSavedCity(): City | null {
   if (typeof window === "undefined") return null;
@@ -277,9 +268,9 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: { title: s
   const bft = getWindBeaufort(maxWind);
 
   return (
-    <div className="!p-6" style={cloudCard}>
+    <div className="card p-6">
       <div className="flex items-center justify-between mb-4">
-        <span className="homecard-kicker !mb-0">{title}</span>
+        <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">{title}</span>
         <span className="text-3xl drop-shadow-xl">{getWeatherEmoji(daily.weatherCode, true)}</span>
       </div>
       <div className="flex items-baseline gap-3 mb-1">
@@ -343,7 +334,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
     let cancelled = false;
     if (!weather) setLoading(true);
     Promise.all([
-      loadWeather(city.lat, city.lon, () => {}, (fresh) => { if (!cancelled) setWeather(fresh); }, (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }),
+      loadWeather(city.lat, city.lon, () => {}, (fresh) => { if (!cancelled) setWeather(fresh); }, (neural) => { if (!cancelled) setWeather((prev) => (prev ? { ...prev, neuralData: neural } : prev)); }, true),
       loadWWS(city.lat, city.lon)
     ]).then(([w, wwsPayload]) => {
       if (!cancelled) {
@@ -406,7 +397,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
   const risks = useMemo(() => (weather ? computeRisks(weather) : []), [weather]);
   const nextRain = useMemo(() => (weather ? NextRain({ weather }) : null), [weather]);
 
-  if (loading || !weather) return <div className="!p-6 text-center" style={cloudCard}><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-text-secondary" /><p className="text-sm text-text-secondary">Piet laadt jouw locatie…</p></div>;
+  if (loading || !weather) return <div className="card p-6 text-center"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-text-secondary" /><p className="text-sm text-text-secondary">Piet laadt jouw locatie…</p></div>;
 
   const narrative = aiNarrative || wws?.piet_update?.content || pietAnalysis || getMainCommentary(weather);
   const narrativeTitle = wws?.piet_update?.title || "Het volledige weerverhaal";
@@ -437,11 +428,11 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
       </div>
 
       {/* 2. PIET'S VERHAAL — DE HOOFDROL */}
-      <div className="rounded-[20px] border-l-4 border-l-accent-cyan !p-7 sm:!p-9" style={{ ...cloudCard, borderLeftWidth: 4, borderLeftColor: "#38bdf8" }}>
+      <div className="card border-l-4 border-l-accent-cyan p-7 sm:p-9">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner">💬</div>
+          <div className="w-12 h-12 rounded-2xl bg-accent-cyan/10 flex items-center justify-center text-2xl shadow-inner">💬</div>
           <div>
-            <h2 className="homecard-kicker !text-accent-cyan !mb-0">{narrativeTitle}</h2>
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-accent-cyan mb-0">{narrativeTitle}</h2>
             <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">{new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })} · vandaag → morgen</p>
           </div>
         </div>
@@ -460,7 +451,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
 
       {/* 3. WWS TECH GRID — HARD DATA EVIDENCE */}
       {wws && (
-        <div className="homecard !p-0 overflow-hidden bg-slate-900 border-slate-800">
+        <div className="rounded-3xl overflow-hidden bg-slate-900 border border-slate-800">
            <div className="bg-slate-800/50 px-6 py-3 flex items-center justify-between border-b border-white/5">
               <div className="flex items-center gap-2">
                  <Terminal className="w-4 h-4 text-emerald-400" />
@@ -490,10 +481,10 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
       )}
 
       {/* 4. NU-HERO */}
-      <div className="!p-7 sm:!p-9" style={cloudCard}>
+      <div className="card p-7 sm:p-9">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <span className="homecard-kicker">Status nu in {city.name}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-text-muted block mb-1">Status nu in {city.name}</span>
             <div className="flex items-baseline gap-3 mt-2">
               <span className="text-7xl sm:text-8xl font-black text-text-primary tracking-tighter leading-none">{weather.current.temperature}°</span>
               <span className="text-6xl sm:text-7xl drop-shadow-xl">{getWeatherEmoji(weather.current.weatherCode, weather.current.isDay)}</span>
@@ -520,8 +511,8 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
       )}
 
       {/* 6. DAGDEEL-SAMENVATTING */}
-      <div className="!p-0 overflow-hidden" style={{ ...cloudCard, padding: 0 }}>
-        <div className="flex items-end justify-between px-6 pt-6 pb-4"><h3 className="homecard-kicker !mb-0">De dagdelen</h3><span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">wall-clock</span></div>
+      <div className="card overflow-hidden p-0">
+        <div className="flex items-end justify-between px-6 pt-6 pb-4"><h3 className="text-[10px] font-black uppercase tracking-widest text-text-muted">De dagdelen</h3><span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">wall-clock</span></div>
         <div className="divide-y divide-white/10">
           {dayparts.map((d, idx) => (
             <motion.div key={d.key} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.04 }} className="px-6 py-4 flex gap-4 items-start" style={d.empty ? { opacity: 0.4 } : undefined}>
@@ -560,7 +551,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
               <div key={h.time} className="flex flex-col items-stretch w-[88px] flex-shrink-0 snap-start">
                 {showDayLabel && <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-1.5 pl-1">{dateLabel(d)}</span>}
                 {!showDayLabel && <span className="block h-[18px] mb-1.5" />}
-                <div className="flex flex-col items-center !p-4" style={isFirst ? { ...cloudCard, borderColor: "rgba(56,189,248,0.7)", background: "rgba(56,189,248,0.25)", padding: 16 } : { ...cloudCard, background: "rgba(255,255,255,0.18)", padding: 16 }}>
+                <div className={`flex flex-col items-center p-4 rounded-2xl border ${isFirst ? "border-sky-300/70 bg-sky-200/30" : "card"}`}>
                   <span className="text-[10px] font-black text-text-muted mb-2">{isFirst ? "NU" : formatHour(h.time)}</span>
                   <span className="text-3xl mb-2 drop-shadow-lg">{getWeatherEmoji(h.weatherCode, isDay)}</span>
                   <span className="text-lg font-black text-text-primary">{h.temperature}°</span>

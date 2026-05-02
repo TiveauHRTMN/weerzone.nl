@@ -85,9 +85,11 @@ async function fetchAndCache(
   lat: number,
   lon: number,
   onSummary?: (v: string) => void,
-  onNeural?: (n: WeatherData["neuralData"]) => void
+  onNeural?: (n: WeatherData["neuralData"]) => void,
+  forceHighRes = false
 ): Promise<WeatherData> {
-  const weather = await fetchServer(lat, lon);
+  const weather = await fetchServer(lat, lon, forceHighRes);
+  if (!weather) throw new Error("fetchServer returned null");
   writeCache(lat, lon, weather);
   
   // Async background enrichment (Teaser for Homepage)
@@ -115,7 +117,8 @@ export async function loadWeather(
   lon: number,
   onSummary?: (verdict: string) => void,
   onFresh?: (weather: WeatherData) => void,
-  onNeural?: (neural: WeatherData["neuralData"]) => void
+  onNeural?: (neural: WeatherData["neuralData"]) => void,
+  forceHighRes = false
 ): Promise<WeatherData> {
   const k = key(lat, lon);
   const cached = readCache(lat, lon);
@@ -165,7 +168,7 @@ export async function loadWeather(
   // EMERGENCY cache: stale data > 60min maar < 4uur — toon direct bij API-uitval
   const emergencyCached = cached && now - cached.ts < EMERGENCY_MS ? cached : null;
 
-  const promise = fetchAndCache(lat, lon, onSummary, onNeural).catch((err) => {
+  const promise = fetchAndCache(lat, lon, onSummary, onNeural, forceHighRes).catch((err) => {
     if (emergencyCached) {
       console.warn("fetchAndCache failed, using emergency cache:", err?.message);
       return emergencyCached.weather;

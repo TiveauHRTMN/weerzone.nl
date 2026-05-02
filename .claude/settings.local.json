@@ -132,7 +132,16 @@
       "Bash(sed -n '11,15p' C:/Users/rwnhr/kutweer/src/app/api/cron/paperclip-yield/route.ts)",
       "Bash(sed -n '12,16p' C:/Users/rwnhr/kutweer/src/app/api/cron/performance-control/route.ts)",
       "Bash(sed -n '28,32p' C:/Users/rwnhr/kutweer/src/app/api/cron/b2b-hunter/route.ts)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "WebFetch(domain:www.xweather.com)",
+      "WebFetch(domain:developer.dataplatform.knmi.nl)",
+      "WebFetch(domain:dataplatform.knmi.nl)",
+      "Bash(curl -I https://weerzone.nl/jouwweer)",
+      "Bash(curl -I https://weerzone.nl/waarschuwingen)",
+      "mcp__claude_ai_Vercel__get_runtime_logs",
+      "Bash(curl -s \"https://api.open-meteo.com/v1/forecast?latitude=52.74&longitude=4.91&current=temperature_2m&forecast_days=1\")",
+      "Bash(curl -s --max-time 20 \"https://api.open-meteo.com/v1/forecast?latitude=52.74&longitude=4.91&current=temperature_2m,weather_code,precipitation,wind_speed_10m,wind_gusts_10m,apparent_temperature,cloud_cover,wind_direction_10m,is_day,relative_humidity_2m&hourly=temperature_2m,weather_code,precipitation,wind_speed_10m,cape,apparent_temperature&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,sunrise,sunset,uv_index_max,sunshine_duration&minutely_15=precipitation&forecast_minutely_15=96&timezone=Europe%2FAmsterdam&forecast_days=2&forecast_hours=48&cache=no-store\")",
+      "Bash(curl *)"
     ]
   }
 }

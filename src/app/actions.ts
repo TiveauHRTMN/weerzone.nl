@@ -56,8 +56,8 @@ export async function updateProfile(args: {
  * SNELLE weer-fetch. Geen AI. Open-Meteo cached 5 min (via fetch revalidate).
  * Client rendert hiermee meteen. getAiVerdict draait apart op de achtergrond.
  */
-export async function getWeather(lat: number, lon: number): Promise<WeatherData> {
-  return await fetchWeatherData(lat, lon);
+export async function getWeather(lat: number, lon: number, forceHighRes = false): Promise<WeatherData> {
+  return await fetchWeatherData(lat, lon, false, forceHighRes);
 }
 
 /**

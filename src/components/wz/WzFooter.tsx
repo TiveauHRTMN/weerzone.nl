@@ -20,8 +20,8 @@ export default function WzFooter() {
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Product</h4>
             <ul className="space-y-4">
               <li><Link href="/prijzen" className="text-sm text-white/30 hover:text-white transition-colors">Prijzen</Link></li>
-              <li><Link href="/piet" className="text-sm text-white/30 hover:text-white transition-colors">Jouw Weer</Link></li>
-              <li><Link href="/reed" className="text-sm text-white/30 hover:text-white transition-colors">Waarschuwingen</Link></li>
+              <li><Link href="/jouwweer" className="text-sm text-white/30 hover:text-white transition-colors">Jouw Weer</Link></li>
+              <li><Link href="/waarschuwingen" className="text-sm text-white/30 hover:text-white transition-colors">Waarschuwingen</Link></li>
               <li><Link href="/zakelijk" className="text-sm text-white/30 hover:text-white transition-colors">Zakelijk</Link></li>
             </ul>
           </div>

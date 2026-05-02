@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { fetchWeatherData } from "@/lib/weather";
+import { fetchKNMIWarnings, warningsForProvince, highestSeverity } from "@/lib/knmi-warnings";
+import { ALL_PLACES } from "@/lib/places-data";
 import { Resend } from "resend";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { amazonProductUrl, amazonUrl } from "@/lib/affiliates";
@@ -102,17 +104,45 @@ export async function GET(req: Request) {
     const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
     const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
 
+    // Haal KNMI warnings eenmalig op (geldig voor alle gebruikers)
+    const allKNMIWarnings = await fetchKNMIWarnings();
+
     for (const user of users as any[]) {
       if (!user.lat || !user.lon) continue;
+
+      // Bepaal provincie voor KNMI-filtering
+      let userProvince: string | null = null;
+      let minDist = Infinity;
+      for (const p of ALL_PLACES) {
+        const dLat = (p.lat - user.lat) * Math.PI / 180;
+        const dLon = (p.lon - user.lon) * Math.PI / 180;
+        const dist = 2 * Math.atan2(Math.sqrt(Math.sin(dLat/2)**2 + Math.cos(user.lat*Math.PI/180) * Math.cos(p.lat*Math.PI/180) * Math.sin(dLon/2)**2), Math.sqrt(1 - Math.sin(dLat/2)**2 - Math.cos(user.lat*Math.PI/180) * Math.cos(p.lat*Math.PI/180) * Math.sin(dLon/2)**2)) * 6371;
+        if (dist < minDist) { minDist = dist; userProvince = p.province; }
+      }
+      const knmiForUser = userProvince ? warningsForProvince(allKNMIWarnings, userProvince) : allKNMIWarnings;
+      const knmiSeverity = highestSeverity(knmiForUser);
+
       const weather = await fetchWeatherData(user.lat, user.lon);
       const anomaly = findAnomaly(weather.hourly);
 
-      if (anomaly) {
-        let alertMsg = `Waarschuwing voor ${user.city}`;
+      // KNMI officieel alarm overschrijft/versterkt Open-Meteo drempel
+      const knmiAnomaly = knmiSeverity ? {
+        type: knmiForUser[0]?.type?.toUpperCase().replace(" ", "_") ?? "WEATHER",
+        level: knmiSeverity,
+        value: knmiForUser.map(w => w.type).join(", "),
+        time: new Date().toISOString(),
+        source: "KNMI",
+      } : null;
+
+      const activeAnomaly = knmiAnomaly ?? anomaly;
+      if (activeAnomaly) {
+        let alertMsg = knmiAnomaly
+          ? `Officieel KNMI-alarm voor ${user.city}: ${knmiForUser.map(w => w.type).join(", ")}`
+          : `Waarschuwing voor ${user.city}`;
         if (genAI) {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent({
-              contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nNIVEAU: ${anomaly.level}\nDATA: ${JSON.stringify({ city: user.city, anomaly })}` }] }],
+              contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nNIVEAU: ${activeAnomaly.level}\nDATA: ${JSON.stringify({ city: user.city, anomaly: activeAnomaly })}` }] }],
               generationConfig: { maxOutputTokens: 60, temperature: 0.9 },
             });
             alertMsg = result.response.text()?.trim().replace(/^"|"$/g, '') || alertMsg;
@@ -123,7 +153,7 @@ export async function GET(req: Request) {
             from: "Sentinel | WEERZONE <no-reply@weerzone.nl>",
             to: user.email,
             subject: `🚨 WEER-ALARM: ${user.city}`,
-            html: buildAffiliateEmailHtml(user.city, anomaly, alertMsg)
+            html: buildAffiliateEmailHtml(user.city, activeAnomaly, alertMsg)
           });
           emailsSent.push(user.email);
         }

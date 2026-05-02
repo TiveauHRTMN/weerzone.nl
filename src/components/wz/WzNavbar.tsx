@@ -9,15 +9,15 @@ import NLPulse from "../NLPulse";
 import { useSession } from "@/lib/session-context";
 
 const LINKS: Array<{ key: string; label: string; href: string }> = [
-  { key: "piet", label: "Jouw Weer", href: "/piet" },
-  { key: "reed", label: "Waarschuwingen", href: "/reed" },
+  { key: "piet", label: "Jouw Weer", href: "/jouwweer" },
+  { key: "reed", label: "Waarschuwingen", href: "/waarschuwingen" },
   { key: "steve", label: "Zakelijk", href: "/zakelijk" },
   { key: "prijzen", label: "Prijzen", href: "/prijzen" },
 ];
 
 function isActive(pathname: string, key: string): boolean {
-  if (key === "piet") return pathname.startsWith("/piet");
-  if (key === "reed") return pathname.startsWith("/reed");
+  if (key === "piet") return pathname.startsWith("/jouwweer");
+  if (key === "reed") return pathname.startsWith("/waarschuwingen");
   if (key === "steve") return pathname.startsWith("/zakelijk");
   if (key === "prijzen") return pathname.startsWith("/prijzen");
   return false;

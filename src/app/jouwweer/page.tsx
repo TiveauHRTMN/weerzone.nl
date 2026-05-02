@@ -4,13 +4,14 @@ import PietExtended from "@/components/PietExtended";
 import PremiumGate from "@/components/PremiumGate";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES } from "@/lib/types";
+import { fetchWeatherData } from "@/lib/weather";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Jouw Weer — Hyperlokaal weerbericht voor jouw straat",
   description:
     "Een eerlijk, persoonlijk weerbericht voor de komende 48 uur op jouw GPS-locatie. In gewone taal, zonder reclame, zonder gokwerk over twee weken vooruit.",
-  alternates: { canonical: "https://weerzone.nl/piet" },
+  alternates: { canonical: "https://weerzone.nl/jouwweer" },
 };
 
 const jsonLd = {
@@ -24,10 +25,13 @@ const jsonLd = {
 };
 
 export default async function PietPage() {
-  // Snelle, non-blocking server calls
   const loc = await getSavedLocationServer().catch(() => null);
   const activeLoc = loc || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
-  
+
+  const lat = typeof activeLoc.lat === "number" && !isNaN(activeLoc.lat) ? activeLoc.lat : 52.1;
+  const lon = typeof activeLoc.lon === "number" && !isNaN(activeLoc.lon) ? activeLoc.lon : 5.18;
+  const initialWeather = await fetchWeatherData(lat, lon).catch(() => undefined);
+
   let greetingName = "jou";
   try {
     const supabase = await createSupabaseServerClient();
@@ -55,18 +59,22 @@ export default async function PietPage() {
       <main>
         <WeatherDashboard
           initialCity={activeLoc}
+          initialWeather={initialWeather}
           hideWeatherInfo={true}
           beforeFooter={
             <div className="space-y-6">
-              {/* Persona intro */}
-              <div className="card p-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-text-muted mb-1">
-                  Weerzone · 48 uur
-                </p>
-                <h2 className="text-3xl font-black text-text-primary leading-tight">
-                  Jouw Weer{greetingName !== "jou" ? `, ${greetingName}` : ""}
+              {/* Persona intro — HomePitch stijl */}
+              <div className="rounded-3xl bg-white/95 backdrop-blur p-6 sm:p-8 shadow-xl border-b-4 border-b-emerald-500">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="text-xs font-black uppercase tracking-widest text-emerald-600">
+                    Piet · 48 uur
+                  </span>
+                </div>
+                <h2 className="text-2xl font-black text-slate-900 leading-snug mb-2">
+                  {greetingName !== "jou" ? `Jouw Weer, ${greetingName}` : "Jouw Weer"}
                 </h2>
-                <p className="text-text-secondary text-sm leading-relaxed mt-2">
+                <p className="text-sm text-slate-500 leading-relaxed">
                   De volledige 48 uur voor jouw locatie — in gewone taal, met
                   concrete tips voor je dag. Betrouwbaar en lokaal, voor elke
                   straat van Nederland.

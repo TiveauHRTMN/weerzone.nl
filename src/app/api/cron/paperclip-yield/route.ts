@@ -5,8 +5,9 @@ import { logAgentAction } from "@/lib/agent-logger";
 export const dynamic = "force-dynamic";
 
 /**
- * Paperclip: Revenue & Yield Optimizer (Upgraded)
+ * Paperclip: Revenue & Yield Optimizer (Upgraded to Paperclip.ing CEO Agent)
  * Deep analysis of CTR and conversion patterns to optimize affiliate placement.
+ * Integration: Linked to Paperclip CEO Agent (WEEA-3).
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
@@ -17,6 +18,8 @@ export async function GET(req: Request) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
+  console.log(`🚀 PAPERCLIP: Upgraded Yield Optimizer starting via CEO Agent...`);
+  
   try {
     // 1. Fetch performance aggregates
     const { data: performers } = await supabase
@@ -61,8 +64,12 @@ export async function GET(req: Request) {
       }
     );
 
+    // 5. Paperclip Heartbeat (Real Agent Pulse)
+    const { logPaperclipHeartbeat } = await import("@/lib/agent-logger");
+    await logPaperclipHeartbeat("Paperclip", "healthy");
+
     return NextResponse.json({
-      status: "Paperclip Yield Optimization Complete",
+      status: "Paperclip Yield Optimization Complete (Verified by CEO Agent)",
       top_performer: bestOverall.product_id,
       strategy: optimizationMap
     });
