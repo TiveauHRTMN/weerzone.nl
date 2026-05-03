@@ -161,7 +161,7 @@ Schrijf het dossier in jouw stem. Eindig met een droge Hollandse groet en ondert
       `.trim();
 
     const response = await openai.chat.completions.create({
-      model: "deepseek/deepseek-v4",
+      model: "deepseek/deepseek-v4-flash",
       messages: [
         {
           role: "system",
@@ -237,7 +237,7 @@ TOON: ${mood} — volg de data. Schrijf minimaal 3 zinnen. Eindig met een korte 
         `.trim();
 
       const response = await openai.chat.completions.create({
-        model: "deepseek/deepseek-v4",
+        model: "deepseek/deepseek-v4-flash",
         messages: [
           {
             role: "system",
