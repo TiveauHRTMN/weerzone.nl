@@ -390,7 +390,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
       const { latitude: lat, longitude: lon } = pos.coords;
       const provisional: City = { name: "Locatie bepalen...", lat, lon };
       setCity(provisional);
-      reverseGeocode(lat, lon).then((c) => { setCity(c); persistCity(c); setLocating(false); }).catch(() => setLocating(false));
+      reverseGeocode(lat, lon).then((c) => { persistCity(c); window.location.reload(); }).catch(() => setLocating(false));
     }, () => setLocating(false), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   };
 
