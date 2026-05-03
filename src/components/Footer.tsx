@@ -76,7 +76,9 @@ export default function Footer() {
            </div>
            
            <div className="flex gap-8">
-             <a href="https://twitter.com/weerzone" target="_blank" className="text-white/20 hover:text-white transition-colors text-[10px] uppercase font-black tracking-widest">Twitter</a>
+             <a href="https://x.com/weerzone" target="_blank" className="text-white/20 hover:text-white transition-colors text-[10px] uppercase font-black tracking-widest">X</a>
+             <a href="https://www.instagram.com/weerzonenl" target="_blank" className="text-white/20 hover:text-white transition-colors text-[10px] uppercase font-black tracking-widest">Instagram</a>
+             <a href="https://youtube.com/@weerzone" target="_blank" className="text-white/20 hover:text-white transition-colors text-[10px] uppercase font-black tracking-widest">YouTube</a>
              <a href="https://linkedin.com/company/weerzone" target="_blank" className="text-white/20 hover:text-white transition-colors text-[10px] uppercase font-black tracking-widest">LinkedIn</a>
            </div>
         </div>

@@ -239,7 +239,19 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
     );
   }
 
-  if (loading || !weather) return <LoadingScreen />;
+  if (loading || !weather) {
+    if (hideWeatherInfo) {
+      return (
+        <div className="min-h-screen relative overflow-x-hidden">
+          <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
+            {beforeFooter}
+            <Footer />
+          </div>
+        </div>
+      );
+    }
+    return <LoadingScreen />;
+  }
 
   const summaryWords = weather.summaryVerdict?.split(/\s+/).filter(Boolean).length ?? 0;
   const narrative = wws?.piet_update?.content

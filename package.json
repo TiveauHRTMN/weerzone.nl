@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "script:youtube": "tsx scripts/gen-youtube-script.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",

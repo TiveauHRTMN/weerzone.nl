@@ -341,12 +341,12 @@ export async function GET(req: Request) {
   let sent = 0;
   const errors: string[] = [];
 
-  for (const [, group] of locGroups) {
-    const first = group[0];
-    const lat = first.user_profile.primary_lat!;
-    const lon = first.user_profile.primary_lon!;
+  const results = await Promise.allSettled(
+    Array.from(locGroups.entries()).map(async ([, group]) => {
+      const first = group[0];
+      const lat = first.user_profile.primary_lat!;
+      const lon = first.user_profile.primary_lon!;
 
-    try {
       const data = await fetchWeather48h(lat, lon);
 
       // Stads-naam: probeer reverse-geocode, anders coördinaten
@@ -377,7 +377,7 @@ export async function GET(req: Request) {
         try {
           narrative = await generateNarrative(genAI, cityLabel, weatherJson);
         } catch (e) {
-          errors.push(`AI error ${cityLabel}: ${e}`);
+          throw new Error(`AI error ${cityLabel}: ${e}`);
         }
       }
 
@@ -386,19 +386,35 @@ export async function GET(req: Request) {
       const subjectTemp = Math.round(data.current.temperature_2m);
       const subject = `${subjectEmoji} ${subjectTemp}° in ${cityLabel} — jouw 48-uurs update`;
 
-      for (const sub of group) {
+      return group.map(sub => {
         const personalHtml = html.replace("__EMAIL__", sub.user_profile.email);
-        const { error: sendErr } = await resend.emails.send({
+        return {
           from: "Piet van Weerzone <piet@weerzone.nl>",
           to: sub.user_profile.email,
           subject,
           html: personalHtml,
-        });
-        if (sendErr) errors.push(sendErr.message);
-        else sent++;
-      }
+        };
+      });
+    })
+  );
+
+  const payloads: any[] = [];
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value) {
+      payloads.push(...result.value);
+    } else if (result.status === "rejected") {
+      errors.push(`Group processing failed: ${result.reason}`);
+    }
+  }
+
+  for (let i = 0; i < payloads.length; i += 100) {
+    const chunk = payloads.slice(i, i + 100);
+    try {
+      const { error: sendErr } = await resend.batch.send(chunk);
+      if (sendErr) errors.push(sendErr.message);
+      else sent += chunk.length;
     } catch (e) {
-      errors.push(`Locatiegroep mislukt (${lat},${lon}): ${e}`);
+      errors.push(`Batch send failed: ${e}`);
     }
   }
 
