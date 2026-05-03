@@ -51,7 +51,7 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
 }
 
 const LINKS = [
-  { key: "piet",    label: "Jouw Weer",      href: "/jouwweer" },
+  { key: "piet",    label: "Mijn Weer",      href: "/jouwweer" },
   { key: "reed",    label: "Waarschuwingen", href: "/waarschuwingen" },
   { key: "steve",   label: "Zakelijk",       href: "/zakelijk" },
   { key: "about",   label: "About",   href: "/over" },

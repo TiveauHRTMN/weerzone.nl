@@ -9,7 +9,7 @@ import NLPulse from "../NLPulse";
 import { useSession } from "@/lib/session-context";
 
 const LINKS: Array<{ key: string; label: string; href: string }> = [
-  { key: "piet", label: "Jouw Weer", href: "/jouwweer" },
+  { key: "piet", label: "Mijn Weer", href: "/jouwweer" },
   { key: "reed", label: "Waarschuwingen", href: "/waarschuwingen" },
   { key: "steve", label: "Zakelijk", href: "/zakelijk" },
   { key: "prijzen", label: "Prijzen", href: "/prijzen" },

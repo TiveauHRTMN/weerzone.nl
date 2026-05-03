@@ -9,6 +9,8 @@ import ZakelijkCTA from "@/components/ZakelijkCTA";
 import { getLocationSEOContent } from "@/app/actions";
 import { fetchWeatherData } from "@/lib/weather";
 import { getWeatherDescription } from "@/lib/weather";
+import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
+import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import Link from "next/link";
 
 interface PageProps {
@@ -129,7 +131,11 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   // Initial weather fetch on server for instant LCP & Disaster SEO
   // Bij bots skippen we de zware modellen om API limits (429) te voorkomen
-  const initialWeather = await fetchWeatherData(place.lat, place.lon, isBot).catch(() => undefined);
+  const [initialWeather, allWarnings] = await Promise.all([
+    fetchWeatherData(place.lat, place.lon, isBot).catch(() => undefined),
+    fetchKNMIWarnings().catch(() => []),
+  ]);
+  const provinceWarnings = warningsForProvince(allWarnings, province);
 
   // Hermes Disaster SEO: Dynamic Schema Injection
   let schemaTitle = `Weer ${place.name} — WEERZONE`;
@@ -246,7 +252,9 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
           <span className="text-white/80">{place.name}</span>
         </nav>
 
-        <WeatherDashboard 
+        <KnmiWarningBanner warnings={provinceWarnings} />
+
+        <WeatherDashboard
           initialCity={place} 
           initialWeather={initialWeather} 
           beforeFooter={

@@ -143,9 +143,9 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
     // of bij bots nooit. Default = alleen het basismodel → geen rate limiting.
     if (!isBot && forceHighRes) {
       fetchPromises.push(
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_harmonie" }).catch(() => null),
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "knmi_seamless" }).catch(() => null),
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: "dwd_icon_d2" }).catch(() => null),
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome" }).catch(() => null),
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome_france_hd" }).catch(() => null),
         fetchGoogleWeather(lat, lon).catch(() => null)
       );
     }

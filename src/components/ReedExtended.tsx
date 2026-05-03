@@ -5,7 +5,7 @@ import Link from "next/link";
 import { MapPin, AlertTriangle, ShieldCheck, Zap, Wind, CloudRain, Thermometer, ShieldAlert } from "lucide-react";
 import { loadWeather, loadWWS, patchCacheDeep } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
-import type { KNMIWarning } from "@/lib/knmi-warnings";
+import type { KNMIWarningEnriched } from "@/lib/knmi-warnings";
 import { useSession } from "@/lib/session-context";
 import { persistCity } from "@/lib/persist-city";
 
@@ -38,7 +38,7 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
   const [aiNarrative, setAiNarrative] = useState<string | null>(null);
-  const [knmiWarnings, setKnmiWarnings] = useState<KNMIWarning[]>([]);
+  const [knmiWarnings, setKnmiWarnings] = useState<KNMIWarningEnriched[]>([]);
   const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
 
@@ -50,8 +50,8 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         setLoading(true);
     }
     
-    // Fetch KNMI official warnings in parallel
-    fetch(`/api/knmi-warnings?lat=${city.lat}&lon=${city.lon}`)
+    // Fetch KNMI official warnings + enrichment in parallel
+    fetch(`/api/knmi-warnings?lat=${city.lat}&lon=${city.lon}&enrich=1`)
       .then(r => r.json())
       .then(data => { if (!cancelled) setKnmiWarnings(data.warnings ?? []); })
       .catch(() => {});
@@ -142,46 +142,84 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         </div>
       )}
 
-      {/* Officiële KNMI Waarschuwingen */}
+      {/* Officiële KNMI Waarschuwingen — dossier per warning */}
       {knmiWarnings.length > 0 && (
         <div className="space-y-3">
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-text-muted">
             Officiële KNMI Waarschuwingen
           </p>
-          {knmiWarnings.map((w, i) => (
-            <div
-              key={i}
-              className={`card !p-5 border-l-4 flex items-start gap-4 ${
-                w.severity === "RED"
-                  ? "border-l-rose-500 bg-rose-500/5"
-                  : w.severity === "ORANGE"
-                  ? "border-l-orange-500 bg-orange-500/5"
-                  : "border-l-amber-400 bg-amber-400/5"
-              }`}
-            >
-              <AlertTriangle
-                className={`w-5 h-5 mt-0.5 shrink-0 ${
-                  w.severity === "RED"
-                    ? "text-rose-500"
-                    : w.severity === "ORANGE"
-                    ? "text-orange-500"
-                    : "text-amber-400"
-                }`}
-              />
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${
-                    w.severity === "RED" ? "text-rose-500" : w.severity === "ORANGE" ? "text-orange-500" : "text-amber-400"
-                  }`}>
-                    Code {w.severity === "RED" ? "Rood" : w.severity === "ORANGE" ? "Oranje" : "Geel"} · {w.type}
-                  </span>
-                  <span className="text-[10px] text-text-muted">· {w.province}</span>
+          {knmiWarnings.map((w) => {
+            const accent =
+              w.severity === "RED"
+                ? { line: "border-l-rose-500", bg: "bg-rose-500/5", text: "text-rose-500", chip: "Code Rood" }
+                : w.severity === "ORANGE"
+                ? { line: "border-l-orange-500", bg: "bg-orange-500/5", text: "text-orange-500", chip: "Code Oranje" }
+                : { line: "border-l-amber-400", bg: "bg-amber-400/5", text: "text-amber-400", chip: "Code Geel" };
+
+            const fmtTime = (iso: string | null) => {
+              if (!iso) return "—";
+              const d = new Date(iso);
+              return d.toLocaleString("nl-NL", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+            };
+
+            return (
+              <div key={w.key} className={`card !p-5 border-l-4 ${accent.line} ${accent.bg}`}>
+                <div className="flex items-start gap-4">
+                  <AlertTriangle className={`w-5 h-5 mt-0.5 shrink-0 ${accent.text}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-2 mb-2">
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${accent.text}`}>
+                        {accent.chip} · {w.type}
+                      </span>
+                      <span className="text-[10px] text-text-muted">· {w.province}</span>
+                      {w.validFrom && w.validUntil && (
+                        <span className="text-[10px] font-bold text-text-secondary">
+                          · {fmtTime(w.validFrom)} → {fmtTime(w.validUntil)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium text-text-primary leading-snug whitespace-pre-line">
+                      {w.description}
+                    </p>
+
+                    {w.enriched && (
+                      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="rounded-xl bg-black/20 p-3">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-text-muted/70">CAPE-piek</p>
+                          <p className="text-sm font-black text-text-primary mt-1">{w.enriched.capeMaxJkg} J/kg</p>
+                        </div>
+                        <div className="rounded-xl bg-black/20 p-3">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-text-muted/70">Regen totaal</p>
+                          <p className="text-sm font-black text-text-primary mt-1">{w.enriched.precipitationTotalMm} mm</p>
+                        </div>
+                        <div className="rounded-xl bg-black/20 p-3">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-text-muted/70">Regen-piek</p>
+                          <p className="text-sm font-black text-text-primary mt-1">
+                            {w.enriched.precipitationPeakMm} mm
+                          </p>
+                          <p className="text-[10px] text-text-muted mt-0.5">
+                            {fmtTime(w.enriched.precipitationPeakHour)}
+                          </p>
+                        </div>
+                        <div className="rounded-xl bg-black/20 p-3">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-text-muted/70">Wind-piek</p>
+                          <p className="text-sm font-black text-text-primary mt-1">
+                            {w.enriched.windPeakKmh} km/h
+                          </p>
+                          <p className="text-[10px] text-text-muted mt-0.5">
+                            {fmtTime(w.enriched.windPeakHour)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm font-medium text-text-primary leading-snug">{w.description}</p>
               </div>
-            </div>
-          ))}
-          <p className="text-[10px] text-text-muted text-right">Bron: KNMI · vernieuwt elke 5 min</p>
+            );
+          })}
+          <p className="text-[10px] text-text-muted text-right">
+            Bron: KNMI · detail-data uit Open-Meteo · vernieuwt elke 5 min
+          </p>
         </div>
       )}
 

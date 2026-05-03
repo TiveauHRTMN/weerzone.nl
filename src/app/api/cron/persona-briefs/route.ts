@@ -8,6 +8,12 @@ import {
   type WeatherSnapshot,
 } from "@/lib/persona-brief";
 import {
+  fetchKNMIWarnings,
+  warningsForProvince,
+  nearestProvinceSlug,
+} from "@/lib/knmi-warnings";
+import { fetchEstofexBeneluxSummary } from "@/lib/estofex";
+import {
   buildPersonaEmailHtml,
   type EmailAmazonTip,
   type EmailWeatherData,
@@ -90,6 +96,12 @@ export async function GET(request: NextRequest) {
   let failed = 0;
   const errors: string[] = [];
 
+  // KNMI warnings + Estofex: één keer ophalen voor alle gebruikers.
+  const [allKNMIWarnings, estofex] = await Promise.all([
+    fetchKNMIWarnings().catch(() => []),
+    fetchEstofexBeneluxSummary(2).catch(() => null),
+  ]);
+
   for (const sub of rows) {
     try {
       // Profiel
@@ -167,12 +179,19 @@ export async function GET(request: NextRequest) {
       const firstName =
         profile.full_name?.trim().split(/\s+/)[0] ?? null;
 
+      const provinceSlug = await nearestProvinceSlug(lat, lon).catch(() => null);
+      const knmiWarnings = provinceSlug
+        ? warningsForProvince(allKNMIWarnings, provinceSlug)
+        : [];
+
       const brief = await generatePersonaBrief({
         tier: sub.tier,
         firstName,
         city,
         weather: snap,
         prefs: prefsRow?.prefs ?? {},
+        knmiWarnings,
+        estofex,
       });
 
       const unsubscribeUrl = `https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(profile.email)}`;

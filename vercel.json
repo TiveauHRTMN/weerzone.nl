@@ -42,7 +42,7 @@
     },
     {
       "path": "/api/cron/reed-alert-email",
-      "schedule": "0 10 * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/openclaw-harvester",

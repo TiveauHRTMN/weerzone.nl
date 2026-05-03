@@ -1,6 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PERSONAS, type PersonaTier } from "@/lib/personas";
 import type { WeatherData } from "@/lib/types";
+import type { KNMIWarning } from "@/lib/knmi-warnings";
+import { SEVERITY_LABEL, formatWindowLabel } from "@/lib/knmi-warnings";
+import type { EstofexBeneluxSummary } from "@/lib/estofex";
 
 export interface WeatherSnapshot {
   current: {
@@ -36,6 +39,10 @@ export interface BriefContext {
   city: string;
   weather: WeatherSnapshot;
   prefs: Record<string, unknown>; // persona_preferences JSONB
+  /** Actieve KNMI-waarschuwingen voor de provincie van de lezer (optioneel). */
+  knmiWarnings?: KNMIWarning[];
+  /** Estofex Benelux-context (alleen bij level >= 2 of expliciete Benelux-mention). */
+  estofex?: EstofexBeneluxSummary | null;
 }
 
 // ---------- WEERZONE Core Style ----------
@@ -142,6 +149,25 @@ function humanisePrefs(tier: PersonaTier, prefs: Record<string, unknown>): strin
   return lines.length ? lines.join("\n") : "- (nog geen voorkeuren ingesteld)";
 }
 
+function knmiToPrompt(warnings: KNMIWarning[] | undefined): string {
+  if (!warnings || warnings.length === 0) return "";
+  const lines = warnings.map((w) => {
+    const window = formatWindowLabel(w);
+    const desc = w.description.split("\n")[0]?.trim() ?? "";
+    return `- ${SEVERITY_LABEL[w.severity]} (${w.type})${window ? `, ${window}` : ""}: ${desc}`;
+  });
+  return `\n\nOFFICIËLE KNMI-WAARSCHUWING(EN) VOOR DEZE REGIO — verwerk dit FEITELIJK in de tekst, geen drama, geen overdrijving:\n${lines.join("\n")}`;
+}
+
+function estofexToPrompt(est: EstofexBeneluxSummary | null | undefined): string {
+  if (!est) return "";
+  const lvl = `Level ${est.maxLevel}`;
+  if (est.beneluxText) {
+    return `\n\nESTOFEX (${lvl}, Europees onweer-vooruitzicht) — relevant voor Benelux:\n"${est.beneluxText}"\nGebruik dit alleen als ondersteunende context, noem ESTOFEX niet bij naam.`;
+  }
+  return `\n\nESTOFEX heeft een ${lvl}-vooruitzicht actief in Europa, niet expliciet voor Benelux. Niet noemen tenzij het bij KNMI-data past.`;
+}
+
 function weatherToPrompt(w: WeatherSnapshot, neural?: WeatherData["neuralData"]): string {
   let base = [
     `Nu: ${w.current.temperature}°C (voelt ${w.current.feelsLike}°), wind ${w.current.windSpeed} km/u (vlagen ${w.current.windGusts}), neerslag ${w.current.precipitation} mm, vocht ${w.current.humidity}%, code ${w.current.weatherCode}.`,
@@ -171,7 +197,10 @@ export async function generatePersonaBrief(
 
   const prefsStr = humanisePrefs(ctx.tier, ctx.prefs);
 
-  const weatherStr = weatherToPrompt(ctx.weather, ctx.neural);
+  const weatherStr =
+    weatherToPrompt(ctx.weather, ctx.neural) +
+    knmiToPrompt(ctx.knmiWarnings) +
+    estofexToPrompt(ctx.estofex);
   const date = new Date().toLocaleDateString("nl-NL", {
     weekday: "long",
     day: "numeric",
