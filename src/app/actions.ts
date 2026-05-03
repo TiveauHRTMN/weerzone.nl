@@ -3,6 +3,7 @@
 import { fetchWeatherData, getWeatherDescription } from "@/lib/weather";
 import type { WeatherData } from "@/lib/types";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import OpenAI from "openai";
 import { getMainCommentary } from "@/lib/commentary";
 import { Resend } from "resend";
 import { getWelcomeEmailHtml } from "@/lib/welcome-email";
@@ -120,49 +121,26 @@ export async function getNearestPlace(lat: number, lon: number): Promise<{ name:
  * Forceert een ultra-uitgebreid meteorologisch dossier (300+ woorden).
  */
 export async function getPietDeepAnalysis(weather: WeatherData): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return getMainCommentary(weather);
-
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction: `
-Je bent Piet — de stem van Weerzone. Betrouwbaar, hyperlokaal en nuchter. 
-
-TONALE CONSISTENTIE:
-- Focus op feiten: wat betekent het weer voor de dag van de lezer?
-- Toegankelijk Nederlands, geen jargon, geen modelnamen.
-
-INHOUD:
-- Beschrijf de dagdelen: OCHTEND, MIDDAG, AVOND, NACHT, MORGEN.
-- Begin elk dagdeel met de naam in vet (bv. "**Ochtend.**").
-- 200–300 woorden in totaal. Wees to-the-point voor snelheid. Max 1 emoji.
-
-- Ondertekenen met "— Piet, voor Weerzone".
-      `.trim(),
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 600,
-      },
+    const openai = new OpenAI({
+      apiKey: process.env.AI_GATEWAY_API_KEY || "dummy-key-for-gateway",
+      baseURL: "https://ai-gateway.vercel.sh/v1"
     });
-
 
     const hourlyData = weather.hourly.slice(0, 24).map(h =>
       `${new Date(h.time).getHours()}:00 (${h.temperature}°, ${h.precipitation}mm, wind ${h.windSpeed}km/h)`
     ).join(", ");
 
-    // Tonale-hint op basis van echte data: voorkomt "troosteloos" bij 16° + zon.
     const maxToday = weather.daily[0]?.tempMax ?? weather.current.temperature;
     const rainToday = weather.daily[0]?.precipitationSum ?? 0;
     const code = weather.current.weatherCode;
     const zonnig = code === 0 || code === 1;
     const moodHint = (() => {
-      if (zonnig && maxToday >= 15 && rainToday < 1) return "mooi-dag";        // positief, terras, lekker
-      if (maxToday >= 20 && rainToday < 2) return "zomers";                     // opgewekt, opletten voor UV/drinken
-      if (rainToday > 5 || (code >= 95 && code <= 99)) return "pittig-nat";    // eerlijk, praktisch
-      if (maxToday < 5) return "koud";                                          // jas, warm drinken, niet dramatisch
-      return "wisselend";                                                        // nuchter, laagdrempelig
+      if (zonnig && maxToday >= 15 && rainToday < 1) return "mooi-dag";
+      if (maxToday >= 20 && rainToday < 2) return "zomers";
+      if (rainToday > 5 || (code >= 95 && code <= 99)) return "pittig-nat";
+      if (maxToday < 5) return "koud";
+      return "wisselend";
     })();
 
     const prompt = `
@@ -182,8 +160,40 @@ TONALE HINT (volg deze, want hij komt uit de data): ${moodHint}.
 Schrijf het dossier in jouw stem. Eindig met een droge Hollandse groet en ondertekening "— Piet, voor Weerzone".
       `.trim();
 
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const response = await openai.chat.completions.create({
+      model: "deepseek/deepseek-v4",
+      messages: [
+        {
+          role: "system",
+          content: `Je bent Piet — de stem van Weerzone. Betrouwbaar, hyperlokaal en nuchter. 
+
+TONALE CONSISTENTIE:
+- Focus op feiten: wat betekent het weer voor de dag van de lezer?
+- Toegankelijk Nederlands, geen jargon, geen modelnamen.
+
+INHOUD:
+- Beschrijf de dagdelen: OCHTEND, MIDDAG, AVOND, NACHT, MORGEN.
+- Begin elk dagdeel met de naam in vet (bv. "**Ochtend.**").
+- 200–300 woorden in totaal. Wees to-the-point voor snelheid. Max 1 emoji.
+
+- Ondertekenen met "— Piet, voor Weerzone".`
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.6,
+      max_tokens: 600,
+    }, {
+      headers: {
+        "vercel-ai-gateway-cache-control": "s-maxage=900, stale-if-error=86400",
+        "x-vercel-ai-gateway-config": JSON.stringify({
+          gateway: {
+            fallback: ["google/gemini-2.0-flash"]
+          }
+        })
+      }
+    });
+
+    return response.choices[0]?.message?.content?.trim() || getMainCommentary(weather);
   } catch (e) {
     console.error("Piet Deep Analysis Error:", e);
     return getMainCommentary(weather);
@@ -196,29 +206,12 @@ Schrijf het dossier in jouw stem. Eindig met een droge Hollandse groet en ondert
  * afgemaakte zinnen — truncated output wordt geweigerd.
  */
 export async function getAiVerdict(weather: WeatherData): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return getMainCommentary(weather);
-
   let attempts = 0;
   while (attempts < 3) {
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
-        systemInstruction: `
-Je bent Piet — de stem van Weerzone. Toon: behulpzaam, nuchter en respectvol. Piet is geen echte persoon maar een merkmetafoor voor betrouwbaar, hyperlokaal weer.
-
-KERNREGELS:
-- TOON: De toon volgt de data. Wees eerlijk en praktisch. Vermijd beledigingen of kleinerende taal.
-- Correct Nederlands, geen meteorologisch jargon.
-- LENGTE: Schrijf 3-4 zinnen (60-100 woorden). Niet korter dan 3 zinnen.
-- INHOUD: Nu, straks, morgen — wat betekent dit voor de lezer?
-- AFSLUITER: Een korte, vriendelijke Hollandse groet.
-`.trim(),
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 400,
-        },
+      const openai = new OpenAI({
+        apiKey: process.env.AI_GATEWAY_API_KEY || "dummy-key-for-gateway",
+        baseURL: "https://ai-gateway.vercel.sh/v1"
       });
 
       const tomorrow = weather.daily[1];
@@ -243,8 +236,35 @@ DATA:
 TOON: ${mood} — volg de data. Schrijf minimaal 3 zinnen. Eindig met een korte Hollandse groet.
         `.trim();
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text().trim().replace(/^"|"$/g, '');
+      const response = await openai.chat.completions.create({
+        model: "deepseek/deepseek-v4",
+        messages: [
+          {
+            role: "system",
+            content: `Je bent Piet — de stem van Weerzone. Toon: behulpzaam, nuchter en respectvol. Piet is geen echte persoon maar een merkmetafoor voor betrouwbaar, hyperlokaal weer.
+
+KERNREGELS:
+- TOON: De toon volgt de data. Wees eerlijk en praktisch. Vermijd beledigingen of kleinerende taal.
+- Correct Nederlands, geen meteorologisch jargon.
+- LENGTE: Schrijf 3-4 zinnen (60-100 woorden). Niet korter dan 3 zinnen.
+- INHOUD: Nu, straks, morgen — wat betekent dit voor de lezer?
+- AFSLUITER: Een korte, vriendelijke Hollandse groet.`
+          },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.6,
+        max_tokens: 400,
+        }, {
+          headers: {
+            "vercel-ai-gateway-cache-control": "s-maxage=900, stale-if-error=86400",
+            "x-vercel-ai-gateway-config": JSON.stringify({
+              gateway: {
+                fallback: ["google/gemini-2.0-flash"]
+              }
+            })
+          }
+        });
+      const text = response.choices[0]?.message?.content?.trim().replace(/^"|"$/g, '') || "";
       const wordCount = text.split(/\s+/).filter(Boolean).length;
 
       if (text && wordCount >= 20 && wordCount < 120) {
