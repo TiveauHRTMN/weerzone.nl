@@ -41,6 +41,8 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
   const [knmiWarnings, setKnmiWarnings] = useState<KNMIWarningEnriched[]>([]);
   const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
+  const [aiError, setAiError] = useState(false);
+  const hasPaidTier = tier === "piet" || tier === "reed" || tier === "steve" || isFounder;
 
   useEffect(() => {
     let cancelled = false;
@@ -66,26 +68,28 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         setWWS(wwsPayload);
         setLoading(false);
 
-        // Reed AI: Alleen voor abonnees of Founder
-        const hasPaidTier = tier === "piet" || tier === "reed" || tier === "steve" || isFounder;
         if (hasPaidTier && !aiNarrative) {
             fetch('/api/persona/reed', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    weather: w, 
-                    city: city.name, 
-                    userName: user?.user_metadata?.full_name || 'gebruiker' 
+                body: JSON.stringify({
+                    weather: w,
+                    city: city.name,
+                    userName: user?.user_metadata?.full_name || 'gebruiker'
                 })
             })
             .then(res => res.json())
             .then(data => {
-                if (!cancelled && data.narrative) {
-                    setAiNarrative(data.narrative);
-                    patchCacheDeep(city.lat, city.lon, data.narrative);
+                if (!cancelled) {
+                    if (data.narrative) {
+                        setAiNarrative(data.narrative);
+                        patchCacheDeep(city.lat, city.lon, data.narrative);
+                    } else {
+                        setAiError(true);
+                    }
                 }
             })
-            .catch(err => console.error("Reed AI Error:", err));
+            .catch(err => { console.error("Reed AI Error:", err); if (!cancelled) setAiError(true); });
         }
       }
     })
@@ -242,14 +246,17 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
                  </div>
                  <p className="text-[10px] text-text-muted mt-8 uppercase tracking-widest">— Reed Expert Systeem</p>
               </div>
-            ) : (
-               (tier || isFounder) && (
-                 <div className="card !p-8 animate-pulse flex items-center gap-4">
-                    <ShieldAlert className="w-5 h-5 text-text-muted" />
-                    <p className="text-sm font-bold text-text-muted uppercase tracking-widest">Reed stelt een risico-rapport op…</p>
-                 </div>
-               )
-            )}
+            ) : aiError ? (
+              <div className="card !p-6 flex items-center gap-3">
+                 <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+                 <p className="text-sm font-bold text-text-secondary">Geen extreme risico&apos;s gedetecteerd voor jouw locatie.</p>
+              </div>
+            ) : hasPaidTier ? (
+              <div className="card !p-8 animate-pulse flex items-center gap-4">
+                 <ShieldAlert className="w-5 h-5 text-text-muted" />
+                 <p className="text-sm font-bold text-text-muted uppercase tracking-widest">Reed stelt een risico-rapport op…</p>
+              </div>
+            ) : null}
          </div>
       )}
 

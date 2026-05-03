@@ -316,9 +316,9 @@ function DayBlock({ title, daily, sunrise, sunset, uvIndex, hourly }: { title: s
   );
 }
 
-interface PietProps { initialWWS?: WWSPayload | null; initialWeather?: WeatherData | null; initialCity?: City; }
+interface PietProps { initialWWS?: WWSPayload | null; initialWeather?: WeatherData | null; initialCity?: City; hideLocate?: boolean; }
 
-export default function PietExtended({ initialWWS, initialWeather, initialCity }: PietProps) {
+export default function PietExtended({ initialWWS, initialWeather, initialCity, hideLocate = false }: PietProps) {
   const { primaryLocation, loading: sessionLoading, user, tier, isFounder } = useSession();
   const [city, setCity] = useState<City>(() => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
@@ -419,13 +419,15 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity }
   return (
     <div className="space-y-10 animate-fade-in">
       {/* 1. LOCATIE-SELECTOR */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <button onClick={locate} disabled={locating} className="btn btn-ghost bg-white/10 backdrop-blur-md border-white/20 text-text-primary font-bold">
-          <MapPin className={`w-4 h-4 ${locating ? "animate-pulse" : ""}`} />
-          {locating ? "Locatie bepalen…" : city.name}
-        </button>
-        {primaryLocation?.name === city.name && <span className="badge sun">Thuis</span>}
-      </div>
+      {!hideLocate && (
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <button onClick={locate} disabled={locating} className="btn btn-ghost bg-white/10 backdrop-blur-md border-white/20 text-text-primary font-bold">
+            <MapPin className={`w-4 h-4 ${locating ? "animate-pulse" : ""}`} />
+            {locating ? "Locatie bepalen…" : city.name}
+          </button>
+          {primaryLocation?.name === city.name && <span className="badge sun">Thuis</span>}
+        </div>
+      )}
 
       {/* 2. PIET'S VERHAAL — DE HOOFDROL */}
       <div className="card border-l-4 border-l-accent-cyan p-7 sm:p-9">

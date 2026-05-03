@@ -100,7 +100,7 @@ export default async function PietPage() {
               )}
 
               <PremiumGate>
-                <PietExtended initialCity={loc || undefined} />
+                <PietExtended initialCity={loc || undefined} hideLocate />
               </PremiumGate>
 
               <p className="text-center text-white/40 text-xs font-medium pb-4">

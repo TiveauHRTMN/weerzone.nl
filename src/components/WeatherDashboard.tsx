@@ -126,13 +126,20 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  // Fix hydration mismatch: Sync city from localStorage after mount
+  // Sync city from localStorage after mount.
+  //
+  // We overschrijven de SSR-initialCity altijd als er een opgeslagen city
+  // is — zo zien gebruikers met een eerder gekozen plaats nooit per ongeluk
+  // de SSR-fallback (De Bilt / Amsterdam) op pagina's als /jouwweer of
+  // /waarschuwingen. De effect verderop schrijft direct ook cookies, dus
+  // de volgende navigatie is meteen correct via SSR.
   useEffect(() => {
     const saved = getSavedCity();
-    if (saved && !initialCity) {
+    if (saved && (saved.name !== city.name || saved.lat !== city.lat || saved.lon !== city.lon)) {
       setCity(saved);
     }
-  }, [initialCity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadData = useCallback(async (targetCity: City) => {
     let cancelled = false;
@@ -208,7 +215,11 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   };
 
   useEffect(() => {
-    localStorage.setItem("wz_city", JSON.stringify({ name: city.name, lat: city.lat, lon: city.lon }));
+    // persistCity() schrijft localStorage EN cookies — zodat SSR-pagina's
+    // (/jouwweer, /waarschuwingen, /weer/[province]/[place]) op de juiste
+    // locatie renderen na een navigatie. Voorheen werd alleen localStorage
+    // gezet, waardoor SSR-routes terugvielen op de hardcoded default.
+    persistCity({ name: city.name, lat: city.lat, lon: city.lon });
     window.dispatchEvent(new CustomEvent("wz:city-updated"));
   }, [city]);
 
