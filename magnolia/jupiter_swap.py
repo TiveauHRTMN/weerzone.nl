@@ -3,16 +3,19 @@ import httpx
 import base64
 import base58
 import json
+import time
 from dotenv import load_dotenv, find_dotenv
 from solders.keypair import Keypair
 from solders.transaction import VersionedTransaction
-from solders.signature import Signature
 
 # Forceer reload van de lokale .env
 load_dotenv(find_dotenv(), override=True)
 
 HELIUS_RPC_URL = os.getenv("HELIUS_RPC_URL")
 PRIV_KEY = os.getenv("SOLANA_PRIVATE_KEY")
+
+# Vercel AI Gateway Endpoint (System Instruction Audit)
+VERCEL_GATEWAY_URL = "https://gateway.ai.vercel.com/v1/tiveauhrtmns-projects/magnolia/ai-gateway"
 
 # Alternatieve Jupiter API (betere DNS bereikbaarheid)
 JUP_BASE_URL = "https://public.jupiterapi.com"
@@ -29,6 +32,38 @@ def get_keypair():
             return Keypair.from_bytes(decoded)
         except: return None
 
+def send_rpc_request(client, method, params):
+    """
+    MAGNOLIA AUDIT GATEWAY INTEGRATIE
+    Routeert RPC requests via Vercel Gateway voor het monitoren van retries en logging.
+    Met veilige fallback naar directe Helius RPC om fleet-downtime te voorkomen.
+    """
+    payload = {
+        "jsonrpc": "2.0", 
+        "id": "magnolia-audit", 
+        "method": method, 
+        "params": params
+    }
+    
+    # Beveiliging: Headers gescheiden. Geen private keys meesturen, alleen metadata.
+    headers = {
+        "Content-Type": "application/json",
+        "x-magnolia-module": "hunter-execution",
+        "x-rpc-target": HELIUS_RPC_URL # Vertel gateway waar het heen moet als custom provider
+    }
+
+    try:
+        # 1. Probeer via Vercel Gateway (Audit & Retry Monitoring)
+        res = client.post(VERCEL_GATEWAY_URL, json=payload, headers=headers)
+        res.raise_for_status()
+        return res.json()
+    except Exception as gateway_err:
+        # 2. Fallback: Als Gateway nog niet JSON-RPC compatibel is ingesteld, bypass.
+        # print(f"⚠️ Gateway Audit Bypass: {gateway_err}. Directe RPC route...")
+        res = client.post(HELIUS_RPC_URL, json=payload)
+        res.raise_for_status()
+        return res.json()
+
 def swap(input_mint, output_mint, amount_lamports, slippage_bps=50):
     keypair = get_keypair()
     if not keypair:
@@ -42,7 +77,7 @@ def swap(input_mint, output_mint, amount_lamports, slippage_bps=50):
         params = {
             "inputMint": input_mint,
             "outputMint": output_mint,
-            "amount": amount_lamports,
+            "amount": str(amount_lamports),
             "slippageBps": slippage_bps
         }
         
@@ -66,42 +101,53 @@ def swap(input_mint, output_mint, amount_lamports, slippage_bps=50):
                 "userPublicKey": str(keypair.pubkey()),
                 "wrapAndUnwrapSol": True,
                 "dynamicComputeUnitLimit": True,
-                "prioritizationFeeLamports": "auto"
+                "prioritizationFeeLamports": 100000 
             }
             
             res = client.post(swap_url, json=payload)
-            res.raise_for_status()
+            if res.status_code != 200:
+                print(f"❌ Jupiter Swap API Error: {res.status_code} - {res.text}")
+                return None
+                
             swap_data = res.json()
             
             # 3. Sign & Send
             raw_tx = base64.b64decode(swap_data['swapTransaction'])
             tx = VersionedTransaction.from_bytes(raw_tx)
             
-            # Sign de message bytes
-            signature = keypair.sign_message(bytes(tx.message))
+            signed_tx = VersionedTransaction(tx.message, [keypair])
             
-            # Reconstruct signed transaction
-            signatures = [Signature.default()] * tx.message.header.num_required_signatures
-            signatures[0] = signature
-            signed_tx = VersionedTransaction.populate(tx.message, signatures)
+            print("🚀 Verzenden naar Solana (Via Vercel AI Gateway)...")
+            encoded_tx = base64.b64encode(bytes(signed_tx)).decode('utf-8')
             
-            print("🚀 Verzenden naar Solana...")
-            send_payload = {
-                "jsonrpc": "2.0", "id": 1, "method": "sendTransaction",
-                "params": [
-                    base64.b64encode(bytes(signed_tx)).decode('utf-8'), 
-                    {"encoding": "base64", "skipPreflight": True}
-                ]
-            }
+            send_params = [
+                encoded_tx, 
+                {"encoding": "base64", "skipPreflight": False, "maxRetries": 5}
+            ]
             
-            final_res = client.post(HELIUS_RPC_URL, json=send_payload)
-            result = final_res.json()
+            # MAGNOLIA AUDIT GATEWAY CALL
+            result = send_rpc_request(client, "sendTransaction", send_params)
             
             if "result" in result:
-                print(f"🔥 SUCCES! Transactie: {result['result']}")
-                return result['result']
+                sig = result['result']
+                print(f"🔥 Transactie verzonden: {sig}")
+                
+                # PEV Protocol: Verificatie loop via Gateway
+                print("⏳ Wachten op on-chain bevestiging (Monitoring via Gateway)...")
+                for i in range(15):
+                    time.sleep(3)
+                    status_data = send_rpc_request(client, "getSignatureStatuses", [[sig]])
+                    status = status_data.get("result", {}).get("value", [None])[0]
+                    
+                    if status and status.get("confirmationStatus") in ["confirmed", "finalized"]:
+                        print(f"✅ BEVESTIGD op slot {status.get('slot')}")
+                        return sig
+                    print(".", end="", flush=True)
+                
+                print("\n⚠️ Geen bevestiging binnen 45s. Check Solscan.")
+                return sig
             else:
-                print(f"❌ Transactie mislukt: {result}")
+                print(f"❌ Transactie mislukt op RPC/Gateway: {result}")
 
     except Exception as e:
         print(f"❌ Syndicaat Executiefout: {e}")
