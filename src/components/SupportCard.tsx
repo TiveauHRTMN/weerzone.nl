@@ -27,7 +27,7 @@ export default function SupportCard() {
         </p>
         
         <Link 
-          href="/prijzen"
+          href="/steun"
           className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30"
         >
           <Coffee className="w-4 h-4 mr-2" />
