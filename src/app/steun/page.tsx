@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import SupportForm from "@/components/SupportForm";
+import WeatherBackground from "@/components/WeatherBackground";
 
 export const metadata: Metadata = {
   title: "Laat ons groeien - Steun Weerzone",
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
 
 export default function SteunPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden flex flex-col">
+    <main className="min-h-screen relative overflow-hidden flex flex-col">
+      <WeatherBackground weatherCode={0} isDay={false} />
       <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-blue-900/20 to-transparent pointer-events-none" />
       
       <div className="relative z-10 flex-1 max-w-2xl mx-auto w-full px-4 py-12 sm:py-20 flex flex-col items-center">
