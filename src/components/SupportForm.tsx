@@ -9,7 +9,7 @@ export default function SupportForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [method, setMethod] = useState<"paypal" | "revolut">("paypal");
+  const [method, setMethod] = useState<"paypal" | "revolut">("revolut");
   const [loading, setLoading] = useState(false);
 
   const finalAmount = customAmount ? parseFloat(customAmount.replace(",", ".")) : amount;
@@ -54,7 +54,7 @@ export default function SupportForm() {
                 onClick={() => { setAmount(val); setCustomAmount(""); }}
                 className={`py-3 sm:py-4 rounded-xl font-black text-lg border-2 transition-all ${
                   amount === val && !customAmount 
-                    ? "border-orange-500 bg-orange-50 text-orange-600 shadow-md" 
+                    ? "border-amber-500 bg-amber-50 text-amber-600 shadow-md" 
                     : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
                 }`}
               >
@@ -87,21 +87,21 @@ export default function SupportForm() {
               placeholder="Naam of alias"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-orange-500 focus:bg-white transition-all font-medium text-slate-800 outline-none"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-amber-500 focus:bg-white transition-all font-medium text-slate-800 outline-none"
             />
             <input
               type="email"
               placeholder="E-mailadres"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-orange-500 focus:bg-white transition-all font-medium text-slate-800 outline-none"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-amber-500 focus:bg-white transition-all font-medium text-slate-800 outline-none"
             />
             <textarea
               placeholder="Een leuk berichtje voor het team?"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-orange-500 focus:bg-white transition-all font-medium text-slate-800 outline-none resize-none"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-amber-500 focus:bg-white transition-all font-medium text-slate-800 outline-none resize-none"
             />
           </div>
         </div>
@@ -111,16 +111,7 @@ export default function SupportForm() {
         {/* BETAALMETHODE */}
         <div>
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-3">3. Betaalmethode</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setMethod("paypal")}
-              className={`py-4 rounded-xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${
-                method === "paypal" ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md" : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
-              }`}
-            >
-              PayPal
-            </button>
+          <div className="grid grid-cols-2 gap-3 mb-2">
             <button
               type="button"
               onClick={() => setMethod("revolut")}
@@ -130,13 +121,27 @@ export default function SupportForm() {
             >
               Revolut
             </button>
+            <button
+              type="button"
+              onClick={() => setMethod("paypal")}
+              className={`py-4 rounded-xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${
+                method === "paypal" ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md" : "border-slate-100 bg-white text-slate-500 hover:border-slate-200"
+              }`}
+            >
+              PayPal
+            </button>
           </div>
+          {method === "revolut" && (
+            <p className="text-xs font-medium text-slate-500 text-center mt-3">
+              Geen Revolut? <a href="https://revolut.com/referral/?promo=JOUW_LINK" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline font-bold">Open gratis een account</a> en steun ons via de signup-bonus!
+            </p>
+          )}
         </div>
 
         <button
           type="submit"
           disabled={loading || finalAmount < 1}
-          className="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/30 text-white font-black text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/30 text-white font-black text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <span className="animate-pulse">Doorsturen...</span>

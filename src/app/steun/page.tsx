@@ -18,7 +18,7 @@ export default function SteunPage() {
             ← Terug naar Weerzone
           </Link>
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-4 drop-shadow-md">
-            Groei jij mee? ☕
+            Groei jij mee? 🍪
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-lg mx-auto font-medium drop-shadow-md">
             Weerzone is onafhankelijk. Jouw bijdrage houdt de servers draaiend en maakt nieuwe tools mogelijk.
