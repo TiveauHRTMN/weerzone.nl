@@ -416,8 +416,10 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity, 
     summarizeDaypart("Middag", "12–18 u", weather.hourly.filter((h) => inHourRange(h, todayStr, 12, 18) && futureOnly(h)), weather, true),
     summarizeDaypart("Avond", "18–00 u", weather.hourly.filter((h) => inHourRange(h, todayStr, 18, 24) && futureOnly(h)), weather, false),
     summarizeDaypart("Nacht", "00–06 u", weather.hourly.filter((h) => inHourRange(h, tomorrowStr, 0, 6)), weather, false),
-    summarizeDaypart("Morgen", "hele dag", weather.hourly.filter((h) => inHourRange(h, tomorrowStr, 6, 24)), weather, true),
-  ];
+    summarizeDaypart("Morgen ochtend", "06–12 u", weather.hourly.filter((h) => inHourRange(h, tomorrowStr, 6, 12)), weather, true),
+    summarizeDaypart("Morgen middag", "12–18 u", weather.hourly.filter((h) => inHourRange(h, tomorrowStr, 12, 18)), weather, true),
+    summarizeDaypart("Morgen avond", "18–00 u", weather.hourly.filter((h) => inHourRange(h, tomorrowStr, 18, 24)), weather, false),
+  ].filter(d => !d.empty);
 
   return (
     <div className="space-y-10 animate-fade-in">
