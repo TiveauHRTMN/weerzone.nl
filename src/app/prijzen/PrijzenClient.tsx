@@ -5,10 +5,10 @@ import Link from "next/link";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import { WzFooter } from "@/components/wz";
 import WzAuthShell from "@/components/wz/WzAuthShell";
-import { displaySubCount } from "@/lib/social-proof";
 
 const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed", "steve"];
 const HIGHLIGHT: PersonaTier = "reed";
+const UNAVAILABLE: PersonaTier[] = ["steve"];
 
 interface Props {
   userTier: PersonaTier | null;
@@ -31,8 +31,6 @@ const FAQS: Array<[string, string]> = [
 ];
 
 export default function PrijzenClient({ userTier, isFounder }: Props) {
-  const subCount = displaySubCount(0);
-
   // Founder/CEO: geen abonnement UI
   if (isFounder) {
     return (
@@ -105,8 +103,13 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
             <p className="t-body" style={{ marginBottom: 18, fontSize: 14 }}>{reed.description}</p>
 
             <div style={{ padding: "14px 16px", background: "var(--ink-050)", borderRadius: 12, marginBottom: 18 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 2 }}>
-                Tijdelijk gratis
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                <span style={{ fontSize: 20, fontWeight: 800 }}>Gratis tijdens bèta</span>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
+                  background: "var(--wz-brand-soft)", color: "var(--wz-brand)",
+                  letterSpacing: ".04em", textTransform: "uppercase",
+                }}>bèta</span>
               </div>
               <div className="t-small">
                 Straks {formatPrice(reed.priceCents!)}/mnd — geen creditcard nodig
@@ -168,6 +171,7 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
           {VISIBLE_TIERS.map((tier) => {
             const p = PERSONAS[tier];
             const highlight = tier === HIGHLIGHT;
+            const unavailable = UNAVAILABLE.includes(tier);
 
             return (
               <div
@@ -182,12 +186,20 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
                   boxShadow: highlight
                     ? "0 20px 50px rgba(59,127,240,.18), 0 0 0 2px var(--wz-brand)"
                     : "var(--shadow-sm)",
+                  opacity: unavailable ? 0.6 : 1,
                 }}
               >
                 {highlight && (
                   <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
                     <span className="badge sun" style={{ boxShadow: "0 4px 10px rgba(255,210,26,.35)" }}>
                       ★ Meest gekozen
+                    </span>
+                  </div>
+                )}
+                {unavailable && (
+                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
+                    <span className="badge" style={{ background: "var(--ink-200)", color: "var(--text-mute)", whiteSpace: "nowrap" }}>
+                      Binnenkort beschikbaar
                     </span>
                   </div>
                 )}
@@ -206,37 +218,42 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
 
                 {/* Price box */}
                 <div style={{ padding: "14px 16px", background: "var(--ink-050)", borderRadius: 12, marginBottom: 18 }}>
-                  {p.priceCents ? (
+                  {unavailable ? (
                     <>
                       <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 2 }}>
-                        Tijdelijk gratis
+                        {formatPrice(p.priceCents!)}/mnd
                       </div>
                       <div className="t-small">
-                        Straks {formatPrice(p.priceCents)}/mnd — geen creditcard nodig
+                        Nog niet beschikbaar — komt later in 2026
                       </div>
                     </>
                   ) : (
                     <>
-                      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 2 }}>
-                        Binnenkort
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                        <span style={{ fontSize: 20, fontWeight: 800 }}>Gratis tijdens bèta</span>
+                        <span style={{
+                          fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
+                          background: "var(--wz-brand-soft)", color: "var(--wz-brand)",
+                          letterSpacing: ".04em", textTransform: "uppercase",
+                        }}>bèta</span>
                       </div>
                       <div className="t-small">
-                        Geen wachtlijst, mail zakelijk@weerzone.nl
+                        Straks {formatPrice(p.priceCents!)}/mnd — geen creditcard nodig
                       </div>
                     </>
                   )}
                 </div>
 
-                {p.priceCents ? (
+                {unavailable ? (
+                  <button disabled className="btn btn-ghost btn-block btn-lg" style={{ opacity: 0.45, cursor: "not-allowed" }}>
+                    Nog niet beschikbaar
+                  </button>
+                ) : (
                   <Link
                     href={`/app/signup?tier=${tier}`}
                     className={`btn btn-block btn-lg ${highlight ? "btn-primary" : "btn-ghost"}`}
                   >
                     Aanmelden →
-                  </Link>
-                ) : (
-                  <Link href="/zakelijk" className="btn btn-ghost btn-block btn-lg">
-                    Lees meer →
                   </Link>
                 )}
 
