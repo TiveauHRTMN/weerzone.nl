@@ -119,7 +119,6 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
   });
 
   return (
-  return (
     <div className="w-full space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">

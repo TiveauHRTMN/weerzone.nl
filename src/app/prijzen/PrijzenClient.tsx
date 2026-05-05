@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import Footer from "@/components/Footer";
 import NavBar from "@/components/NavBar";
+import { loadWeather } from "@/lib/weatherCache";
 
 const WeatherBackground = dynamic(() => import("@/components/WeatherBackground"));
 
@@ -33,25 +34,26 @@ const FAQS: Array<[string, string]> = [
   ["Wat is het verschil met Buienradar of Weerplaza?", "Weerzone is reclamevrij en is afgestemd op jouw situatie: je postcode en de voorkeuren die je bij aanmelden hebt doorgegeven."],
 ];
 
-import { useEffect, useState } from "react";
-import { getSavedCity } from "@/lib/persist-city";
-import { loadWeather } from "@/lib/weatherCache";
-
 function PageShell({ children }: { children: React.ReactNode }) {
   const [weatherCode, setWeatherCode] = useState(2);
   const [isDay, setIsDay] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    const city = getSavedCity();
-    if (city) {
-      loadWeather(city.lat, city.lon, () => {}, (fresh) => {
-        if (!cancelled && fresh) {
-          setWeatherCode(fresh.current.weatherCode);
-          setIsDay(fresh.current.isDay);
+    try {
+      const saved = localStorage.getItem("wz_city");
+      if (saved) {
+        const city = JSON.parse(saved);
+        if (city && typeof city.lat === "number" && typeof city.lon === "number") {
+          loadWeather(city.lat, city.lon, () => {}, (fresh) => {
+            if (!cancelled && fresh) {
+              setWeatherCode(fresh.current.weatherCode);
+              setIsDay(fresh.current.isDay);
+            }
+          }).catch(() => {});
         }
-      }).catch(() => {});
-    }
+      }
+    } catch {}
     return () => { cancelled = true; };
   }, []);
 
