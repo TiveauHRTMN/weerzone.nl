@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -51,17 +51,21 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
 }
 
 const LINKS = [
-  { key: "piet",    label: "Mijn Weer",      href: "/jouwweer" },
+  { key: "home",    label: "Home",           href: "/homepage" },
+  { key: "piet",    label: "Mijn Weer",      href: "/mijnweer" },
   { key: "reed",    label: "Waarschuwingen", href: "/waarschuwingen" },
   { key: "steve",   label: "Zakelijk",       href: "/zakelijk" },
-  { key: "about",   label: "About",   href: "/over" },
+  { key: "prijzen", label: "Prijzen",        href: "/prijzen" },
+  { key: "about",   label: "Over",           href: "/over" },
   { key: "contact", label: "Contact", href: "/contact" },
 ];
 
 function isActive(pathname: string, key: string) {
-  if (key === "piet")    return pathname.startsWith("/jouwweer");
+  if (key === "home")    return pathname === "/" || pathname.startsWith("/homepage");
+  if (key === "piet")    return pathname.startsWith("/mijnweer") || pathname.startsWith("/jouwweer");
   if (key === "reed")    return pathname.startsWith("/waarschuwingen");
   if (key === "steve")   return pathname.startsWith("/zakelijk");
+  if (key === "prijzen") return pathname.startsWith("/prijzen");
   if (key === "about")   return pathname.startsWith("/over");
   if (key === "contact") return pathname.startsWith("/contact");
   return false;
@@ -81,6 +85,10 @@ export default function GlobalNav() {
   const { user, tier, isFounder } = useSession();
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
 
   return (
@@ -99,7 +107,9 @@ export default function GlobalNav() {
       {/* Desktop */}
       <div className="hidden md:flex items-center max-w-[1200px] mx-auto px-5 py-2" style={{ gap: 12 }}>
 
-        <LogoBadge tier={tier} isFounder={isFounder} />
+        <Link href="/homepage" aria-label="Weerzone home">
+          <LogoBadge tier={tier} isFounder={isFounder} />
+        </Link>
 
         <div className="w-px self-stretch my-1.5" style={{ background: "rgba(0,0,0,0.08)" }} />
 
@@ -171,13 +181,16 @@ export default function GlobalNav() {
 
       {/* Mobile */}
       <div className="md:hidden flex items-center justify-between gap-2 px-4 py-2.5">
-        <LogoBadge tier={tier} isFounder={isFounder} />
+        <Link href="/homepage" aria-label="Weerzone home">
+          <LogoBadge tier={tier} isFounder={isFounder} />
+        </Link>
         <div className="flex items-center gap-2">
           <LocatieButton compact active={pathname.startsWith("/weer")} />
           <button
             type="button"
             onClick={() => setOpen(v => !v)}
             aria-label="Menu"
+            aria-expanded={open}
             className="w-9 h-9 flex items-center justify-center rounded-2xl transition-all"
             style={open
               ? { background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)", color: "var(--text-primary)" }
@@ -233,6 +246,7 @@ export default function GlobalNav() {
                 </Link>
                 <button
                   onClick={async () => {
+                    setOpen(false);
                     const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
                     await createSupabaseBrowserClient().auth.signOut();
                     window.location.href = "/";
