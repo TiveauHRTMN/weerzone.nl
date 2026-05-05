@@ -124,7 +124,7 @@ export default async function MijnWeerPage() {
         <WeatherDashboard
           initialCity={activeLoc}
           initialWeather={initialWeather}
-          slimMode={true}
+          hideWeatherInfo={true}
           topContent={
             <div className="space-y-6">
               <div className="rounded-3xl bg-white/95 backdrop-blur p-6 sm:p-8 shadow-xl border-b-4 border-b-emerald-500">
