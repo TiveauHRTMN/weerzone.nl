@@ -5,13 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function SupportBanner() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  // We delay the appearance slightly so it slides in nicely after load
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [isVisible, setIsVisible] = useState(true);
 
   if (!isVisible) return null;
 
