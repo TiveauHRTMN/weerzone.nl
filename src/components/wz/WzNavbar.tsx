@@ -9,17 +9,21 @@ import NLPulse from "../NLPulse";
 import { useSession } from "@/lib/session-context";
 
 const LINKS: Array<{ key: string; label: string; href: string }> = [
-  { key: "piet", label: "Mijn Weer", href: "/jouwweer" },
-  { key: "reed", label: "Waarschuwingen", href: "/waarschuwingen" },
-  { key: "steve", label: "Zakelijk", href: "/zakelijk" },
-  { key: "prijzen", label: "Prijzen", href: "/prijzen" },
+  { key: "piet",    label: "Mijn Weer",      href: "/mijnweer" },
+  { key: "reed",    label: "Waarschuwingen", href: "/waarschuwingen" },
+  { key: "steve",   label: "Zakelijk",       href: "/zakelijk" },
+  { key: "prijzen", label: "Prijzen",        href: "/prijzen" },
+  { key: "over",    label: "Over",           href: "/over" },
+  { key: "contact", label: "Contact",        href: "/contact" },
 ];
 
 function isActive(pathname: string, key: string): boolean {
-  if (key === "piet") return pathname.startsWith("/jouwweer");
-  if (key === "reed") return pathname.startsWith("/waarschuwingen");
-  if (key === "steve") return pathname.startsWith("/zakelijk");
+  if (key === "piet")    return pathname.startsWith("/mijnweer") || pathname.startsWith("/jouwweer");
+  if (key === "reed")    return pathname.startsWith("/waarschuwingen");
+  if (key === "steve")   return pathname.startsWith("/zakelijk");
   if (key === "prijzen") return pathname.startsWith("/prijzen");
+  if (key === "over")    return pathname === "/over";
+  if (key === "contact") return pathname === "/contact";
   return false;
 }
 

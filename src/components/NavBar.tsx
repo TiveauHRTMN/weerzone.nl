@@ -57,14 +57,20 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         </li>
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
+          <Link href="/" className="nav-item w-full">
+            <span className="label">Home</span>
+          </Link>
+        </li>
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
           <Link
-            href="/jouwweer"
+            href="/mijnweer"
             onClick={handleLockedClick}
             className={`nav-item w-full ${!hasSub ? "opacity-70" : ""}`}
           >
             <span className="label flex items-center gap-1 justify-center">
               {!hasSub && <Lock className="w-2.5 h-2.5 shrink-0" />}
-              Piet
+              Mijn Weer
             </span>
           </Link>
         </li>
@@ -77,41 +83,27 @@ export default function NavBar({ activeCity, isLocating }: Props) {
           >
             <span className="label flex items-center gap-1 justify-center">
               {!hasSub && <Lock className="w-2.5 h-2.5 shrink-0" />}
-              Reed
+              Waarschuwingen
             </span>
           </Link>
         </li>
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
           <Link href="/zakelijk" className="nav-item w-full">
-            <span className="label">Steve</span>
+            <span className="label">Zakelijk</span>
           </Link>
         </li>
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
-          <Link href="/prijzen" className="nav-item w-full">
-            <span className="label">Prijzen</span>
+          <Link href="/over" className="nav-item w-full">
+            <span className="label">Over</span>
           </Link>
         </li>
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
-          {user ? (
-            <button
-              onClick={async () => {
-                const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-                const supabase = createSupabaseBrowserClient();
-                await supabase.auth.signOut();
-                window.location.reload();
-              }}
-              className="nav-item w-full"
-            >
-              <span className="label">Log uit</span>
-            </button>
-          ) : (
-            <Link href="/app/login" className="nav-item w-full">
-              <span className="label">Login</span>
-            </Link>
-          )}
+          <Link href="/contact" className="nav-item w-full">
+            <span className="label">Contact</span>
+          </Link>
         </li>
       </ul>
     </nav>

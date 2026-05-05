@@ -1,114 +1,68 @@
-
-
-
-
-
-
-
-
-
 import type { Metadata } from "next";
 import Link from "next/link";
+import WeatherDashboard from "@/components/WeatherDashboard";
 import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact opnemen met WEERZONE? Stuur een mail naar info@weerzone.nl — we lezen alles, antwoorden op werkdagen binnen 24 uur.",
+    "Contact opnemen met WEERZONE? Mail naar info@weerzone.nl of stuur direct een bericht. We antwoorden op werkdagen meestal binnen 24 uur.",
   alternates: { canonical: "https://weerzone.nl/contact" },
 };
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
-      <div className="max-w-xl mx-auto">
-        <nav className="text-xs text-white/50 mb-6">
-          <span className="text-white/80">Contact</span>
-        </nav>
+    <main>
+      <WeatherDashboard
+        hideWeatherInfo
+        beforeFooter={
+          <div className="space-y-6">
+            <div className="rounded-3xl bg-white/95 backdrop-blur p-6 sm:p-8 shadow-xl border-b-4 border-b-sky-500">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-3 h-3 rounded-full bg-sky-500" />
+                <span className="text-xs font-black uppercase tracking-widest text-sky-600">
+                  Contact · Weerzone
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-tight mb-2">
+                Neem contact op
+              </h1>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Voor support, feedback en samenwerkingen. We antwoorden op werkdagen meestal binnen 24 uur.
+              </p>
+            </div>
 
-        <header className="mb-8">
-          <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-4">Contact</h1>
-          <p className="text-white/70 text-lg leading-relaxed">
-            Vraag, klacht, tip, samenwerking, of gewoon een compliment? Stuur een mail. We lezen alles
-            en antwoorden op werkdagen binnen 24 uur.
-          </p>
-        </header>
+            <div className="rounded-3xl bg-white/95 backdrop-blur p-6 sm:p-8 shadow-xl border border-white/70">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2">
+                E-mail
+              </p>
+              <a
+                href="mailto:info@weerzone.nl"
+                className="text-2xl sm:text-3xl font-black text-slate-900 hover:text-sky-600 transition-colors break-all"
+              >
+                info@weerzone.nl
+              </a>
+              <p className="text-sm text-slate-500 leading-relaxed mt-3">
+                Gebruik dit adres voor support, feedback en zakelijke vragen.
+              </p>
+            </div>
 
-        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mb-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-accent-orange mb-2">
-            E-mail
-          </p>
-          <a
-            href="mailto:info@weerzone.nl"
-            className="text-2xl sm:text-3xl font-black text-white hover:text-accent-orange transition-colors break-all"
-          >
-            info@weerzone.nl
-          </a>
-          <p className="text-xs text-white/50 mt-3">
-            Klik op het adres of kopieer het naar je mail-app.
-          </p>
-        </section>
+            <div className="rounded-3xl bg-white/95 backdrop-blur p-6 sm:p-8 shadow-xl border border-white/70">
+              <h2 className="text-xl font-black text-slate-900 mb-3">Direct een bericht sturen</h2>
+              <ContactForm />
+            </div>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-black text-white mb-3">Of stuur direct een bericht</h2>
-          <ContactForm />
-        </section>
-
-        <section className="space-y-4 text-sm text-white/70 leading-relaxed">
-          <div className="flex gap-3">
-            <span className="shrink-0 text-xl">💼</span>
-            <div>
-              <p className="font-bold text-white">Zakelijk / samenwerking</p>
-              <p>
-                Bedrijven die buiten werken, reclame, integraties:{" "}
-                <Link href="/zakelijk" className="text-accent-orange hover:underline">
-                  /zakelijk
+            <div className="rounded-3xl bg-white/95 backdrop-blur p-6 shadow-xl border border-white/70">
+              <p className="text-sm text-slate-500 leading-relaxed">
+                Door contact op te nemen ga je akkoord met verwerking van je bericht zoals beschreven in de{" "}
+                <Link href="/privacy" className="text-sky-600 hover:underline font-semibold">
+                  privacyverklaring
                 </Link>.
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <span className="shrink-0 text-xl">📧</span>
-            <div>
-              <p className="font-bold text-white">Piet — dagelijkse mail</p>
-              <p>
-                Gratis weerupdate elke ochtend. Aanmelden via de homepage.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <span className="shrink-0 text-xl">⚠️</span>
-            <div>
-              <p className="font-bold text-white">Reed — extreem weer alerts</p>
-              <p>
-                Extra mail zodra er iets ongebruikelijks op komst is. Aanmelden op de homepage.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <span className="shrink-0 text-xl">🔒</span>
-            <div>
-              <p className="font-bold text-white">Privacy</p>
-              <p>
-                Zie onze{" "}
-                <Link href="/privacy" className="text-accent-orange hover:underline">
-                  privacyverklaring
-                </Link>{" "}
-                voor hoe we met gegevens omgaan.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-10">
-          <Link
-            href="/"
-            className="inline-block px-6 py-3 rounded-xl bg-accent-orange text-slate-900 font-bold hover:brightness-95 transition-all"
-          >
-            ← Terug naar WEERZONE
-          </Link>
-        </div>
-      </div>
+        }
+      />
     </main>
   );
 }
