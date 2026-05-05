@@ -121,7 +121,7 @@ export default function GlobalNav() {
               <Link
                 key={l.key}
                 href={l.href}
-                className="px-3 py-1.5 rounded-2xl text-[11px] font-black uppercase transition-all"
+                className="px-3 py-1.5 rounded-2xl text-[11px] font-black uppercase transition-all whitespace-nowrap"
                 style={{
                   letterSpacing: "0.08em",
                   color: active ? "var(--text-primary)" : "rgba(15,26,44,0.5)",
