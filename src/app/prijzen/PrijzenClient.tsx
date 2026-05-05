@@ -40,20 +40,23 @@ function PageShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let lat = 52.1, lon = 5.18; // De Bilt default
     try {
       const saved = localStorage.getItem("wz_city");
       if (saved) {
         const city = JSON.parse(saved);
         if (city && typeof city.lat === "number" && typeof city.lon === "number") {
-          loadWeather(city.lat, city.lon, () => {}, (fresh) => {
-            if (!cancelled && fresh) {
-              setWeatherCode(fresh.current.weatherCode);
-              setIsDay(fresh.current.isDay);
-            }
-          }).catch(() => {});
+          lat = city.lat;
+          lon = city.lon;
         }
       }
     } catch {}
+    loadWeather(lat, lon).then((w) => {
+      if (!cancelled && w) {
+        setWeatherCode(w.current.weatherCode);
+        setIsDay(w.current.isDay);
+      }
+    }).catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
