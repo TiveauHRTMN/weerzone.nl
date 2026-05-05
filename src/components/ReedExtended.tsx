@@ -252,7 +252,7 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
           <div className="space-y-3">
             <div className="flex items-end justify-between px-1">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Spatial Meteo Maps</h3>
-              <span className="text-[10px] font-bold text-accent-cyan uppercase tracking-widest">Icon · Arome</span>
+              <span className="text-[10px] font-bold text-accent-cyan uppercase tracking-widest">Harmonie · Icon · Arome</span>
             </div>
             <MeteoMapsDashboard lat={city.lat} lon={city.lon} city={city.name} />
           </div>

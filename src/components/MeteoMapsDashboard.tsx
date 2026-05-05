@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function MeteoMapsDashboard({ lat, lon, city }: Props) {
-  const [model, setModel] = useState<"icon" | "arome">("icon");
+  const [model, setModel] = useState<"harmonie" | "icon" | "arome">("harmonie");
 
   const embedBase = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=7&level=surface&lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&marker=true&message=true`;
 
@@ -28,6 +28,12 @@ export default function MeteoMapsDashboard({ lat, lon, city }: Props) {
         </div>
         
         <div className="flex bg-black/20 rounded-lg p-1 border border-white/10">
+          <button 
+            onClick={() => setModel("harmonie")}
+            className={`px-4 py-1.5 rounded-md text-[11px] font-black uppercase tracking-widest transition-all ${model === "harmonie" ? "bg-accent-cyan/20 text-accent-cyan" : "text-white/40 hover:text-white"}`}
+          >
+            HARMONIE
+          </button>
           <button 
             onClick={() => setModel("icon")}
             className={`px-4 py-1.5 rounded-md text-[11px] font-black uppercase tracking-widest transition-all ${model === "icon" ? "bg-accent-cyan/20 text-accent-cyan" : "text-white/40 hover:text-white"}`}
