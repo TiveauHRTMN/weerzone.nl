@@ -126,9 +126,9 @@ export async function POST(req: Request) {
           try {
             const resend = new Resend(process.env.RESEND_API_KEY);
             await resend.emails.send({
-              from: "WEERZONE Zakelijk <info@weerzone.nl>",
+              from: "WEERZONE <info@weerzone.nl>",
               to: sub.email,
-              subject: "Welkom bij WEERZONE Zakelijk — je account is actief",
+              subject: "Welkom bij WEERZONE — je account is actief",
               html: `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,sans-serif;">
   <div style="max-width:480px;margin:0 auto;">

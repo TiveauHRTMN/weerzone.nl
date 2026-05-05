@@ -113,7 +113,7 @@ export async function GET(req: Request) {
             const html = getB2BEmailHtml(tier.industry as any, rawLead.businessName, city, snippet, 1);
 
             await resend.emails.send({
-              from: "Steve | WEERZONE Zakelijk <info@weerzone.nl>",
+              from: "WEERZONE <info@weerzone.nl>",
               to: contactEmail,
               subject,
               html,
