@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
 import { WzFooter } from "@/components/wz";
-import WzAuthShell from "@/components/wz/WzAuthShell";
 
 const VISIBLE_TIERS: PersonaTier[] = ["piet", "reed", "steve"];
 const HIGHLIGHT: PersonaTier = "reed";
 const UNAVAILABLE: PersonaTier[] = ["steve"];
+
+const PAGE_BG = "linear-gradient(160deg, #1a3a6e 0%, #0f2244 40%, #080f1f 100%)";
 
 interface Props {
   userTier: PersonaTier | null;
@@ -30,111 +31,104 @@ const FAQS: Array<[string, string]> = [
   ["Wat is het verschil met Buienradar of Weerplaza?", "Weerzone is reclamevrij en is afgestemd op jouw situatie: je postcode en de voorkeuren die je bij aanmelden hebt doorgegeven."],
 ];
 
+const GLASS_CARD: React.CSSProperties = {
+  background: "rgba(255,255,255,0.93)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.6)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.8)",
+};
+
 export default function PrijzenClient({ userTier, isFounder }: Props) {
-  // Founder/CEO: geen abonnement UI
   if (isFounder) {
     return (
-      <WzAuthShell
-        title={"Je hebt\nvolledige toegang."}
-        subtitle="Als founder heb je Steve-niveau toegang tot alle functies van Weerzone, nu en na de lancering."
-      >
-        <div className="animate-in fade-in slide-in-from-right-4 duration-500 text-center py-4">
-          <span className="badge sun" style={{ marginBottom: 24, display: "inline-flex" }}>★ Founder</span>
-          <h1 className="h-1 mb-3">Alles staat klaar.</h1>
-          <p className="t-body mb-8">
-            Je hebt toegang tot Piet, Reed en Steve — zonder abonnement, zonder creditcard.
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: PAGE_BG }}>
+        <div style={{ ...GLASS_CARD, maxWidth: 400, width: "100%", padding: "clamp(32px,4vw,48px)", textAlign: "center" }}>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6" style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)" }}>
+            <span className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#7c3aed" }}>★ Founder</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 mb-3" style={{ letterSpacing: "-0.02em" }}>
+            Je hebt volledige toegang.
+          </h1>
+          <p className="text-sm text-slate-500 leading-relaxed mb-8">
+            Als founder heb je Steve-niveau toegang tot alle functies van Weerzone, nu en na de lancering — zonder abonnement, zonder creditcard.
           </p>
           <Link href="/app" className="btn btn-primary btn-block btn-lg">
             Naar dashboard →
           </Link>
-        </div>
-      </WzAuthShell>
-    );
-  }
-
-  // Ingelogd als Reed of Steve: al abonnee
-  if (userTier === "reed" || userTier === "steve") {
-    const p = PERSONAS[userTier];
-    return (
-      <div className="wz-page min-h-screen">
-        <div style={{ maxWidth: 640, margin: "0 auto", padding: "clamp(60px,8vw,100px) clamp(20px,4vw,48px)", textAlign: "center" }}>
-          <span className="badge ok" style={{ marginBottom: 20 }}>Actief abonnement</span>
-          <h1 className="h-1" style={{ marginBottom: 16 }}>Je bent {p.name}-abonnee.</h1>
-          <p className="t-body" style={{ marginBottom: 32 }}>
-            {p.tagline} Je hoeft niets te doen — alles staat klaar.
-          </p>
-          <Link href="/app" className="btn btn-primary btn-lg">Naar dashboard →</Link>
         </div>
         <WzFooter />
       </div>
     );
   }
 
-  // Ingelogd als Piet: toon alleen upgrade naar Reed
+  if (userTier === "reed" || userTier === "steve") {
+    const p = PERSONAS[userTier];
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: PAGE_BG }}>
+        <div style={{ ...GLASS_CARD, maxWidth: 480, width: "100%", padding: "clamp(32px,4vw,48px)", textAlign: "center" }}>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)" }}>
+            <span className="text-[11px] font-black uppercase tracking-widest text-emerald-700">Actief abonnement</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 mb-3" style={{ letterSpacing: "-0.02em" }}>
+            Je bent {p.name}-abonnee.
+          </h1>
+          <p className="text-sm text-slate-500 leading-relaxed mb-8">
+            {p.tagline} Je hoeft niets te doen — alles staat klaar.
+          </p>
+          <Link href="/app" className="btn btn-primary btn-lg btn-block">Naar dashboard →</Link>
+        </div>
+        <WzFooter />
+      </div>
+    );
+  }
+
   if (userTier === "piet") {
-    const piet = PERSONAS.piet;
     const reed = PERSONAS.reed;
     return (
-      <div className="wz-page min-h-screen">
-        <div style={{ maxWidth: 560, margin: "0 auto", padding: "clamp(60px,8vw,100px) clamp(20px,4vw,48px)" }}>
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <span className="badge brand" style={{ marginBottom: 16 }}>Huidig abonnement</span>
-            <h1 className="h-1" style={{ marginBottom: 12 }}>Je bent Piet-abonnee.</h1>
-            <p className="t-body">Upgrade naar Reed voor persoonlijke weerswaarschuwingen.</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: PAGE_BG }}>
+        <div style={{ ...GLASS_CARD, maxWidth: 520, width: "100%", padding: "clamp(24px,3vw,36px)" }}>
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style={{ background: "rgba(59,127,240,0.1)", border: "1px solid rgba(59,127,240,0.25)" }}>
+              <span className="text-[11px] font-black uppercase tracking-widest" style={{ color: "#3b7ff0" }}>Huidig abonnement</span>
+            </div>
+            <h1 className="text-2xl font-black text-slate-900 mb-2">Je bent Piet-abonnee.</h1>
+            <p className="text-sm text-slate-500">Upgrade naar Reed voor persoonlijke weerswaarschuwingen.</p>
           </div>
 
-          {/* Upgrade card */}
-          <div className="card" style={{
-            padding: "clamp(20px,2.5vw,28px)", display: "flex", flexDirection: "column",
-            position: "relative",
-            borderColor: "var(--wz-brand)",
-            boxShadow: "0 20px 50px rgba(59,127,240,.18), 0 0 0 2px var(--wz-brand)",
-          }}>
-            <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
-              <span className="badge sun" style={{ boxShadow: "0 4px 10px rgba(255,210,26,.35)" }}>
-                ★ Upgrade beschikbaar
-              </span>
+          <div className="rounded-2xl p-5 relative" style={{ background: "rgba(59,127,240,0.06)", border: "2px solid #3b7ff0" }}>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest text-white" style={{ background: "#f59e0b" }}>★ Upgrade beschikbaar</span>
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: 24, fontWeight: 800 }}>{reed.name}</span>
-              <span className="t-micro">· {reed.label}</span>
+            <div className="flex items-baseline gap-2 mb-1 mt-2">
+              <span className="text-xl font-black text-slate-900">{reed.name}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-400">· {reed.label}</span>
             </div>
-            <h3 className="h-3" style={{ marginBottom: 12, fontSize: 17 }}>{reed.tagline}</h3>
-            <p className="t-body" style={{ marginBottom: 18, fontSize: 14 }}>{reed.description}</p>
-
-            <div style={{ padding: "14px 16px", background: "var(--ink-050)", borderRadius: 12, marginBottom: 18 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                <span style={{ fontSize: 20, fontWeight: 800 }}>Gratis tijdens bèta</span>
-                <span style={{
-                  fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
-                  background: "var(--wz-brand-soft)", color: "var(--wz-brand)",
-                  letterSpacing: ".04em", textTransform: "uppercase",
-                }}>bèta</span>
+            <h3 className="text-base font-black text-slate-900 mb-2">{reed.tagline}</h3>
+            <p className="text-sm text-slate-500 mb-4">{reed.description}</p>
+            <div className="rounded-xl p-3 mb-4" style={{ background: "rgba(0,0,0,0.04)" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg font-black text-slate-900">Gratis tijdens bèta</span>
+                <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: "rgba(59,127,240,0.12)", color: "#3b7ff0" }}>bèta</span>
               </div>
-              <div className="t-small">
-                Straks {formatPrice(reed.priceCents!)}/mnd — geen creditcard nodig
-              </div>
+              <p className="text-xs text-slate-400">Straks {formatPrice(reed.priceCents!)}/mnd — geen creditcard nodig</p>
             </div>
-
-            <Link href="/app/checkout/reed" className="btn btn-primary btn-block btn-lg">
-              Upgrade naar Reed →
-            </Link>
-
-            <ul style={{ listStyle: "none", padding: 0, margin: "20px 0 0" }}>
+            <Link href="/app/checkout/reed" className="btn btn-primary btn-block btn-lg">Upgrade naar Reed →</Link>
+            <ul className="mt-5 space-y-2">
               {reed.features.map((f, i) => (
-                <li key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10, fontSize: 14, color: "var(--text-soft)" }}>
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ flex: "0 0 auto", marginTop: 1 }}>
-                    <circle cx="9" cy="9" r="9" fill="var(--wz-brand-soft)" />
-                    <path d="M5 9.5l2.5 2.5L13 6.5" stroke="var(--wz-brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <li key={i} className="flex gap-2.5 items-start text-sm text-slate-500">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5">
+                    <circle cx="9" cy="9" r="9" fill="rgba(59,127,240,0.12)" />
+                    <path d="M5 9.5l2.5 2.5L13 6.5" stroke="#3b7ff0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {f}
                 </li>
               ))}
             </ul>
           </div>
-
-          <div style={{ textAlign: "center", marginTop: 24 }}>
-            <Link href="/app" className="btn btn-link">Terug naar dashboard</Link>
+          <div className="text-center mt-6">
+            <Link href="/app" className="btn btn-link text-slate-400">Terug naar dashboard</Link>
           </div>
         </div>
         <WzFooter />
@@ -144,30 +138,24 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
 
   // Niet ingelogd: toon alle abonnementen
   return (
-    <div className="wz-page min-h-screen">
-
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(40px,6vw,80px) clamp(20px,4vw,48px) 48px" }}>
+    <div className="min-h-screen" style={{ background: PAGE_BG }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "clamp(60px,8vw,100px) clamp(20px,4vw,48px) 48px" }}>
 
         {/* Hero */}
-        <div style={{ textAlign: "center", marginBottom: "clamp(32px,4vw,56px)" }}>
-          <h1 className="h-display" style={{ marginTop: 14, marginBottom: 14, fontSize: "clamp(32px,5vw,52px)" }}>
+        <div className="text-center mb-14">
+          <h1 className="text-white font-black mb-4" style={{ fontSize: "clamp(32px,5vw,52px)", letterSpacing: "-0.025em", lineHeight: 1.05 }}>
             Een abonnement op Weerzone
           </h1>
-          <p className="t-body" style={{ maxWidth: 640, margin: "0 auto", fontSize: "clamp(15px,1.6vw,17px)" }}>
+          <p className="mx-auto" style={{ maxWidth: 600, fontSize: "clamp(15px,1.6vw,17px)", color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
             Piet voor thuis, Reed voor waarschuwingen, Steve voor je zaak. Elke ochtend een korte weermail op jouw postcode. Geen reclame. Opzeggen kan maandelijks.
           </p>
-          <p className="t-small" style={{ maxWidth: 560, margin: "16px auto 0" }}>
+          <p className="mt-3 text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
             Nu tijdelijk gratis te proberen.
           </p>
         </div>
 
         {/* Plans */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
-          gap: 20,
-          alignItems: "stretch",
-        }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: 20, alignItems: "stretch" }}>
           {VISIBLE_TIERS.map((tier) => {
             const p = PERSONAS[tier];
             const highlight = tier === HIGHLIGHT;
@@ -176,70 +164,54 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
             return (
               <div
                 key={tier}
-                className="card"
                 style={{
+                  ...GLASS_CARD,
                   padding: "clamp(20px,2.5vw,28px)",
                   display: "flex",
                   flexDirection: "column",
                   position: "relative",
-                  borderColor: highlight ? "var(--wz-brand)" : "var(--border)",
+                  borderColor: highlight ? "#3b7ff0" : "rgba(255,255,255,0.5)",
                   boxShadow: highlight
-                    ? "0 20px 50px rgba(59,127,240,.18), 0 0 0 2px var(--wz-brand)"
-                    : "var(--shadow-sm)",
+                    ? "0 20px 50px rgba(59,127,240,.25), 0 0 0 2px #3b7ff0, inset 0 1px 0 rgba(255,255,255,0.8)"
+                    : GLASS_CARD.boxShadow,
                   opacity: unavailable ? 0.6 : 1,
                 }}
               >
                 {highlight && (
                   <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
-                    <span className="badge sun" style={{ boxShadow: "0 4px 10px rgba(255,210,26,.35)" }}>
+                    <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest text-white" style={{ background: "#f59e0b", boxShadow: "0 4px 10px rgba(245,158,11,.35)" }}>
                       ★ Meest gekozen
                     </span>
                   </div>
                 )}
                 {unavailable && (
                   <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
-                    <span className="badge" style={{ background: "var(--ink-200)", color: "var(--text-mute)", whiteSpace: "nowrap" }}>
+                    <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest" style={{ background: "rgba(0,0,0,0.12)", color: "rgba(0,0,0,0.4)", whiteSpace: "nowrap" }}>
                       Binnenkort beschikbaar
                     </span>
                   </div>
                 )}
 
-                <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
-                  <span style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.01em" }}>{p.name}</span>
-                  <span className="t-micro">· {p.label}</span>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.01em" }}>{p.name}</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">· {p.label}</span>
                 </div>
+                <h3 className="font-black text-slate-900 mb-3" style={{ fontSize: 17, lineHeight: 1.3, minHeight: 52 }}>{p.tagline}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed mb-4">{p.description}</p>
 
-                <h3 className="h-3" style={{ marginBottom: 12, minHeight: 52, fontSize: 17 }}>
-                  {p.tagline}
-                </h3>
-                <p className="t-body" style={{ marginBottom: 18, fontSize: 14 }}>
-                  {p.description}
-                </p>
-
-                {/* Price box */}
-                <div style={{ padding: "14px 16px", background: "var(--ink-050)", borderRadius: 12, marginBottom: 18 }}>
+                <div className="rounded-xl p-3 mb-4" style={{ background: "rgba(0,0,0,0.04)" }}>
                   {unavailable ? (
                     <>
-                      <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 2 }}>
-                        {formatPrice(p.priceCents!)}/mnd
-                      </div>
-                      <div className="t-small">
-                        Nog niet beschikbaar — komt later in 2026
-                      </div>
+                      <div className="text-xl font-black text-slate-900 mb-1">{formatPrice(p.priceCents!)}/mnd</div>
+                      <div className="text-xs text-slate-400">Nog niet beschikbaar — komt later in 2026</div>
                     </>
                   ) : (
                     <>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                        <span style={{ fontSize: 20, fontWeight: 800 }}>Gratis tijdens bèta</span>
-                        <span style={{
-                          fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
-                          background: "var(--wz-brand-soft)", color: "var(--wz-brand)",
-                          letterSpacing: ".04em", textTransform: "uppercase",
-                        }}>bèta</span>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl font-black text-slate-900">Gratis tijdens bèta</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: "rgba(59,127,240,0.12)", color: "#3b7ff0" }}>bèta</span>
                       </div>
-                      <div className="t-small">
-                        Straks {formatPrice(p.priceCents!)}/mnd — geen creditcard nodig
-                      </div>
+                      <div className="text-xs text-slate-400">Straks {formatPrice(p.priceCents!)}/mnd — geen creditcard nodig</div>
                     </>
                   )}
                 </div>
@@ -249,65 +221,53 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
                     Nog niet beschikbaar
                   </button>
                 ) : (
-                  <Link
-                    href={`/app/signup?tier=${tier}`}
-                    className={`btn btn-block btn-lg ${highlight ? "btn-primary" : "btn-ghost"}`}
-                  >
+                  <Link href={`/app/signup?tier=${tier}`} className={`btn btn-block btn-lg ${highlight ? "btn-primary" : "btn-ghost"}`}>
                     Aanmelden →
                   </Link>
                 )}
 
-                <ul style={{ listStyle: "none", padding: 0, margin: "20px 0 0" }}>
+                <ul className="mt-5 space-y-2 flex-1">
                   {p.features.map((f, i) => (
-                    <li key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10, fontSize: 14, color: "var(--text-soft)" }}>
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ flex: "0 0 auto", marginTop: 1 }}>
-                        <circle cx="9" cy="9" r="9" fill={highlight ? "var(--wz-brand-soft)" : "var(--ink-100)"} />
-                        <path d="M5 9.5l2.5 2.5L13 6.5" stroke={highlight ? "var(--wz-brand)" : "var(--text-soft)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <li key={i} className="flex gap-2.5 items-start text-sm text-slate-500">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0 mt-0.5">
+                        <circle cx="9" cy="9" r="9" fill={highlight ? "rgba(59,127,240,0.12)" : "rgba(0,0,0,0.06)"} />
+                        <path d="M5 9.5l2.5 2.5L13 6.5" stroke={highlight ? "#3b7ff0" : "#64748b"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       {f}
                     </li>
                   ))}
                 </ul>
-
-                <div style={{ marginTop: "auto", paddingTop: 16, fontSize: 13, color: "var(--text-mute)", fontStyle: "italic" }}>
-                  {p.audience}
-                </div>
+                <div className="mt-auto pt-4 text-[13px] italic text-slate-400">{p.audience}</div>
               </div>
             );
           })}
         </div>
 
         {/* Zo werkt het */}
-        <div style={{ marginTop: "clamp(48px,6vw,80px)" }}>
-          <h2 className="h-1" style={{ textAlign: "center", marginBottom: 32, fontSize: "clamp(26px,3vw,34px)" }}>
+        <div style={{ marginTop: "clamp(56px,7vw,88px)" }}>
+          <h2 className="text-white font-black text-center mb-8" style={{ fontSize: "clamp(26px,3vw,34px)", letterSpacing: "-0.02em" }}>
             Zo werkt het
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
             {STEPS.map(([n, t, d]) => (
-              <div key={n} style={{ padding: 24, background: "#fff", borderRadius: 18, border: "1px solid var(--border)" }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: "var(--wz-brand)", color: "#fff",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  fontWeight: 800, marginBottom: 14,
-                }}>{n}</div>
-                <div className="h-3" style={{ marginBottom: 6 }}>{t}</div>
-                <p className="t-small">{d}</p>
+              <div key={n} style={{ ...GLASS_CARD, padding: 24 }}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center font-black text-white text-sm mb-4" style={{ background: "#3b7ff0" }}>{n}</div>
+                <div className="font-black text-slate-900 mb-2" style={{ fontSize: 16 }}>{t}</div>
+                <p className="text-sm text-slate-500 leading-relaxed">{d}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* FAQ */}
-        <div style={{ marginTop: "clamp(48px,6vw,80px)" }}>
-          <h2 className="h-1" style={{ textAlign: "center", marginBottom: 32, fontSize: "clamp(26px,3vw,34px)" }}>
+        <div style={{ marginTop: "clamp(56px,7vw,88px)" }}>
+          <h2 className="text-white font-black text-center mb-8" style={{ fontSize: "clamp(26px,3vw,34px)", letterSpacing: "-0.02em" }}>
             Veelgestelde vragen
           </h2>
           <div style={{ maxWidth: 760, margin: "0 auto" }}>
             <FAQ items={FAQS} />
           </div>
         </div>
-
       </div>
 
       <WzFooter />
@@ -318,31 +278,21 @@ export default function PrijzenClient({ userTier, isFounder }: Props) {
 function FAQ({ items }: { items: Array<[string, string]> }) {
   const [open, setOpen] = useState(0);
   return (
-    <div style={{ display: "grid", gap: 8 }}>
+    <div className="space-y-2">
       {items.map(([q, a], i) => (
-        <div key={i} className="card" style={{ overflow: "hidden", padding: 0 }}>
+        <div key={i} style={{ ...GLASS_CARD, overflow: "hidden", padding: 0 }}>
           <button
             type="button"
             onClick={() => setOpen(open === i ? -1 : i)}
-            style={{
-              width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
-              gap: 12, padding: "18px 20px", background: "transparent", border: 0,
-              cursor: "pointer", textAlign: "left", font: "inherit",
-            }}
+            className="w-full flex justify-between items-center gap-3 text-left"
+            style={{ padding: "18px 20px", background: "transparent", border: 0, cursor: "pointer", font: "inherit" }}
           >
-            <span style={{ fontWeight: 700, fontSize: 15 }}>{q}</span>
-            <span style={{
-              width: 24, height: 24, borderRadius: "50%", background: "var(--ink-100)",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-              fontSize: 14, fontWeight: 800, flexShrink: 0,
-              transform: open === i ? "rotate(45deg)" : "rotate(0)",
-              transition: "transform .2s",
-            }}>+</span>
+            <span className="font-black text-slate-900 text-sm">{q}</span>
+            <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-black text-slate-400 shrink-0"
+              style={{ background: "rgba(0,0,0,0.06)", transform: open === i ? "rotate(45deg)" : "rotate(0)", transition: "transform .2s" }}>+</span>
           </button>
           {open === i && (
-            <div style={{ padding: "0 20px 18px", color: "var(--text-soft)", fontSize: 14, lineHeight: 1.6 }}>
-              {a}
-            </div>
+            <div className="text-sm text-slate-500 leading-relaxed" style={{ padding: "0 20px 18px" }}>{a}</div>
           )}
         </div>
       ))}

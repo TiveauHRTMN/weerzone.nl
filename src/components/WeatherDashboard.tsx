@@ -39,6 +39,7 @@ interface DashboardProps {
   beforeFooter?: React.ReactNode;
   titleOverride?: string;
   hideWeatherInfo?: boolean;
+  slimMode?: boolean;
 }
 
 function getSavedCity(): City | null {
@@ -103,7 +104,7 @@ const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
   );
 };
 
-export default function WeatherDashboard({ initialCity, initialWeather, topContent, beforeFooter, titleOverride, hideWeatherInfo }: DashboardProps) {
+export default function WeatherDashboard({ initialCity, initialWeather, topContent, beforeFooter, titleOverride, hideWeatherInfo, slimMode }: DashboardProps) {
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
@@ -278,6 +279,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
         <div className="flex flex-col gap-6 animate-fade-in">
           {!hideWeatherInfo && (
             <>
+              {!slimMode && (<>
               {/* ACTUEEL SECTION: HERO SIZE */}
               <div className="card overflow-hidden relative group shadow-2xl border-white/40">
             <div className="p-8 sm:p-12 relative z-[2] pt-12 sm:pt-20">
@@ -450,12 +452,13 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
 
           <EmailSubscribe city={city} />
           <AffiliateCard weather={weather} placeName={city.name} />
+              </>)}
 
-          {/* PIET GATE: GRID & RADAR */}
+          {/* PIET GATE: HOURLY STRIP (+ radar in full mode) */}
           <PremiumGate tierRequired="piet">
             <div className="space-y-6">
-              {/* Rain radar */}
-              {weather.minutely && weather.minutely.length > 0 && (
+              {/* Rain radar — full mode only */}
+              {!slimMode && weather.minutely && weather.minutely.length > 0 && (
                 <div className="card p-5 border-white/40 shadow-xl overflow-hidden">
                   <div className="flex items-center gap-2 mb-4 px-1">
                     <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
@@ -468,7 +471,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
               {/* Hourly forecast */}
               <div className="card p-5 sm:p-6 border-white/40 shadow-xl">
                 <div className="flex justify-between items-center mb-6 px-1">
-                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">Uur-voor-uur Details</h3>
+                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">48 uur · Uur-voor-uur</h3>
                   <div className="flex items-center gap-0.5 rounded-2xl border border-white/60 p-0.5" style={{ background: "rgba(255,255,255,0.3)" }}>
                     {[
                       { k: "temp", i: <Thermometer className="w-3.5 h-3.5" /> },
@@ -492,7 +495,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
                 </div>
 
                 <div className="relative">
-                <div ref={hourlyScrollRef} className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
+                <div ref={hourlyScrollRef} className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2" style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}>
                   {(() => {
                     const nowHour = new Date()
                       .toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" })
@@ -505,7 +508,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
                     return (
                       <div
                         key={hour.time}
-                        className="flex flex-col items-center gap-2 rounded-2xl border px-2.5 py-3 snap-start shrink-0 w-[72px] transition-all"
+                        className="flex flex-col items-center gap-2 rounded-2xl border px-2.5 py-3 shrink-0 w-[72px] transition-all"
                         style={{
                           background: isNow ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.10)",
                           borderColor: isNow ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
@@ -538,8 +541,8 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
             </div>
           </PremiumGate>
 
-          {/* REED GATE: EXTREMITIES & CAPE */}
-          <PremiumGate tierRequired="reed">
+          {/* REED GATE: EXTREMITIES & CAPE — full mode only */}
+          {!slimMode && <PremiumGate tierRequired="reed">
             {(() => {
               const cape = weather.hourly[0]?.cape ?? 0;
               const precip = weather.current.precipitation;
@@ -582,7 +585,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
                 </div>
               );
             })()}
-          </PremiumGate>
+          </PremiumGate>}
           </>
           )}
         </div>
