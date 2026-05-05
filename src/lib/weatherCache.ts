@@ -124,8 +124,9 @@ export async function loadWeather(
   const cached = readCache(lat, lon);
   const now = Date.now();
 
-  // FRESH cache — direct terug, geen netwerk
-  if (cached && now - cached.ts < FRESH_MS) {
+  // FRESH cache — direct terug, maar niet als forceHighRes en modellen ontbreken
+  const cachedHasModels = cached?.weather.hourly?.[0]?.models?.icon !== undefined;
+  if (cached && now - cached.ts < FRESH_MS && (!forceHighRes || cachedHasModels)) {
     if (!cached.weather.summaryVerdict && onSummary) {
       getAiVerdict(cached.weather)
         .then((v) => { patchCacheSummary(lat, lon, v); onSummary(v); })
@@ -140,7 +141,7 @@ export async function loadWeather(
   }
 
   // STALE cache — toon direct, revalideer op achtergrond (SWR)
-  if (cached && now - cached.ts < STALE_MS) {
+  if (cached && now - cached.ts < STALE_MS && (!forceHighRes || cachedHasModels)) {
     if (!revalidating.has(k)) {
       revalidating.add(k);
       fetchAndCache(lat, lon, onSummary, onNeural)

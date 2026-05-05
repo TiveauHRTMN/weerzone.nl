@@ -403,9 +403,12 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity, 
   const narrativeTitle = wws?.piet_update?.title || "Het volledige weerverhaal";
   const narrativeClosing = wws?.piet_update?.closing || "— Piet, voor Weerzone";
 
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-  const inHourRange = (h: HourlyForecast, dateStr: string, from: number, to: number) => { if (h.time.slice(0, 10) !== dateStr) return false; const hr = new Date(h.time).getHours(); return hr >= from && hr < to; };
+  const _pad = (n: number) => String(n).padStart(2, "0");
+  const _now = new Date();
+  const todayStr = `${_now.getFullYear()}-${_pad(_now.getMonth() + 1)}-${_pad(_now.getDate())}`;
+  const _tom = new Date(_now); _tom.setDate(_tom.getDate() + 1);
+  const tomorrowStr = `${_tom.getFullYear()}-${_pad(_tom.getMonth() + 1)}-${_pad(_tom.getDate())}`;
+  const inHourRange = (h: HourlyForecast, dateStr: string, from: number, to: number) => { if (h.time.slice(0, 10) !== dateStr) return false; const hr = parseInt(h.time.slice(11, 13), 10); return hr >= from && hr < to; };
   const futureOnly = (h: HourlyForecast) => new Date(h.time).getTime() >= Date.now() - 30 * 60 * 1000;
 
   const dayparts: DaypartSummary[] = [
