@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ALL_PLACES, findPlace, placeSlug, nearbyPlaces, PROVINCE_LABELS, type Province } from "@/lib/places-data";
+import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
 import ProvinceTopCities from "@/components/ProvinceTopCities";
@@ -8,7 +9,6 @@ import LocalComparison from "@/components/LocalComparison";
 import ZakelijkCTA from "@/components/ZakelijkCTA";
 import { getLocationSEOContent } from "@/app/actions";
 import { fetchWeatherData } from "@/lib/weather";
-import { getWeatherDescription } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import Link from "next/link";
@@ -151,78 +151,14 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
     }
   }
 
-  // Structured data: WeatherForecast (voor Google rich results)
-  const weatherForecastLd = {
-    "@context": "https://schema.org",
-    "@type": "WeatherForecast",
-    "name": `Weersverwachting ${place.name}`,
-    "url": `https://weerzone.nl/weer/${province}/${slug}`,
-    "datePublished": new Date().toISOString(),
-    "dateModified": new Date().toISOString(),
-    "contentLocation": {
-      "@type": "City",
-      "name": place.name,
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": place.lat,
-        "longitude": place.lon,
-      }
-    },
-    "currentWeather": initialWeather ? {
-      "@type": "PropertyValue",
-      "name": "Temperatuur",
-      "value": `${initialWeather.current.temperature}°C`,
-      "description": getWeatherDescription(initialWeather.current.weatherCode)
-    } : undefined,
-    "forecast": initialWeather?.daily.slice(0, 3).map(d => ({
-      "@type": "PropertyValue",
-      "name": d.date,
-      "value": `${d.tempMax}°C / ${d.tempMin}°C`,
-      "description": getWeatherDescription(d.weatherCode)
-    })),
-    "provider": {
-      "@type": "Organization",
-      "name": "WEERZONE",
-      "url": "https://weerzone.nl",
-      "logo": "https://weerzone.nl/weerzone-icon.png",
-    },
-  };
+  const weatherPageLd = schemaCityWeatherPage({ placeName: place.name, lat: place.lat, lon: place.lon, province, slug });
 
-  // FAQ Schema voor ALLE locaties (SEO Boost)
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: `Wat is de weersverwachting voor ${place.name} de komende 48 uur?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `In ${place.name} tonen wij een per uur bijgewerkte verwachting voor de komende 48 uur, op 1 bij 1 kilometer precies. Bekijk temperatuur, wind en regen voor uw exacte locatie.`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `Wanneer gaat het regenen in ${place.name}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `De neerslagverwachting voor ${place.name} vind je per uur op WEERZONE. Onze data toont exact wanneer buien beginnen en eindigen op straatniveau.`,
-        },
-      },
-    ],
-  };
-
-  // Breadcrumb
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
-      { "@type": "ListItem", position: 2, name: "Weer", item: "https://weerzone.nl/weer" },
-      { "@type": "ListItem", position: 3, name: provLabel, item: `https://weerzone.nl/weer/${province}` },
-      { "@type": "ListItem", position: 4, name: place.name, item: `https://weerzone.nl/weer/${province}/${slug}` },
-    ],
-  };
+  const breadcrumbLd = schemaBreadcrumb([
+    { name: "WEERZONE", item: "https://weerzone.nl" },
+    { name: "Weer", item: "https://weerzone.nl/weer" },
+    { name: provLabel, item: `https://weerzone.nl/weer/${province}` },
+    { name: place.name, item: `https://weerzone.nl/weer/${province}/${slug}` },
+  ]);
 
   const city = { name: place.name, lat: place.lat, lon: place.lon };
   const hermesSEO = await getHermesSEO(place.name, province);
@@ -231,16 +167,11 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   return (
     <>
-      <script 
-        type="application/ld+json" 
-        dangerouslySetInnerHTML={{ 
-          __html: JSON.stringify([
-            weatherForecastLd,
-            ...(faqLd ? [faqLd] : []),
+      <script {...schemaLd([
+            weatherPageLd,
             breadcrumbLd,
-            ...(hermesSEO?.json_ld ? [hermesSEO.json_ld] : [])
-          ]) 
-        }} 
+            ...(hermesSEO?.json_ld ? [hermesSEO.json_ld] : []),
+          ])}
       />
       <main>
         {/* Breadcrumb navigatie */}

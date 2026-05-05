@@ -141,7 +141,16 @@
       "mcp__claude_ai_Vercel__get_runtime_logs",
       "Bash(curl -s \"https://api.open-meteo.com/v1/forecast?latitude=52.74&longitude=4.91&current=temperature_2m&forecast_days=1\")",
       "Bash(curl -s --max-time 20 \"https://api.open-meteo.com/v1/forecast?latitude=52.74&longitude=4.91&current=temperature_2m,weather_code,precipitation,wind_speed_10m,wind_gusts_10m,apparent_temperature,cloud_cover,wind_direction_10m,is_day,relative_humidity_2m&hourly=temperature_2m,weather_code,precipitation,wind_speed_10m,cape,apparent_temperature&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,sunrise,sunset,uv_index_max,sunshine_duration&minutely_15=precipitation&forecast_minutely_15=96&timezone=Europe%2FAmsterdam&forecast_days=2&forecast_hours=48&cache=no-store\")",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "WebFetch(domain:www.knmi.nl)",
+      "Bash(grep -oE 'data-[a-z]+=\"[^\"]{1,80}\"|\"warningLevel\":[^,}]+|\"validFrom\":[^,}]+|\"validUntil\":[^,}]+|\"message\":\"[^\"]{1,150}\"|class=\"[a-zA-Z_-]*warning[a-zA-Z_-]*\"' /c/Users/rwnhr/AppData/Local/Temp/knmi.html)",
+      "Bash(grep -oE \"warningOverview|warningTimeline|window\\\\\\\\._|window\\\\\\\\.__\" /c/Users/rwnhr/AppData/Local/Temp/knmi.html)",
+      "Bash(awk '/warning-overview--container/{f=1} f{print; n++; if\\(n>120\\)exit}' /c/Users/rwnhr/AppData/Local/Temp/knmi.html)",
+      "Bash(awk '/warning-overview--container/{f=1} f{print; n++; if\\(n>30\\)exit}' /c/Users/rwnhr/AppData/Local/Temp/knmi_g.html)",
+      "Bash(grep -oE \"level [0-9]+|Level [0-9]+|threat_level|class=\\\\\"forecast|class=\\\\\"level|VALID|Issued|http[s]?://[^\\\\\"' ]*\\\\\\\\.\\(xml|json|rss\\)[^\\\\\"' ]*\" /c/Users/rwnhr/AppData/Local/Temp/estofex.html)",
+      "Bash(where vercel *)",
+      "Bash(npx --yes vercel --version)",
+      "Bash(npx --yes vercel deploy --prod --yes)"
     ]
   }
 }

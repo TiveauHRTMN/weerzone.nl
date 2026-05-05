@@ -65,20 +65,6 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
         "url": `https://weerzone.nl/weer/${province}/${placeSlug(place.name)}`
       }))
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": `Wat is de weersverwachting voor ${label}?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `De weersverwachting voor ${label} wordt elke 10 minuten bijgewerkt. Wij bieden een per uur gespecificeerde voorspelling op 1 bij 1 kilometer, voor alle locaties in de provincie.`
-          }
-        }
-      ]
-    }
   ];
 
   // Piet's Regionale Uitbrander (Provincie Roast 1.0)

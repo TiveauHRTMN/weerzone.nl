@@ -1,6 +1,7 @@
 import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "48 uur weer voor keuzes vandaag en morgen | WEERZONE",
@@ -24,24 +25,12 @@ export default function FortyEightPage() {
     "Apeldoorn", "Enschede"
   ].map(name => ALL_PLACES.find(p => p.name === name)).filter(Boolean);
 
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Waarom toont WEERZONE maximaal 48 uur?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Voorbij 48 uur neemt de onzekerheid toe. WEERZONE focust daarom op de periode waarin weerdata het meest bruikbaar is voor concrete keuzes vandaag en morgen.",
-        },
-      },
-    ],
-  };
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script {...schemaLd([
+        schemaWebPage({ name: "48 uur weer voor keuzes vandaag en morgen", url: "https://weerzone.nl/weer/48-uur", description: "Waarom WEERZONE focust op de komende 48 uur: de periode waarin weerdata het meest bruikbaar is voor planning per uur." }),
+        schemaBreadcrumb([{ name: "WEERZONE", item: "https://weerzone.nl" }, { name: "Weer", item: "https://weerzone.nl/weer" }, { name: "48 uur" }]),
+      ])} />
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <nav className="text-xs text-white/50 mb-6 font-bold uppercase">

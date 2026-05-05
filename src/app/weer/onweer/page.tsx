@@ -1,6 +1,7 @@
 import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Onweer vandaag in Nederland — live CAPE-waarden per uur | WEERZONE",
@@ -25,24 +26,12 @@ export default function OnweerPage() {
     "Apeldoorn", "Enschede"
   ].map(name => ALL_PLACES.find(p => p.name === name)).filter(Boolean);
 
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Wat is een CAPE-waarde?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "CAPE (Convective Available Potential Energy) meet hoeveel energie er in de atmosfeer zit om onweer te vormen. Onder 500 is rustig. 1500-2500 is serieus onweer.",
-        },
-      },
-    ],
-  };
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script {...schemaLd([
+        schemaWebPage({ name: "Onweer vandaag in Nederland", url: "https://weerzone.nl/weer/onweer", description: "Onweer vandaag in Nederland? Bekijk live de CAPE-waarden (onweersenergie) per uur per stad." }),
+        schemaBreadcrumb([{ name: "WEERZONE", item: "https://weerzone.nl" }, { name: "Weer", item: "https://weerzone.nl/weer" }, { name: "Onweer" }]),
+      ])} />
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <nav className="text-xs text-white/50 mb-6 font-bold uppercase">

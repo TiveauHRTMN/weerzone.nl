@@ -1,6 +1,7 @@
 import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Regen vandaag in Nederland — wanneer wordt het droog? | WEERZONE",
@@ -25,24 +26,12 @@ export default function RegenPage() {
     "Apeldoorn", "Enschede"
   ].map(name => ALL_PLACES.find(p => p.name === name)).filter(Boolean);
 
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Wanneer stopt de regen?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "De uurlijkse neerslagverwachting op WeerZone laat exact zien wanneer de buien eindigen — op 1 bij 1 kilometer nauwkeurig voor uw locatie.",
-        },
-      },
-    ],
-  };
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script {...schemaLd([
+        schemaWebPage({ name: "Regen vandaag in Nederland", url: "https://weerzone.nl/weer/regen", description: "Regen vandaag in Nederland? Bekijk per uur, per stad, wanneer de bui stopt en wanneer het weer droog is." }),
+        schemaBreadcrumb([{ name: "WEERZONE", item: "https://weerzone.nl" }, { name: "Weer", item: "https://weerzone.nl/weer" }, { name: "Regen" }]),
+      ])} />
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
         <div className="max-w-3xl mx-auto">
           <nav className="text-xs text-white/50 mb-6 font-bold uppercase">

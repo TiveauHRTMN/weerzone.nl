@@ -98,6 +98,48 @@ import { getSupabase } from "@/lib/supabase";
 import AffiliateBanner from "@/components/AffiliateBanner";
 import GlobalNav from "@/components/wz/GlobalNav";
 
+const globalSchemasLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "WEERZONE",
+    url: "https://weerzone.nl",
+    logo: "https://weerzone.nl/weerzone-icon.png",
+    description: "Nederlandse hyperlocale weerdienst voor 48-uur weersverwachtingen per stad en provincie.",
+    areaServed: { "@type": "Country", name: "Nederland" },
+    inLanguage: "nl-NL",
+    sameAs: [
+      "https://www.youtube.com/@weerzone",
+      "https://x.com/weerzone",
+      "https://www.instagram.com/weerzone",
+      "https://www.tiktok.com/@weerzone",
+      "https://www.reddit.com/r/weerzone",
+      "https://www.wikidata.org/wiki/Q139675943"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "WEERZONE",
+    url: "https://weerzone.nl",
+    applicationCategory: "WeatherApplication",
+    operatingSystem: "Web, iOS, Android",
+    inLanguage: "nl-NL",
+    description: "Hyperlokale 48-uur weersverwachting voor alle Nederlandse steden en provincies, vertaald naar praktische keuzes.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "EUR",
+      description: "Gratis 48-uurs weerbericht op weerzone.nl",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "WEERZONE",
+      url: "https://weerzone.nl",
+    },
+  },
+];
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -124,6 +166,10 @@ export default async function RootLayout({
         <meta name="theme-color" content="#4a9ee8" />
       </head>
       <body className="min-h-screen">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchemasLd) }}
+        />
         <Script
           id="adsense-loader"
           strategy="lazyOnload"

@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://weerzone.nl/weer" },
 };
 
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
+    { "@type": "ListItem", position: 2, name: "Weer in Nederland", item: "https://weerzone.nl/weer" },
+  ],
+};
+
 export default function WeerIndexPage() {
   const provinces = Object.entries(PROVINCE_LABELS).map(([id, label]) => ({
     id: id as Province,
@@ -32,6 +41,11 @@ export default function WeerIndexPage() {
   ];
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <nav className="text-xs text-white/50 mb-6 font-bold uppercase tracking-widest">
@@ -100,5 +114,6 @@ export default function WeerIndexPage() {
         </section>
       </div>
     </main>
+    </>
   );
 }

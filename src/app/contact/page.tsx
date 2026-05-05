@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import ContactForm from "@/components/ContactForm";
+import { schemaContactPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -13,6 +14,13 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <main>
+      <script {...schemaLd([
+        schemaContactPage(),
+        schemaBreadcrumb([
+          { name: "WEERZONE", item: "https://weerzone.nl" },
+          { name: "Contact", item: "https://weerzone.nl/contact" },
+        ]),
+      ])} />
       <WeatherDashboard
         hideWeatherInfo
         beforeFooter={

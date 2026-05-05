@@ -35,8 +35,7 @@ const FAQS: Array<[string, string]> = [
 
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
-      <WeatherBackground weatherCode={2} isDay={true} />
+    <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       <NavBar />
       <div className="relative z-10 pt-24">
         {children}

@@ -5,14 +5,6 @@
       "schedule": "0 7 * * *"
     },
     {
-      "path": "/api/cron/piet-briefing",
-      "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/cron/weather-image",
-      "schedule": "0 6 * * *"
-    },
-    {
       "path": "/api/b2b/discover",
       "schedule": "0 7 * * 1-5"
     },
@@ -21,32 +13,8 @@
       "schedule": "0 9 * * 1-5"
     },
     {
-      "path": "/api/cron/smart-agent",
-      "schedule": "0 11 * * *"
-    },
-    {
       "path": "/api/cron/amazon-refresh",
       "schedule": "0 4 * * *"
-    },
-    {
-      "path": "/api/cron/persona-briefs",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/social-post",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/piet-morning-email",
-      "schedule": "30 5 * * *"
-    },
-    {
-      "path": "/api/cron/reed-alert-email",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/openclaw-harvester",
-      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/discovery-engine",

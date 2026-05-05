@@ -3,6 +3,7 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 import { notFound } from "next/navigation";
+import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 
 interface Theme {
   slug: string;
@@ -76,9 +77,23 @@ export default async function ThemePage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <WeatherDashboard 
-      initialCity={deBilt} 
-      initialWeather={weather} 
+    <>
+      <script {...schemaLd([
+        schemaWebPage({
+          name: theme.title.split("|")[0].trim(),
+          url: `https://weerzone.nl/weer/themas/${slug}`,
+          description: theme.metaDescription,
+          dateModified: new Date().toISOString(),
+        }),
+        schemaBreadcrumb([
+          { name: "WEERZONE", item: "https://weerzone.nl" },
+          { name: "Weer", item: "https://weerzone.nl/weer" },
+          { name: theme.title.split("|")[0].trim(), item: `https://weerzone.nl/weer/themas/${slug}` },
+        ]),
+      ])} />
+    <WeatherDashboard
+      initialCity={deBilt}
+      initialWeather={weather}
       titleOverride={theme.title.split("|")[0].trim()}
       beforeFooter={
         <div className="mt-12 mb-20 px-6 max-w-2xl mx-auto">
@@ -100,5 +115,6 @@ export default async function ThemePage({ params }: { params: Promise<{ slug: st
         </div>
       }
     />
+    </>
   );
 }

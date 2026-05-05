@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Building2, Clock, TrendingUp, Shield, Zap, BarChart3, Mail } from "lucide-react";
 import B2BSignupForm from "@/components/B2BSignupForm";
 import WeatherDashboard from "@/components/WeatherDashboard";
+import { schemaService, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "WEERZONE Zakelijk — Het weer, maar dan echt",
@@ -79,6 +80,22 @@ const FEATURES = [
 export default function ZakelijkPage() {
   return (
     <main>
+      <script {...schemaLd([
+        schemaService({
+          name: "WEERZONE Zakelijk",
+          alternateName: "Steve",
+          description:
+            "Dagelijkse zakelijke weermail en live dashboard voor bedrijven die buiten werken. 48 uur vooruit, op 1 bij 1 kilometer, vertaald naar inkoop-, rooster- en operationele beslissingen.",
+          url: "https://weerzone.nl/zakelijk",
+          serviceType: "WeatherInformationService",
+          audience: "Bedrijven — horeca, bouw, transport, evenementen, agrarisch",
+          offers: { price: "499.00", priceCurrency: "EUR" },
+        }),
+        schemaBreadcrumb([
+          { name: "WEERZONE", item: "https://weerzone.nl" },
+          { name: "Zakelijk", item: "https://weerzone.nl/zakelijk" },
+        ]),
+      ])} />
       <WeatherDashboard
         hideWeatherInfo={true}
         beforeFooter={

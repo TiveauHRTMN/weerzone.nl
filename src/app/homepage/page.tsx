@@ -19,59 +19,6 @@ const jsonLd = {
   name: "WEERZONE",
   url: "https://weerzone.nl",
   description: "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Hyperlokaal, tot 48 uur vooruit.",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: "https://weerzone.nl/weer/{city}",
-    "query-input": "required name=city",
-  },
-};
-
-const orgLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "WEERZONE",
-  url: "https://weerzone.nl",
-  logo: "https://weerzone.nl/weerzone-icon.png",
-  sameAs: [],
-};
-
-const faqLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Wat is WEERZONE?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "WEERZONE is een hyperlokale weerhulp voor beslissingen vandaag en morgen. Je ziet wat het weer betekent voor fietsen, buiten werken, terras, strand, tuin en waarschuwingen, tot 48 uur vooruit.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Waarom maar 48 uur vooruit?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Omdat de komende 48 uur de periode is waarin weersverwachtingen het nuttigst zijn voor concrete keuzes. Verder vooruit kan nog richting geven, maar is minder geschikt voor planning per uur.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Waarom is WEERZONE zo nauwkeurig?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "We combineren lokale weerdata, modelvergelijking en een praktische vertaalslag naar wat je vandaag en morgen kunt doen. Daardoor krijg je geen generieke samenvatting, maar informatie die echt bruikbaar is op locatie.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Is het gratis?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "De 48-uurs voorspelling op de homepage is gratis en met advertenties. Een abonnement (Piet, Reed of Steve) is tijdelijk gratis. Vroege aanmelders houden hun introductieprijs. Abonnees krijgen de mails en het dashboard zonder advertenties.",
-      },
-    },
-  ],
 };
 
 export default async function Home() {
@@ -84,7 +31,7 @@ export default async function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, orgLd, faqLd]) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main>
         <WeatherDashboard
