@@ -23,6 +23,7 @@ import AffiliateCard from "./AffiliateCard";
 import AmazonStickyBar from "./AmazonStickyBar";
 import PietInlineTip from "./PietInlineTip";
 import EmailSubscribe from "./EmailSubscribe";
+import SupportCard from "./SupportCard";
 import Footer from "./Footer";
 import dynamic from "next/dynamic";
 
@@ -368,6 +369,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
             </div>
           </Link>
 
+          <SupportCard />
           <EmailSubscribe city={city} />
           <AffiliateCard weather={weather} placeName={city.name} />
               </>)}
