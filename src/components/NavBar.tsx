@@ -95,6 +95,12 @@ export default function NavBar({ activeCity, isLocating }: Props) {
         </li>
         <li className="nav-divider" />
         <li className="flex-none sm:flex-1">
+          <Link href="/prijzen" className="nav-item w-full">
+            <span className="label">Prijzen</span>
+          </Link>
+        </li>
+        <li className="nav-divider" />
+        <li className="flex-none sm:flex-1">
           <Link href="/over" className="nav-item w-full">
             <span className="label">Over</span>
           </Link>
