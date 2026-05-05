@@ -33,11 +33,21 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  turbopack: {},
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    cpus: 1,
+  },
   async redirects() {
     return [
-      { source: "/piet", destination: "/jouwweer", permanent: true },
+      { source: "/piet", destination: "/mijnweer", permanent: true },
       { source: "/reed", destination: "/waarschuwingen", permanent: true },
     ];
+  },
+  webpack(config) {
+    return config;
   },
   async headers() {
     return [

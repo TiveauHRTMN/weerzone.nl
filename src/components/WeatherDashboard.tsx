@@ -35,6 +35,7 @@ const RainRadar = dynamic(() => import("./RainRadar"), {
 interface DashboardProps {
   initialCity?: City;
   initialWeather?: WeatherData;
+  topContent?: React.ReactNode;
   beforeFooter?: React.ReactNode;
   titleOverride?: string;
   hideWeatherInfo?: boolean;
@@ -102,7 +103,7 @@ const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
   );
 };
 
-export default function WeatherDashboard({ initialCity, initialWeather, beforeFooter, titleOverride, hideWeatherInfo }: DashboardProps) {
+export default function WeatherDashboard({ initialCity, initialWeather, topContent, beforeFooter, titleOverride, hideWeatherInfo }: DashboardProps) {
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
@@ -130,7 +131,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   //
   // We overschrijven de SSR-initialCity altijd als er een opgeslagen city
   // is — zo zien gebruikers met een eerder gekozen plaats nooit per ongeluk
-  // de SSR-fallback (De Bilt / Amsterdam) op pagina's als /jouwweer of
+  // de SSR-fallback (De Bilt / Amsterdam) op pagina's als /mijnweer of
   // /waarschuwingen. De effect verderop schrijft direct ook cookies, dus
   // de volgende navigatie is meteen correct via SSR.
   useEffect(() => {
@@ -216,7 +217,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
   useEffect(() => {
     // persistCity() schrijft localStorage EN cookies — zodat SSR-pagina's
-    // (/jouwweer, /waarschuwingen, /weer/[province]/[place]) op de juiste
+    // (/mijnweer, /waarschuwingen, /weer/[province]/[place]) op de juiste
     // locatie renderen na een navigatie. Voorheen werd alleen localStorage
     // gezet, waardoor SSR-routes terugvielen op de hardcoded default.
     persistCity({ name: city.name, lat: city.lat, lon: city.lon });
@@ -268,12 +269,11 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
   const narrative = wws?.piet_update?.content
     || (summaryWords >= 20 ? weather.summaryVerdict : null)
     || getMainCommentary(weather);
-
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
-        
+        {topContent}
 
         <div className="flex flex-col gap-6 animate-fade-in">
           {!hideWeatherInfo && (
@@ -284,7 +284,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 mb-12">
                 <div className="flex flex-col items-start">
                   <div className="flex items-center gap-2 mb-6">
-                    <span className="text-[12px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-3 py-1 rounded">Actueel</span>
+                    <span className="text-[12px] font-black uppercase tracking-[0.3em] text-black bg-black/5 px-3 py-1 rounded">Actueel weer</span>
                     {wws && (
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -309,7 +309,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
                    <span className="text-4xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode)}</span>
                    <span className="text-lg font-bold text-text-secondary bg-black/5 px-4 py-1.5 rounded-full shadow-inner">Voelt als {weather.current.feelsLike}°</span>
                  </div>
-              </div>
+               </div>
             </div>
           </div>
 
@@ -319,7 +319,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
-                  {wws ? "Piet — Live Analyse" : "Samenvatting"}
+                  {wws ? "Piet — Live Analyse" : "Wat betekent dit vandaag?"}
                 </span>
               </div>
               <p className="text-base font-medium text-text-primary leading-relaxed">{narrative}</p>
@@ -352,7 +352,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, beforeFo
 
           {/* KORTE TERMIJN SECTION: LARGER CARDS */}
           <div className="card p-6 sm:p-10 border-white/40 shadow-xl">
-            <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em] mb-8 px-1">Korte Termijn</h3>
+            <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.2em] mb-8 px-1">Vandaag en morgen</h3>
             <div className="grid grid-cols-2 gap-6">
               {[0, 1].map((i) => (
                 <div key={i} className="flex flex-col gap-4">

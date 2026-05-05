@@ -55,16 +55,20 @@ async function run() {
     xml += `  <url><loc>${BASE_URL}/weer/${p}</loc><lastmod>${now}</lastmod><priority>0.9</priority></url>\n`;
   });
 
-  // Places
-  places.forEach((place: any) => {
+  // Priority Places (Manual focus)
+  const priorityCityNames = ["Amsterdam", "Rotterdam", "Den Haag", "Utrecht", "Groningen", "Haarlem"];
+  const priorityPlaces = places.filter((p: any) => priorityCityNames.includes(p.name));
+  const otherPlaces = places.filter((p: any) => !priorityCityNames.includes(p.name));
+
+  [...priorityPlaces, ...otherPlaces].forEach((place: any) => {
     const slug = placeSlug(place.name);
-    xml += `  <url><loc>${BASE_URL}/weer/${place.province}/${slug}</loc><lastmod>${now}</lastmod><priority>0.5</priority></url>\n`;
+    xml += `  <url><loc>${BASE_URL}/weer/${place.province}/${slug}</loc><lastmod>${now}</lastmod><priority>${priorityCityNames.includes(place.name) ? '0.7' : '0.5'}</priority></url>\n`;
   });
 
   xml += '</urlset>';
 
   fs.writeFileSync(sitemapPath, xml);
-  console.log(`✅ Sitemap saved to ${sitemapPath} (${places.length} locations)`);
+  console.log(`✅ Sitemap saved to ${sitemapPath} (${places.length} locations with prioritized cities)`);
 }
 
 run().catch(console.error);

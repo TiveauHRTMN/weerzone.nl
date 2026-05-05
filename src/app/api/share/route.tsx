@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { getWeatherEmoji, getWeatherDescription } from "@/lib/weather";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 function getOneLiner(temp: number, precip: number, code: number): string {
   if (code >= 95) return "Bliksem, donder, drama. Blijf binnen.";

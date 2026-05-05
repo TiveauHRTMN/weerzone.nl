@@ -20,8 +20,10 @@
   --persona-steve: #0ea5e9;
   --card-border: rgba(255, 255, 255, 0.5);
   --card-radius: 24px;
-  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-brand: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-manrope: 'Inter', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace;
+  --font-sans: var(--font-manrope);
+  --font-brand: var(--font-manrope);
 
   --wz-blue:       #3b7ff0;
   --wz-blue-dark:  #2a5fc4;
@@ -63,8 +65,8 @@
   --wz-shadow-lg: 0 20px 50px rgba(15,26,44,.14), 0 6px 16px rgba(15,26,44,.06);
   --wz-shadow-brand: 0 12px 30px rgba(59,127,240,.28);
 
-  --font-wz: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-wz-mono: var(--font-mono), ui-monospace, monospace;
+  --font-wz: var(--font-manrope);
+  --font-wz-mono: var(--font-mono);
 }
 
 @theme inline {

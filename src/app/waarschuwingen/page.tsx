@@ -119,7 +119,7 @@ export default async function ReedPage() {
               </div>
             )}
 
-            <PremiumGate>
+            <PremiumGate tierRequired="reed">
               <ReedExtended initialCity={loc || undefined} />
             </PremiumGate>
           </div>

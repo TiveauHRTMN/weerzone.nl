@@ -15,7 +15,7 @@ export default function Footer() {
     {
       title: "Platform",
       links: [
-        { label: "Over WeerZone", href: "/over-ons" },
+        { label: "Over Weerzone", href: "/over" },
         { label: "Prijzen", href: "/prijzen" },
         { label: "Partner worden", href: "/zakelijk" },
         { label: "Onboarding", href: "/app/onboarding" },
@@ -40,8 +40,8 @@ export default function Footer() {
               <LogoFull height={32} className="opacity-100" />
             </Link>
             <p className="text-white/60 text-sm max-w-sm leading-relaxed font-medium">
-              De nauwkeurigste weersvoorspelling van Nederland. <br />
-              Op 1 bij 1 kilometer, tot 48 uur vooruit — precies voor uw locatie.
+              Hyperlokaal weer voor keuzes vandaag en morgen. <br />
+              Vragen of samenwerking: info@weerzone.nl
             </p>
           </div>
           

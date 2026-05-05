@@ -1,28 +1,28 @@
 const TIERS = [
   {
-    range: "0–48 uur",
+    range: "0-48 uur",
     label: "Precisie",
-    desc: "Voorspellingen op 1×1 km — nauwkeurig genoeg om beslissingen op te baseren.",
+    desc: "Voorspellingen voor de korte termijn, met een duidelijke focus op bruikbare keuzes.",
     emoji: "🎯",
     accent: "#10b981",
     tint: "rgba(16,185,129,0.10)",
     border: "rgba(16,185,129,0.25)",
-    pct: "92–98%",
+    pct: "92-98%",
   },
   {
-    range: "3–7 dagen",
+    range: "3-7 dagen",
     label: "Beperkte zekerheid",
     desc: "De verwachting kan nog flink veranderen. Baseer grotere beslissingen op de 48-uurs voorspelling.",
     emoji: "🎲",
     accent: "#f59e0b",
     tint: "rgba(245,158,11,0.09)",
     border: "rgba(245,158,11,0.22)",
-    pct: "45–75%",
+    pct: "45-75%",
   },
   {
     range: "10+ dagen",
     label: "Indicatief",
-    desc: "Geschikt voor een globaal seizoensgevoel — niet voor dagplanning.",
+    desc: "Geschikt voor een globaal seizoensgevoel, niet voor dagplanning.",
     emoji: "🔮",
     accent: "rgba(255,255,255,0.35)",
     tint: "rgba(255,255,255,0.04)",
@@ -32,38 +32,36 @@ const TIERS = [
 ];
 
 const BARS = [
-  { day: "Dag 1", val: 98,  color: "#10b981" },
-  { day: "Dag 2", val: 92,  color: "#34d399" },
-  { day: "Dag 3", val: 70,  color: "#fbbf24" },
-  { day: "Dag 4", val: 48,  color: "#f59e0b" },
-  { day: "Dag 5", val: 28,  color: "rgba(255,255,255,0.22)" },
-  { day: "Dag 6", val: 14,  color: "rgba(255,255,255,0.13)" },
-  { day: "Dag 7", val: 6,   color: "rgba(255,255,255,0.07)" },
+  { day: "Dag 1", val: 98, color: "#10b981" },
+  { day: "Dag 2", val: 92, color: "#34d399" },
+  { day: "Dag 3", val: 70, color: "#fbbf24" },
+  { day: "Dag 4", val: 48, color: "#f59e0b" },
+  { day: "Dag 5", val: 28, color: "rgba(255,255,255,0.22)" },
+  { day: "Dag 6", val: 14, color: "rgba(255,255,255,0.13)" },
+  { day: "Dag 7", val: 6, color: "rgba(255,255,255,0.07)" },
 ];
 
 export default function TrustSection() {
   return (
     <section className="px-4 py-20">
       <div className="max-w-5xl mx-auto">
-
-        {/* Header */}
         <div className="text-center mb-12">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-4">
             Transparantie over nauwkeurigheid
           </p>
           <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-5">
-            Waarom stopt WEERZONE<br />
-            bij <span style={{ color: "#ffd60a" }}>48 uur?</span>
+            Gemaakt voor de uren
+            <br />
+            die je echt plant.
           </h2>
           <p className="text-white/65 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Veel weerdiensten tonen een 14-daagse voorspelling alsof die net zo betrouwbaar is als vandaag.
-            De werkelijkheid is anders.
+            WEERZONE focust op de periode waarin weersverwachtingen het meest bruikbaar zijn:
+            vandaag, vannacht en morgen. Verder vooruit kan richting geven, maar is minder geschikt
+            voor beslissingen per uur.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-          {/* Tier cards */}
           <div className="flex flex-col gap-3">
             {TIERS.map((t) => (
               <div
@@ -93,7 +91,6 @@ export default function TrustSection() {
             ))}
           </div>
 
-          {/* Accuracy chart */}
           <div
             className="rounded-3xl border p-6 flex flex-col"
             style={{
@@ -130,18 +127,16 @@ export default function TrustSection() {
               ))}
             </div>
 
-            {/* 48h marker */}
             <div
               className="mt-5 pt-4 flex items-center gap-2"
               style={{ borderTop: "1px dashed rgba(255,255,255,0.10)" }}
             >
               <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
               <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
-                WeerZone focust op dag 1–2
+                WEERZONE focust op dag 1-2
               </span>
             </div>
           </div>
-
         </div>
       </div>
     </section>

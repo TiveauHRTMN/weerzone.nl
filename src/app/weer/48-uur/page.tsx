@@ -3,9 +3,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "48 uur weer — waarom langer voorspellen onzin is | WEERZONE",
+  title: "48 uur weer voor keuzes vandaag en morgen | WEERZONE",
   description:
-    "Waarom WEERZONE maximaal 48 uur vooruit voorspelt en geen 14-daagse toont. De wetenschap achter weersverwachting en waarom twee dagen vooruit de harde grens is.",
+    "Waarom WEERZONE focust op de komende 48 uur: de periode waarin weerdata het meest bruikbaar is voor planning per uur.",
   keywords: [
     "48 uur weer",
     "48 uur weerbericht",
@@ -33,7 +33,7 @@ export default function FortyEightPage() {
         name: "Waarom toont WEERZONE maximaal 48 uur?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Voorbij 48 uur daalt de nauwkeurigheid van elk weermodel drastisch. Wij tonen liever 48 uur messcherp dan 14 dagen onzin.",
+          text: "Voorbij 48 uur neemt de onzekerheid toe. WEERZONE focust daarom op de periode waarin weerdata het meest bruikbaar is voor concrete keuzes vandaag en morgen.",
         },
       },
     ],
@@ -53,17 +53,17 @@ export default function FortyEightPage() {
           <header className="mb-10">
             <div className="text-5xl mb-4">⏱️</div>
             <h1 className="text-4xl sm:text-6xl font-black leading-tight mb-4 tracking-tighter">
-              48 uur weer. <span className="text-accent-cyan">De nauwkeurigste horizon.</span>
+              48 uur weer. <span className="text-accent-cyan">Voor keuzes vandaag en morgen.</span>
             </h1>
             <p className="text-white/70 text-lg leading-relaxed">
-              Veel weer-apps tonen 14 dagen vooruit, terwijl de nauwkeurigheid na drie dagen al sterk terugloopt. WeerZone levert de komende 48 uur zo precies mogelijk — op 1 bij 1 kilometer.
+              WEERZONE richt zich op de periode waarin weerdata het meest bruikbaar is: vandaag, vannacht en morgen. Per uur, hyperlokaal en direct toepasbaar.
             </p>
           </header>
 
           <section className="mb-10 space-y-6 text-white/75 leading-relaxed bg-white/5 p-8 rounded-3xl border border-white/10">
-            <h2 className="text-2xl font-black text-white uppercase tracking-tight">Waarom geen 14-daagse?</h2>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">Waarom die 48-uurs focus?</h2>
             <p>
-               Na ongeveer 48 uur lopen weersvoorspellingen door het vlindereffect sterk uiteen. Kleine afwijkingen worden grote fouten. Daarom concentreren wij ons op de periode waarin onze voorspelling écht klopt.
+               Na ongeveer 48 uur neemt de onzekerheid toe en kunnen kleine afwijkingen groter worden. Daarom concentreren wij ons op de periode waarin je het weer nog praktisch kunt gebruiken voor planning per uur.
             </p>
             <div className="grid sm:grid-cols-2 gap-4 mt-6">
                <div className="p-4 rounded-xl bg-white/5 border border-white/10">

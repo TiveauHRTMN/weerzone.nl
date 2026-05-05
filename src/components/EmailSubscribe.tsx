@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Users } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useSession } from "@/lib/session-context";
-import { displaySubCount } from "@/lib/social-proof";
 import type { City } from "@/lib/types";
 
 interface Props {
@@ -11,8 +10,8 @@ interface Props {
 }
 
 /**
- * Promo-card bovenaan het dashboard. CTA naar /prijzen met social-proof +
- * scarcity (fake-until-real: zie src/lib/social-proof.ts).
+ * Promo-card bovenaan het dashboard. CTA naar /prijzen met duidelijke urgentie
+ * gebaseerd op de eerstvolgende mail en de komende 48 uur.
  *
  * Abonnees zien deze card niet.
  */
@@ -20,8 +19,6 @@ export default function EmailSubscribe({ city: _city }: Props) {
   const { tier, loading } = useSession();
 
   if (loading || tier) return null;
-
-  const subCount = displaySubCount(0);
 
   return (
     <div className="card p-5 space-y-3 relative overflow-hidden">
@@ -38,13 +35,12 @@ export default function EmailSubscribe({ city: _city }: Props) {
 
       <p className="text-xs text-text-secondary leading-snug">
         Piet schrijft, Reed waarschuwt, Steve beslist. Op jouw postcode,
-        zonder reclame. Geen creditcard vooraf. Opzeggen kan altijd.
+        zonder reclame. Meld je nu aan en ontvang morgen al de eerste update.
       </p>
 
       <div className="flex items-center gap-1.5 text-[11px] text-text-secondary pt-1 border-t border-black/5">
-        <Users className="w-3.5 h-3.5 text-accent-orange" />
-        <strong className="text-text-primary">{subCount.toLocaleString("nl-NL")}</strong>
-        <span>Nederlanders ontvangen dit al</span>
+        <Mail className="w-3.5 h-3.5 text-accent-orange" />
+        <span>Elke ochtend vroeg in je inbox. Geen creditcard vooraf.</span>
       </div>
 
       <Link

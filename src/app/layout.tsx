@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Manrope, JetBrains_Mono } from "next/font/google";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
 import FounderBanner from "@/components/FounderBanner";
@@ -11,19 +10,6 @@ import { Suspense } from "react";
 import "./globals.css";
 
 const ADSENSE_CLIENT = "ca-pub-6187487207780127";
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://weerzone.nl"),
@@ -36,21 +22,34 @@ export const metadata: Metadata = {
     apple: "/weerzone-icon.png",
   },
   title: {
-    default: "WEERZONE | De nauwkeurigste weersvoorspelling van Nederland",
+    default: "WEERZONE | Weerkeuzes voor vandaag en morgen",
     template: "%s | WEERZONE",
   },
   description:
-    "WeerZone is de nauwkeurigste weersvoorspelling van Nederland. Voor jouw postcode, op 1 bij 1 kilometer, tot 48 uur vooruit.",
+    "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Hyperlokaal, tot 48 uur vooruit.",
   keywords: [
-    "weer", "weer nederland", "weerbericht", "weersverwachting", "weer vandaag",
-    "weer morgen", "48 uur weer", "weer komende 48 uur", "regen verwachting",
-    "WEERZONE", "nauwkeurig weer", "weerzone.nl",
-    "buienradar alternatief", "weerbericht nederland", "actueel weer",
-    "neerslagverwachting", "zonkracht vandaag", "weerstation nederland",
+    "weer",
+    "weer nederland",
+    "weerbericht",
+    "weersverwachting",
+    "weer vandaag",
+    "weer morgen",
+    "48 uur weer",
+    "weer komende 48 uur",
+    "regen verwachting",
+    "WEERZONE",
+    "nauwkeurig weer",
+    "weerzone.nl",
+    "buienradar alternatief",
+    "weerbericht nederland",
+    "actueel weer",
+    "neerslagverwachting",
+    "zonkracht vandaag",
+    "weerstation nederland",
   ],
   openGraph: {
-    title: "WEERZONE | De nauwkeurigste weersvoorspelling van Nederland",
-    description: "De nauwkeurigste weersvoorspelling van Nederland. Op 1 bij 1 kilometer, tot 48 uur vooruit.",
+    title: "WEERZONE | Weerkeuzes voor vandaag en morgen",
+    description: "Hyperlokaal weer voor concrete keuzes in de komende 48 uur.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl",
@@ -66,8 +65,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "WEERZONE | De nauwkeurigste weersvoorspelling van Nederland",
-    description: "De nauwkeurigste weersvoorspelling van Nederland. Op 1 bij 1 kilometer, tot 48 uur vooruit.",
+    title: "WEERZONE | Weerkeuzes voor vandaag en morgen",
+    description: "Hyperlokaal weer voor concrete keuzes in de komende 48 uur.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -113,14 +112,14 @@ export default async function RootLayout({
       .select("*")
       .eq("id", "global")
       .single();
-    
+
     if (state?.is_active) {
       activeDeal = state;
     }
   }
 
   return (
-    <html lang="nl" className={`${manrope.variable} ${jetbrains.variable} antialiased`}>
+    <html lang="nl" className="antialiased">
       <head>
         <meta name="theme-color" content="#4a9ee8" />
       </head>
@@ -135,7 +134,7 @@ export default async function RootLayout({
           <Suspense fallback={null}>
             <PostHogPageView />
           </Suspense>
-          
+
           {activeDeal && (
             <AffiliateBanner
               message={activeDeal.flash_deal_message}

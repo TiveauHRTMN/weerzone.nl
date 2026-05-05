@@ -18,7 +18,7 @@ const jsonLd = {
   "@type": "WebSite",
   name: "WEERZONE",
   url: "https://weerzone.nl",
-  description: "WeerZone is de nauwkeurigste weersvoorspelling van Nederland. Voor jouw postcode, op 1 bij 1 kilometer, tot 48 uur vooruit.",
+  description: "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Hyperlokaal, tot 48 uur vooruit.",
   potentialAction: {
     "@type": "SearchAction",
     target: "https://weerzone.nl/weer/{city}",
@@ -44,7 +44,7 @@ const faqLd = {
       name: "Wat is WEERZONE?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "WEERZONE is de nauwkeurigste weersvoorspelling van Nederland. Elke ochtend één mail op je postcode, 48 uur vooruit, op 1 bij 1 kilometer precies. Zonder advertenties.",
+        text: "WEERZONE is een hyperlokale weerhulp voor beslissingen vandaag en morgen. Je ziet wat het weer betekent voor fietsen, buiten werken, terras, strand, tuin en waarschuwingen, tot 48 uur vooruit.",
       },
     },
     {
@@ -52,7 +52,7 @@ const faqLd = {
       name: "Waarom maar 48 uur vooruit?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Omdat dat zo ver is als een weersvoorspelling betrouwbaar reikt. Elke dag die je verder kijkt, neemt de nauwkeurigheid sterk af. Binnen die 48 uur zijn wij de meest precieze van Nederland.",
+        text: "Omdat de komende 48 uur de periode is waarin weersverwachtingen het nuttigst zijn voor concrete keuzes. Verder vooruit kan nog richting geven, maar is minder geschikt voor planning per uur.",
       },
     },
     {
@@ -60,7 +60,7 @@ const faqLd = {
       name: "Waarom is WEERZONE zo nauwkeurig?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "We voorspellen op 1 bij 1 kilometer precies — veel fijnmaziger dan de gangbare weerdiensten. Daardoor klopt onze voorspelling op straatniveau, niet alleen voor je provincie.",
+        text: "We combineren lokale weerdata, modelvergelijking en een praktische vertaalslag naar wat je vandaag en morgen kunt doen. Daardoor krijg je geen generieke samenvatting, maar informatie die echt bruikbaar is op locatie.",
       },
     },
     {

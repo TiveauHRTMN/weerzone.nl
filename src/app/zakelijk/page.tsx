@@ -114,10 +114,10 @@ export default function ZakelijkPage() {
                   In ontwikkeling — Binnenkort beschikbaar
                 </span>
                 <a
-                  href="mailto:zakelijk@weerzone.nl"
+                  href="mailto:info@weerzone.nl"
                   className="text-text-muted hover:text-text-primary transition-colors text-sm font-medium"
                 >
-                  Interesse? Mail zakelijk@weerzone.nl
+                  Interesse? Mail info@weerzone.nl
                 </a>
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function ZakelijkPage() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Link
-                  href="/jouwweer"
+                  href="/mijnweer"
                   className="rounded-2xl p-4 transition-all hover:scale-[1.01]"
                   style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}
                 >

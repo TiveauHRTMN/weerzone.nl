@@ -16,13 +16,13 @@ export default function HomePitch() {
       {/* Lead */}
       <div className="text-center mb-10">
         <h2 className="text-3xl sm:text-5xl font-black text-white leading-[1.05] mb-5 drop-shadow">
-          Geen reclame.<br />
-          Direct en eerlijk weer.
+          Weer voor keuzes.<br />
+          Niet voor eindeloos scrollen.
         </h2>
         <p className="text-white/85 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-          Piet schrijft je weerbericht. Reed waarschuwt als het over jouw
-          grens gaat. Steve vertaalt het weer naar een beslissing voor je
-          zaak. Probeer Weerzone nu gratis.
+          WEERZONE vertaalt de komende 48 uur naar concrete momenten:
+          wanneer je droog fietst, buiten kunt werken of beter moet wachten.
+          Piet, Reed en Steve maken die keuzes persoonlijker.
         </p>
       </div>
 
@@ -60,7 +60,7 @@ export default function HomePitch() {
                 className="mt-6 text-center rounded-2xl py-3 text-white font-black text-sm group-hover:brightness-110 shadow-lg shadow-black/5"
                 style={{ background: p.color }}
               >
-                Kies voor {p.name} →
+                Bekijk {p.name} →
               </div>
             </Link>
           );
@@ -73,7 +73,7 @@ export default function HomePitch() {
           href="/prijzen"
           className="inline-block px-8 py-4 rounded-full bg-white text-slate-900 font-black text-sm shadow-2xl hover:bg-accent-orange hover:text-white transition-all transform hover:scale-105"
         >
-          Vergelijk alle voordelen →
+          Vergelijk de weerhulpen →
         </Link>
       </div>
     </section>

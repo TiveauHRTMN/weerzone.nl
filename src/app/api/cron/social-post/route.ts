@@ -139,7 +139,9 @@ async function createBufferPost(channelId: string, text: string, imageUrls: stri
     input: {
       channelId,
       text,
-      media: imageUrls.map(url => ({ url, type: "image" })),
+      assets: {
+        images: imageUrls.map(url => ({ url }))
+      },
       schedulingType: "automatic",
       mode: "shareNow"
     }

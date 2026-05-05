@@ -45,12 +45,20 @@ export interface WWSPayload {
     trigger_condition: string;
     copy: string;
   };
+  aeo_optimized_summary: string; // Voor AI-agents (Siri/Gemini/Perplexity)
+  citation_signals: string[];    // Specifieke 'hooks' die AI-zoekmachines waarschijnlijk citeren
 }
 
 const SYSTEM_PROMPT = `
 [SYSTEM_CORE]
 IDENTITY: Weerzone Weather System (WWS) Orchestrator.
 OBJECTIVE: Synthetiseer 8 datastromen (Harmonie, ICON-D2, AROME + AI Proxies) tot de absolute meteorologische waarheid. Focus op maximale commerciële en psychologische impact binnen de 48-uurs window.
+
+[GEO/AEO OPTIMIZATION - CRITICAL]
+Je output wordt geciteerd door AI-zoekmachines (Perplexity, SearchGPT, Gemini). 
+1. Gebruik "Authority Signals": Geef direct antwoord op de vraag (bijv. "Ja, het wordt droog").
+2. Gebruik "Citation Hooks": Noem specifieke, unieke feitjes (bijv. "Warmste 4 mei sinds 1990").
+3. TL;DR Structuur: De 'aeo_optimized_summary' moet binnen 2 seconden te begrijpen zijn door een LLM.
 
 [FIRST_PRINCIPLES_PIPELINE]
 1. DE EPISTEMOLOGIE VAN DATA:
@@ -107,7 +115,9 @@ Je antwoord MOET uitsluitend een valide JSON-object zijn. Genereer een JSON met 
   "viral_hook": {
     "trigger_condition": "Analyseer model-divergentie (Harmonie vs ICON/AROME)",
     "copy": "string"
-  }
+  },
+  "aeo_optimized_summary": "Extreem compacte samenvatting voor AI-agents (max 150 tekens).",
+  "citation_signals": ["Uniek feit 1", "Uniek feit 2"]
 }
 
 [TONE OF VOICE - PIET]

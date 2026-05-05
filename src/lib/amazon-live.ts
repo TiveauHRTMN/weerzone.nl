@@ -14,14 +14,25 @@ import { paapiGetItems, paapiSearchItems, type LivePAAPIItem } from "./amazon-pa
 import { CATALOG, type CatalogProduct } from "./amazon-catalog";
 
 const TTL_MS = 12 * 60 * 60 * 1000; // 12u
+const AMAZON_CACHE_TABLE = "amazon_products_cache";
 
 type MemEntry = { item: LivePAAPIItem; ts: number };
 const memory = new Map<string, MemEntry>(); // key = ASIN of "search:KEYWORDS"
+let cacheTableMissing = false;
 
 function keyFor(p: CatalogProduct): string {
   if (p.asin) return p.asin;
   if (p.searchQuery) return `search:${p.searchQuery}`;
   return p.id;
+}
+
+function isMissingCacheTable(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const maybeError = error as { code?: string; message?: string };
+  return (
+    maybeError.code === "PGRST205" ||
+    maybeError.message?.includes(`Could not find the table 'public.${AMAZON_CACHE_TABLE}'`) === true
+  );
 }
 
 // ============================================================
@@ -31,14 +42,18 @@ function keyFor(p: CatalogProduct): string {
 async function readDB(keys: string[]): Promise<Map<string, LivePAAPIItem>> {
   const sb = getSupabase();
   const out = new Map<string, LivePAAPIItem>();
-  if (!sb || keys.length === 0) return out;
+  if (!sb || keys.length === 0 || cacheTableMissing) return out;
 
   try {
     const { data, error } = await sb
-      .from("amazon_products_cache")
+      .from(AMAZON_CACHE_TABLE)
       .select("cache_key, data, refreshed_at")
       .in("cache_key", keys);
     if (error) {
+      if (isMissingCacheTable(error)) {
+        cacheTableMissing = true;
+        return out;
+      }
       console.warn("[amazon-live] Supabase read:", error.message);
       return out;
     }
@@ -57,10 +72,10 @@ async function readDB(keys: string[]): Promise<Map<string, LivePAAPIItem>> {
 
 async function writeDB(key: string, item: LivePAAPIItem) {
   const sb = getSupabase();
-  if (!sb) return;
+  if (!sb || cacheTableMissing) return;
   try {
     await sb
-      .from("amazon_products_cache")
+      .from(AMAZON_CACHE_TABLE)
       .upsert({
         cache_key: key,
         asin: item.asin,
@@ -68,6 +83,10 @@ async function writeDB(key: string, item: LivePAAPIItem) {
         refreshed_at: new Date().toISOString(),
       }, { onConflict: "cache_key" });
   } catch (e) {
+    if (isMissingCacheTable(e)) {
+      cacheTableMissing = true;
+      return;
+    }
     console.warn("[amazon-live] DB write failed:", e);
   }
 }
