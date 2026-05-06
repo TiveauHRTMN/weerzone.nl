@@ -297,7 +297,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
               </div>
 
               {/* ACTUEEL SECTION: HERO SIZE */}
-              <div className="card overflow-hidden relative group shadow-2xl border-white/40">
+              <div className="card relative group">
             <div className="p-8 sm:p-12 relative z-[2] pt-12 sm:pt-20">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 mb-12">
                 <div className="flex flex-col items-start">
@@ -333,7 +333,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
 
           {/* Narrative teaser */}
           {narrative && (
-            <div className="card px-6 py-5 border-white/40 shadow-xl">
+            <div className="card px-6 py-5">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
@@ -346,7 +346,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
 
           {/* CTA: Mijn Weer */}
           <Link href="/mijnweer" className="block group">
-            <div className="card p-8 sm:p-10 border-white/40 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.01]">
+            <div className="card p-8 sm:p-10">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-3xl">💬</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Piet · Mijn Weer</span>
@@ -359,7 +359,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
 
           {/* CTA: Waarschuwingen */}
           <Link href="/waarschuwingen" className="block group">
-            <div className="card p-8 sm:p-10 border-white/40 shadow-xl hover:shadow-2xl transition-all hover:scale-[1.01]">
+            <div className="card p-8 sm:p-10">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-3xl">⚡</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-rose-500">Reed · Waarschuwingen</span>

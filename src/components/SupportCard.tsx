@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function SupportCard() {
   return (
-    <div className="card p-8 sm:p-10 border-white/40 shadow-xl bg-gradient-to-br from-white to-amber-50/50 relative overflow-hidden group hover:shadow-2xl transition-all">
+    <div className="card p-8 sm:p-10 bg-gradient-to-br from-white to-amber-50/50 relative group">
       <div className="absolute -right-6 -top-6 text-amber-500/10 rotate-12 transition-transform group-hover:scale-110 group-hover:rotate-6 duration-500">
         <Heart size={140} />
       </div>
