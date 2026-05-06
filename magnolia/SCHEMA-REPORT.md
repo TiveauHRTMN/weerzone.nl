@@ -60,6 +60,6 @@ Homepage target: `https://weerzone.nl/weer/{city}` — maar steden zitten op `/w
 - [x] FAQPage verwijderen uit homepage
 - [x] FAQPage verwijderen uit province pagina's
 - [x] WeatherForecast → WebPage op city pagina's + FAQPage verwijderen
-- [ ] Dubbele WebSite + Organization verwijderen van /weer
-- [ ] Product + Offer toevoegen aan /prijzen (server-rendered)
-- [ ] Lege sameAs verwijderen van homepage Organization
+- [x] Dubbele WebSite + Organization verwijderen van /weer
+- [x] Product + Offer toevoegen aan /prijzen (server-rendered)
+- [x] Lege sameAs verwijderen van homepage Organization

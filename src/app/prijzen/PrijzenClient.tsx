@@ -93,7 +93,7 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
             <Link href="/app" className="btn btn-primary btn-block btn-lg">Naar dashboard →</Link>
           </div>
         </div>
-        <Footer />
+        <div className="max-w-2xl mx-auto w-full"><Footer /></div>
       </PageShell>
     );
   }
@@ -113,7 +113,7 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
             <Link href="/app" className="btn btn-primary btn-lg btn-block">Naar dashboard →</Link>
           </div>
         </div>
-        <Footer />
+        <div className="max-w-2xl mx-auto w-full"><Footer /></div>
       </PageShell>
     );
   }
@@ -168,7 +168,7 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
             </div>
           </div>
         </div>
-        <Footer />
+        <div className="max-w-2xl mx-auto w-full"><Footer /></div>
       </PageShell>
     );
   }
@@ -307,7 +307,7 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
         </div>
       </div>
 
-      <Footer />
+      <div className="max-w-2xl mx-auto w-full"><Footer /></div>
     </PageShell>
   );
 }
