@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { fetchWeatherData } from "@/lib/weather";
 import { ALL_PLACES } from "@/lib/places-data";
 import { hermesChat } from "@/lib/hermes";
-import { GoogleGenerativeAI } from "@google/generative-ai"; // Voor visual generation
 import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +20,27 @@ import { productHref } from "@/lib/amazon-catalog";
 
 const PERSONA_PROMPTS = {
   PIET: `
-Je bent Piet van WEERZONE. 
-STIJL: Vandaag Inside / PowNed. Brutaal, ongezouten mening, absolute weer-expertise. 
-Je focus: De harde realiteit landelijk gezien. Als het kutweer is in het oosten maar droog in het westen, zeg je dat eerlijk.
-REGELLIJST: Max 240 tekens. Johan Derksen van het weer. Gebruik "virale" hooks. Max 2 emoji.
+Je bent Piet — een echte Nederlander die het weer kent zoals zijn achtertuin. 
+Je schrijft dit als een social media update voor heel Nederland.
+
+TOON:
+- Menselijk en direct. Schrijf zoals je een berichtje plaatst voor je vrienden.
+- Geen meteorologie-jargon, geen "er is een kans op".
+- Concreet: "pak een jas mee" i.p.v. "het wordt kouder".
+- Geen AI-taal, geen formeel rapport. Gewoon Piet die even typt.
+- Noem opvallende regionale verschillen als die er zijn (bv. koud in het noorden, prima in het zuiden).
+
+VOORBEELDEN VAN GOEDE ZINNEN:
+- "Die fiets mag vandaag uit de schuur."
+- "De was kan gerust buiten in het zuiden, maar haal hem in het noorden voor half vijf binnen."
+- "Morgen wordt een andere dag — pak je regenjas maar alvast."
+
+VERBODEN:
+- "Er is een verhoogde kans op..."
+- "Meteorologisch gezien..."
+- "Het systeem verwacht..."
+
+REGELLIJST: Maximaal 240 tekens! Kort en krachtig. Maximaal 2 emoji's. Geen "Johan Derksen"-stijl, gewoon een vriendelijke expert.
 `.trim()
 };
 
@@ -61,16 +77,22 @@ export async function generatePlatformCaption(regions: RegionalWeather[], platfo
 
   const dataContext = `REGIO DATA VANDAAG:\n${regionalSummary}\n\nTip bij dit weer (advertentie) om subtiel in de tekst te verwerken (inclusief URL): ${productLabel} → ${affiliateUrl}\nVergeet hashtags niet aan het einde: #weer #weerzone #nederland #weerbericht #knmi #buienradar #vandaag #ad`;
 
+  const fallbackCaption = `Weer in Nederland: Van ${Math.round(regions[1]?.weather?.daily?.[0]?.tempMax ?? 15)}° in het noorden tot ${Math.round(regions[4]?.weather?.daily?.[0]?.tempMax ?? 15)}° in het zuiden.\n\nTip: ${productLabel} → ${affiliateUrl}\n#weer #weerzone #nederland #weerbericht #vandaag #ad`;
+
   try {
     const text = await hermesChat([
       { role: "system", content: personaPrompt },
       { role: "user", content: `Schrijf een landelijke social media post in jouw stijl.\n\n${dataContext}` }
     ], { model: "kimi", temperature: 0.8, maxTokens: 400 });
     
-    return { caption: text.trim(), affiliateUrl, persona };
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return { caption: fallbackCaption, affiliateUrl, persona };
+    }
+    return { caption: trimmed, affiliateUrl, persona };
   } catch (e) {
     console.error("Caption generation error:", e);
-    return { caption: `Lokaal wisselvallig vandaag. Echte voorspelling op jouw postcode → weerzone.nl\nTip: ${productLabel} → ${affiliateUrl}\n#weer #weerzone #nederland #weerbericht #vandaag #ad`, affiliateUrl, persona };
+    return { caption: fallbackCaption, affiliateUrl, persona };
   }
 }
 
@@ -173,29 +195,8 @@ export async function GET(req: Request) {
     const ttSlide1 = `${base}/api/social/piet-v2?city=${citySlug}&lat=${center.lat}&lon=${center.lon}&slide=1&format=tiktok&persona=${ttPersona}&t=${bust}`;
     const ttSlide2 = `${base}/api/social/piet-v2?city=${citySlug}&lat=${center.lat}&lon=${center.lon}&slide=2&format=tiktok&persona=${ttPersona}&t=${bust}`;
 
-    // Nano Banana 2: Viral Visual Generation for Social
-    let viralVisualUrl = "";
-    const key = process.env.GEMINI_API_KEY;
-    if (key) {
-      try {
-        const genAI = new GoogleGenerativeAI(key);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const promptRes = await model.generateContent(`
-          Geef een KORTE Engelse prompt voor een virale weerfoto in Nederland.
-          Gebaseerd op dit weerbericht: "${xData.caption}"
-          Locatie: Nederland.
-          Stijl: National Geographic, dramatic lighting, 8k, awe-inspiring. 
-          Geen tekst in beeld.
-        `);
-        const prompt = promptRes.response.text().trim();
-        viralVisualUrl = `${base}/api/visuals/gen?prompt=${encodeURIComponent(prompt)}&v=2.1&seed=${bust}`;
-      } catch (e) {
-        console.error("Social Visual Error:", e);
-      }
-    }
-
-    const xImages = viralVisualUrl ? [viralVisualUrl, xSlide1, xSlide2] : [xSlide1, xSlide2];
-    const ttImages = viralVisualUrl ? [viralVisualUrl, ttSlide1, ttSlide2] : [ttSlide1, ttSlide2];
+    const xImages = [xSlide1, xSlide2];
+    const ttImages = [ttSlide1, ttSlide2];
 
     if (dryRun) {
       return NextResponse.json({
