@@ -26,7 +26,7 @@ export default async function OgImage({ params }: { params: Promise<{ province: 
     (
       <div
         style={{
-          background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+          background: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", // Sky blue gradient
           width: "100%",
           height: "100%",
           display: "flex",
@@ -36,103 +36,84 @@ export default async function OgImage({ params }: { params: Promise<{ province: 
           fontFamily: "system-ui, sans-serif",
           padding: "60px",
           position: "relative",
+          overflow: "hidden",
         }}
       >
-        {/* Subtle silver tech gray accent overlay */}
-        <div 
-          style={{ 
-            position: "absolute", 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            background: "radial-gradient(circle at 50% 0%, rgba(203, 213, 225, 0.2) 0%, transparent 70%)" 
-          }} 
-        />
+        {/* Subtle cloud 1 (top left) */}
+        <div style={{ position: "absolute", top: "-100px", left: "-50px", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)" }} />
+        {/* Subtle cloud 2 (middle right) */}
+        <div style={{ position: "absolute", top: "20%", right: "-100px", width: "500px", height: "300px", background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)" }} />
+        {/* Subtle cloud 3 (bottom left) */}
+        <div style={{ position: "absolute", bottom: "-150px", left: "20%", width: "600px", height: "350px", background: "radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%)" }} />
 
+        {/* WEERZONE Brand Badge (Image) */}
+        {logoSrc ? (
+          <img src={logoSrc} alt="WEERZONE" width={320} style={{ marginBottom: "16px" }} />
+        ) : (
+          <div
+            style={{
+              background: "#ffd60a",
+              color: "black",
+              padding: "12px 28px",
+              borderRadius: "99px",
+              fontSize: "18px",
+              fontWeight: 900,
+              letterSpacing: "4px",
+              marginBottom: "40px",
+              display: "flex",
+            }}
+          >
+            WEERZONE
+          </div>
+        )}
+
+        {/* Dynamic City Name */}
         <div
           style={{
+            fontSize: "120px",
+            fontWeight: 900,
+            color: "#ffffff", // White text for the sky blue background
+            letterSpacing: "-4px",
+            lineHeight: 1.1,
+            marginBottom: "16px",
+            textAlign: "center",
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            background: "#ffffff",
-            border: "3px solid #cbd5e1", // Silver tech gray border
-            borderRadius: "48px",
-            padding: "80px 100px",
-            boxShadow: "0 40px 100px rgba(0,0,0,0.4)",
-            position: "relative",
           }}
         >
-          {/* WEERZONE Brand Badge (Image) */}
-          {logoSrc ? (
-            <img src={logoSrc} alt="WEERZONE" width={280} style={{ marginBottom: "32px" }} />
-          ) : (
-            <div
-              style={{
-                background: "#ffd60a",
-                color: "black",
-                padding: "12px 28px",
-                borderRadius: "99px",
-                fontSize: "18px",
-                fontWeight: 900,
-                letterSpacing: "4px",
-                marginBottom: "40px",
-                display: "flex",
-                boxShadow: "0 10px 30px rgba(255, 214, 10, 0.3)",
-              }}
-            >
-              WEERZONE
-            </div>
-          )}
+          {cityName}
+        </div>
 
-          {/* Dynamic City Name */}
-          <div
-            style={{
-              fontSize: "110px",
-              fontWeight: 900,
-              color: "#0f172a", // Dark slate for contrast
-              letterSpacing: "-4px",
-              lineHeight: 1.1,
-              marginBottom: "24px",
-              textAlign: "center",
-              display: "flex",
-            }}
-          >
-            {cityName}
-          </div>
+        {/* Information Gap Copy */}
+        <div
+          style={{
+            fontSize: "42px",
+            fontWeight: 600,
+            color: "rgba(255, 255, 255, 0.9)", // Dimmed white text
+            letterSpacing: "1px",
+            textAlign: "center",
+            marginBottom: "60px",
+            display: "flex",
+          }}
+        >
+          Bekijk of jij vanmiddag droog blijft.
+        </div>
 
-          {/* Information Gap Copy */}
-          <div
-            style={{
-              fontSize: "38px",
-              fontWeight: 600,
-              color: "#64748b", // Tech gray text
-              letterSpacing: "1px",
-              textAlign: "center",
-              marginBottom: "56px",
-              display: "flex",
-            }}
-          >
-            Bekijk of jij vanmiddag droog blijft.
-          </div>
-
-          {/* Click-forcing CTA Button */}
-          <div
-            style={{
-              background: "#0ea5e9", // Sky blue CTA
-              color: "white",
-              padding: "24px 56px",
-              borderRadius: "32px",
-              fontSize: "36px",
-              fontWeight: 800,
-              letterSpacing: "1px",
-              display: "flex",
-              alignItems: "center",
-              boxShadow: "0 20px 40px rgba(14, 165, 233, 0.4)",
-            }}
-          >
-            Live Radar Bekijken &rarr;
-          </div>
+        {/* Click-forcing CTA Button (Sun Yellow) */}
+        <div
+          style={{
+            background: "#ffd60a", // Zon-geel CTA
+            color: "#0f172a", // Dark slate text for maximum contrast
+            padding: "24px 64px",
+            borderRadius: "32px",
+            fontSize: "36px",
+            fontWeight: 900,
+            letterSpacing: "1px",
+            display: "flex",
+            alignItems: "center",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          Live Radar Bekijken &rarr;
         </div>
       </div>
     ),
