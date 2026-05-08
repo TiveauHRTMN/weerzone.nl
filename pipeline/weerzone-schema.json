@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Weerzone TikTok Dagtemplate",
+  "description": "Invoerschema voor de dagelijkse Weerzone TikTok-slides. Genereer altijd valide JSON conform dit schema.",
+  "type": "object",
+  "required": [
+    "datumLabel",
+    "weatherCondition",
+    "conditionTekst",
+    "tempMax",
+    "tempMin",
+    "extraLabel",
+    "ochtendIcon", "ochtendTemp", "ochtendDesc",
+    "middagIcon",  "middagTemp",  "middagDesc",
+    "avondIcon",   "avondTemp",   "avondDesc",
+    "nachtIcon",   "nachtTemp",   "nachtDesc",
+    "morgenLabel"
+  ],
+  "properties": {
+    "datumLabel": {
+      "type": "string",
+      "description": "Dag en datum in Nederlands, afgekorte notatie. Maximaal 12 tekens.",
+      "examples": ["do 8 mei", "vr 9 mei", "za 10 mei"],
+      "maxLength": 12
+    },
+    "weatherCondition": {
+      "type": "string",
+      "description": "Dominante weerconditie van de dag. Bepaalt het icoon én de achtergrondkleur van slide 1.",
+      "enum": ["zon", "halfbewolkt", "bewolkt", "regen", "onweer", "mist", "nacht"]
+    },
+    "conditionTekst": {
+      "type": "string",
+      "description": "Korte weerbeschrijving voor de hero-tekst op slide 1. Actief, bondig. Maximaal 30 tekens.",
+      "examples": ["Volop zon vandaag", "Buien in de ochtend", "Kans op onweer"],
+      "maxLength": 30
+    },
+    "tempMax": {
+      "type": "integer",
+      "description": "Maximumtemperatuur in graden Celsius voor vandaag.",
+      "minimum": -20,
+      "maximum": 45
+    },
+    "tempMin": {
+      "type": "integer",
+      "description": "Minimumtemperatuur in graden Celsius voor vandaag.",
+      "minimum": -20,
+      "maximum": 45
+    },
+    "extraLabel": {
+      "type": "string",
+      "description": "Extra callout-tekst op de gele pill onderaan slide 1. Concreet en activerend. Maximaal 45 tekens.",
+      "examples": [
+        "Heerlijk strandweer vandaag",
+        "Paraplu mee vandaag!",
+        "Kans op onweer middaguur",
+        "Zomerjas nog even aan"
+      ],
+      "maxLength": 45
+    },
+    "ochtendIcon": {
+      "type": "string",
+      "description": "Weerconditie-icoon voor de ochtend (06:00–12:00).",
+      "enum": ["zon", "halfbewolkt", "bewolkt", "regen", "onweer", "mist", "nacht"]
+    },
+    "ochtendTemp": {
+      "type": "integer",
+      "description": "Temperatuur in de ochtend in graden Celsius.",
+      "minimum": -20,
+      "maximum": 45
+    },
+    "ochtendDesc": {
+      "type": "string",
+      "description": "Korte weerbeschrijving voor de ochtend. Maximaal 22 tekens.",
+      "examples": ["Lichte bewolking", "Buien mogelijk", "Zonnig"],
+      "maxLength": 22
+    },
+    "middagIcon": {
+      "type": "string",
+      "description": "Weerconditie-icoon voor de middag (12:00–18:00).",
+      "enum": ["zon", "halfbewolkt", "bewolkt", "regen", "onweer", "mist", "nacht"]
+    },
+    "middagTemp": {
+      "type": "integer",
+      "description": "Temperatuur in de middag in graden Celsius.",
+      "minimum": -20,
+      "maximum": 45
+    },
+    "middagDesc": {
+      "type": "string",
+      "description": "Korte weerbeschrijving voor de middag. Maximaal 22 tekens.",
+      "examples": ["Volop zon", "Wisselend bewolkt", "Onweersbuien"],
+      "maxLength": 22
+    },
+    "avondIcon": {
+      "type": "string",
+      "description": "Weerconditie-icoon voor de avond (18:00–00:00).",
+      "enum": ["zon", "halfbewolkt", "bewolkt", "regen", "onweer", "mist", "nacht"]
+    },
+    "avondTemp": {
+      "type": "integer",
+      "description": "Temperatuur in de avond in graden Celsius.",
+      "minimum": -20,
+      "maximum": 45
+    },
+    "avondDesc": {
+      "type": "string",
+      "description": "Korte weerbeschrijving voor de avond. Maximaal 22 tekens.",
+      "examples": ["Geleidelijk bewolkt", "Opklaringen", "Droog"],
+      "maxLength": 22
+    },
+    "nachtIcon": {
+      "type": "string",
+      "description": "Weerconditie-icoon voor de nacht (00:00–06:00). Gebruik 'nacht' tenzij er actief weer is.",
+      "enum": ["zon", "halfbewolkt", "bewolkt", "regen", "onweer", "mist", "nacht"]
+    },
+    "nachtTemp": {
+      "type": "integer",
+      "description": "Temperatuur in de nacht in graden Celsius.",
+      "minimum": -20,
+      "maximum": 45
+    },
+    "nachtDesc": {
+      "type": "string",
+      "description": "Korte weerbeschrijving voor de nacht. Maximaal 22 tekens.",
+      "examples": ["Bewolkt, droog", "Lokale mist", "Opklaringen"],
+      "maxLength": 22
+    },
+    "morgenLabel": {
+      "type": "string",
+      "description": "Korte preview van het weer van morgen voor onderaan slide 2. Bondig, max 55 tekens.",
+      "examples": [
+        "Wisselend bewolkt, kans op een bui",
+        "Zonnig en warm, tot 28 graden",
+        "Veel bewolking, kans op regen"
+      ],
+      "maxLength": 55
+    }
+  }
+}

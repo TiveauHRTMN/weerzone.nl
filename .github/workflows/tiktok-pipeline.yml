@@ -1,0 +1,45 @@
+name: Weerzone TikTok Pipeline
+
+on:
+  schedule:
+    # Dagelijks 06:30 UTC = 08:30 CEST (zomer) / 07:30 CET (winter)
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (geen Buffer post)"
+        type: boolean
+        default: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Puppeteer Chromium
+        run: npx puppeteer browsers install chrome
+
+      - name: Run pipeline
+        run: npx tsx pipeline/index.ts ${{ inputs.dry_run == true && '--dry' || '' }}
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          BUFFER_API_TOKEN: ${{ secrets.BUFFER_API_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Upload slide screenshots (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-slides
+          path: pipeline/.tmp/slide-*.png
+          retention-days: 7

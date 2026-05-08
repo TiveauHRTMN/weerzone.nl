@@ -43,6 +43,11 @@ next-env.d.ts
 .vercel
 .env.local
 
+# TikTok pipeline — generated files
+pipeline/.screenshots/
+pipeline/.tmp/
+pipeline/_slides-tmp.html
+
 # AI tool directories (niet in repo)
 .adal/
 .agents/

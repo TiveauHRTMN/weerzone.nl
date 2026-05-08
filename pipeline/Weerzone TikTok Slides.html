@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weerzone TikTok Slides</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="deck-stage.js"></script>
+
+  <style>
+    /* =============================================
+       DESIGN TOKENS — 1080 × 1920 vertical TikTok
+       ============================================= */
+    :root {
+      --type-hero:    192px;
+      --type-title:   92px;
+      --type-sub:     62px;
+      --type-body:    44px;
+      --type-small:   36px;
+      --type-label:   28px;
+      --type-micro:   24px;
+
+      --pad-x:        80px;
+      --pad-top:      96px;
+      --pad-bottom:   96px;
+      --gap-xl:       64px;
+      --gap-lg:       48px;
+      --gap-md:       32px;
+      --gap-sm:       20px;
+      --gap-xs:       12px;
+
+      --c-sky:        #4a9ee8;
+      --c-sky-mid:   #2a7ed4;
+      --c-sky-dark:  #1558a0;
+      --c-yellow:    #FFD700;
+      --c-white:     #FFFFFF;
+      --c-navy:      #152a45;
+      --c-muted-sky: rgba(255,255,255,0.72);
+      --c-card:      #FFFFFF;
+      --c-card-text: #152a45;
+      --c-card-muted:#6b8099;
+      --c-border:    rgba(255,255,255,0.28);
+
+      --ff-cond: 'Barlow Condensed', sans-serif;
+      --ff-body: 'Barlow', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #000; }
+
+    /* =============================================
+       SHARED SLIDE BASE
+       ============================================= */
+    section {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      color: var(--c-white);
+      font-family: var(--ff-body);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .wz-logo { height: 50px; width: auto; }
+
+    /* =============================================
+       SLIDE 1 — ACTUEEL WEER
+       ============================================= */
+    .s1 { background: linear-gradient(165deg, #6ab9f7 0%, #4a9ee8 45%, #1e72c8 100%); }
+    .s1[data-condition="regen"]       { background: linear-gradient(165deg, #4a6e8c 0%, #3a5878 50%, #263e58 100%); }
+    .s1[data-condition="onweer"]      { background: linear-gradient(165deg, #3a3068 0%, #251e50 50%, #14103a 100%); }
+    .s1[data-condition="bewolkt"]     { background: linear-gradient(165deg, #7890a8 0%, #607888 50%, #485868 100%); }
+    .s1[data-condition="halfbewolkt"] { background: linear-gradient(165deg, #5ab2f7 0%, #3a92e0 50%, #1a68b8 100%); }
+    .s1[data-condition="mist"]        { background: linear-gradient(165deg, #808ea0 0%, #687080 50%, #505868 100%); }
+    .s1[data-condition="nacht"]       { background: linear-gradient(165deg, #101a38 0%, #0a1228 50%, #060818 100%); }
+
+    .s1-glow {
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 640px;
+      height: 640px;
+      background: radial-gradient(circle, rgba(255,215,0,0.10) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .s1-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--pad-top) var(--pad-x) 0;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .s1-datum {
+      font-family: var(--ff-body);
+      font-size: var(--type-label);
+      font-weight: 600;
+      color: var(--c-muted-sky);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .s1-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--pad-x);
+      gap: var(--gap-sm);
+      position: relative;
+      z-index: 1;
+    }
+
+    .s1-icon {
+      width: 380px;
+      height: 380px;
+      filter: drop-shadow(0 0 70px rgba(255,215,0,0.22));
+    }
+
+    .s1-condition {
+      font-family: var(--ff-cond);
+      font-size: 50px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--c-white);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .s1-temps {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      margin-top: var(--gap-md);
+    }
+
+    .s1-temp-max {
+      font-family: var(--ff-cond);
+      font-size: var(--type-hero);
+      font-weight: 900;
+      color: var(--c-yellow);
+      line-height: 0.88;
+    }
+
+    .s1-temp-sep {
+      font-family: var(--ff-cond);
+      font-size: calc(var(--type-hero) * 0.42);
+      font-weight: 300;
+      color: var(--c-muted-sky);
+      line-height: 1;
+    }
+
+    .s1-temp-min {
+      font-family: var(--ff-cond);
+      font-size: calc(var(--type-hero) * 0.42);
+      font-weight: 600;
+      color: var(--c-muted-sky);
+      line-height: 1;
+    }
+
+    .s1-footer {
+      flex-shrink: 0;
+      padding: 0 var(--pad-x) var(--pad-bottom);
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-md);
+      position: relative;
+      z-index: 1;
+    }
+
+    .s1-callout {
+      background: var(--c-yellow);
+      color: var(--c-navy);
+      font-family: var(--ff-body);
+      font-size: var(--type-small);
+      font-weight: 800;
+      padding: 24px 44px;
+      border-radius: 120px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .s1-brand-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: var(--gap-md);
+      border-top: 1px solid var(--c-border);
+    }
+
+    .s1-brand-url {
+      font-family: var(--ff-cond);
+      font-size: var(--type-label);
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--c-muted-sky);
+      text-transform: uppercase;
+    }
+
+    /* =============================================
+       SLIDE 2 — PIET'S WEERBERICHT
+       ============================================= */
+    .s2 { background: linear-gradient(165deg, #5ab2f4 0%, #4298e0 40%, #1e68c0 100%); }
+
+    .s2-header {
+      display: flex;
+      align-items: center;
+      padding: var(--pad-top) var(--pad-x) 0;
+      flex-shrink: 0;
+    }
+
+    .s2-title-area {
+      flex-shrink: 0;
+      padding: var(--gap-lg) var(--pad-x) 0;
+    }
+
+    .s2-overline {
+      font-family: var(--ff-body);
+      font-size: var(--type-label);
+      font-weight: 700;
+      color: var(--c-yellow);
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      margin-bottom: 8px;
+    }
+
+    .s2-title {
+      font-family: var(--ff-cond);
+      font-size: var(--type-title);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      line-height: 0.9;
+    }
+
+    .s2-cards {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--gap-lg) var(--pad-x) 0;
+      gap: 18px;
+    }
+
+    .s2-card {
+      flex: 1;
+      background: var(--c-card);
+      border-radius: 28px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.14);
+    }
+
+    .s2-card.highlight {
+      background: #FFFBE6;
+      border: 2px solid rgba(255,215,0,0.60);
+    }
+
+    .s2-tp-label {
+      font-family: var(--ff-body);
+      font-size: var(--type-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--c-card-muted);
+      width: 148px;
+      flex-shrink: 0;
+    }
+
+    .s2-tp-icon { flex-shrink: 0; }
+
+    .s2-tp-temp {
+      font-family: var(--ff-cond);
+      font-size: var(--type-sub);
+      font-weight: 800;
+      color: var(--c-navy);
+      width: 88px;
+      flex-shrink: 0;
+    }
+
+    .s2-tp-desc {
+      font-family: var(--ff-body);
+      font-size: var(--type-small);
+      font-weight: 500;
+      color: var(--c-card-text);
+      line-height: 1.25;
+      flex: 1;
+    }
+
+    .s2-morgen {
+      flex-shrink: 0;
+      padding: var(--gap-md) var(--pad-x) var(--pad-bottom);
+      border-top: 1px solid var(--c-border);
+    }
+
+    .s2-morgen-lbl {
+      font-family: var(--ff-body);
+      font-size: var(--type-micro);
+      font-weight: 700;
+      color: var(--c-yellow);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 10px;
+    }
+
+    .s2-morgen-txt {
+      font-family: var(--ff-body);
+      font-size: var(--type-body);
+      font-weight: 500;
+      color: rgba(255,255,255,0.92);
+      line-height: 1.35;
+    }
+
+    /* =============================================
+       SLIDE 3 — CTA / WEERZONE.NL
+       ============================================= */
+    .s3 {
+      background:
+        radial-gradient(ellipse at 70% 15%, rgba(255,255,255,0.18) 0%, transparent 45%),
+        linear-gradient(165deg, #72bcf7 0%, #4a9ee8 45%, #1a68c0 100%);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .s3-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 100px var(--pad-x);
+      gap: 44px;
+      width: 100%;
+    }
+
+    .s3-logo {
+      width: 820px;
+      height: auto;
+      filter: drop-shadow(0 8px 40px rgba(0,0,0,0.22));
+    }
+
+    .s3-divider {
+      width: 100px;
+      height: 6px;
+      background: var(--c-yellow);
+      border-radius: 3px;
+      box-shadow: 0 0 28px rgba(255,215,0,0.55);
+    }
+
+    .s3-headline {
+      font-family: var(--ff-cond);
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 0;
+      line-height: 1.15;
+      color: var(--c-white);
+      text-shadow: 0 4px 20px rgba(0,0,0,0.20);
+    }
+
+    .s3-hl-line {
+      display: block;
+      white-space: nowrap;
+      transform-origin: center left;
+    }
+
+    .s3-url-card {
+      background: var(--c-white);
+      border-radius: 36px;
+      padding: 52px 80px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.10);
+    }
+
+    .s3-url {
+      font-family: var(--ff-cond);
+      font-size: 100px;
+      font-weight: 900;
+      color: var(--c-sky-mid);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==========================================
+     WEATHER ICON SYMBOLS (hidden)
+     ========================================== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;position:absolute;">
+  <defs>
+
+    <!-- ZON -->
+    <symbol id="icon-zon" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="27" fill="#FFD700"/>
+      <line x1="60"  y1="6"   x2="60"  y2="23"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="60"  y1="97"  x2="60"  y2="114" stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="6"   y1="60"  x2="23"  y2="60"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="97"  y1="60"  x2="114" y2="60"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="22"  y1="22"  x2="34"  y2="34"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="86"  y1="86"  x2="98"  y2="98"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="98"  y1="22"  x2="86"  y2="34"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+      <line x1="22"  y1="98"  x2="34"  y2="86"  stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- HALFBEWOLKT -->
+    <symbol id="icon-halfbewolkt" viewBox="0 0 120 120">
+      <circle cx="42" cy="36" r="19" fill="#FFD700"/>
+      <line x1="42" y1="8"   x2="42" y2="16"  stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="42" y1="56"  x2="42" y2="64"  stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="14" y1="36"  x2="22" y2="36"  stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="62" y1="36"  x2="70" y2="36"  stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="18" y1="16"  x2="25" y2="23"  stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="60" y1="16"  x2="67" y2="9"   stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <line x1="18" y1="56"  x2="25" y2="49"  stroke="#FFD700" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M94 92 C106 92 112 81 107 72 C104 66 99 63 94 62 C92 51 82 43 70 44 C60 44 51 51 49 61 C44 60 37 65 36 71 C30 73 27 79 29 85 C31 92 39 96 47 92 Z" fill="#c8e4f8"/>
+    </symbol>
+
+    <!-- BEWOLKT -->
+    <symbol id="icon-bewolkt" viewBox="0 0 120 120">
+      <path d="M88 80 C101 80 108 69 103 60 C100 54 95 50 88 50 C86 38 76 28 63 28 C51 28 41 37 39 48 C33 47 26 52 25 58 C18 61 15 67 17 73 C19 81 27 86 36 82 Z" fill="#c0dff5"/>
+    </symbol>
+
+    <!-- REGEN -->
+    <symbol id="icon-regen" viewBox="0 0 120 120">
+      <path d="M88 62 C101 62 108 51 103 42 C100 36 95 32 88 32 C86 20 76 10 63 10 C51 10 41 19 39 30 C33 29 26 34 25 40 C18 43 15 49 17 55 C19 63 27 67 36 63 Z" fill="#c0dff5"/>
+      <line x1="36" y1="78"  x2="31" y2="94"  stroke="#4a9ee8" stroke-width="5" stroke-linecap="round"/>
+      <line x1="55" y1="82"  x2="50" y2="98"  stroke="#4a9ee8" stroke-width="5" stroke-linecap="round"/>
+      <line x1="74" y1="78"  x2="69" y2="94"  stroke="#4a9ee8" stroke-width="5" stroke-linecap="round"/>
+      <line x1="44" y1="97"  x2="39" y2="113" stroke="#4a9ee8" stroke-width="5" stroke-linecap="round"/>
+      <line x1="65" y1="97"  x2="60" y2="113" stroke="#4a9ee8" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- ONWEER -->
+    <symbol id="icon-onweer" viewBox="0 0 120 120">
+      <path d="M88 60 C101 60 108 49 103 40 C100 34 95 30 88 30 C86 18 76 8 63 8 C51 8 41 17 39 28 C33 27 26 32 25 38 C18 41 15 47 17 53 C19 60 27 65 36 61 Z" fill="#7a8899"/>
+      <path d="M63 64 L50 86 L62 86 L55 112 L78 80 L64 80 Z" fill="#FFD700"/>
+    </symbol>
+
+    <!-- MIST -->
+    <symbol id="icon-mist" viewBox="0 0 120 120">
+      <line x1="18"  y1="28"  x2="102" y2="28"  stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.65"/>
+      <line x1="12"  y1="48"  x2="108" y2="48"  stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.85"/>
+      <line x1="22"  y1="68"  x2="98"  y2="68"  stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.75"/>
+      <line x1="16"  y1="88"  x2="104" y2="88"  stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.60"/>
+      <line x1="28"  y1="108" x2="92"  y2="108" stroke="white" stroke-width="5.5" stroke-linecap="round" opacity="0.42"/>
+    </symbol>
+
+    <!-- NACHT (maan) -->
+    <symbol id="icon-nacht" viewBox="0 0 120 120">
+      <path d="M70 14 C45 14 26 34 26 59 C26 84 45 103 70 103 C82 103 92 98 99 90 C93 92 87 93 80 93 C55 93 36 74 36 49 C36 36 41 25 49 18 C56 15 63 14 70 14 Z" fill="#8ab4d8"/>
+      <circle cx="87" cy="22" r="5.5" fill="#8ab4d8" opacity="0.60"/>
+      <circle cx="99" cy="38" r="3.5" fill="#8ab4d8" opacity="0.45"/>
+    </symbol>
+
+  </defs>
+</svg>
+
+<!-- ==========================================
+     DECK
+     ========================================== -->
+<deck-stage width="1080" height="1920">
+
+  <!-- ─────────────────────────────────────────
+       SLIDE 1 · ACTUEEL WEER
+       ───────────────────────────────────────── -->
+  <section data-label="01 Actueel Weer" class="s1" data-condition="zon">
+
+    <div class="s1-glow"></div>
+    <div class="s1-glow-2"></div>
+
+    <div class="s1-header">
+      <img src="uploads/WEERZONE zon - hele woord.png" class="wz-logo" alt="Weerzone">
+      <span class="s1-datum" id="s1-datum">do 8 mei</span>
+    </div>
+
+    <div class="s1-body">
+      <svg viewBox="0 0 120 120" class="s1-icon">
+        <use href="#icon-zon" id="s1-icon-use"></use>
+      </svg>
+      <div class="s1-condition" id="s1-condition">Volop zon vandaag</div>
+      <div class="s1-temps">
+        <span class="s1-temp-max" id="s1-temp-max">26°</span>
+        <span class="s1-temp-sep">/</span>
+        <span class="s1-temp-min" id="s1-temp-min">15°</span>
+      </div>
+    </div>
+
+    <div class="s1-footer">
+      <div class="s1-callout" id="s1-extra">Heerlijk strandweer vandaag</div>
+      <div class="s1-brand-strip">
+        <span class="s1-brand-url">weerzone.nl</span>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ─────────────────────────────────────────
+       SLIDE 2 · PIET'S WEERBERICHT
+       ───────────────────────────────────────── -->
+  <section data-label="02 Piets Weerbericht" class="s2">
+
+    <div class="s2-header">
+      <img src="uploads/WEERZONE zon - hele woord.png" class="wz-logo" alt="Weerzone">
+    </div>
+
+    <div class="s2-title-area">
+      <div class="s2-overline">Piet's</div>
+      <div class="s2-title">Weerbericht</div>
+    </div>
+
+    <div class="s2-cards">
+
+      <div class="s2-card">
+        <span class="s2-tp-label">Ochtend</span>
+        <svg viewBox="0 0 120 120" class="s2-tp-icon" width="68" height="68">
+          <use href="#icon-halfbewolkt" id="s2-icon-ochtend"></use>
+        </svg>
+        <span class="s2-tp-temp" id="s2-temp-ochtend">17°</span>
+        <span class="s2-tp-desc" id="s2-desc-ochtend">Lichte bewolking</span>
+      </div>
+
+      <div class="s2-card highlight">
+        <span class="s2-tp-label">Middag</span>
+        <svg viewBox="0 0 120 120" class="s2-tp-icon" width="68" height="68">
+          <use href="#icon-zon" id="s2-icon-middag"></use>
+        </svg>
+        <span class="s2-tp-temp" id="s2-temp-middag">26°</span>
+        <span class="s2-tp-desc" id="s2-desc-middag">Volop zon</span>
+      </div>
+
+      <div class="s2-card">
+        <span class="s2-tp-label">Avond</span>
+        <svg viewBox="0 0 120 120" class="s2-tp-icon" width="68" height="68">
+          <use href="#icon-halfbewolkt" id="s2-icon-avond"></use>
+        </svg>
+        <span class="s2-tp-temp" id="s2-temp-avond">22°</span>
+        <span class="s2-tp-desc" id="s2-desc-avond">Geleidelijk bewolkt</span>
+      </div>
+
+      <div class="s2-card">
+        <span class="s2-tp-label">Nacht</span>
+        <svg viewBox="0 0 120 120" class="s2-tp-icon" width="68" height="68">
+          <use href="#icon-nacht" id="s2-icon-nacht"></use>
+        </svg>
+        <span class="s2-tp-temp" id="s2-temp-nacht">14°</span>
+        <span class="s2-tp-desc" id="s2-desc-nacht">Bewolkt, droog</span>
+      </div>
+
+    </div>
+
+    <div class="s2-morgen">
+      <div class="s2-morgen-lbl">Morgen</div>
+      <div class="s2-morgen-txt" id="s2-morgen">Wisselend bewolkt, kans op een bui</div>
+    </div>
+
+  </section>
+
+
+  <!-- ─────────────────────────────────────────
+       SLIDE 3 · CTA — WEERZONE.NL
+       ───────────────────────────────────────── -->
+  <section data-label="03 Weerzone" class="s3">
+    <div class="s3-inner">
+      <img src="uploads/WEERZONE zon - hele woord.png" class="s3-logo" alt="Weerzone">
+      <div class="s3-divider"></div>
+      <div class="s3-headline">
+        <div class="s3-hl-line">HYPERLOKAAL WEER.</div>
+        <div class="s3-hl-line">VANDAAG EN MORGEN.</div>
+      </div>
+      <div class="s3-url-card">
+        <div class="s3-url">weerzone.nl</div>
+      </div>
+    </div>
+  </section>
+
+</deck-stage>
+
+<!-- ==========================================
+     TWEAKS PANEL
+     ========================================== -->
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "datumLabel": "do 8 mei",
+  "weatherCondition": "zon",
+  "conditionTekst": "Volop zon vandaag",
+  "tempMax": 26,
+  "tempMin": 15,
+  "extraLabel": "Heerlijk strandweer vandaag",
+  "ochtendIcon": "halfbewolkt",
+  "ochtendTemp": 17,
+  "ochtendDesc": "Lichte bewolking",
+  "middagIcon": "zon",
+  "middagTemp": 26,
+  "middagDesc": "Volop zon",
+  "avondIcon": "halfbewolkt",
+  "avondTemp": 22,
+  "avondDesc": "Geleidelijk bewolkt",
+  "nachtIcon": "nacht",
+  "nachtTemp": 14,
+  "nachtDesc": "Bewolkt, droog",
+  "morgenLabel": "Wisselend bewolkt, kans op een bui"
+}/*EDITMODE-END*/;
+
+function applyTweaks(t) {
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setUse  = (id, icon) => { const el = document.getElementById(id); if (el) el.setAttribute('href', '#icon-' + icon); };
+
+  setText('s1-datum',    t.datumLabel);
+  setText('s1-condition', t.conditionTekst);
+  setText('s1-temp-max', t.tempMax + '°');
+  setText('s1-temp-min', t.tempMin + '°');
+  setText('s1-extra',    t.extraLabel);
+
+  const slide1 = document.querySelector('.s1');
+  if (slide1) slide1.setAttribute('data-condition', t.weatherCondition);
+  setUse('s1-icon-use', t.weatherCondition);
+
+  ['ochtend','middag','avond','nacht'].forEach(p => {
+    setText('s2-temp-' + p, t[p + 'Temp'] + '°');
+    setText('s2-desc-' + p, t[p + 'Desc']);
+    setUse('s2-icon-'  + p, t[p + 'Icon']);
+  });
+
+  setText('s2-morgen', t.morgenLabel);
+}
+
+function WeerzoneApp() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  React.useEffect(() => { applyTweaks(t); }, [t]);
+
+  const iconOpts = ['zon','halfbewolkt','bewolkt','regen','onweer','mist','nacht'];
+
+  return (
+    <TweaksPanel title="Weerzone dagtemplate">
+      <TweakSection label="Dag &amp; Hoofd">
+        <TweakText   label="Datum"        value={t.datumLabel}       onChange={v => setTweak('datumLabel', v)} />
+        <TweakSelect label="Conditie"     value={t.weatherCondition} options={iconOpts} onChange={v => setTweak('weatherCondition', v)} />
+        <TweakText   label="Omschrijving" value={t.conditionTekst}   onChange={v => setTweak('conditionTekst', v)} />
+        <TweakText   label="Extra label"  value={t.extraLabel}       onChange={v => setTweak('extraLabel', v)} />
+      </TweakSection>
+      <TweakSection label="Temperatuur">
+        <TweakNumber label="Max (°C)" value={t.tempMax} min={-20} max={45} onChange={v => setTweak('tempMax', v)} />
+        <TweakNumber label="Min (°C)" value={t.tempMin} min={-20} max={45} onChange={v => setTweak('tempMin', v)} />
+      </TweakSection>
+      <TweakSection label="Ochtend">
+        <TweakSelect label="Icoon"        value={t.ochtendIcon} options={iconOpts} onChange={v => setTweak('ochtendIcon', v)} />
+        <TweakNumber label="Temp (°C)"    value={t.ochtendTemp} min={-20} max={45} onChange={v => setTweak('ochtendTemp', v)} />
+        <TweakText   label="Omschrijving" value={t.ochtendDesc} onChange={v => setTweak('ochtendDesc', v)} />
+      </TweakSection>
+      <TweakSection label="Middag">
+        <TweakSelect label="Icoon"        value={t.middagIcon} options={iconOpts} onChange={v => setTweak('middagIcon', v)} />
+        <TweakNumber label="Temp (°C)"    value={t.middagTemp} min={-20} max={45} onChange={v => setTweak('middagTemp', v)} />
+        <TweakText   label="Omschrijving" value={t.middagDesc} onChange={v => setTweak('middagDesc', v)} />
+      </TweakSection>
+      <TweakSection label="Avond">
+        <TweakSelect label="Icoon"        value={t.avondIcon} options={iconOpts} onChange={v => setTweak('avondIcon', v)} />
+        <TweakNumber label="Temp (°C)"    value={t.avondTemp} min={-20} max={45} onChange={v => setTweak('avondTemp', v)} />
+        <TweakText   label="Omschrijving" value={t.avondDesc} onChange={v => setTweak('avondDesc', v)} />
+      </TweakSection>
+      <TweakSection label="Nacht">
+        <TweakSelect label="Icoon"        value={t.nachtIcon} options={iconOpts} onChange={v => setTweak('nachtIcon', v)} />
+        <TweakNumber label="Temp (°C)"    value={t.nachtTemp} min={-20} max={45} onChange={v => setTweak('nachtTemp', v)} />
+        <TweakText   label="Omschrijving" value={t.nachtDesc} onChange={v => setTweak('nachtDesc', v)} />
+      </TweakSection>
+      <TweakSection label="Morgen">
+        <TweakText label="Preview tekst" value={t.morgenLabel} onChange={v => setTweak('morgenLabel', v)} />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+const tweaksRoot = document.createElement('div');
+tweaksRoot.id = 'tweaks-root';
+document.body.appendChild(tweaksRoot);
+ReactDOM.createRoot(tweaksRoot).render(<WeerzoneApp />);
+</script>
+
+</body>
+</html>
