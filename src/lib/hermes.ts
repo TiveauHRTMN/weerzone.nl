@@ -3,7 +3,7 @@ import OpenAI from "openai";
 const MODELS = {
   large: "nousresearch/hermes-4-405b",  // complexe taken (WWS, orchestrator)
   fast:  "nousresearch/hermes-4-70b",   // snelle taken
-  seo:   "nousresearch/hermes-4-70b",   // batch SEO
+  seo:   "deepseek/deepseek-v4-pro",    // batch SEO
   persona: "deepseek/deepseek-v4-flash", // persona briefs (Piet/Reed/Steve)
 } as const;
 

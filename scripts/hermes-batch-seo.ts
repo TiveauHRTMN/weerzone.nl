@@ -27,7 +27,7 @@ async function run() {
   const batchSize = 10;
 
   const total = ALL_PLACES.length;
-  console.log(`🚀 Hermes 4 70B: ${total} locaties in heel Nederland (${PROVINCES.length} provincies)...`);
+  console.log(`🚀 DeepSeek V4 Pro: ${total} locaties in heel Nederland (${PROVINCES.length} provincies)...`);
 
   for (const province of PROVINCES) {
     const villages = ALL_PLACES.filter(p => p.province === province);
@@ -71,7 +71,7 @@ INSTRUCTIES VOOR TITEL/DESC:
               "name": entry.title,
               "description": entry.description,
             },
-            ai_strategy: `Kimi K2.6 Batch SEO: ${query}`,
+            ai_strategy: `DeepSeek V4 Pro Batch SEO: ${query}`,
           });
         }
       }
