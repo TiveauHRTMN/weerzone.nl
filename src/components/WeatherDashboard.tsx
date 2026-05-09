@@ -33,8 +33,6 @@ const RainRadar = dynamic(() => import("./RainRadar"), {
   loading: () => <div className="card p-4 text-center text-xs text-text-secondary">Radar laadt…</div>,
 });
 const KNMIStationBadge = dynamic(() => import("./KNMIStationBadge"), { ssr: false });
-const KNMIClimateCard = dynamic(() => import("./KNMIClimateCard"), { ssr: false });
-const KNMIRadarCard = dynamic(() => import("./KNMIRadarCard"), { ssr: false });
 
 interface DashboardProps {
   initialCity?: City;
@@ -331,12 +329,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
               <RainRadar data={weather.minutely} />
             </div>
           )}
-
-          {/* KNMI live radar metadata */}
-          <KNMIRadarCard />
-
-          {/* KNMI klimaatvergelijking */}
-          <KNMIClimateCard lat={city.lat} lon={city.lon} />
 
           {/* Narrative teaser */}
           {narrative && (
