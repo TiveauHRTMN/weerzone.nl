@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #1e3048;
+  --bg-primary: #0ea5e9;
   --bg-secondary: #f8fafc;
   --bg-card: rgba(255, 255, 255, 0.88);
   --bg-card-hover: rgba(255, 255, 255, 0.96);

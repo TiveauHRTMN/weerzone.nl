@@ -4,6 +4,7 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import ReedExtended from "@/components/ReedExtended";
 import PremiumGate from "@/components/PremiumGate";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
+import LoadingScreen from "@/components/LoadingScreen";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES, type City } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
@@ -25,7 +26,7 @@ export default async function ReedPage() {
 
   return (
     <main>
-      <Suspense fallback={null}>
+      <Suspense fallback={<LoadingScreen />}>
         <WaarschuwingenAsync activeLoc={activeLoc} loc={loc} />
       </Suspense>
     </main>

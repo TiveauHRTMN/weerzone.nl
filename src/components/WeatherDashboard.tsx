@@ -26,9 +26,9 @@ import EmailSubscribe from "./EmailSubscribe";
 import SupportBanner from "./SupportBanner";
 import Footer from "./Footer";
 import WeatherAdvice from "./WeatherAdvice";
-import WeatherBackground from "./WeatherBackground";
 import dynamic from "next/dynamic";
 
+const WeatherBackground = dynamic(() => import("./WeatherBackground"));
 const RainRadar = dynamic(() => import("./RainRadar"), {
   ssr: false,
   loading: () => <div className="card p-4 text-center text-xs text-text-secondary">Radar laadt…</div>,
