@@ -9,12 +9,6 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#4BA3E3] to-[#2980B9]">
       <div className="max-w-2xl mx-auto px-4 py-12 sm:px-6">
-        <a
-          href="/"
-          className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm mb-8 transition-colors"
-        >
-          ← Terug naar WEERZONE
-        </a>
 
         <div className="card p-6 sm:p-8 space-y-6">
           <div>
@@ -106,12 +100,6 @@ export default function PrivacyPage() {
               </a>
             </p>
           </section>
-
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} WEERZONE.nl — 48 uur. De rest is ruis.
-            </p>
-          </div>
         </div>
       </div>
     </main>

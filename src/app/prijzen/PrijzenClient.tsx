@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { PERSONAS, formatPrice, type PersonaTier } from "@/lib/personas";
-import Footer from "@/components/Footer";
 import NavBar from "@/components/NavBar";
 import { loadWeather } from "@/lib/weatherCache";
 
@@ -93,7 +92,6 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
             <Link href="/app" className="btn btn-primary btn-block btn-lg">Naar dashboard →</Link>
           </div>
         </div>
-        <div className="max-w-2xl mx-auto w-full"><Footer /></div>
       </PageShell>
     );
   }
@@ -113,7 +111,6 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
             <Link href="/app" className="btn btn-primary btn-lg btn-block">Naar dashboard →</Link>
           </div>
         </div>
-        <div className="max-w-2xl mx-auto w-full"><Footer /></div>
       </PageShell>
     );
   }
@@ -167,7 +164,6 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
             </div>
           </div>
         </div>
-        <div className="max-w-2xl mx-auto w-full"><Footer /></div>
       </PageShell>
     );
   }
@@ -305,8 +301,6 @@ export default function PrijzenClient({ userTier, isFounder, initialWeatherCode,
           </div>
         </div>
       </div>
-
-      <div className="max-w-2xl mx-auto w-full"><Footer /></div>
     </PageShell>
   );
 }

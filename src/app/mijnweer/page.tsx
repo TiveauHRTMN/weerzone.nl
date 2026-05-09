@@ -13,6 +13,7 @@ import PollenWidget from "@/components/PollenWidget";
 import MarineWidget from "@/components/MarineWidget";
 import PietDailyBriefing from "@/components/PietDailyBriefing";
 import { fetchPietDailyBriefing } from "@/lib/piet-briefing";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const loc = await getSavedLocationServer().catch(() => null);
@@ -251,10 +252,6 @@ async function MijnWeerAsync({ activeLoc, loc }: { activeLoc: City, loc: City | 
 
           {airQuality && <PollenWidget data={airQuality} />}
           {marineData && <MarineWidget data={marineData} />}
-
-          <p className="text-center text-white/40 text-xs font-medium pb-4">
-            Verder dan 48 uur kijken we niet vooruit - dan wordt het gokken.
-          </p>
         </div>
       }
     />

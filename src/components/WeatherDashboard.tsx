@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -36,6 +36,8 @@ const RainRadar = dynamic(() => import("./RainRadar"), {
 interface DashboardProps {
   initialCity?: City;
   initialWeather?: WeatherData;
+  initialWeatherCode?: number;
+  initialIsDay?: boolean;
   topContent?: React.ReactNode;
   beforeFooter?: React.ReactNode;
   titleOverride?: string;
@@ -105,7 +107,7 @@ const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
   );
 };
 
-export default function WeatherDashboard({ initialCity, initialWeather, topContent, beforeFooter, titleOverride, hideWeatherInfo, slimMode }: DashboardProps) {
+export default function WeatherDashboard({ initialCity, initialWeather, initialWeatherCode, initialIsDay, topContent, beforeFooter, titleOverride, hideWeatherInfo, slimMode }: DashboardProps) {
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
@@ -130,18 +132,11 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
   }, []);
 
   // Sync city from localStorage after mount.
-  //
-  // We overschrijven de SSR-initialCity altijd als er een opgeslagen city
-  // is — zo zien gebruikers met een eerder gekozen plaats nooit per ongeluk
-  // de SSR-fallback (De Bilt / Amsterdam) op pagina's als /mijnweer of
-  // /waarschuwingen. De effect verderop schrijft direct ook cookies, dus
-  // de volgende navigatie is meteen correct via SSR.
   useEffect(() => {
     const saved = getSavedCity();
     if (saved && (saved.name !== city.name || saved.lat !== city.lat || saved.lon !== city.lon)) {
       setCity(saved);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = useCallback(async (targetCity: City) => {
@@ -218,10 +213,6 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
   };
 
   useEffect(() => {
-    // persistCity() schrijft localStorage EN cookies — zodat SSR-pagina's
-    // (/mijnweer, /waarschuwingen, /weer/[province]/[place]) op de juiste
-    // locatie renderen na een navigatie. Voorheen werd alleen localStorage
-    // gezet, waardoor SSR-routes terugvielen op de hardcoded default.
     persistCity({ name: city.name, lat: city.lat, lon: city.lon });
     window.dispatchEvent(new CustomEvent("wz:city-updated"));
   }, [city]);
@@ -254,20 +245,12 @@ export default function WeatherDashboard({ initialCity, initialWeather, topConte
   }
 
   if (loading || !weather) {
-    if (hideWeatherInfo) {
-      return (
-        <div className="min-h-screen relative overflow-x-hidden">
-          <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
-            {topContent}
-            {beforeFooter}
-            <Footer />
-          </div>
-        </div>
-      );
-    }
+    const wCode = initialWeather?.current.weatherCode ?? initialWeatherCode ?? 2;
+    const isD = initialWeather?.current.isDay ?? initialIsDay ?? true;
+    
     return (
       <div className="min-h-screen relative overflow-x-hidden">
-        <WeatherBackground weatherCode={initialWeather?.current.weatherCode || 2} isDay={initialWeather?.current.isDay ?? true} />
+        <WeatherBackground weatherCode={wCode} isDay={isD} />
         <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
           {topContent}
           {beforeFooter}

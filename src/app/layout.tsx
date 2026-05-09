@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import InstallPrompt from "@/components/InstallPrompt";
@@ -97,6 +97,7 @@ export const metadata: Metadata = {
 import { getSupabase } from "@/lib/supabase";
 import AffiliateBanner from "@/components/AffiliateBanner";
 import GlobalNav from "@/components/wz/GlobalNav";
+import Footer from "@/components/Footer";
 
 const globalSchemasLd = [
   {
@@ -163,7 +164,7 @@ export default async function RootLayout({
   return (
     <html lang="nl" className="antialiased">
       <head>
-        <meta name="theme-color" content="#4a9ee8" />
+        <meta name="theme-color" content="#0f172a" />
       </head>
       <body className="min-h-screen">
         <script
@@ -192,6 +193,7 @@ export default async function RootLayout({
 
           <GlobalNav />
           {children}
+          <Footer />
           <CookieBanner />
           <InstallPrompt />
           <FounderBanner />
