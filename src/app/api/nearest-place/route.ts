@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ALL_PLACES, placeSlug } from "@/lib/places-data";
 
+const NL_PROVINCES = new Set([
+  "groningen","friesland","drenthe","overijssel","flevoland",
+  "gelderland","utrecht","noord-holland","zuid-holland","zeeland",
+  "noord-brabant","limburg",
+]);
+
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get("lat") ?? "");
   const lon = parseFloat(req.nextUrl.searchParams.get("lon") ?? "");
@@ -9,10 +15,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(null, { status: 400 });
   }
 
-  let nearest = ALL_PLACES[0];
+  // GPS navigation always resolves to a Dutch place — Belgian pages exist for
+  // SEO indexing but are not stable enough to route live users to yet.
+  const pool = ALL_PLACES.filter(p => NL_PROVINCES.has(p.province));
+
+  let nearest = pool[0];
   let minDist = Infinity;
 
-  for (const p of ALL_PLACES) {
+  for (const p of pool) {
     const dLat = (p.lat - lat) * Math.PI / 180;
     const dLon = (p.lon - lon) * Math.PI / 180;
     const a =
