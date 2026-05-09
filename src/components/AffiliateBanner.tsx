@@ -32,7 +32,7 @@ export default function AffiliateBanner({ message, link, cta, type = 'neutral' }
         <a 
           href={link} 
           target="_blank" 
-          rel="noopener noreferrer"
+          rel="noopener noreferrer sponsored"
           className="bg-white text-black px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform whitespace-nowrap shadow-xl"
         >
           {cta} →

@@ -94,7 +94,7 @@ export default function AmazonStickyBar({ weather }: Props) {
             <span>{emoji.emoji}</span>
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={pick.image} alt="" className="w-full h-full object-cover rounded-xl" />
+            <img src={pick.image} alt={pick.title} className="w-full h-full object-cover rounded-xl" />
           )}
         </div>
         <div className="flex-1 min-w-0">
