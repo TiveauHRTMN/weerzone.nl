@@ -47,9 +47,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `Weer ${place.name} | 10x Nauwkeuriger op Straatniveau | WeerZone`;
   const description = hermesSEO?.meta_description || `Weer in ${place.name} (${provLabel}). De nauwkeurigste 48-uurs weersvoorspelling van Nederland, op 1 bij 1 kilometer. Temperatuur, regen, wind en UV — per uur bijgewerkt.`;
 
+  // Noindex dunne pagina's: geen Hermes-coverage én kleine/onbekende kern
+  const isThinPage = !hermesSEO && (!place.population || place.population < 500);
+
   return {
     title,
     description,
+    robots: isThinPage ? { index: false, follow: true } : { index: true, follow: true },
     keywords: [
       `weer ${place.name.toLowerCase()}`,
       `weer ${place.name.toLowerCase()} vandaag`,
@@ -214,8 +218,8 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
                 <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
                   <span className="text-accent-cyan">ℹ️</span> Weer in {place.name}: Lokaal karakter
                 </h2>
-                <div className="text-white/60 text-xs leading-relaxed italic mb-6">
-                  {seoContent}
+                <div className="text-white/60 text-xs leading-relaxed italic mb-6" data-speakable>
+                  {hermesSEO?.geo_optimized_summary || seoContent}
                 </div>
 
                 {initialWeather && (
