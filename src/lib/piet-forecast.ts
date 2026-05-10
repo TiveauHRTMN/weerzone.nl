@@ -70,6 +70,12 @@ STRUCTUUR:
 - Tweede alinea: het verloop of de details die er écht toe doen.
 - Derde alinea (optioneel): morgen kort aantippen als dat relevant is.
 
+DAGNAMEN — VERPLICHT:
+- Schrijf altijd de concrete dag van de week, nooit vage tijdsaanduidingen.
+- Gebruik NIET: "vandaag", "vanmiddag", "vanavond", "morgen" alleen.
+- Gebruik WEL: "zondagmiddag", "maandagochtend", "morgen (maandag)", "dinsdagavond".
+- De data geeft de dagnamen mee — gebruik ze altijd in de tekst.
+
 VERBODEN:
 - Geen meteorologie-jargon ("trog", "lagedrukgebied", "front", "hogedrukgebied").
 - Geen anglicismen.
