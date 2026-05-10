@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getSupabase } from "@/lib/supabase";
 import { getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 import { amazonProductUrl, amazonUrl } from "@/lib/affiliates";
 
 // Vercel Cron: elke ochtend om 06:30 NL tijd
@@ -200,11 +200,9 @@ export async function GET(req: Request) {
   }
 
   const resendKey = process.env.RESEND_API_KEY;
-  const geminiKey = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
   if (!resendKey) return NextResponse.json({ error: "RESEND_API_KEY missing" }, { status: 500 });
   
   const resend = new Resend(resendKey);
-  const genAI = geminiKey ? new GoogleGenerativeAI(geminiKey) : null;
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ error: "Supabase missing" }, { status: 500 });
 
@@ -229,16 +227,13 @@ export async function GET(req: Request) {
       // Genereer Piet's commentaar via AI
       let pietCommentary = "De 14-daagse van Buienradar is voor mensen die nog in sprookjes geloven. Wij houden het bij de feiten.";
       
-      if (genAI) {
-        try {
-          const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-          const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: `${PIET_PROMPT}\n\nSTAD: ${first.city}\nWEER: ${JSON.stringify(weatherData.current)}` }] }]
-          });
-          pietCommentary = result.response.text()?.trim().replace(/^"|"$/g, '') || pietCommentary;
-        } catch (e) {
-          console.error("AI error:", e);
-        }
+      try {
+        pietCommentary = (await hermesChat(
+          [{ role: "user", content: `${PIET_PROMPT}\n\nSTAD: ${first.city}\nWEER: ${JSON.stringify(weatherData.current)}` }],
+          { model: "persona", temperature: 0.6 }
+        )).trim().replace(/^"|"$/g, '') || pietCommentary;
+      } catch (e) {
+        console.error("hermesChat error:", e);
       }
 
       const html = buildEmailHtml(first.city, weatherData, pietCommentary);

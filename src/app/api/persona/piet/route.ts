@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGeminiPro } from '@/lib/google/vertex';
+import { hermesChat } from '@/lib/hermes';
 
 export async function POST(req: Request) {
   try {
@@ -8,8 +8,6 @@ export async function POST(req: Request) {
     if (!weather || !city) {
       return NextResponse.json({ error: 'Missing weather or city data' }, { status: 400 });
     }
-
-    const model = getGeminiPro();
 
     const prompt = `
 Je bent Piet, de nuchtere, eerlijke en betrouwbare weerman van Weerzone.
@@ -26,14 +24,10 @@ Weerdata om te analyseren:
 - Korte voorspelling: ${weather.summaryVerdict || 'Geen specifieke samenvatting'}
 `;
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }]
-    });
-
-    const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseText = await hermesChat([{ role: "user", content: prompt }]);
 
     if (!responseText) {
-      throw new Error("Geen valide tekst gegenereerd door Vertex AI");
+      throw new Error("Geen valide tekst gegenereerd");
     }
 
     return NextResponse.json({ narrative: responseText });

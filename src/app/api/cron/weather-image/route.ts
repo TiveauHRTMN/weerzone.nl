@@ -4,7 +4,7 @@ import { getSupabase } from "@/lib/supabase";
 import { getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
 import { getConditionTag, trackEvent, ConditionTag } from "@/lib/affiliate-orchestrator";
 import { WeatherData } from "@/lib/types";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 
 export const dynamic = "force-dynamic";
 
@@ -244,22 +244,10 @@ async function buildEmailHtml(city: string, data: Record<string, unknown>, affil
   // Nano Banana 2: Dynamic Hero Visual Integration
   // We use Gemini to generate a specific prompt for the visual engine based on city and weather
   let visualPrompt = `Realistisch weerbeeld in ${city}: ${desc}, ${temp}°C.`;
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const aiRes = await model.generateContent(`
-        Geef een KORTE Engelse prompt voor een AI image generator (Stable Diffusion/Flux stijl).
-        Het moet het weer in ${city} uitbeelden.
-        Weer: ${desc}, Temperatuur: ${temp}°C. 
-        Stijl: Hyper-realistisch, cinematic, wide angle, 8k. 
-        Geen tekst in het beeld.
-      `);
-      visualPrompt = aiRes.response.text().trim();
-    } catch (e) {
-      console.error("Nano Banana Prompt Error:", e);
-    }
+  try {
+    visualPrompt = (await hermesChat([{ role: "user", content: `Geef een KORTE Engelse prompt voor een AI image generator (Stable Diffusion/Flux stijl). Het moet het weer in ${city} uitbeelden. Weer: ${desc}, Temperatuur: ${temp}°C. Stijl: Hyper-realistisch, cinematic, wide angle, 8k. Geen tekst in het beeld.` }])).trim();
+  } catch (e) {
+    console.error("Nano Banana Prompt Error:", e);
   }
 
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://weerzone.nl";

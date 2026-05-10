@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGeminiPro } from '@/lib/google/vertex';
+import { hermesChat } from '@/lib/hermes';
 
 export async function POST(req: Request) {
   try {
@@ -8,8 +8,6 @@ export async function POST(req: Request) {
     if (!weather || !city) {
       return NextResponse.json({ error: 'Missing weather or city data' }, { status: 400 });
     }
-
-    const model = getGeminiPro();
 
     const prompt = `
 Je bent Reed, de analytische risico-expert van Weerzone. 
@@ -33,14 +31,10 @@ Data:
 - WWS Status: ${weather.wwsRaw ? 'Gekoppeld aan 1KM Grid' : 'Standaard model data'}
 `;
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }]
-    });
-
-    const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseText = await hermesChat([{ role: "user", content: prompt }]);
 
     if (!responseText) {
-      throw new Error("Geen valide tekst gegenereerd door Reed AI");
+      throw new Error("Geen valide tekst gegenereerd");
     }
 
     return NextResponse.json({ narrative: responseText });

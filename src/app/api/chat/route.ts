@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 
 export const dynamic = "force-dynamic";
 
@@ -22,19 +22,6 @@ export async function POST(req: Request) {
     if (!question || !weather) {
       return NextResponse.json({ error: "Vraag en weerdata vereist" }, { status: 400 });
     }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    console.log("Chat API Key Check:", apiKey ? "FOUND (masked)" : "NOT FOUND");
-    console.log("Environment:", process.env.NODE_ENV);
-
-    if (!apiKey) {
-      return NextResponse.json({
-        answer: `${weather.current.temperature}° in ${city}. ${weather.current.precipitation > 0 ? "Het regent, paraplu mee." : "Droog."} Stel GEMINI_API_KEY in voor slimmere antwoorden. (Env: ${process.env.NODE_ENV}) 🤷`
-      });
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const weatherContext = JSON.stringify({
       stad: city,
@@ -64,20 +51,10 @@ export async function POST(req: Request) {
       uv: weather.uvIndex,
     });
 
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${SYSTEM_PROMPT}\n\nWEERDATA: ${weatherContext}\n\nVRAAG: ${question}` }],
-        },
-      ],
-      generationConfig: {
-        maxOutputTokens: 200,
-        temperature: 0.8,
-      },
-    });
-
-    const answer = result.response.text()?.trim() || "Geen antwoord. Probeer het opnieuw.";
+    const answer = await hermesChat(
+      [{ role: "user", content: `${SYSTEM_PROMPT}\n\nWEERDATA: ${weatherContext}\n\nVRAAG: ${question}` }],
+      { temperature: 0.8, maxTokens: 200 }
+    ) || "Geen antwoord. Probeer het opnieuw.";
 
     return NextResponse.json({ answer });
   } catch (e: any) {

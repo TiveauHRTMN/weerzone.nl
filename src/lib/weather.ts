@@ -1,5 +1,5 @@
 import type { WeatherData, HourlyForecast, MinutelyPrecipitation, AirQualityData, MarineData } from "./types";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { fetchGoogleWeather, mapGoogleWeatherConditionToWMO } from "./google-weather";
 
@@ -328,9 +328,6 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
  * Gebruikt Gemini om de ruwe data te interpreteren naar hyper-lokale inzichten.
  */
 export async function getNeuralInsights(lat: number, lon: number, weather: WeatherData): Promise<WeatherData["neuralData"]> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return undefined;
-
   // TEST MODE: Forceer Reed-gate event voor demo
   const isSimulation = false; 
   if (isSimulation) {
@@ -347,9 +344,6 @@ export async function getNeuralInsights(lat: number, lon: number, weather: Weath
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     const prompt = `
       Je bent het neurale weer-brein van WEERZONE. Interpreteer de volgende data voor coördinaten ${lat}, ${lon}:
       - Temp: ${weather.current.temperature}C
@@ -381,9 +375,8 @@ export async function getNeuralInsights(lat: number, lon: number, weather: Weath
       }
     `.trim();
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim().replace(/```json|```/g, "");
-    return JSON.parse(text);
+    const raw = await hermesChat([{ role: "user", content: prompt }], { json: true });
+    return JSON.parse(raw.trim().replace(/```json|```/g, ""));
   } catch (e) {
     console.error("Neural Insights Error:", e);
     return undefined;

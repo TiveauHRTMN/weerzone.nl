@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ALL_PLACES, type Place } from "@/lib/places-data";
 import { logAgentAction } from "@/lib/agent-logger";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 
 export const dynamic = "force-dynamic";
 
@@ -35,10 +35,7 @@ export async function GET(req: Request) {
     }
 
     // 2. AI Analyse van de batch
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    try {
       const prompt = `
         Je bent OpenClaw, de Discovery Agent van WEERZONE.nl.
         Analyseer deze locaties: ${targets.map(t => t.name).join(", ")}.
@@ -47,8 +44,7 @@ export async function GET(req: Request) {
         Antwoord in een JSON array van objecten: [{"name": "...", "type": "...", "reason": "..."}]
       `.trim();
       
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text().trim();
+      const responseText = (await hermesChat([{ role: "user", content: prompt }], { json: true })).trim();
       try {
         const results = JSON.parse(responseText.replace(/```json|```/g, ""));
         
@@ -78,6 +74,8 @@ export async function GET(req: Request) {
       } catch (e) {
         console.error("JSON Parse error in OpenClaw Batch:", responseText);
       }
+    } catch (e) {
+      console.error("OpenClaw hermesChat error:", e);
     }
 
     return NextResponse.json({ status: "Fallback or No AI key" });

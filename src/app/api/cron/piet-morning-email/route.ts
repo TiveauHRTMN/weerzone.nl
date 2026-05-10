@@ -11,7 +11,7 @@
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
 
@@ -50,14 +50,8 @@ async function fetchWeather48h(lat: number, lon: number) {
   return res.json();
 }
 
-async function generateNarrative(
-  genAI: GoogleGenerativeAI,
-  city: string,
-  weatherJson: string
-): Promise<string> {
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    systemInstruction: `
+async function generateNarrative(city: string, weatherJson: string): Promise<string> {
+  const systemInstruction = `
 Je bent Piet — de stem van de 'Meteorological Truth' bij Weerzone. 
 Jouw unique selling point: extreme precisie. Wij gissen niet, wij rekenen op de kilometer nauwkeurig.
 
@@ -76,15 +70,15 @@ GRENZEN:
 - Max 1 emoji. 
 - Geen modelnamen noemen. 
 - 100% correct Nederlands.
-- Afsluiter: "— Piet, voor Weerzone".
-`.trim(),
-    generationConfig: { temperature: 0.6, maxOutputTokens: 600 },
-  });
+- Afsluiter: "— Piet, voor Weerzone".`.trim();
 
-  const result = await model.generateContent(
-    `Stad: ${city}\n\nWeerdata (48u):\n${weatherJson}`
-  );
-  return result.response.text().trim();
+  return (await hermesChat(
+    [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: `Stad: ${city}\n\nWeerdata (48u):\n${weatherJson}` },
+    ],
+    { model: "persona", temperature: 0.6, maxTokens: 600 }
+  )).trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -299,11 +293,9 @@ export async function GET(req: Request) {
   }
 
   const resendKey = process.env.RESEND_API_KEY;
-  const geminiKey = process.env.GEMINI_API_KEY;
   if (!resendKey) return NextResponse.json({ error: "RESEND_API_KEY missing" }, { status: 500 });
 
   const resend = new Resend(resendKey);
-  const genAI = geminiKey ? new GoogleGenerativeAI(geminiKey) : null;
   const admin = createSupabaseAdminClient();
 
   // 1. Haal alle actieve Piet + Reed abonnees op met locatie
@@ -373,12 +365,10 @@ export async function GET(req: Request) {
       });
 
       let narrative = `Goedemorgen! Vandaag in ${cityLabel}: ${getWeatherDescription(data.current.weather_code).toLowerCase()}, ${Math.round(data.current.temperature_2m)}°. Prettige dag gewenst. — Piet, voor Weerzone`;
-      if (genAI) {
-        try {
-          narrative = await generateNarrative(genAI, cityLabel, weatherJson);
-        } catch (e) {
-          throw new Error(`AI error ${cityLabel}: ${e}`);
-        }
+      try {
+        narrative = await generateNarrative(cityLabel, weatherJson);
+      } catch (e) {
+        throw new Error(`AI error ${cityLabel}: ${e}`);
       }
 
       const html = buildMorningEmailHtml(cityLabel, narrative, data, "__EMAIL__");

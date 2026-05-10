@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { fetchWeatherData } from "@/lib/weather";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 import { Resend } from "resend";
 import { getSmartAffiliateEmailHtml } from "@/lib/smart-affiliate-email";
 import { getImpactAnalysis } from "@/lib/impact-engine";
@@ -37,7 +37,6 @@ export async function GET(req: Request) {
     (s) => s.user_profile?.primary_lat != null && s.user_profile?.primary_lon != null
   );
 
-  const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
   const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
 
   const AGENT_PROMPT = `Je bent de "Hyper-Affiliate" Timing Agent van WEERZONE.nl. 
@@ -77,14 +76,12 @@ export async function GET(req: Request) {
 
       let aiText = `Er komt ${trigger} aan in ${cityLabel}. Bereid je voor op ellende.`;
 
-      if (genAI) {
-        try {
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          const result = await model.generateContent(`${AGENT_PROMPT}\n\nSituatie: ${trigger} in ${cityLabel}. Details: ${details}.`);
-          aiText = result.response.text()?.trim() || aiText;
-        } catch (e) {
-          console.error("Gemini error:", e);
-        }
+      try {
+        aiText = (await hermesChat(
+          [{ role: "user", content: `${AGENT_PROMPT}\n\nSituatie: ${trigger} in ${cityLabel}. Details: ${details}.` }]
+        )).trim() || aiText;
+      } catch (e) {
+        console.error("hermesChat error:", e);
       }
 
       // Impact Analysis

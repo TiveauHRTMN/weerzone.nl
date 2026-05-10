@@ -4,7 +4,7 @@ import { fetchWeatherData } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince, highestSeverity } from "@/lib/knmi-warnings";
 import { ALL_PLACES } from "@/lib/places-data";
 import { Resend } from "resend";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { hermesChat } from "@/lib/hermes";
 import { amazonProductUrl, amazonUrl } from "@/lib/affiliates";
 import { logAgentAction } from "@/lib/agent-logger";
 
@@ -101,7 +101,6 @@ export async function GET(req: Request) {
     if (error || !users) throw error;
 
     const emailsSent = [];
-    const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
     const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
 
     // Haal KNMI warnings eenmalig op (geldig voor alle gebruikers)
@@ -139,14 +138,12 @@ export async function GET(req: Request) {
         let alertMsg = knmiAnomaly
           ? `Officieel KNMI-alarm voor ${user.city}: ${knmiForUser.map(w => w.type).join(", ")}`
           : `Waarschuwing voor ${user.city}`;
-        if (genAI) {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent({
-              contents: [{ role: "user", parts: [{ text: `${SENTINEL_PROMPT.trim()}\n\nNIVEAU: ${activeAnomaly.level}\nDATA: ${JSON.stringify({ city: user.city, anomaly: activeAnomaly })}` }] }],
-              generationConfig: { maxOutputTokens: 60, temperature: 0.9 },
-            });
-            alertMsg = result.response.text()?.trim().replace(/^"|"$/g, '') || alertMsg;
-        }
+        try {
+          alertMsg = (await hermesChat(
+            [{ role: "user", content: `${SENTINEL_PROMPT.trim()}\n\nNIVEAU: ${activeAnomaly.level}\nDATA: ${JSON.stringify({ city: user.city, anomaly: activeAnomaly })}` }],
+            { temperature: 0.9, maxTokens: 60 }
+          )).trim().replace(/^"|"$/g, '') || alertMsg;
+        } catch {}
 
         if (process.env.RESEND_API_KEY) {
           await resend.emails.send({

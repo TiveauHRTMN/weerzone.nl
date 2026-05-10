@@ -2,8 +2,8 @@
 
 import { fetchWeatherData, getWeatherDescription } from "@/lib/weather";
 import type { WeatherData } from "@/lib/types";
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import OpenAI from "openai";
+import { hermesChat } from "@/lib/hermes";
 import { getMainCommentary } from "@/lib/commentary";
 import { Resend } from "resend";
 import { getWelcomeEmailHtml } from "@/lib/welcome-email";
@@ -190,7 +190,7 @@ INHOUD:
         "vercel-ai-gateway-cache-control": "s-maxage=900, stale-if-error=86400",
         "x-vercel-ai-gateway-config": JSON.stringify({
           gateway: {
-            fallback: ["google/gemini-2.0-flash"]
+            fallback: ["deepseek/deepseek-v4-pro"]
           }
         })
       }
@@ -261,7 +261,7 @@ KERNREGELS:
             "vercel-ai-gateway-cache-control": "s-maxage=900, stale-if-error=86400",
             "x-vercel-ai-gateway-config": JSON.stringify({
               gateway: {
-                fallback: ["google/gemini-2.0-flash"]
+                fallback: ["deepseek/deepseek-v4-pro"]
               }
             })
           }
@@ -519,30 +519,15 @@ export async function getLocationSEOContent(placeName: string, province: string,
     console.error("SEO cache check failed:", err);
   }
 
-  // 2. No cache? Call Gemini
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return `Bekijk het actuele weer in ${placeName}. Vooruitzichten per uur exclusief van het KNMI.`;
-
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    const prompt = `
-      Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
+    const prompt = `Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
       ${character ? `Houd rekening met het karakter: ${character}.` : ""}
-      - Gebruik geen clichés als "Welkom in". 
+      - Gebruik geen clichés als "Welkom in".
       - Link het naar de geografische ligging van ${placeName}.
       - Vertel bijvoorbeeld over de invloed van de zee (indien kust), de wind op de open vlakte, of de hitte in de stad (urban heat island).
-      - De tekst moet informatief en autoritair klinken voor iemand die het weer zoekt.
-    `.trim();
+      - De tekst moet informatief en autoritair klinken voor iemand die het weer zoekt.`.trim();
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-
-    // 3. We slaan dit specifieke stukje content tijdelijk niet meer op in ai_strategy via deze route
-    // omdat de SEO batch cronjob die overschrijft met tracking logs. We returnen het gewoon direct voor de render.
-    
-    return text;
+    return (await hermesChat([{ role: "user", content: prompt }], { model: "seo" })).trim();
   } catch (error) {
     console.error("getLocationSEOContent error:", error);
     return `Het weer in ${placeName} (${province}) wordt beïnvloed door lokale geografische factoren. Wij tonen de nauwkeurigste actuele voorspelling voor uw locatie.`;
@@ -552,22 +537,13 @@ export async function getLocationSEOContent(placeName: string, province: string,
  * Genereert een korte weerkundige samenvatting voor een hele provincie.
  */
 export async function getProvinceVerdict(provinceLabel: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return `Bekijk de weersverwachting voor alle plaatsen in ${provinceLabel}.`;
-
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    const prompt = `
-      Je bent de meteoroloog van WEERZONE. Schrijf een KORTE, krachtige samenvatting (1-2 zinnen) over wat ${provinceLabel} als provincie weerkundig uniek maakt.
+    const prompt = `Je bent de meteoroloog van WEERZONE. Schrijf een KORTE, krachtige samenvatting (1-2 zinnen) over wat ${provinceLabel} als provincie weerkundig uniek maakt.
       Denk aan geografische kenmerken: de Zeeuwse stromen, de Limburgse heuvels, de Utrechtse Heuvelrug, of de Groningse open klei.
-      Geen introducties, begin direct met de essentie.
-    `.trim();
+      Geen introducties, begin direct met de essentie.`.trim();
 
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
-  } catch (error) {
+    return (await hermesChat([{ role: "user", content: prompt }], { model: "seo" })).trim();
+  } catch {
     return `In ${provinceLabel} vind je diverse microklimaten. Van de kust tot de zandgronden, wij brengen het per uur in kaart.`;
   }
 }

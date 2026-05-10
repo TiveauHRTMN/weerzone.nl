@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { fetchWeatherData } from "@/lib/weather";
 import { findLeadsInCity, getLeadDetails } from "@/lib/b2b-discovery";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Resend } from "resend";
 import { getB2BSubject, getB2BEmailHtml } from "@/lib/b2b-emails";
 import { buildSnippet } from "@/lib/b2b-relevance";
