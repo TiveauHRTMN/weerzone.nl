@@ -17,10 +17,20 @@ function wcLabel(code: number): string {
   return WC_LABEL[code] ?? "wisselend";
 }
 
+const DAGEN = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
+
+function dagNaam(offsetDagen = 0): string {
+  const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Amsterdam" }));
+  d.setDate(d.getDate() + offsetDagen);
+  return DAGEN[d.getDay()];
+}
+
 function weatherToContext(w: WeatherData, city: string): string {
   const now = w.current;
   const today = w.daily[0];
   const tomorrow = w.daily[1];
+  const vandaag = dagNaam(0);
+  const morgen = dagNaam(1);
 
   const hourlyLines = w.hourly
     .slice(0, 18)
@@ -34,12 +44,12 @@ function weatherToContext(w: WeatherData, city: string): string {
   const lines = [
     `Locatie: ${city}`,
     `Nu: ${now.temperature}°C (voelt ${now.feelsLike}°), ${wcLabel(now.weatherCode)}, wind ${now.windSpeed}km/u (vlagen ${now.windGusts}), neerslag ${now.precipitation}mm, vochtigheid ${now.humidity}%.`,
-    `Vandaag: min ${today.tempMin}°, max ${today.tempMax}°, ${wcLabel(today.weatherCode)}, neerslag ${today.precipitationSum}mm, wind max ${today.windSpeedMax}km/u, zon ${today.sunHours}u.`,
-    `Uurverloop:\n${hourlyLines}`,
+    `${vandaag.charAt(0).toUpperCase() + vandaag.slice(1)} (vandaag): min ${today.tempMin}°, max ${today.tempMax}°, ${wcLabel(today.weatherCode)}, neerslag ${today.precipitationSum}mm, wind max ${today.windSpeedMax}km/u, zon ${today.sunHours}u.`,
+    `Uurverloop ${vandaag}:\n${hourlyLines}`,
   ];
 
   if (tomorrow) {
-    lines.push(`Morgen: min ${tomorrow.tempMin}°, max ${tomorrow.tempMax}°, ${wcLabel(tomorrow.weatherCode)}, neerslag ${tomorrow.precipitationSum}mm.`);
+    lines.push(`${morgen.charAt(0).toUpperCase() + morgen.slice(1)} (morgen): min ${tomorrow.tempMin}°, max ${tomorrow.tempMax}°, ${wcLabel(tomorrow.weatherCode)}, neerslag ${tomorrow.precipitationSum}mm.`);
   }
 
   return lines.join("\n\n");

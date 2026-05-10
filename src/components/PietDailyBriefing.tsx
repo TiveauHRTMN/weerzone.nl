@@ -1,6 +1,8 @@
 import type { PietDailyBriefingData } from "@/lib/piet-briefing";
 import { currentSegment } from "@/lib/piet-briefing";
 
+const DAGEN = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
+
 const SEGMENT_HOURS: Record<string, string> = {
   Ochtend: "06:00 – 12:00",
   Middag: "12:00 – 18:00",
@@ -10,6 +12,8 @@ const SEGMENT_HOURS: Record<string, string> = {
 
 export default function PietDailyBriefing({ data }: { data: PietDailyBriefingData }) {
   const active = currentSegment();
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Amsterdam" }));
+  const dagVandaag = DAGEN[now.getDay()].charAt(0).toUpperCase() + DAGEN[now.getDay()].slice(1);
   const updatedAt = new Date(data.generated_at).toLocaleTimeString("nl-NL", {
     timeZone: "Europe/Amsterdam",
     hour: "2-digit",
@@ -22,7 +26,7 @@ export default function PietDailyBriefing({ data }: { data: PietDailyBriefingDat
         <div className="flex items-center gap-2">
           <span className="text-lg">🌤️</span>
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-            Weerbericht vandaag
+            {dagVandaag} · vandaag
           </p>
         </div>
         <span className="text-[10px] text-slate-400 font-medium">bijgewerkt {updatedAt}</span>
