@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ALL_PLACES, findPlace, placeSlug, nearbyPlaces } from "@/lib/places-data";
 import WeatherDashboard from "@/components/WeatherDashboard";
-import { getKarlWeatherVerdict } from "@/app/actions";
+import { getKarlWeatherVerdict, getLocationSEOContent } from "@/app/actions";
 import { fetchWeatherData } from "@/lib/weather";
 import Link from "next/link";
 import {
@@ -67,7 +67,10 @@ export default async function OrtWeatherPage({ params }: PageProps) {
 
   const label = DE_BUNDESLAND_LABELS[bundesland] ?? bundesland;
 
-  const initialWeather = await fetchWeatherData(place.lat, place.lon, false);
+  const [initialWeather, marianaSeoText] = await Promise.all([
+    fetchWeatherData(place.lat, place.lon, false),
+    getLocationSEOContent(place.name, label, place.character, "de").catch(() => null),
+  ]);
 
   const karlVerdict = initialWeather
     ? await getKarlWeatherVerdict(initialWeather, place.name, label).catch(() => null)
@@ -150,14 +153,14 @@ export default async function OrtWeatherPage({ params }: PageProps) {
                 </Link>
               </div>
 
-              {/* Lokales Profil */}
+              {/* Lokales Profil — unieke Mariana SEO-text per locatie */}
               <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
-                <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4">
-                  Wetter in {place.name} — Lokales Profil
+                <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="text-accent-cyan">Mariana</span> · Wetter in {place.name}
                 </h2>
-                <p className="text-white/60 text-xs leading-relaxed italic">
-                  {place.name} liegt in {label}. WEERZONE liefert die stündlich aktualisierte
-                  Vorhersage mit 1 km Auflösung — direkt für deine Straße, nicht nur für die Stadt.
+                <p className="text-white/65 text-xs leading-relaxed italic" data-speakable>
+                  {marianaSeoText ||
+                    `${place.name} liegt in ${label}. WEERZONE liefert die stündlich aktualisierte Vorhersage mit 1 km Auflösung — direkt für deine Straße, nicht nur für die Stadt.`}
                 </p>
               </div>
 

@@ -544,13 +544,22 @@ export async function getImpactAnalysisAction(lat: number, lon: number) {
 /**
  * Genereert een unieke weerkundige beschrijving voor een specifieke locatie.
  * Gebruikt voor Programmatic SEO om 'thin content' te voorkomen.
- * BEVAT CACHING: Checkt eerst Supabase om API kosten/latency te minimaliseren.
+ *
+ * - BEVAT CACHING: Checkt eerst Supabase, schrijft na generatie terug.
+ * - LOCALE-AWARE: locale='de' geeft Duitse SEO-tekst (Karl-DE market).
+ *   Cache-keys zijn uniek per (placeName, province) — voor NL en DE worden
+ *   verschillende `province`-labels meegegeven door de caller, dus geen botsing.
  */
-export async function getLocationSEOContent(placeName: string, province: string, character?: string): Promise<string> {
+export async function getLocationSEOContent(
+  placeName: string,
+  province: string,
+  character?: string,
+  locale: "nl" | "de" = "nl",
+): Promise<string> {
   try {
     const supabase = createSupabaseAdminClient();
-    
-    // 1. Check cache (gebruik de ai_strategy kolom mits het geen interne tracking string is)
+
+    // 1. Check cache
     try {
       const { data: existing } = await supabase
         .from("seo_injections")
@@ -566,17 +575,43 @@ export async function getLocationSEOContent(placeName: string, province: string,
       console.error("SEO cache check failed:", err);
     }
 
-    const prompt = `Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
-      ${character ? `Houd rekening met het karakter: ${character}.` : ""}
-      - Gebruik geen clichés als "Welkom in".
-      - Link het naar de geografische ligging van ${placeName}.
-      - Vertel bijvoorbeeld over de invloed van de zee (indien kust), de wind op de open vlakte, of de hitte in de stad (urban heat island).
-      - De tekst moet informatief en autoritair klinken voor iemand die het weer zoekt.`.trim();
+    const prompt = locale === "de"
+      ? `Du bist der SEO-Texter von WEERZONE. Schreib einen KURZEN, einzigartigen deutschen Text (max 2-3 Sätze) über die Wettercharakteristik von ${placeName} (${province}).
+${character ? `Berücksichtige den Charakter: ${character}.` : ""}
+- Keine Floskeln wie "Willkommen in".
+- Verknüpfe es konkret mit der geografischen Lage von ${placeName}.
+- Mögliche Aspekte: Küsteneinfluss (falls Küste), Wind über offener Ebene, Hitzeinsel in der Stadt, Höhenlage im Mittelgebirge, Flusstal-Klima, Nähe zu Wäldern oder Seen.
+- Informativ und autoritativ — für jemanden, der konkret das Wetter sucht.`.trim()
+      : `Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
+${character ? `Houd rekening met het karakter: ${character}.` : ""}
+- Gebruik geen clichés als "Welkom in".
+- Link het naar de geografische ligging van ${placeName}.
+- Vertel bijvoorbeeld over de invloed van de zee (indien kust), de wind op de open vlakte, of de hitte in de stad (urban heat island).
+- De tekst moet informatief en autoritair klinken voor iemand die het weer zoekt.`.trim();
 
-    return (await hermesChat([{ role: "user", content: prompt }], { model: "seo" })).trim();
+    const content = (await hermesChat([{ role: "user", content: prompt }], { model: "seo" })).trim();
+
+    // 2. Persist to cache zodat we geen herhaalde Hermes-calls doen.
+    try {
+      await supabase.from("seo_injections").upsert(
+        {
+          place_name: placeName,
+          province,
+          ai_strategy: content,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "place_name,province" },
+      );
+    } catch (err) {
+      console.error("SEO cache write failed:", err);
+    }
+
+    return content;
   } catch (error) {
     console.error("getLocationSEOContent error:", error);
-    return `Het weer in ${placeName} (${province}) wordt beïnvloed door lokale geografische factoren. Wij tonen de nauwkeurigste actuele voorspelling voor uw locatie.`;
+    return locale === "de"
+      ? `Das Wetter in ${placeName} (${province}) wird durch lokale geografische Faktoren geprägt. WEERZONE liefert die genaueste 48-Stunden-Vorhersage für deine Adresse.`
+      : `Het weer in ${placeName} (${province}) wordt beïnvloed door lokale geografische factoren. Wij tonen de nauwkeurigste actuele voorspelling voor uw locatie.`;
   }
 }
 /**
