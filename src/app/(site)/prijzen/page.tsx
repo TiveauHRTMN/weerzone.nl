@@ -52,6 +52,21 @@ function buildOffer(tier: "piet" | "reed") {
           },
         }),
     availability: "https://schema.org/InStock",
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "NL",
+      returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+    },
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingRate: { "@type": "MonetaryAmount", value: "0.00", currency: "EUR" },
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "NL" },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
+        transitTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
+      },
+    },
     url: `https://weerzone.nl/app/signup?tier=${tier}`,
   };
 }
