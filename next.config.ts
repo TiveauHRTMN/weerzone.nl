@@ -11,16 +11,12 @@ const securityHeaders = [
     value: "max-age=63072000; includeSubDomains; preload",
   },
   {
-    key: "X-XSS-Protection",
-    value: "1; mode=block",
-  },
-  {
     key: "X-Frame-Options",
-    value: "DENY", // Voorkomt Clickjacking
+    value: "DENY",
   },
   {
     key: "X-Content-Type-Options",
-    value: "nosniff", // Voorkomt MIME-sniffing
+    value: "nosniff",
   },
   {
     key: "Referrer-Policy",
@@ -42,6 +38,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/homepage", destination: "/", permanent: true },
       { source: "/piet", destination: "/mijnweer", permanent: true },
       { source: "/reed", destination: "/waarschuwingen", permanent: true },
     ];

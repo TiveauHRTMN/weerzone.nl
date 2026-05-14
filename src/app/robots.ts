@@ -16,9 +16,8 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "ChatGPT-User", allow: "/" },
       { userAgent: "ClaudeBot", allow: "/" },
       { userAgent: "PerplexityBot", allow: "/" },
-      // Training-only crawlers — geblokkeerd
+      // Training-only crawler — geblokkeerd
       { userAgent: "CCBot", disallow: "/" },
-      { userAgent: "anthropic-ai", disallow: "/" },
     ],
     sitemap: "https://weerzone.nl/sitemap.xml",
   };

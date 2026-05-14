@@ -44,7 +44,7 @@ const SECTIONS = [
 
 export default function Footer() {
   const pathname = usePathname();
-  const isHome = pathname === "/" || pathname === "/homepage";
+  const isHome = pathname === "/";
 
   return (
     <footer className="w-full flex flex-col items-center pb-12 mt-12 relative z-10">

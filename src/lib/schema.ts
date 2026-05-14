@@ -14,6 +14,12 @@ const ORG = {
   description: "Nederlandse hyperlocale weerdienst voor 48-uur weersverwachtingen per stad en provincie.",
   areaServed: { "@type": "Country", name: "Nederland" },
   inLanguage: "nl-NL",
+  contactPoint: {
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "email": "info@weerzone.nl",
+    "url": "https://weerzone.nl/contact"
+  }
 } as const;
 
 /** Props voor <script type="application/ld+json" {...schemaLd(schema)} /> */
@@ -21,6 +27,22 @@ export function schemaLd(schema: object | object[]) {
   return {
     type: "application/ld+json" as const,
     dangerouslySetInnerHTML: { __html: JSON.stringify(schema) },
+  };
+}
+
+export function schemaSearchAction() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://weerzone.nl",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://weerzone.nl/weer?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
   };
 }
 
@@ -129,6 +151,33 @@ export function schemaService(opts: {
         }
       : {}),
   };
+}
+
+export function schemaWeatherWarnings(
+  warnings: Array<{
+    name: string;
+    description: string;
+    url: string;
+    validFrom?: string | null;
+    validUntil?: string | null;
+    issuedAt?: string | null;
+    areaServed?: string;
+  }>
+) {
+  return warnings.map((warning) => ({
+    "@context": "https://schema.org",
+    "@type": "SpecialAnnouncement",
+    name: warning.name,
+    text: warning.description,
+    url: warning.url,
+    category: "https://www.wikidata.org/wiki/Q81054",
+    inLanguage: "nl-NL",
+    publisher: ORG,
+    ...(warning.areaServed ? { spatialCoverage: { "@type": "AdministrativeArea", name: warning.areaServed } } : {}),
+    ...(warning.validFrom ? { datePosted: warning.validFrom } : {}),
+    ...(warning.issuedAt ? { datePublished: warning.issuedAt } : {}),
+    ...(warning.validUntil ? { expires: warning.validUntil } : {}),
+  }));
 }
 
 export function schemaCityWeatherPage(opts: {

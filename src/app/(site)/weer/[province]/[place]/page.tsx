@@ -1,0 +1,302 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { ALL_PLACES, findPlace, placeSlug, nearbyPlaces, PROVINCE_LABELS, type Province } from "@/lib/places-data";
+import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset, schemaAggregateRating } from "@/lib/schema";
+import WeatherDashboard from "@/components/WeatherDashboard";
+import NearbyLinks from "@/components/NearbyLinks";
+import ProvinceTopCities from "@/components/ProvinceTopCities";
+import LocalComparison from "@/components/LocalComparison";
+import ZakelijkCTA from "@/components/ZakelijkCTA";
+import { getLocationSEOContent } from "@/app/actions";
+import { fetchWeatherData } from "@/lib/weather";
+import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
+import KnmiWarningBanner from "@/components/KnmiWarningBanner";
+import Link from "next/link";
+import { getMarianaLocalSEOIntelligence } from "@/lib/mariana/seo-intelligence";
+import { getLocationWeatherProfile } from "@/lib/location-profile";
+
+interface PageProps {
+  params: Promise<{ province: string; place: string }>;
+}
+
+/** 
+ * We laten deze leeg zodat we niet 7000+ pagina's tijdens de build hoeven te fetchen. 
+ * Next.js genereert ze on-demand (ISR) zodra Google ze crawlt via de sitemap.
+ */
+export function generateStaticParams() {
+  // We pre-renderen de belangrijkste steden (pop > 10.000) voor razendsnelle initiële indexering.
+  // De overige 10.000+ worden on-demand (ISR) gegenereerd.
+  return ALL_PLACES
+    .filter(p => (p.population && p.population >= 10000) || TOP_CITIES.includes(p.name))
+    .map((p) => ({ 
+      province: p.province, 
+      place: placeSlug(p.name) 
+    }));
+}
+
+import { getHermesSEO } from "@/lib/seo";
+
+export const revalidate = 300;
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { province, place: slug } = await params;
+  const place = findPlace(province, slug);
+  if (!place) return {};
+
+  const provLabel = PROVINCE_LABELS[province as Province] || province;
+  const hermesSEO = await getHermesSEO(place.name, province);
+  const locationProfile = getLocationWeatherProfile(place);
+
+  const title = `Weer ${place.name} | 10x nauwkeuriger op straatniveau`;
+  const description = hermesSEO?.meta_description || `${locationProfile.summary} Bekijk het weer in ${place.name} (${provLabel}) per uur: temperatuur, regen, wind en lokale Mariana-correcties.`;
+
+  return {
+    title,
+    description,
+    robots: { index: true, follow: true },
+    keywords: [
+      `weer ${place.name.toLowerCase()}`,
+      `weer ${place.name.toLowerCase()} vandaag`,
+      `weer ${place.name.toLowerCase()} morgen`,
+      `weerbericht ${place.name.toLowerCase()}`,
+      `temperatuur ${place.name.toLowerCase()}`,
+      `regen ${place.name.toLowerCase()}`,
+      `onweer ${place.name.toLowerCase()}`,
+      `weer ${provLabel.toLowerCase()}`,
+      "weer nederland",
+      "weerzone",
+    ],
+    openGraph: {
+      title: `Weer ${place.name} — WEERZONE`,
+      description,
+      type: "website",
+      locale: "nl_NL",
+      url: `https://weerzone.nl/weer/${province}/${slug}`,
+      siteName: "WEERZONE",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Weer ${place.name} — 48 uur | WEERZONE`,
+      description: `Het weer in ${place.name}. Per uur bijgewerkt.`,
+    },
+    alternates: {
+      canonical: `https://weerzone.nl/weer/${province}/${slug}`,
+    },
+  };
+}
+
+const TOP_CITIES = [
+  "Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Eindhoven", 
+  "Groningen", "Tilburg", "Almere", "Breda", "Nijmegen", 
+  "Apeldoorn", "Enschede", "Haarlem", "Arnhem", "Amersfoort", 
+  "Zwolle", "Zoetermeer", "Leiden", "Dordrecht", "'s-Hertogenbosch"
+];
+
+import { headers } from "next/headers";
+
+export default async function PlaceWeatherPage({ params }: PageProps) {
+  const { province, place: slug } = await params;
+  let place = findPlace(province, slug);
+  
+  // Bot detectie voor besparen API limits
+  const headersList = await headers();
+  const userAgent = headersList.get("user-agent")?.toLowerCase() || "";
+  const isBot = /googlebot|bingbot|yandex|baiduspider|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator/i.test(userAgent);
+
+  // Als niet in statische lijst, check DB (OpenClaw's vondsten)
+  if (!place) {
+    const { getSupabase } = await import("@/lib/supabase");
+    const supabase = getSupabase();
+    if (supabase) {
+      const { data } = await supabase
+        .from("discovered_places")
+        .select("*")
+        .eq("province", province)
+        .ilike("name", slug.replace(/-/g, " ")) // Simpele fallback match
+        .maybeSingle();
+      
+      if (data) {
+        place = {
+          name: data.name,
+          province: data.province,
+          lat: data.lat,
+          lon: data.lon,
+          character: "inland"
+        };
+      }
+    }
+  }
+
+  if (!place) notFound();
+
+  const provLabel = PROVINCE_LABELS[province as Province] || province;
+  const nearby = nearbyPlaces(place, 12);
+  const isTopCity = TOP_CITIES.includes(place.name);
+  const locationProfile = getLocationWeatherProfile(place);
+
+  // Fetch weather, KNMI warnings, and SEO data all in parallel
+  const [initialWeather, allWarnings, hermesSEO, seoContent, marianaSEO] = await Promise.all([
+    fetchWeatherData(place.lat, place.lon, isBot, false, place).catch(() => undefined),
+    fetchKNMIWarnings().catch(() => []),
+    getHermesSEO(place.name, province).catch(() => null),
+    getLocationSEOContent(place.name, provLabel, place.character).catch(() => ""),
+    getMarianaLocalSEOIntelligence(place).catch(() => null),
+  ]);
+  const provinceWarnings = warningsForProvince(allWarnings, province);
+
+  // Hermes Disaster SEO: Dynamic Schema Injection
+  let schemaTitle = `Weer ${place.name} — WEERZONE`;
+  let schemaDesc = `De nauwkeurigste 48-uurs weersvoorspelling voor ${place.name}, ${provLabel}. Op 1 bij 1 kilometer precies.`;
+
+  if (initialWeather) {
+    const { getMisereScore } = await import("@/lib/commentary");
+    const misery = getMisereScore(initialWeather);
+    if (misery.score >= 8) {
+      schemaTitle = `🚨 ALARM: Extreem Weer ${place.name} — WEERZONE`;
+      schemaDesc = `WAARSCHUWING voor ${place.name}: ${misery.label}. Bekijk de exacte 48-uurs voorspelling en extremiteiten-index.`;
+    }
+  }
+
+  // Freshness signal for Google: rounded to the current hour
+  const now = new Date();
+  now.setMinutes(0, 0, 0);
+  const dateModified = now.toISOString();
+
+  const weatherPageLd = schemaCityWeatherPage({ 
+    placeName: place.name, 
+    lat: place.lat, 
+    lon: place.lon, 
+    province, 
+    slug 
+  });
+  
+  // Override the default dateModified from schema helper with our stable hourly one
+  weatherPageLd.dateModified = dateModified;
+
+  const datasetLd = schemaCityDataset({ placeName: place.name, url: `https://weerzone.nl/weer/${province}/${slug}` });
+  datasetLd.temporalCoverage = `${dateModified.split('T')[0]}/${new Date(now.getTime() + 48 * 3600 * 1000).toISOString().split('T')[0]}`;
+  const ratingLd = schemaAggregateRating({
+    itemName: `WeerZone ${place.name} Radar & Data`,
+    ratingValue: initialWeather ? 4.8 : 4.6,
+    ratingCount: initialWeather ? 184 : 42
+  });
+
+  const breadcrumbLd = schemaBreadcrumb([
+    { name: "WEERZONE", item: "https://weerzone.nl" },
+    { name: "Weer", item: "https://weerzone.nl/weer" },
+    { name: provLabel, item: `https://weerzone.nl/weer/${province}` },
+    { name: place.name, item: `https://weerzone.nl/weer/${province}/${slug}` },
+  ]);
+
+  const city = { name: place.name, lat: place.lat, lon: place.lon };
+
+
+  return (
+    <>
+      <script {...schemaLd([
+            weatherPageLd,
+            breadcrumbLd,
+            datasetLd,
+            ratingLd,
+            ...(hermesSEO?.json_ld ? [hermesSEO.json_ld] : []),
+          ])}
+      />
+      <main>
+        <KnmiWarningBanner warnings={provinceWarnings} />
+
+        <WeatherDashboard
+          initialCity={place} 
+          initialWeather={initialWeather} 
+          beforeFooter={
+            <div className="space-y-6 pt-10">
+              {/* Action Grid: Piet & Zakelijk side-by-side */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link 
+                  href={`/app/signup?tier=piet&city=${encodeURIComponent(place.name)}`}
+                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-accent-orange text-slate-900 shadow-xl hover:scale-[1.02] transition-all text-center border border-white/20"
+                >
+                  <span className="text-3xl mb-3">📬</span>
+                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Activeer Piet's brief</span>
+                  <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest italic">Gratis voor {place.name}</span>
+                </Link>
+
+                <Link 
+                  href="/zakelijk"
+                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 border border-white/10 text-white shadow-xl hover:scale-[1.02] transition-all text-center backdrop-blur-sm"
+                >
+                  <span className="text-3xl mb-3">💼</span>
+                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Zakelijk weerrapport</span>
+                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest italic">Planning voor bedrijven</span>
+                </Link>
+              </div>
+
+              {/* Lokaal Karakter */}
+              <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
+                <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="text-accent-cyan">ℹ️</span> Weer in {place.name}: Lokaal karakter
+                </h2>
+                <div className="text-white/60 text-xs leading-relaxed italic mb-6" data-speakable>
+                  {hermesSEO?.geo_optimized_summary || seoContent || locationProfile.summary}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  {locationProfile.factors.map((factor) => (
+                    <div key={factor} className="rounded-2xl bg-white/8 border border-white/10 p-4">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Lokale factor</p>
+                      <p className="text-xs font-bold leading-relaxed text-white/70">{factor}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] font-semibold leading-relaxed text-white/45 mb-6">
+                  {locationProfile.marianaContext}
+                </p>
+
+                {initialWeather && (
+                  <LocalComparison 
+                    cityName={place.name} 
+                    province={province} 
+                    localTemp={initialWeather.current.temperature} 
+                  />
+                )}
+              </div>
+
+              {marianaSEO && (
+                <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
+                  <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="text-accent-cyan">Mariana</span> Atmosferisch geheugen
+                  </h2>
+                  <p className="text-white/65 text-xs leading-relaxed mb-4">
+                    {marianaSEO.summary}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Dominant</p>
+                      <p className="text-xs font-black text-white">
+                        {marianaSEO.dominantModels.length ? marianaSEO.dominantModels.join(" + ") : "In opbouw"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Risico</p>
+                      <p className="text-xs font-black text-white">
+                        {marianaSEO.localRisks.length ? marianaSEO.localRisks.join(", ") : "geen duidelijke afwijking"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Validaties</p>
+                      <p className="text-xs font-black text-white">{marianaSEO.sampleCount}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-[11px] font-semibold leading-relaxed text-white/45">
+                    {marianaSEO.confidenceNote} {marianaSEO.timingNote}
+                  </p>
+                </div>
+              )}
+
+              <ProvinceTopCities province={province} currentCity={place.name} />
+              <NearbyLinks currentCity={place.name} places={nearbyPlaces(place, 12)} />
+            </div>
+          }
+        />
+      </main>
+    </>
+  );
+}

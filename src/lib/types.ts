@@ -1,3 +1,5 @@
+import type { MarianaForecastIntelligence, MarianaHourlyIntelligence } from "@/lib/mariana/types";
+
 export interface MinutelyPrecipitation {
   time: string;
   precipitation: number;
@@ -23,6 +25,7 @@ export interface WeatherData {
   sunset: string;
   uvIndex: number;
   models: ModelComparison;
+  mariana?: MarianaForecastIntelligence;
   summaryVerdict?: string; // Korte teaser voor Homepage
   deepAnalysis?: string;   // Uitgebreid dossier voor /piet
   neuralData?: {
@@ -47,6 +50,7 @@ export interface HourlyForecast {
   windSpeed: number;
   cape: number; // Convective Available Potential Energy (J/kg) — onweersrisico
   confidence: "high" | "medium" | "low";
+  mariana?: MarianaHourlyIntelligence;
   models?: {
     harmonie?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
     icon?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
@@ -301,4 +305,59 @@ export function distanceBetween(lat1: number, lon1: number, lat2: number, lon2: 
     Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) ** 2;
   return 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 6371;
+}
+
+// ============================================================
+// WK Poule Types
+// ============================================================
+
+export interface PouleTournament {
+  id: string;
+  name: string;
+  slug: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+}
+
+export interface PouleMatch {
+  id: string;
+  tournament_id: string;
+  api_match_id?: string;
+  home_team: string;
+  away_team: string;
+  home_score: number | null;
+  away_score: number | null;
+  kickoff: string;
+  status: 'scheduled' | 'live' | 'finished';
+}
+
+export interface PoulePrediction {
+  id: string;
+  user_id: string;
+  match_id: string;
+  home_prediction: number;
+  away_prediction: number;
+  calculated_points: number;
+}
+
+export interface PouleGroup {
+  id: string;
+  name: string;
+  owner_id: string | null;
+  invite_code: string;
+}
+
+export interface PouleGroupMember {
+  group_id: string;
+  user_id: string;
+  joined_at: string;
+}
+
+export interface UserPouleStats {
+  user_id: string;
+  display_name?: string;
+  total_points: number;
+  exact_scores: number;
+  correct_winners: number;
 }

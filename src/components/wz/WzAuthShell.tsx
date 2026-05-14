@@ -35,7 +35,7 @@ export default function WzAuthShell({
       <div className="relative w-full" style={{ maxWidth: 440 }}>
         {/* Logo boven de kaart */}
         <div className="flex justify-center mb-8">
-          <Link href="/homepage" aria-label="Weerzone home">
+          <Link href="/" aria-label="Weerzone home">
             <WzLogo height={22} />
           </Link>
         </div>

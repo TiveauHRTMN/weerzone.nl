@@ -96,7 +96,7 @@ export default function GlobalNav() {
       {/* Desktop */}
       <div className="hidden md:flex items-center max-w-[1200px] mx-auto px-6 py-2.5" style={{ gap: 16 }}>
 
-        <Link href="/homepage" aria-label="Weerzone home" className="shrink-0 transition-opacity hover:opacity-80">
+        <Link href="/" aria-label="Weerzone home" className="shrink-0 transition-opacity hover:opacity-80">
           <LogoBadge tier={tier} isFounder={isFounder} />
         </Link>
 
@@ -193,7 +193,7 @@ export default function GlobalNav() {
 
       {/* Mobile */}
       <div className="md:hidden flex items-center justify-between gap-2 px-4 py-3">
-        <Link href="/homepage" aria-label="Weerzone home">
+        <Link href="/" aria-label="Weerzone home">
           <LogoBadge tier={tier} isFounder={isFounder} />
         </Link>
         <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@ import {
   type KNMISeverity,
   formatWindowLabel,
   SEVERITY_LABEL,
+  warningAdviceFor,
 } from "@/lib/knmi-warnings";
 
 const SEVERITY_STYLE: Record<KNMISeverity, { bg: string; border: string; chip: string; chipBg: string }> = {
@@ -17,7 +18,7 @@ interface Props {
   warnings: KNMIWarning[];
   /** Toon de "meer details" link naar /waarschuwingen. Default true. */
   detailsLink?: boolean;
-  /** Compact = enkel de chip + 1 regel, geen description. */
+  /** Compact = enkel de chip + 1 regel, geen description of adviesblokken. */
   compact?: boolean;
 }
 
@@ -33,39 +34,72 @@ export default function KnmiWarningBanner({ warnings, detailsLink = true, compac
   return (
     <div className="max-w-4xl mx-auto px-4 pt-3">
       <div className="space-y-2">
-        {ordered.map((w) => {
-          const style = SEVERITY_STYLE[w.severity];
-          const window = formatWindowLabel(w);
+        {ordered.map((warning) => {
+          const style = SEVERITY_STYLE[warning.severity];
+          const window = formatWindowLabel(warning);
+          const advice = warningAdviceFor(warning);
+
           return (
             <div
-              key={w.key}
-              className={`rounded-2xl border ${style.border} ${style.bg} backdrop-blur-sm p-3 sm:p-4 flex items-start gap-3`}
+              key={warning.key}
+              className={`rounded-2xl border ${style.border} ${style.bg} backdrop-blur-sm p-3 sm:p-4`}
               role="alert"
             >
-              <div className={`flex-none px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${style.chip} ${style.chipBg}`}>
-                {SEVERITY_LABEL[w.severity]}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="text-sm font-black text-white">{w.type}</span>
-                  <span className="text-[11px] font-medium text-white/60">{w.province}</span>
-                  {window && (
-                    <span className="text-[11px] font-bold text-white/80">· {window}</span>
+              <div className="flex items-start gap-3">
+                <div className={`flex-none px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${style.chip} ${style.chipBg}`}>
+                  {SEVERITY_LABEL[warning.severity]}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="text-sm font-black text-white">{warning.type}</span>
+                    <span className="text-[11px] font-medium text-white/60">{warning.province}</span>
+                    {window && (
+                      <span className="text-[11px] font-bold text-white/80">· {window}</span>
+                    )}
+                  </div>
+                  {!compact && warning.description && (
+                    <p className="text-xs text-white/75 leading-relaxed mt-1">
+                      {warning.description.split("\n")[0]}
+                    </p>
                   )}
                 </div>
-                {!compact && w.description && (
-                  <p className="text-xs text-white/75 leading-relaxed mt-1 line-clamp-2">
-                    {w.description.split("\n")[0]}
-                  </p>
+                {detailsLink && (
+                  <Link
+                    href="/waarschuwingen"
+                    className="flex-none text-[11px] font-bold text-white/80 hover:text-white underline underline-offset-2"
+                  >
+                    details
+                  </Link>
                 )}
               </div>
-              {detailsLink && (
-                <Link
-                  href="/waarschuwingen"
-                  className="flex-none text-[11px] font-bold text-white/80 hover:text-white underline underline-offset-2"
-                >
-                  details
-                </Link>
+
+              {!compact && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl bg-black/10 border border-white/10 p-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">
+                      Wat kan ik verwachten?
+                    </p>
+                    <ul className="space-y-1.5">
+                      {advice.expect.map((item) => (
+                        <li key={item} className="text-xs text-white/80 leading-relaxed">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-2xl bg-black/10 border border-white/10 p-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">
+                      Wat kan ik doen?
+                    </p>
+                    <ul className="space-y-1.5">
+                      {advice.actions.map((item) => (
+                        <li key={item} className="text-xs text-white/80 leading-relaxed">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               )}
             </div>
           );

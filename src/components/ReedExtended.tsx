@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, AlertTriangle, ShieldCheck, Zap, Wind, CloudRain, Thermometer, ShieldAlert } from "lucide-react";
-import { loadWeather, loadWWS, patchCacheDeep } from "@/lib/weatherCache";
+import { MapPin, AlertTriangle, Wind, Thermometer } from "lucide-react";
+import { loadWeather, loadWWS } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
 import type { KNMIWarningEnriched } from "@/lib/knmi-warnings";
-import { useSession } from "@/lib/session-context";
 import { persistCity } from "@/lib/persist-city";
 import ReflectivityMap from "@/components/ReflectivityMap";
 import LightningMap from "@/components/LightningMap";
@@ -34,18 +33,14 @@ interface ReedProps {
 }
 
 export default function ReedExtended({ initialWeather, initialCity }: ReedProps) {
-  const { user, tier, isFounder } = useSession();
   const [city, setCity] = useState<City>(
     () => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]
   );
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
-  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
   const [knmiWarnings, setKnmiWarnings] = useState<KNMIWarningEnriched[]>([]);
   const [loading, setLoading] = useState(!initialWeather);
   const [locating, setLocating] = useState(false);
-  const [aiError, setAiError] = useState(false);
-  const hasPaidTier = tier === "piet" || tier === "reed" || tier === "steve" || isFounder;
 
   useEffect(() => {
     let cancelled = false;
@@ -61,26 +56,11 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
       if (cancelled) return;
       setWeather(w);
       setLoading(false);
-      if (hasPaidTier && !aiNarrative) {
-        fetch('/api/persona/reed', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ weather: w, city: city.name, userName: user?.user_metadata?.full_name || 'gebruiker' })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (!cancelled) {
-            if (data.narrative) { setAiNarrative(data.narrative); patchCacheDeep(city.lat, city.lon, data.narrative); }
-            else setAiError(true);
-          }
-        })
-        .catch(err => { console.error("Reed AI Error:", err); if (!cancelled) setAiError(true); });
-      }
     }).catch(() => !cancelled && setLoading(false));
 
     loadWWS(city.lat, city.lon).then((wwsPayload) => { if (!cancelled) setWWS(wwsPayload); }).catch(() => {});
     return () => { cancelled = true; };
-  }, [city, tier, isFounder, user?.user_metadata?.full_name]);
+  }, [city]);
 
   const locate = () => {
     if (!("geolocation" in navigator)) return;
@@ -188,28 +168,6 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
             <ReedExtremeCharts hourly={weather.hourly} />
           </div>
         </div>
-      )}
-
-      {(!loading || weather) && !hasExtreme && (
-         <div className="animate-fade-in mb-6">
-            {aiNarrative ? (
-              <div className="card border-l-4 border-l-emerald-500 !p-8">
-                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"><ShieldCheck className="w-5 h-5 text-emerald-500" /></div>
-                    <div>
-                       <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">Status: Veilig</h3>
-                       <p className="text-[10px] font-bold text-text-muted/60 uppercase">Gecheckt door Reed</p>
-                    </div>
-                 </div>
-                 <div className="text-lg font-medium text-text-primary leading-relaxed space-y-4">{aiNarrative.split(/\n\n+/).map((para, i) => <p key={i}>{para}</p>)}</div>
-                 <p className="text-[10px] text-text-muted mt-8 uppercase tracking-widest">— Reed</p>
-              </div>
-            ) : aiError ? (
-              <div className="card !p-6 flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" /><p className="text-sm font-bold text-text-secondary">Geen gevaarlijke situaties gedetecteerd voor jouw locatie.</p></div>
-            ) : hasPaidTier ? (
-              <div className="card !p-8 animate-pulse flex items-center gap-4"><ShieldAlert className="w-5 h-5 text-text-muted" /><p className="text-sm font-bold text-text-muted uppercase tracking-widest">Reed checkt de risico's voor je…</p></div>
-            ) : null}
-         </div>
       )}
 
       {(!loading || weather) && hasExtreme && alert && (

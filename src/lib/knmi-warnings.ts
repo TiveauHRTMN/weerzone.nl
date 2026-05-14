@@ -21,6 +21,12 @@ export interface KNMIWarning {
   key: string;
 }
 
+export interface KNMIWarningAdvice {
+  impactTitle: string;
+  expect: string[];
+  actions: string[];
+}
+
 /** Optionele verrijking met Open-Meteo data binnen het waarschuwingsvenster. */
 export interface KNMIWarningEnriched extends KNMIWarning {
   enriched?: {
@@ -315,6 +321,100 @@ export function formatWindowLabel(w: KNMIWarning): string {
   const fromHM = `${String(from.getHours()).padStart(2, "0")}:${String(from.getMinutes()).padStart(2, "0")}`;
   const untilHM = `${String(until.getHours()).padStart(2, "0")}:${String(until.getMinutes()).padStart(2, "0")}`;
   return `${dayLabel} ${fromHM}–${untilHM}`;
+}
+
+export function warningAdviceFor(warning: Pick<KNMIWarning, "type" | "description" | "severity">): KNMIWarningAdvice {
+  const type = warning.type.toLowerCase();
+  const description = warning.description.toLowerCase();
+  const text = `${type} ${description}`;
+
+  if (text.includes("wind") || text.includes("storm")) {
+    return {
+      impactTitle: "Zware windstoten: dit betekent het praktisch",
+      expect: [
+        "Fietsers, wandelaars en hoge voertuigen kunnen hinder krijgen, vooral aan de kust, op bruggen en langs open water.",
+        "Losse objecten zoals containers, tuinmeubels, trampolines, parasols en bouwmateriaal kunnen wegwaaien.",
+        "Bij bomen is kans op afbrekende takken. Parkeren of lopen onder bomen is minder verstandig tijdens de piek.",
+      ],
+      actions: [
+        "Zet losse spullen vast of haal ze naar binnen vóór de waarschuwing begint.",
+        "Stel watersport, strandactiviteiten en buitenwerk op hoogte uit als dat kan.",
+        "Rij rustiger op bruggen, dijken en open stukken; houd extra afstand van vrachtwagens en aanhangers.",
+        "Parkeer niet onder bomen en vermijd bos of duinen tijdens de zwaarste windstoten.",
+      ],
+    };
+  }
+
+  if (text.includes("onweer") || text.includes("bliksem")) {
+    return {
+      impactTitle: "Onweer: dit betekent het praktisch",
+      expect: [
+        "Kans op bliksem, felle buien, windvlagen en lokaal veel water in korte tijd.",
+        "Buitenactiviteiten, sportvelden, open water en open terrein worden risicovoller.",
+      ],
+      actions: [
+        "Ga naar binnen zodra je donder hoort en blijf uit de buurt van bomen, masten en open water.",
+        "Haal losse elektrische apparatuur van de lader of gebruik overspanningsbeveiliging.",
+        "Plan buitenactiviteiten om de buien heen en check vlak voor vertrek opnieuw de waarschuwing.",
+      ],
+    };
+  }
+
+  if (text.includes("regen") || text.includes("neerslag")) {
+    return {
+      impactTitle: "Veel regen: dit betekent het praktisch",
+      expect: [
+        "Kans op water op straat, slecht zicht en langere reistijd.",
+        "Laaggelegen wegen, tunnels en kelders kunnen lokaal problemen krijgen.",
+      ],
+      actions: [
+        "Controleer dakgoten, putjes en kelderafvoer als je weet dat ze gevoelig zijn.",
+        "Vermijd ondergelopen wegen en rijd niet hard door diepe plassen.",
+        "Neem extra reistijd en houd afstand in verkeer.",
+      ],
+    };
+  }
+
+  if (text.includes("glad") || text.includes("ijzel") || text.includes("sneeuw")) {
+    return {
+      impactTitle: "Gladheid: dit betekent het praktisch",
+      expect: [
+        "Stoepen, fietspaden, bruggen en op- en afritten kunnen plaatselijk glad zijn.",
+        "Reistijd kan snel oplopen door lagere snelheid en incidenten.",
+      ],
+      actions: [
+        "Vertrek eerder of stel niet-noodzakelijke ritten uit.",
+        "Loop en fiets rustiger; bruggen en schaduwplekken zijn vaak het eerst glad.",
+        "Strooi bij je deur of oprit als daar veel wordt gelopen.",
+      ],
+    };
+  }
+
+  if (text.includes("hitte")) {
+    return {
+      impactTitle: "Hitte: dit betekent het praktisch",
+      expect: [
+        "Kwetsbare mensen, huisdieren en zware buiteninspanning lopen meer risico.",
+        "Binnenruimtes en auto’s kunnen snel opwarmen.",
+      ],
+      actions: [
+        "Drink genoeg water en vermijd zware inspanning in de warmste uren.",
+        "Houd gordijnen dicht aan de zonzijde en ventileer zodra het buiten koeler is.",
+        "Laat kinderen en dieren nooit achter in een auto.",
+      ],
+    };
+  }
+
+  return {
+    impactTitle: "Weerwaarschuwing: dit betekent het praktisch",
+    expect: [
+      "Het weer kan tijdelijk hinder of risico geven voor buitenactiviteiten en verkeer.",
+    ],
+    actions: [
+      "Check vlak voor vertrek opnieuw de waarschuwing.",
+      "Pas je planning aan als je buiten, op de weg of op het water moet zijn.",
+    ],
+  };
 }
 
 export const SEVERITY_LABEL: Record<KNMISeverity, string> = {

@@ -34,10 +34,12 @@ export default function ContactForm() {
   if (status === "ok") {
     return (
       <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-8 text-center animate-fade-in">
-        <div className="text-5xl mb-4">📥</div>
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-green-200 mb-3">
+          Ontvangen
+        </div>
         <p className="font-black text-white text-2xl mb-2">Bericht ontvangen!</p>
         <p className="text-white/70 leading-relaxed">
-          We hebben je gegevens in goede orde ontvangen. Check je inbox voor een bevestiging. 
+          We hebben je gegevens in goede orde ontvangen. Check je inbox voor een bevestiging.
           We antwoorden doorgaans binnen 24 uur op werkdagen.
         </p>
       </div>
@@ -64,7 +66,7 @@ export default function ContactForm() {
       />
       <textarea
         required
-        placeholder="Je bericht…"
+        placeholder="Je bericht..."
         rows={5}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
@@ -75,7 +77,7 @@ export default function ContactForm() {
         disabled={status === "sending"}
         className="w-full py-3 rounded-xl bg-accent-orange text-slate-900 font-bold hover:brightness-95 transition-all disabled:opacity-60"
       >
-        {status === "sending" ? "Bezig…" : "Verstuur bericht"}
+        {status === "sending" ? "Bezig..." : "Verstuur bericht"}
       </button>
       {status === "err" && (
         <p className="text-sm text-red-400 text-center">

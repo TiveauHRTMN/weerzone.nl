@@ -18,7 +18,7 @@ function getClient() {
   return new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
     apiKey,
-    timeout: 60000,
+    timeout: 8000, // Verlaagd naar 8s voor Vercel (10s limit)
     defaultHeaders: {
       "HTTP-Referer": "https://weerzone.nl",
       "X-Title": "Weerzone",

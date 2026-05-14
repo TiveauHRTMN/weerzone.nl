@@ -104,7 +104,13 @@ function blendHourly(
   return { hourly, agreement: 100 };
 }
 
-export async function fetchWeatherData(lat: number, lon: number, isBot: boolean = false, forceHighRes: boolean = false): Promise<WeatherData> {
+export async function fetchWeatherData(
+  lat: number,
+  lon: number,
+  isBot: boolean = false,
+  forceHighRes: boolean = false,
+  marianaLocation?: { name?: string; province?: string; lat: number; lon: number; id?: string; locationId?: string }
+): Promise<WeatherData> {
   // Skip live API calls during Next.js build-time static generation
   if (process.env.NEXT_PHASE === 'phase-production-build') return null as any;
 
@@ -284,7 +290,7 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
     if (aromeData) sources.push("METEOFRANCE AROME");
     if (googleData) sources.push("GOOGLE WEATHER API");
 
-    return {
+    const weather: WeatherData = {
       current: {
         temperature: currentTemp,
         feelsLike: currentFeels,
@@ -317,6 +323,20 @@ export async function fetchWeatherData(lat: number, lon: number, isBot: boolean 
         sources,
       },
     };
+
+    try {
+      const [{ applyMarianaArbitration }, { toMarianaLocation }, { loadMarianaMemory }] = await Promise.all([
+        import("@/lib/mariana/arbitration"),
+        import("@/lib/mariana/location"),
+        import("@/lib/mariana/storage"),
+      ]);
+      const location = toMarianaLocation(marianaLocation ?? { lat, lon });
+      const memory = await loadMarianaMemory(location.locationId).catch(() => null);
+      return applyMarianaArbitration({ location, weather, memory });
+    } catch (error) {
+      console.error("Mariana arbitration skipped:", error instanceof Error ? error.message : String(error));
+      return weather;
+    }
   } catch (error) {
     console.error("fetchWeatherData crash:", error);
     throw error;
