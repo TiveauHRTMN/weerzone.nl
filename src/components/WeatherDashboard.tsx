@@ -95,10 +95,11 @@ const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
 };
 
 export default function WeatherDashboard({ initialCity, initialWeather, initialWeatherCode, initialIsDay, topContent, beforeFooter, titleOverride, hideWeatherInfo, slimMode, showRainRadar }: DashboardProps) {
+  const needsWeatherData = !hideWeatherInfo || !!showRainRadar;
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
   const [weather, setWeather] = useState<WeatherData | null>(initialWeather || null);
   const [wws, setWWS] = useState<WWSPayload | null>(null);
-  const [loading, setLoading] = useState(!initialWeather);
+  const [loading, setLoading] = useState(needsWeatherData && !initialWeather);
   const [error, setError] = useState(false);
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
@@ -164,13 +165,18 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
   }, []);
 
   useEffect(() => {
+    if (!needsWeatherData) {
+      setLoading(false);
+      return;
+    }
+
     const cleanupPromise = loadData(city);
     const interval = setInterval(() => loadData(city), 15 * 60000);
     return () => {
       cleanupPromise.then(fn => fn && fn());
       clearInterval(interval);
     };
-  }, [city, loadData]);
+  }, [city, loadData, needsWeatherData]);
 
   const handleLocationClick = () => {
     if (!("geolocation" in navigator)) return;
@@ -205,7 +211,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
     return () => window.removeEventListener("wz:locate", fn);
   }, []);
 
-  if (error && !weather) {
+  if (needsWeatherData && error && !weather) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
         <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 backdrop-blur-md border border-white/20">
@@ -224,7 +230,7 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
     );
   }
 
-  if (loading || !weather) {
+  if (needsWeatherData && (loading || !weather)) {
     const wCode = initialWeather?.current.weatherCode ?? initialWeatherCode ?? 2;
     const isD = initialWeather?.current.isDay ?? initialIsDay ?? true;
     
@@ -239,19 +245,23 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
     );
   }
 
-  const summaryWords = weather.summaryVerdict?.split(/\s+/).filter(Boolean).length ?? 0;
-  const narrative = wws?.piet_update?.content
-    || (summaryWords >= 20 ? weather.summaryVerdict : null)
-    || getMainCommentary(weather);
+  const summaryWords = weather?.summaryVerdict?.split(/\s+/).filter(Boolean).length ?? 0;
+  const narrative = weather
+    ? wws?.piet_update?.content
+      || (summaryWords >= 20 ? weather.summaryVerdict : null)
+      || getMainCommentary(weather)
+    : null;
+  const backgroundWeatherCode = weather?.current.weatherCode ?? initialWeatherCode ?? 2;
+  const backgroundIsDay = weather?.current.isDay ?? initialIsDay ?? true;
   return (
     <div className="min-h-screen relative overflow-x-hidden">
-      <WeatherBackground weatherCode={weather.current.weatherCode} isDay={weather.current.isDay} />
+      <WeatherBackground weatherCode={backgroundWeatherCode} isDay={backgroundIsDay} />
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
         <SupportBanner />
         {topContent}
 
         <div className="flex flex-col gap-6 animate-fade-in">
-          {!hideWeatherInfo && (
+          {!hideWeatherInfo && weather && (
             <>
               {!slimMode && (<>
 
@@ -314,6 +324,40 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
             </div>
           )}
 
+          {weather.mariana && (
+            <div className="card px-6 py-5">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-cyan-600" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
+                    Mariana · atmosferische arbitrage
+                  </span>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-700 bg-cyan-50 px-2 py-1 rounded-lg">
+                  {Math.round(weather.mariana.confidence.score * 100)}%
+                </span>
+              </div>
+              <p className="text-sm font-medium text-text-primary leading-relaxed">
+                {weather.mariana.interpretation}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="text-[10px] font-bold text-text-secondary bg-slate-100 px-2 py-1 rounded-lg">
+                  {weather.mariana.weatherRegime.label}
+                </span>
+                {weather.mariana.dominantModels.slice(0, 2).map((model) => (
+                  <span key={model} className="text-[10px] font-bold text-text-secondary bg-slate-100 px-2 py-1 rounded-lg">
+                    {model}
+                  </span>
+                ))}
+                {weather.mariana.correctionApplied && (
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg">
+                    lokaal gecorrigeerd
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* CTA: Mijn Weer */}
           <Link href="/mijnweer" className="block group">
             <div className="card p-8 sm:p-10">
@@ -350,13 +394,13 @@ export default function WeatherDashboard({ initialCity, initialWeather, initialW
           </>
           )}
         </div>
-        {showRainRadar && weather.minutely && weather.minutely.length > 0 && (
+        {showRainRadar && weather && weather.minutely && weather.minutely.length > 0 && (
           <div className="card p-5 sm:p-6">
             <RainRadar data={weather.minutely} />
           </div>
         )}
         {beforeFooter}
-        <AmazonStickyBar weather={weather} />
+        {weather && <AmazonStickyBar weather={weather} />}
       </div>
     </div>
   );
