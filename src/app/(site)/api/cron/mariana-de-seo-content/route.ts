@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isMarianaAuthorized, marianaUnauthorized } from "@/lib/mariana/http";
 import { ALL_PLACES } from "@/lib/places-data";
 import { DE_BUNDESLAND_LABELS, PROVINCE_TO_DE_BUNDESLAND } from "@/config/locales";
 import { getLocationSEOContent } from "@/app/actions";
@@ -8,25 +7,31 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 /**
- * Mariana DE SEO content warmup.
+ * DE SEO content warmup (intern via Hermes 4 70b / Mariana-stack).
  *
- * Per call genereert deze route unieke Duitse SEO-snippets voor een batch
- * Duitse plaatsen via Hermes (Mariana / Hermes 4 70b) en cached ze in
- * seo_injections. Onbeperkt herhaalbaar — bestaande cached content wordt
- * niet overschreven (getLocationSEOContent skipt op cache-hit).
+ * Genereert per call unieke Duitse SEO-snippets voor een batch Duitse
+ * plaatsen en cached ze in seo_injections. Onbeperkt herhaalbaar —
+ * bestaande cache-hits worden geskipt.
  *
- * Auth: zelfde als andere Mariana cron routes (Bearer MARIANA_SECRET / CRON_SECRET).
+ * Auth: Bearer MARIANA_SECRET (of CRON_SECRET fallback).
  *
  * Query params:
  *   limit    — max plaatsen per batch (default 25, hard cap 100)
  *   offset   — startpositie (default: daily-bucket rotation)
  *   province — filter op interne province key (e.g. "beieren")
- *
- * Daily-bucket rotation zorgt dat elke dag een andere batch wordt verwerkt
- * zonder dat we offsets handmatig hoeven bij te houden.
  */
+function isAuthorized(request: NextRequest): boolean {
+  if (process.env.NODE_ENV !== "production") return true;
+  const secret = process.env.MARIANA_SECRET ?? process.env.CRON_SECRET;
+  if (!secret) return false;
+  const auth = request.headers.get("authorization");
+  return auth === `Bearer ${secret}`;
+}
+
 export async function GET(request: NextRequest) {
-  if (!isMarianaAuthorized(request)) return marianaUnauthorized();
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
 
   const rawLimit = Number(request.nextUrl.searchParams.get("limit") ?? 25);
   const limit = Math.max(1, Math.min(100, Number.isFinite(rawLimit) ? rawLimit : 25));
