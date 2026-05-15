@@ -166078,5 +166078,117 @@
     "lat": 53.5243,
     "lon": 11.8884,
     "character": "inland"
+  },
+  {
+    "name": "Paris",
+    "province": "ile-de-france",
+    "lat": 48.8566,
+    "lon": 2.3522,
+    "population": 2161000,
+    "character": "urban"
+  },
+  {
+    "name": "Marseille",
+    "province": "ile-de-france",
+    "lat": 43.2965,
+    "lon": 5.3698,
+    "population": 861635,
+    "character": "coastal"
+  },
+  {
+    "name": "Lyon",
+    "province": "ile-de-france",
+    "lat": 45.764,
+    "lon": 4.8357,
+    "population": 513275,
+    "character": "urban"
+  },
+  {
+    "name": "Toulouse",
+    "province": "ile-de-france",
+    "lat": 43.6047,
+    "lon": 1.4442,
+    "population": 471941,
+    "character": "urban"
+  },
+  {
+    "name": "Nice",
+    "province": "ile-de-france",
+    "lat": 43.7102,
+    "lon": 7.262,
+    "population": 342522,
+    "character": "coastal"
+  },
+  {
+    "name": "Nantes",
+    "province": "ile-de-france",
+    "lat": 47.2184,
+    "lon": -1.5536,
+    "population": 303382,
+    "character": "urban"
+  },
+  {
+    "name": "Strasbourg",
+    "province": "ile-de-france",
+    "lat": 48.5734,
+    "lon": 7.7521,
+    "population": 277270,
+    "character": "urban"
+  },
+  {
+    "name": "Montpellier",
+    "province": "ile-de-france",
+    "lat": 43.6108,
+    "lon": 3.8767,
+    "population": 277929,
+    "character": "coastal"
+  },
+  {
+    "name": "Bordeaux",
+    "province": "ile-de-france",
+    "lat": 44.8378,
+    "lon": -0.5792,
+    "population": 249712,
+    "character": "urban"
+  },
+  {
+    "name": "Bruxelles",
+    "province": "wallonie",
+    "lat": 50.8503,
+    "lon": 4.3517,
+    "population": 1208542,
+    "character": "urban"
+  },
+  {
+    "name": "Liège",
+    "province": "wallonie",
+    "lat": 50.6326,
+    "lon": 5.5797,
+    "population": 197355,
+    "character": "urban"
+  },
+  {
+    "name": "Namur",
+    "province": "wallonie",
+    "lat": 50.4674,
+    "lon": 4.8719,
+    "population": 110939,
+    "character": "urban"
+  },
+  {
+    "name": "Charleroi",
+    "province": "wallonie",
+    "lat": 50.4105,
+    "lon": 4.4446,
+    "population": 201816,
+    "character": "urban"
+  },
+  {
+    "name": "Mons",
+    "province": "wallonie",
+    "lat": 50.4542,
+    "lon": 3.9567,
+    "population": 95299,
+    "character": "urban"
   }
 ]

@@ -51,7 +51,10 @@ export type Province =
   | "saksen-anhalt"
   | "sleeswijk-holstein"
   | "thuringen"
-  | "baden-wurttemberg";
+  | "baden-wurttemberg"
+  // Frankrijk & Wallonie
+  | "wallonie"
+  | "ile-de-france";
 
 export const PROVINCE_LABELS: Record<Province, string> = {
   groningen: "Groningen",
@@ -88,6 +91,9 @@ export const PROVINCE_LABELS: Record<Province, string> = {
   "sleeswijk-holstein": "Sleeswijk-Holstein",
   thuringen: "Thüringen",
   "baden-wurttemberg": "Baden-Württemberg",
+  // Frankrijk & Wallonie
+  wallonie: "Wallonie",
+  "ile-de-france": "Île-de-France",
 };
 
 // ============================================================
