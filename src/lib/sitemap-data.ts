@@ -26,6 +26,10 @@ export const DE_PROVINCES = new Set([
   "saarland", "saksen", "saksen-anhalt", "sleeswijk-holstein", "thuringen", "baden-wurttemberg",
 ]);
 
+export const FR_PROVINCES = new Set([
+  "ile-de-france", "wallonie",
+]);
+
 export const THEME_SLUGS = [
   "bbq-weer", "strandweer", "hardloopweer", "hooikoorts", "wintersport-nl",
 ] as const;
@@ -102,10 +106,11 @@ export function buildSitemapIndex(): string {
     `${BASE_URL}/sitemap-nl.xml`,
     `${BASE_URL}/sitemap-be.xml`,
     `${BASE_URL}/sitemap-de.xml`,
+    `${BASE_URL}/sitemap-fr.xml`,
   ]);
 }
 
-// ─── Statische sitemap (NL + BE + DE static pages + provincie/Bundesland overzichten) ──
+// ─── Statische sitemap (NL + BE + DE + FR static pages + provincie/Bundesland overzichten) ──
 export function buildStaticSitemap(): string {
   const today = todayIso();
   const entries: SitemapEntry[] = [];
@@ -159,6 +164,25 @@ export function buildStaticSitemap(): string {
         priority: 0.8,
       });
     }
+  }
+
+  // FR statisch
+  entries.push({ url: `${BASE_URL}/fr`,             lastmod: today, changefreq: "weekly",  priority: 0.9 });
+  entries.push({ url: `${BASE_URL}/fr/meteo`,       lastmod: today, changefreq: "hourly",  priority: 0.8 });
+  entries.push({ url: `${BASE_URL}/fr/mon-meteo`,   lastmod: today, changefreq: "weekly",  priority: 0.8 });
+  entries.push({ url: `${BASE_URL}/fr/alertes`,     lastmod: today, changefreq: "weekly",  priority: 0.7 });
+  entries.push({ url: `${BASE_URL}/fr/tarifs`,      lastmod: today, changefreq: "monthly", priority: 0.7 });
+  entries.push({ url: `${BASE_URL}/fr/a-propos`,    lastmod: today, changefreq: "monthly", priority: 0.5 });
+  entries.push({ url: `${BASE_URL}/fr/contact`,     lastmod: today, changefreq: "monthly", priority: 0.4 });
+
+  // FR Région-overzichten
+  for (const p of FR_PROVINCES) {
+    entries.push({
+      url: `${BASE_URL}/fr/meteo/${p}`,
+      lastmod: today,
+      changefreq: "hourly",
+      priority: 0.8,
+    });
   }
 
   return xmlUrlset(entries);
@@ -217,6 +241,27 @@ export function buildDESitemap(): string {
     if (!bundesland) continue;
     const slug = canonicalPlaceSlug(place.name);
     const url = `${BASE_URL}/de/wetter/${bundesland}/${slug}`;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    entries.push({ url, lastmod: today, changefreq: "hourly", priority: placePriority(place.population) });
+  }
+
+  entries.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  return xmlUrlset(entries);
+}
+
+// ─── FR-plaatsen ─────────────────────────────────────────────────────────────
+export function buildFRSitemap(): string {
+  const today = todayIso();
+  const seen = new Set<string>();
+  const entries: SitemapEntry[] = [];
+
+  for (const place of ALL_PLACES) {
+    if (!isSitemapPlace(place)) continue;
+    if (!FR_PROVINCES.has(place.province)) continue;
+    const region = place.province;
+    const slug = canonicalPlaceSlug(place.name);
+    const url = `${BASE_URL}/fr/meteo/${region}/${slug}`;
     if (seen.has(url)) continue;
     seen.add(url);
     entries.push({ url, lastmod: today, changefreq: "hourly", priority: placePriority(place.population) });

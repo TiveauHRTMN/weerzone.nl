@@ -43,6 +43,10 @@ export async function generateMetadata({
     description: `Météo hyperlocales pour ${city.name}. Prévisions heure par heure de la température, pluie, vent et alertes.`,
     alternates: {
       canonical: `https://weerzone.nl/fr/meteo/${region}/${citySlug}`,
+      languages: {
+        "fr-FR": `https://weerzone.nl/fr/meteo/${region}/${citySlug}`,
+        "x-default": `https://weerzone.nl/fr/meteo/${region}/${citySlug}`,
+      },
     },
     openGraph: {
       title: `Météo ${city.name} | WEERZONE`,
