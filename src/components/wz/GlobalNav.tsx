@@ -101,42 +101,37 @@ export default function GlobalNav() {
     >
       {isFR ? <FRPulse /> : isDE ? <DEPulse /> : <NLPulse />}
 
-      {/* Desktop */}
-      <div className="hidden md:flex items-center max-w-[1200px] mx-auto px-6 py-2.5" style={{ gap: 16 }}>
+      {/* Main Bar */}
+      <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-3 md:gap-4">
+        
+        {/* Left: Hamburger & Logo */}
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          <button
+            onClick={() => setOpen(!open)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:bg-black/5 border border-transparent active:scale-95"
+            aria-label="Menu"
+          >
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
 
-        <Link href={homeHref} aria-label={isFR ? "WEERZONE Accueil" : isDE ? "WEERZONE Startseite" : "Weerzone home"} className="shrink-0 transition-opacity hover:opacity-80">
-          <LogoBadge tier={tier} isFounder={isFounder} />
-        </Link>
+          <Link href={homeHref} aria-label="Weerzone home" className="transition-opacity hover:opacity-80">
+            <LogoBadge tier={tier} isFounder={isFounder} />
+          </Link>
+        </div>
 
-        <div className="w-px self-stretch my-1" style={{ background: "rgba(0,0,0,0.10)" }} />
+        <div className="w-px h-6 bg-black/10 hidden sm:block" />
 
-        <nav className="flex items-center gap-1 flex-1">
+        {/* Middle: Location Button (Visible on Desktop, hidden or compact on mobile if space is tight) */}
+        <div className="flex-1 min-w-0">
           <LocatieButton 
             locale={locale} 
             active={pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")}
             className="!h-[36px] !px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest"
           />
-          {links.map(l => {
-            const active = isActive(l.href, l.key);
-            return (
-              <Link
-                key={l.key}
-                href={l.href}
-                className="px-3.5 py-2 rounded-xl text-[11px] font-black uppercase transition-all whitespace-nowrap"
-                style={{
-                  letterSpacing: "0.07em",
-                  color: active ? "#0f1a2c" : "rgba(15,26,44,0.50)",
-                  background: active ? "rgba(0,0,0,0.11)" : "transparent",
-                }}
-              >
-                {l.label}
-              </Link>
-            );
-          })}
-        </nav>
+        </div>
 
-        {/* Locale Switcher */}
-        <div className="flex items-center gap-2 mr-2">
+        {/* Right: Flags & Actions (Desktop) */}
+        <div className="hidden lg:flex items-center gap-4 shrink-0">
           <div className="flex bg-black/5 rounded-lg p-0.5 border border-black/10">
             {[
               { code: 'nl', flag: '🇳🇱', label: 'NL', href: '/' },
@@ -160,79 +155,40 @@ export default function GlobalNav() {
                 );
             })}
           </div>
+
+          <div className="flex items-center gap-2">
+            {user ? (
+              <>
+                <Link href="/app" className={actionBtnClass} style={{ height: BTN_H, background: "rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.10)", color: "#0f1a2c" }}>
+                  Dashboard
+                </Link>
+                <button
+                  onClick={async () => {
+                    const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+                    await createSupabaseBrowserClient().auth.signOut();
+                    window.location.href = "/";
+                  }}
+                  className={actionBtnClass}
+                  style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}
+                >
+                  {isFR ? "Déconnexion" : isDE ? "Abmelden" : "Log uit"}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"} className={actionBtnClass} style={{ height: BTN_H, background: "rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.10)", color: "#0f1a2c" }}>
+                  {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                </Link>
+                <Link href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"} className={actionBtnClass} style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}>
+                  {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                </Link>
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <>
-              <Link
-                href="/app"
-                className={actionBtnClass}
-                style={{
-                  height: BTN_H,
-                  background: "rgba(0,0,0,0.08)",
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  color: "#0f1a2c",
-                }}
-              >
-                Dashboard
-              </Link>
-              <button
-                onClick={async () => {
-                  const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-                  await createSupabaseBrowserClient().auth.signOut();
-                  window.location.href = "/";
-                }}
-                className={actionBtnClass}
-                style={{
-                  background: "#0f1a2c",
-                  height: BTN_H,
-                  color: "white",
-                  boxShadow: "0 2px 8px rgba(15,26,44,0.25), inset 0 1px 0 rgba(255,255,255,0.08)",
-                }}
-              >
-                {isFR ? "Déconnexion" : isDE ? "Abmelden" : "Log uit"}
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"}
-                className={actionBtnClass}
-                style={{
-                  height: BTN_H,
-                  background: "rgba(0,0,0,0.08)",
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  color: "#0f1a2c",
-                }}
-              >
-                {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
-              </Link>
-              <Link
-                href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"}
-                className={actionBtnClass}
-                style={{
-                  background: "#0f1a2c",
-                  height: BTN_H,
-                  color: "white",
-                  boxShadow: "0 2px 8px rgba(15,26,44,0.25), inset 0 1px 0 rgba(255,255,255,0.08)",
-                }}
-              >
-                {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile */}
-      <div className="md:hidden flex items-center justify-between gap-2 px-4 py-3">
-        <Link href={homeHref} aria-label={isFR ? "WEERZONE Accueil" : isDE ? "WEERZONE Startseite" : "Weerzone home"}>
-          <LogoBadge tier={tier} isFounder={isFounder} />
-        </Link>
-        <div className="flex items-center gap-2">
-          {/* Locale Switcher Mobile */}
-          <div className="flex bg-black/5 rounded-lg p-0.5 border border-black/10 mr-1">
+        {/* Flags (Mobile only, shown next to menu if desktop right is hidden) */}
+        <div className="flex lg:hidden bg-black/5 rounded-lg p-0.5 border border-black/10 shrink-0">
              {[
               { code: 'nl', flag: '🇳🇱', href: '/' },
               { code: 'be', flag: '🇧🇪', href: '/weer/wallonie' },
@@ -247,95 +203,98 @@ export default function GlobalNav() {
                   <Link 
                     key={loc.code}
                     href={loc.href} 
-                    className={`w-8 h-7 flex items-center justify-center rounded-md text-sm transition-all ${active ? 'bg-white shadow-sm grayscale-0' : 'grayscale opacity-40'}`}
+                    className={`w-7 h-6 flex items-center justify-center rounded-md text-sm transition-all ${active ? 'bg-white shadow-sm grayscale-0' : 'grayscale opacity-40'}`}
                   >
                     {loc.flag}
                   </Link>
                 );
             })}
-          </div>
-          <LocatieButton locale={locale} compact active={pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")} />
-          <button
-            type="button"
-            onClick={() => setOpen(v => !v)}
-            aria-label={isFR ? "Menu" : isDE ? "Menü" : "Menu"}
-            aria-expanded={open}
-            className="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
-            style={{ background: "rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.10)", color: "#0f1a2c" }}
-          >
-            {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-          </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Unified Hamburger Menu Overlay */}
       {open && (
         <div
-          className="md:hidden px-4 pb-5 pt-2"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
+          className="absolute top-full left-0 right-0 bg-white shadow-2xl border-t border-slate-100 z-50 animate-in slide-in-from-top duration-200"
+          style={{ background: "rgba(255,255,255,0.98)", backdropFilter: "blur(20px)" }}
         >
-          <nav className="grid gap-0.5 mb-4">
-            <LocatieButton locale={locale} active={pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")} />
-            {links.map(l => {
-              const active = isActive(l.href, l.key);
-              return (
-                <Link
-                  key={l.key}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="px-4 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all"
-                  style={{
-                    color: active ? "#0f1a2c" : "rgba(15,26,44,0.50)",
-                    background: active ? "rgba(0,0,0,0.09)" : "transparent",
-                  }}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="grid grid-cols-2 gap-2 pt-3" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-            {user ? (
-              <>
-                <Link
-                  href="/app"
-                  onClick={() => setOpen(false)}
-                  className="py-3 rounded-xl text-center text-[11px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5"
-                  style={{ color: "#0f1a2c" }}
-                  >
-                  Dashboard
-                  </Link>
-                <button
-                  onClick={async () => {
-                    setOpen(false);
-                    const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-                    await createSupabaseBrowserClient().auth.signOut();
-                    window.location.href = "/";
-                  }}
-                  className="py-3 rounded-xl text-[11px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]"
-                  >
-                  {isFR ? "Déconnexion" : isDE ? "Abmelden" : "Log uit"}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"}
-                  onClick={() => setOpen(false)}
-                  className="py-3 rounded-xl text-center text-[11px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5"
-                  style={{ color: "#0f1a2c" }}
-                  >
-                  {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
-                  </Link>
-                <Link
-                  href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"}
-                  onClick={() => setOpen(false)}
-                  className="py-3 rounded-xl text-center text-[11px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]"
-                >
-                  {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
-                </Link>
-              </>
-            )}
+          <div className="max-w-[1200px] mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            {/* Column 1: Main Pages */}
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 px-4">Menu</p>
+              <nav className="grid gap-1">
+                {links.map(l => {
+                  const active = isActive(l.href, l.key);
+                  return (
+                    <Link
+                      key={l.key}
+                      href={l.href}
+                      onClick={() => setOpen(false)}
+                      className="px-4 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all flex items-center justify-between group"
+                      style={{
+                        color: active ? "#3b7ff0" : "#0f1a2c",
+                        background: active ? "#3b7ff0/5" : "transparent",
+                      }}
+                    >
+                      <span>{l.label}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full bg-[#3b7ff0] transition-transform ${active ? 'scale-100' : 'scale-0 group-hover:scale-50'}`} />
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Column 2: Account Actions (especially for mobile/tablet where they might be hidden in the main bar) */}
+            <div className="lg:hidden">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 px-4">Compte</p>
+              <div className="grid gap-2">
+                {user ? (
+                  <>
+                    <Link href="/app" onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-slate-50 border border-slate-100">
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        setOpen(false);
+                        const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+                        await createSupabaseBrowserClient().auth.signOut();
+                        window.location.href = "/";
+                      }}
+                      className="py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]"
+                    >
+                      {isFR ? "Déconnexion" : isDE ? "Abmelden" : "Log uit"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-slate-50 border border-slate-100">
+                      {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                    </Link>
+                    <Link href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
+                      {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Column 3: Brand/Info */}
+            <div className="hidden lg:block border-l border-slate-100 pl-8">
+               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Weerzone</p>
+               <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-[#ffd21a]/10 border border-[#ffd21a]/20">
+                     <p className="text-xs font-bold text-slate-800 leading-relaxed">
+                        {isFR ? "Prévisions hyperlocales basées op 5 modèles météorologiques. Précis, honnête et sans fioritures." : "Hyperlokale weersverwachting op basis van 5 weermodellen. Eerlijk, nuchter en zonder poespas."}
+                     </p>
+                  </div>
+                  <nav className="grid gap-2">
+                     <Link href={isFR ? "/fr/a-propos" : "/over"} className="text-[10px] font-black uppercase text-slate-400 hover:text-[#0f1a2c] transition-colors">{isFR ? "À Propos" : "Over ons"}</Link>
+                     <Link href={isFR ? "/fr/contact" : "/contact"} className="text-[10px] font-black uppercase text-slate-400 hover:text-[#0f1a2c] transition-colors">Contact</Link>
+                  </nav>
+               </div>
+            </div>
+
           </div>
         </div>
       )}
