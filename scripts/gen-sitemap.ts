@@ -11,9 +11,9 @@ import path from 'path';
  * Indeling:
  *   sitemap-static.xml      — statische pagina's + alle provincie-overzichten
  *   sitemap-nl.xml          — Nederlandse plaatsen (~10.400)
- *   sitemap-be.xml          — Vlaamse plaatsen (~1.600)
- *   sitemap-de.xml          — Duitse plaatsen (~150, groeit via OpenClaw)
- *   sitemap-fr.xml          — Franse + Waalse plaatsen (~35.000)
+ *   sitemap-be.xml          — Vlaamse + Waalse plaatsen (~1.700)
+ *   sitemap-de.xml          — Duitse plaatsen (~150)
+ *   sitemap-fr.xml          — Franse plaatsen (~35.000)
  */
 
 const placesPath = path.join(process.cwd(), 'src/lib/places.json');
@@ -53,11 +53,10 @@ const FR_PROVINCES = new Set([
   "tarn-et-garonne", "var", "vaucluse", "vendee", "vienne", "haute-vienne",
   "vosges", "yonne", "territoire-de-belfort", "essonne", "hauts-de-seine",
   "seine-saint-denis", "val-de-marne", "val-d-oise", "guadeloupe", "martinique",
-  "guyane", "la-reunion", "mayotte", "wallonie",
+  "guyane", "la-reunion", "mayotte",
 ]);
 
 // Interne province-key → publieke Duitse URL-slug.
-// Synced met src/config/locales.ts PROVINCE_TO_DE_BUNDESLAND.
 const PROVINCE_TO_DE_BUNDESLAND: Record<string, string> = {
   berlijn: 'berlin',
   beieren: 'bayern',
@@ -145,8 +144,8 @@ async function run() {
   NL_THEMES.forEach(t => {
     staticXml += url(`${BASE_URL}/weer/themas/${t}`, staticLastMod, 'daily', '0.7');
   });
-  // NL+BE provincies (gebruiken /weer/${province})
-  [...NL_PROVINCES, ...BE_PROVINCES].forEach(p => {
+  // NL+BE provincies
+  [...NL_PROVINCES, ...BE_PROVINCES, 'wallonie'].forEach(p => {
     const prio = NL_PROVINCES.has(p) ? '0.9' : '0.8';
     staticXml += url(`${BASE_URL}/weer/${p}`, placesLastMod, 'hourly', prio);
   });
@@ -159,7 +158,6 @@ async function run() {
   staticXml += url(`${BASE_URL}/de/preise`,      staticLastMod, 'monthly', '0.7');
   staticXml += url(`${BASE_URL}/de/uber-uns`,    staticLastMod, 'monthly', '0.5');
   staticXml += url(`${BASE_URL}/de/kontakt`,     staticLastMod, 'monthly', '0.4');
-  // DE Bundesländer (gebruiken /de/wetter/${bundesland})
   for (const p of DE_PROVINCES) {
     const bundesland = PROVINCE_TO_DE_BUNDESLAND[p];
     if (bundesland) {
@@ -175,13 +173,11 @@ async function run() {
   staticXml += url(`${BASE_URL}/fr/tarifs`,      staticLastMod, 'monthly', '0.7');
   staticXml += url(`${BASE_URL}/fr/a-propos`,    staticLastMod, 'monthly', '0.5');
   staticXml += url(`${BASE_URL}/fr/contact`,     staticLastMod, 'monthly', '0.4');
-  // FR Régions (gebruiken /fr/meteo/${region})
   for (const p of FR_PROVINCES) {
     staticXml += url(`${BASE_URL}/fr/meteo/${p}`, placesLastMod, 'hourly', '0.8');
   }
 
   fs.writeFileSync(path.join(publicDir, 'sitemap-static.xml'), wrapUrlset(staticXml));
-  console.log(`  ✅ sitemap-static.xml`);
 
   // ── per-land plaatsen sitemaps ──
   const buckets: Record<'nl' | 'be' | 'de' | 'fr', RawPlace[]> = { nl: [], be: [], de: [], fr: [] };
@@ -196,54 +192,52 @@ async function run() {
     seen.add(key);
 
     if (NL_PROVINCES.has(place.province)) buckets.nl.push(place);
-    else if (BE_PROVINCES.has(place.province)) buckets.be.push(place);
+    else if (BE_PROVINCES.has(place.province) || place.province === 'wallonie') buckets.be.push(place);
     else if (DE_PROVINCES.has(place.province)) buckets.de.push(place);
     else if (FR_PROVINCES.has(place.province)) buckets.fr.push(place);
   }
 
-  // NL + BE: legacy `/weer/${province}/${slug}` URL
-  for (const land of ['nl', 'be'] as const) {
-    let xml = '';
-    buckets[land]
-      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
-      .forEach(place => {
-        const slug = placeSlug(place.name);
-        xml += url(`${BASE_URL}/weer/${place.province}/${slug}`, placesLastMod, 'hourly', placePriority(place.population));
-      });
-    fs.writeFileSync(path.join(publicDir, `sitemap-${land}.xml`), wrapUrlset(xml));
-    console.log(`  ✅ sitemap-${land}.xml — ${buckets[land].length} locaties`);
-  }
-
-  // DE: nieuwe `/de/wetter/${bundesland}/${slug}` URL
+  // NL: /weer/${province}/${slug}
   {
     let xml = '';
-    buckets.de
-      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
-      .forEach(place => {
-        const bundesland = PROVINCE_TO_DE_BUNDESLAND[place.province];
-        if (!bundesland) return;
-        const slug = placeSlug(place.name);
-        xml += url(`${BASE_URL}/de/wetter/${bundesland}/${slug}`, placesLastMod, 'hourly', placePriority(place.population));
-      });
+    buckets.nl.sort((a, b) => (b.population ?? 0) - (a.population ?? 0)).forEach(place => {
+      xml += url(`${BASE_URL}/weer/${place.province}/${placeSlug(place.name)}`, placesLastMod, 'hourly', placePriority(place.population));
+    });
+    fs.writeFileSync(path.join(publicDir, 'sitemap-nl.xml'), wrapUrlset(xml));
+  }
+
+  // BE: /weer/${province}/${slug} (Includes Wallonie now)
+  {
+    let xml = '';
+    buckets.be.sort((a, b) => (b.population ?? 0) - (a.population ?? 0)).forEach(place => {
+      xml += url(`${BASE_URL}/weer/${place.province}/${placeSlug(place.name)}`, placesLastMod, 'hourly', placePriority(place.population));
+    });
+    fs.writeFileSync(path.join(publicDir, 'sitemap-be.xml'), wrapUrlset(xml));
+  }
+
+  // DE: /de/wetter/${bundesland}/${slug}
+  {
+    let xml = '';
+    buckets.de.sort((a, b) => (b.population ?? 0) - (a.population ?? 0)).forEach(place => {
+      const bundesland = PROVINCE_TO_DE_BUNDESLAND[place.province];
+      if (!bundesland) return;
+      xml += url(`${BASE_URL}/de/wetter/${bundesland}/${placeSlug(place.name)}`, placesLastMod, 'hourly', placePriority(place.population));
+    });
     fs.writeFileSync(path.join(publicDir, 'sitemap-de.xml'), wrapUrlset(xml));
-    console.log(`  ✅ sitemap-de.xml — ${buckets.de.length} locaties`);
   }
 
-  // FR: `/fr/meteo/${region}/${slug}` URL
+  // FR: /fr/meteo/${region}/${slug}
   {
     let xml = '';
-    buckets.fr
-      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
-      .forEach(place => {
-        const region = place.province;
-        const slug = placeSlug(place.name);
-        xml += url(`${BASE_URL}/fr/meteo/${region}/${slug}`, placesLastMod, 'hourly', placePriority(place.population));
-      });
+    buckets.fr.sort((a, b) => (b.population ?? 0) - (a.population ?? 0)).forEach(place => {
+      const priority = placePriority(place.population);
+      const freq = (place.population && place.population > 50000) ? 'hourly' : 'daily';
+      xml += url(`${BASE_URL}/fr/meteo/${place.province}/${placeSlug(place.name)}`, placesLastMod, freq, priority);
+    });
     fs.writeFileSync(path.join(publicDir, 'sitemap-fr.xml'), wrapUrlset(xml));
-    console.log(`  ✅ sitemap-fr.xml — ${buckets.fr.length} locaties`);
   }
 
-  // ── sitemap.xml (index) ──
+  // ── sitemap.xml ──
   const childUrls = [
     `${BASE_URL}/sitemap-static.xml`,
     `${BASE_URL}/sitemap-nl.xml`,
@@ -252,9 +246,7 @@ async function run() {
     `${BASE_URL}/sitemap-fr.xml`,
   ];
   fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), wrapIndex(childUrls));
-
-  const total = buckets.nl.length + buckets.be.length + buckets.de.length + buckets.fr.length;
-  console.log(`✅ Sitemap index klaar — ${total} locaties over 5 sitemaps`);
+  console.log(`✅ Sitemap index klaar — ${buckets.nl.length + buckets.be.length + buckets.de.length + buckets.fr.length} locaties over 5 sitemaps`);
 }
 
 run().catch((err) => {

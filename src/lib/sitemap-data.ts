@@ -43,7 +43,7 @@ export const FR_PROVINCES = new Set([
   "tarn-et-garonne", "var", "vaucluse", "vendee", "vienne", "haute-vienne",
   "vosges", "yonne", "territoire-de-belfort", "essonne", "hauts-de-seine",
   "seine-saint-denis", "val-de-marne", "val-d-oise", "guadeloupe", "martinique",
-  "guyane", "la-reunion", "mayotte", "wallonie",
+  "guyane", "la-reunion", "mayotte",
 ]);
 
 export const THEME_SLUGS = [
@@ -200,6 +200,8 @@ export function buildStaticSitemap(): string {
       priority: 0.8,
     });
   }
+  // Add Wallonia overview specifically to static sitemap if not already there
+  entries.push({ url: `${BASE_URL}/weer/wallonie`, lastmod: today, changefreq: "hourly", priority: 0.8 });
 
   return xmlUrlset(entries);
 }
@@ -232,7 +234,9 @@ export function buildBESitemap(): string {
 
   for (const place of ALL_PLACES) {
     if (!isSitemapPlace(place)) continue;
-    if (!BE_PROVINCES.has(place.province)) continue;
+    // Mariana treatment: include Wallonia in Belgian sitemap
+    if (!BE_PROVINCES.has(place.province) && place.province !== "wallonie") continue;
+    
     const slug = canonicalPlaceSlug(place.name);
     const url = `${BASE_URL}/weer/${place.province}/${slug}`;
     if (seen.has(url)) continue;
@@ -280,9 +284,15 @@ export function buildFRSitemap(): string {
     const url = `${BASE_URL}/fr/meteo/${region}/${slug}`;
     if (seen.has(url)) continue;
     seen.add(url);
-    entries.push({ url, lastmod: today, changefreq: "hourly", priority: placePriority(place.population) });
+    
+    // Mariana treatment: dynamic frequency and priority
+    const priority = placePriority(place.population);
+    const changefreq = (place.population && place.population > 50000) ? "hourly" : "daily";
+    
+    entries.push({ url, lastmod: today, changefreq, priority });
   }
 
+  // Sort by priority so Google crawls big cities first
   entries.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   return xmlUrlset(entries);
 }
