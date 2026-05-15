@@ -8,9 +8,10 @@ interface Props {
   lon: number;
   city: string;
   initialWeather?: WeatherData;
+  locale?: "de" | "fr";
 }
 
-const WC_LABEL: Record<number, string> = {
+const WC_LABEL_DE: Record<number, string> = {
   0: "sonnig",
   1: "überwiegend sonnig",
   2: "leicht bewölkt",
@@ -34,40 +35,90 @@ const WC_LABEL: Record<number, string> = {
   99: "schweres Gewitter mit Hagel",
 };
 
-const TAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+const WC_LABEL_FR: Record<number, string> = {
+  0: "ensoleillé",
+  1: "principalement ensoleillé",
+  2: "partiellement nuageux",
+  3: "nuageux",
+  45: "brouillard",
+  48: "brouillard givrant",
+  51: "légère bruine",
+  53: "bruine",
+  55: "forte bruine",
+  61: "légère pluie",
+  63: "pluie",
+  65: "forte pluie",
+  71: "légères chutes de neige",
+  73: "chutes de neige",
+  75: "fortes chutes de neige",
+  80: "averses",
+  81: "fortes averses",
+  82: "violentes averses",
+  95: "orage",
+  96: "orage avec grêle",
+  99: "orage violent avec grêle",
+};
 
-function dayName(offset = 0) {
-  const date = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Berlin" }));
+const TAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+const JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+
+function dayName(offset = 0, locale = "de") {
+  const isFR = locale === "fr";
+  const date = new Date(new Date().toLocaleString("en-US", { timeZone: isFR ? "Europe/Paris" : "Europe/Berlin" }));
   date.setDate(date.getDate() + offset);
-  return TAGE[date.getDay()];
+  return isFR ? JOURS[date.getDay()] : TAGE[date.getDay()];
 }
 
-function dayPart() {
-  const hour = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Berlin" })).getHours();
+function dayPart(locale = "de") {
+  const isFR = locale === "fr";
+  const hour = new Date(new Date().toLocaleString("en-US", { timeZone: isFR ? "Europe/Paris" : "Europe/Berlin" })).getHours();
+  if (locale === "fr") {
+    if (hour < 6) return " soir";
+    if (hour < 12) return " matin";
+    if (hour < 18) return " après-midi";
+    return " soir";
+  }
   if (hour < 6) return "nacht";
   if (hour < 12) return "morgen";
   if (hour < 18) return "nachmittag";
   return "abend";
 }
 
-function label(code?: number) {
-  return WC_LABEL[Number(code)] ?? "wechselhaft";
+function label(code?: number, locale = "de") {
+  const labels = locale === "fr" ? WC_LABEL_FR : WC_LABEL_DE;
+  return labels[Number(code)] ?? (locale === "fr" ? "variable" : "wechselhaft");
 }
 
-function quickKarlForecast(weather: WeatherData | undefined, city: string) {
+function quickForecast(weather: WeatherData | undefined, city: string, locale = "de") {
   if (!weather) return null;
+  const isFR = locale === "fr";
   const current = weather.current;
   const today = weather.daily?.[0];
   const tomorrow = weather.daily?.[1];
-  const heute = dayName(0);
-  const morgenName = dayName(1);
-  const part = dayPart();
+  const heute = dayName(0, locale);
+  const morgenName = dayName(1, locale);
+  const part = dayPart(locale);
   const temp = Math.round(current.temperature);
   const wind = Math.round(current.windSpeed);
   const gusts = Math.round(current.windGusts || current.windSpeed);
-  const rain = Number(current.precipitation || 0);
-  const todayRain = Number(today?.precipitationSum || rain || 0);
-  const weatherText = label(current.weatherCode);
+  const todayRain = Number(today?.precipitationSum || current.precipitation || 0);
+  const weatherText = label(current.weatherCode, locale);
+
+  if (isFR) {
+    const windText = wind >= 35 ? "avec un vent fort" : wind >= 20 ? "avec un vent modéré" : "avec peu de vent";
+    const rainText = todayRain >= 5
+      ? "Prévoyez des passages pluvieux ; ce n'est pas le jour pour oublier votre veste."
+      : todayRain >= 1
+        ? "Quelques averses sont possibles, entrecoupées de périodes sèches."
+        : "Le temps restera principalement sec, avec tout au plus quelques gouttes locales.";
+
+    const tomorrowText = tomorrow
+      ? ` ${morgenName.charAt(0).toUpperCase() + morgenName.slice(1)}, il fera environ ${Math.round(tomorrow.tempMax)} degrés avec un temps ${label(tomorrow.weatherCode, locale)}.`
+      : "";
+
+    return `Ce ${heute}${part}, il fait ${weatherText} à ${city} avec environ ${temp} degrés, ${windText}. ${rainText} Les rafales peuvent atteindre ${gusts} km/h, le ressenti est donc parfois plus frais que ce qu'indique le thermomètre.${tomorrowText}`;
+  }
+
   const windText = wind >= 35 ? "mit kräftigem Wind" : wind >= 20 ? "mit mäßigem Wind" : "mit wenig Wind";
   const rainText = todayRain >= 5
     ? "Rechne mit nassen Phasen; das ist kein Tag, um weit von einer Jacke entfernt zu sein."
@@ -76,14 +127,15 @@ function quickKarlForecast(weather: WeatherData | undefined, city: string) {
       : "Es bleibt überwiegend trocken, höchstens mit etwas lokalem Spritzer.";
 
   const tomorrowText = tomorrow
-    ? ` ${morgenName} bleibt es um die ${Math.round(tomorrow.tempMax)} Grad mit ${label(tomorrow.weatherCode)}.`
+    ? ` ${morgenName} bleibt es um die ${Math.round(tomorrow.tempMax)} Grad mit ${label(tomorrow.weatherCode, locale)}.`
     : "";
 
-  return `${heute}${part} ist es in ${city} ${weatherText} und etwa ${temp} Grad, ${windText}. ${rainText} Die Windböen erreichen bis zu ${gusts} km/h, also fühlt es sich manchmal frischer an, als das Thermometer vermuten lässt.${tomorrowText}`;
+  return `${heute.charAt(0).toUpperCase() + heute.slice(1)}${part} ist es in ${city} ${weatherText} und etwa ${temp} Grad, ${windText}. ${rainText} Die Windböen erreichen bis zu ${gusts} km/h, also fühlt es sich manchmal frischer an, als das Thermometer vermuten lässt.${tomorrowText}`;
 }
 
-export default function DwdForecastCard({ lat, lon, city, initialWeather }: Props) {
-  const initialForecast = quickKarlForecast(initialWeather, city);
+export default function DwdForecastCard({ lat, lon, city, initialWeather, locale = "de" }: Props) {
+  const isFR = locale === "fr";
+  const initialForecast = quickForecast(initialWeather, city, locale);
   const [forecast, setForecast] = useState<string | null>(initialForecast);
   const [loading, setLoading] = useState(!initialForecast);
   const [enhanced, setEnhanced] = useState(false);
@@ -92,7 +144,9 @@ export default function DwdForecastCard({ lat, lon, city, initialWeather }: Prop
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 4500);
 
-    fetch(`/api/karl-wetterbericht?lat=${lat}&lon=${lon}&city=${encodeURIComponent(city)}`, {
+    const apiRoute = isFR ? "/api/luc-bulletin" : "/api/karl-wetterbericht";
+
+    fetch(`${apiRoute}?lat=${lat}&lon=${lon}&city=${encodeURIComponent(city)}`, {
       signal: controller.signal,
     })
       .then((r) => (r.ok ? r.json() : null))
@@ -108,7 +162,7 @@ export default function DwdForecastCard({ lat, lon, city, initialWeather }: Prop
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [lat, lon, city]);
+  }, [lat, lon, city, isFR]);
 
   if (loading) {
     return (
@@ -127,12 +181,16 @@ export default function DwdForecastCard({ lat, lon, city, initialWeather }: Prop
 
   const paragraphs = forecast.split(/\n+/).map((p) => p.trim()).filter(Boolean);
 
+  const sourceLabel = isFR ? "Météo-France" : "DWD";
+  const personaName = isFR ? "Luc" : "Karl";
+  const bulletinLabel = isFR ? "Bulletin météo" : "Wetterbericht";
+
   return (
     <div className="card p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">
-          Karl · Wetterbericht
+          {personaName} · {bulletinLabel}
         </span>
       </div>
       <div className="space-y-3">
@@ -141,7 +199,10 @@ export default function DwdForecastCard({ lat, lon, city, initialWeather }: Prop
         ))}
       </div>
       <p className="text-[9px] text-slate-400 mt-4">
-        Basiert auf DWD-Wetterbericht · {enhanced ? "KI-Version geladen" : "Schnellversion"} · alle 30 Minuten aktualisiert
+        {isFR 
+          ? `Basé sur les prévisions ${sourceLabel} · ${enhanced ? "Version IA chargée" : "Version rapide"} · mis à jour toutes les 30 minutes`
+          : `Basiert auf ${sourceLabel}-Wetterbericht · ${enhanced ? "KI-Version geladen" : "Schnellversion"} · alle 30 Minuten aktualisiert`
+        }
       </p>
     </div>
   );
