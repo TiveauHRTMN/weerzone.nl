@@ -186,7 +186,9 @@ export async function fetchWeatherData(
     if (!isBot && forceHighRes) {
       fetchPromises.push(
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: SECONDARY_MODEL_BY_LOCALE[locale] }).catch(() => null),
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome_france_hd" }).catch(() => null)
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome_france_hd" }).catch(() => null),
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "ecmwf_ifs0p25" }).catch(() => null),
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "gfs_seamless" }).catch(() => null)
       );
     }
 
@@ -201,6 +203,9 @@ export async function fetchWeatherData(
 
     const secondaryData = (!isBot && forceHighRes ? results[1] : null) || null;
     const aromeData = (!isBot && forceHighRes ? results[2] : null) || null;
+    const ecmwfData = (!isBot && forceHighRes ? results[3] : null) || null;
+    const gfsData = (!isBot && forceHighRes ? results[4] : null) || null;
+
     const harmonieData = locale === "nl" ? coreData : secondaryData;
     const iconData = locale === "de" ? coreData : (locale === "fr" ? secondaryData : null);
     const googleData: any = null;
@@ -237,13 +242,27 @@ export async function fetchWeatherData(
         windSpeed: Math.round(aromeData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
+      const ecmwf = (ecmwfData && Array.isArray(ecmwfData.temperature_2m)) ? {
+        temperature: Math.round(ecmwfData.temperature_2m[i] ?? 0),
+        precipitation: ecmwfData.precipitation?.[i] ?? 0,
+        weatherCode: ecmwfData.weather_code?.[i] ?? 0,
+        windSpeed: Math.round(ecmwfData.wind_speed_10m?.[i] ?? 0)
+      } : undefined;
+
+      const gfs = (gfsData && Array.isArray(gfsData.temperature_2m)) ? {
+        temperature: Math.round(gfsData.temperature_2m[i] ?? 0),
+        precipitation: gfsData.precipitation?.[i] ?? 0,
+        weatherCode: gfsData.weather_code?.[i] ?? 0,
+        windSpeed: Math.round(gfsData.wind_speed_10m?.[i] ?? 0)
+      } : undefined;
+
       const google = googleData ? {
         temperature: Math.round(googleData.temperature[i] ?? 0),
         precipitation: googleData.precipitation[i] ?? 0,
         weatherCode: googleData.weatherCode[i] ?? 0,
         windSpeed: Math.round(googleData.windSpeed[i] ?? 0)
       } : undefined;
-      const leadModelEntry = locale === "de" ? icon : harmonie;
+      const leadModelEntry = locale === "de" ? icon : (locale === "fr" ? arome : harmonie);
 
       // Base values volgen altijd het land-specifieke leidende model.
       const temperature = Math.round(data.hourly.temperature_2m[i] ?? 0);
@@ -260,7 +279,7 @@ export async function fetchWeatherData(
         windSpeed,
         cape: Math.round(data.hourly.cape?.[i] ?? 0),
         confidence: leadModelEntry ? "high" : "medium",
-        models: { harmonie, icon, arome, google }
+        models: { harmonie, icon, arome, ecmwf, gfs, google }
       };
     });
 
@@ -268,7 +287,7 @@ export async function fetchWeatherData(
     let agreement = 100;
     if (harmonieData?.precipitation && iconData?.precipitation && aromeData?.precipitation) {
       // Check for divergence in precipitation in next 12 hours
-      const leadSeries = locale === "de" ? iconData : harmonieData;
+      const leadSeries = locale === "de" ? iconData : (locale === "fr" ? aromeData : harmonieData);
       const secondarySeries = locale === "de" ? harmonieData : iconData;
       const next12Lead = (leadSeries?.precipitation || []).slice(0, 12).reduce((a: number, b: number) => a + b, 0);
       const next12Secondary = (secondarySeries?.precipitation || []).slice(0, 12).reduce((a: number, b: number) => a + b, 0);
