@@ -6,9 +6,11 @@ import { Zap } from "lucide-react";
 interface Props {
   lat: number;
   lon: number;
+  locale?: "nl" | "de";
 }
 
-export default function LightningMap({ lat, lon }: Props) {
+export default function LightningMap({ lat, lon, locale = "nl" }: Props) {
+  const isDE = locale === "de";
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -22,10 +24,10 @@ export default function LightningMap({ lat, lon }: Props) {
       <div className="px-5 pt-5 pb-3 flex items-center justify-between">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5">
-            Actuele ontladingen (LightningMaps netwerk)
+            {isDE ? "Aktuelle Entladungen (LightningMaps Netzwerk)" : "Actuele ontladingen (LightningMaps netwerk)"}
           </p>
           <h3 className="text-sm font-black text-slate-800 leading-none flex items-center gap-2">
-            Live Bliksemradar
+            {isDE ? "Live Blitzradar" : "Live Bliksemradar"}
           </h3>
         </div>
         <div className="flex items-center gap-1.5">

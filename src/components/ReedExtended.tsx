@@ -30,9 +30,10 @@ function getSavedCity(): City | null {
 interface ReedProps {
     initialWeather?: WeatherData | null;
     initialCity?: City;
+    locale?: "nl" | "de";
 }
 
-export default function ReedExtended({ initialWeather, initialCity }: ReedProps) {
+export default function ReedExtended({ initialWeather, initialCity, locale = "nl" }: ReedProps) {
   const [city, setCity] = useState<City>(
     () => initialCity || getSavedCity() || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0]
   );
@@ -154,18 +155,18 @@ export default function ReedExtended({ initialWeather, initialCity }: ReedProps)
         <div className="space-y-6 animate-fade-in mb-6">
           <div className="space-y-3">
             <div className="flex items-end justify-between px-1">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Buien-intensiteit</h3>
-              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Komende 48 uur</span>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">{locale === "de" ? "Niederschlags-Intensität" : "Buien-intensiteit"}</h3>
+              <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{locale === "de" ? "Kommende 48 Stunden" : "Komende 48 uur"}</span>
             </div>
-            <ReflectivityMap hourly={weather.hourly} />
+            <ReflectivityMap hourly={weather.hourly} locale={locale} />
           </div>
           <div className="space-y-3">
-            <div className="flex items-end justify-between px-1"><h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Live Bliksem</h3></div>
-            <LightningMap lat={city.lat} lon={city.lon} />
+            <div className="flex items-end justify-between px-1"><h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">{locale === "de" ? "Live Blitze" : "Live Bliksem"}</h3></div>
+            <LightningMap lat={city.lat} lon={city.lon} locale={locale} />
           </div>
           <div className="space-y-3">
-            <div className="flex items-end justify-between px-1"><h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Regen en windstoten</h3></div>
-            <ReedExtremeCharts hourly={weather.hourly} />
+            <div className="flex items-end justify-between px-1"><h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">{locale === "de" ? "Regen und Windböen" : "Regen en windstoten"}</h3></div>
+            <ReedExtremeCharts hourly={weather.hourly} locale={locale} />
           </div>
         </div>
       )}

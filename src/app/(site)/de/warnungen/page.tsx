@@ -176,7 +176,7 @@ export default async function WarnungenPage() {
             )}
 
             <PremiumGate tierRequired="reed">
-              <ReedExtended initialCity={loc || undefined} />
+              <ReedExtended initialCity={loc || undefined} locale="de" />
             </PremiumGate>
           </div>
         }

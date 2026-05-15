@@ -433,7 +433,7 @@ export default function WeatherDashboard({
         </div>
         {showRainRadar && weather && weather.minutely && weather.minutely.length > 0 && (
           <div className="card p-5 sm:p-6">
-            <RainRadar data={weather.minutely} />
+            <RainRadar data={weather.minutely} locale={locale} />
           </div>
         )}
         {beforeFooter}

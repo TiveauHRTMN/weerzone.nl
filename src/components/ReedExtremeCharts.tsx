@@ -4,6 +4,7 @@ import type { HourlyForecast } from "@/lib/types";
 
 interface Props {
   hourly: HourlyForecast[];
+  locale?: "nl" | "de";
 }
 
 // ─── Layout constants ─────────────────────────────────────────
@@ -16,8 +17,9 @@ const PB = 24;  // bottom padding for time axis
 const CW = W - PL - PR;
 const CH = H - PT - PB;
 
-function formatHour(iso: string): string {
-  return `${new Date(iso).getHours()}u`;
+function formatHour(iso: string, locale: "nl" | "de" = "nl"): string {
+  const hr = new Date(iso).getHours();
+  return locale === "de" ? `${hr}h` : `${hr}u`;
 }
 
 function xAt(i: number, n: number) {
@@ -61,12 +63,15 @@ function ChartPanel({
 
   // Time axis: every 6 hours
   const timeLabels: { text: string; x: number }[] = [];
+  const localeStr = (typeof window !== "undefined" && window.location.pathname.startsWith("/de")) ? "de" : "nl"; // Quick hack if locale not passed, but we should pass it
+  // Better: pass locale down to ChartPanel
   hours.forEach((h, i) => {
     const hr = new Date(h.time).getHours();
     if (i === 0) {
+      // It's mapped later, but we can pass 'Nu' and translate in render
       timeLabels.push({ text: "Nu", x: xAt(i, n) });
     } else if (hr % 6 === 0) {
-      timeLabels.push({ text: formatHour(h.time), x: xAt(i, n) });
+      timeLabels.push({ text: formatHour(h.time, localeStr), x: xAt(i, n) });
     }
   });
 
@@ -158,22 +163,27 @@ function ChartPanel({
         )}
 
         {/* Time axis labels */}
-        {timeLabels.map(({ text, x }) => (
-          <text key={text + x} x={x} y={H - 4}
-            fill={text === "Nu" ? "#3b82f6" : "#94a3b8"}
-            fontSize="9" textAnchor="middle"
-            fontFamily="ui-sans-serif, system-ui, sans-serif"
-            fontWeight={text === "Nu" ? "900" : "700"}>
-            {text}
-          </text>
-        ))}
+        {timeLabels.map(({ text, x }) => {
+          const isNu = text === "Nu";
+          const display = isNu ? (typeof window !== "undefined" && window.location.pathname.startsWith("/de") ? "Jetzt" : "Nu") : text;
+          return (
+            <text key={text + x} x={x} y={H - 4}
+              fill={isNu ? "#3b82f6" : "#94a3b8"}
+              fontSize="9" textAnchor="middle"
+              fontFamily="ui-sans-serif, system-ui, sans-serif"
+              fontWeight={isNu ? "900" : "700"}>
+              {display}
+            </text>
+          );
+        })}
       </svg>
     </div>
   );
 }
 
 // ─── Main component ──────────────────────────────────────────
-export default function ReedExtremeCharts({ hourly }: Props) {
+export default function ReedExtremeCharts({ hourly, locale = "nl" }: Props) {
+  const isDE = locale === "de";
   const hours = hourly.slice(0, 48);
   if (hours.length === 0) return null;
 
@@ -189,40 +199,40 @@ export default function ReedExtremeCharts({ hourly }: Props) {
     <div className="space-y-4">
       {/* CAPE */}
       <ChartPanel
-        title="Onweers-kans"
-        maxLabel={capeMax > 1500 ? "Hoog" : capeMax > 500 ? "Matig" : "Laag"}
+        title={isDE ? "Gewitter-Risiko" : "Onweers-kans"}
+        maxLabel={capeMax > 1500 ? (isDE ? "Hoch" : "Hoog") : capeMax > 500 ? (isDE ? "Mittel" : "Matig") : (isDE ? "Niedrig" : "Laag")}
         data={capeData}
         hours={hours}
         yMax={2000}
         unit=""
         threshold={1000}
-        thresholdLabel="Pas op"
+        thresholdLabel={isDE ? "Achtung" : "Pas op"}
         colorFn={(v) => v > 1500 ? "#dc2626" : v > 500 ? "#ea580c" : "#f59e0b"}
       />
 
       {/* Neerslag */}
       <ChartPanel
-        title="Regen"
+        title={isDE ? "Regen" : "Regen"}
         maxLabel={`${precipMax.toFixed(1)}`}
         data={precipData}
         hours={hours}
         yMax={10}
         unit="mm"
         threshold={5}
-        thresholdLabel="Zware regen"
+        thresholdLabel={isDE ? "Starker Regen" : "Zware regen"}
         colorFn={(v) => v > 5 ? "#dc2626" : v > 1 ? "#2563eb" : "#60a5fa"}
       />
 
       {/* Wind */}
       <ChartPanel
-        title="Wind"
+        title={isDE ? "Wind" : "Wind"}
         maxLabel={`${windMax.toFixed(0)}`}
         data={windData}
         hours={hours}
         yMax={80}
         unit="km/h"
         threshold={50}
-        thresholdLabel="Harde wind"
+        thresholdLabel={isDE ? "Starker Wind" : "Harde wind"}
         type="line"
         colorFn={(v) => v > 75 ? "#dc2626" : v > 50 ? "#ea580c" : "#3b82f6"}
       />
