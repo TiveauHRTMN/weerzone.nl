@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "@/components/NLPulse";
 import DEPulse from "@/components/DEPulse";
@@ -26,45 +26,21 @@ const TIER_LABEL: Record<string, string> = {
   piet: "P", reed: "R", steve: "S", founder: "★",
 };
 
-// SVG Flag Components for maximum reliability across OS/Browsers
+// SVG Flag Components
 const FlagNL = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full">
-    <rect width="640" height="480" fill="#21468b"/>
-    <rect width="640" height="320" fill="#fff"/>
-    <rect width="640" height="160" fill="#ae1c28"/>
-  </svg>
+  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#21468b"/><rect width="640" height="320" fill="#fff"/><rect width="640" height="160" fill="#ae1c28"/></svg>
 );
-
 const FlagBE = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full">
-    <rect width="640" height="480" fill="#ed2939"/>
-    <rect width="426.7" height="480" fill="#fae042"/>
-    <rect width="213.3" height="480" fill="#000"/>
-  </svg>
+  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#ed2939"/><rect width="426.7" height="480" fill="#fae042"/><rect width="213.3" height="480" fill="#000"/></svg>
 );
-
 const FlagDE = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full">
-    <rect width="640" height="480" fill="#ffce00"/>
-    <rect width="640" height="320" fill="#d00"/>
-    <rect width="640" height="160" fill="#000"/>
-  </svg>
+  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#ffce00"/><rect width="640" height="320" fill="#d00"/><rect width="640" height="160" fill="#000"/></svg>
 );
-
 const FlagFR = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full">
-    <rect width="640" height="480" fill="#ed2939"/>
-    <rect width="426.7" height="480" fill="#fff"/>
-    <rect width="213.3" height="480" fill="#002395"/>
-  </svg>
+  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#ed2939"/><rect width="426.7" height="480" fill="#fff"/><rect width="213.3" height="480" fill="#002395"/></svg>
 );
-
 const FlagLU = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full">
-    <rect width="640" height="480" fill="#00a3e0"/>
-    <rect width="640" height="320" fill="#fff"/>
-    <rect width="640" height="160" fill="#ea1423"/>
-  </svg>
+  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#00a3e0"/><rect width="640" height="320" fill="#fff"/><rect width="640" height="160" fill="#ea1423"/></svg>
 );
 
 function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: boolean }) {
@@ -153,7 +129,7 @@ export default function GlobalNav() {
       {isFR ? <FRPulse /> : isDE ? <DEPulse /> : <NLPulse />}
 
       {/* Main Bar */}
-      <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-3 md:gap-4">
+      <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-2 md:gap-4">
         
         {/* Left: Hamburger & Logo */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -172,16 +148,16 @@ export default function GlobalNav() {
 
         <div className="w-px h-6 bg-black/10 hidden sm:block" />
 
-        {/* Middle: Location Button */}
-        <div className="flex-1 min-w-0">
+        {/* Middle: Location Button (Responsive sizing) */}
+        <div className="flex-1 min-w-0 max-w-[200px] sm:max-w-none">
           <LocatieButton 
             locale={locale} 
             active={pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")}
-            className="!h-[36px] !px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest"
+            className="!h-[36px] !px-3 sm:!px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest"
           />
         </div>
 
-        {/* Right: Flags & Actions (Desktop) */}
+        {/* Right: Flags & Actions (Desktop only - 1024px+) */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
           <div className="flex bg-black/5 rounded-lg p-0.5 border border-black/10">
             {flags.map((loc) => {
@@ -236,30 +212,19 @@ export default function GlobalNav() {
           </div>
         </div>
 
-        {/* Flags (Mobile only) */}
-        <div className="flex lg:hidden bg-black/5 rounded-lg p-0.5 border border-black/10 shrink-0">
-             {flags.map((loc) => {
-                const active = (loc.code === 'nl' && !isDE && !isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) || 
-                             (loc.code === 'de' && isDE && !pathname.includes('luxembourg')) || 
-                             (loc.code === 'fr' && isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) ||
-                             (loc.code === 'be' && pathname.includes('wallonie')) ||
-                             (loc.code === 'lu' && pathname.includes('luxembourg'));
-                return (
-                  <Link 
-                    key={loc.code}
-                    href={loc.href} 
-                    className={`w-8 h-7 flex items-center justify-center rounded-md p-1.5 transition-all ${active ? 'bg-white shadow-sm grayscale-0' : 'grayscale opacity-40'}`}
-                  >
-                    <div className="w-full h-full rounded-[1px] overflow-hidden">
-                      {loc.component}
-                    </div>
-                  </Link>
-                );
-            })}
+        {/* Right: Compact Account Icon (Tablet/Mobile only - <1024px) */}
+        <div className="flex lg:hidden shrink-0">
+          <Link 
+            href="/app" 
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/5 border border-transparent hover:bg-black/10 transition-all"
+            aria-label="Account"
+          >
+            <User className="w-5 h-5 text-[#0f1a2c]" />
+          </Link>
         </div>
       </div>
 
-      {/* Unified Hamburger Menu Overlay (Now matching Nav color) */}
+      {/* Unified Hamburger Menu Overlay */}
       {open && (
         <div
           className="absolute top-full left-0 right-0 shadow-2xl border-t border-black/5 z-50 animate-in slide-in-from-top duration-200"
@@ -267,8 +232,29 @@ export default function GlobalNav() {
         >
           <div className="max-w-[1200px] mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            {/* Column 1: Main Pages */}
+            {/* Column 1: Main Pages & Flags (Flags moved here for mobile/tablet) */}
             <div>
+              <div className="flex lg:hidden bg-black/5 rounded-xl p-1 border border-black/10 mb-6 justify-between">
+                {flags.map((loc) => {
+                    const active = (loc.code === 'nl' && !isDE && !isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) || 
+                                 (loc.code === 'de' && isDE && !pathname.includes('luxembourg')) || 
+                                 (loc.code === 'fr' && isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) ||
+                                 (loc.code === 'be' && pathname.includes('wallonie')) ||
+                                 (loc.code === 'lu' && pathname.includes('luxembourg'));
+                    return (
+                      <Link 
+                        key={loc.code}
+                        href={loc.href} 
+                        className={`flex-1 h-10 flex items-center justify-center rounded-lg transition-all ${active ? 'bg-white shadow-sm grayscale-0' : 'grayscale opacity-40 hover:opacity-100 hover:grayscale-0'}`}
+                      >
+                        <div className="w-6 h-5 rounded-[1px] overflow-hidden">
+                          {loc.component}
+                        </div>
+                      </Link>
+                    );
+                })}
+              </div>
+
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">Menu</p>
               <nav className="grid gap-1">
                 {links.map(l => {
@@ -289,7 +275,6 @@ export default function GlobalNav() {
                     </Link>
                   );
                 })}
-                {/* Brand support links moved here */}
                 <div className="h-px bg-black/5 my-2 mx-4" />
                 <Link 
                   href={isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over"} 
@@ -308,10 +293,10 @@ export default function GlobalNav() {
               </nav>
             </div>
 
-            {/* Column 2: Account Actions */}
+            {/* Column 2: Account Actions (Shown in menu for mobile/tablet) */}
             <div className="lg:hidden">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">Compte</p>
-              <div className="grid gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {user ? (
                   <>
                     <Link href="/app" onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
@@ -332,10 +317,10 @@ export default function GlobalNav() {
                 ) : (
                   <>
                     <Link href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
-                      {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                      {isFR ? "Connexion" : isDE ? "Login" : "Inloggen"}
                     </Link>
                     <Link href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
-                      {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                      {isFR ? "S'inscrire" : isDE ? "Starten" : "Aanmelden"}
                     </Link>
                   </>
                 )}
