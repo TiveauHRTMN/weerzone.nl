@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "@/components/NLPulse";
 import DEPulse from "@/components/DEPulse";
@@ -129,7 +129,7 @@ export default function GlobalNav() {
       {isFR ? <FRPulse /> : isDE ? <DEPulse /> : <NLPulse />}
 
       {/* Main Bar */}
-      <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-2 md:gap-4">
+      <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-3 md:gap-4">
         
         {/* Left: Hamburger & Logo */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -148,12 +148,12 @@ export default function GlobalNav() {
 
         <div className="w-px h-6 bg-black/10 hidden sm:block" />
 
-        {/* Middle: Location Button (Responsive sizing) */}
-        <div className="flex-1 min-w-0 max-w-[200px] sm:max-w-none">
+        {/* Right: Location Button (Now stretched to fill remaining space on mobile) */}
+        <div className="flex-1 min-w-0 flex justify-end lg:justify-start">
           <LocatieButton 
             locale={locale} 
             active={pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")}
-            className="!h-[36px] !px-3 sm:!px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest"
+            className="!h-[36px] !px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest"
           />
         </div>
 
@@ -211,17 +211,6 @@ export default function GlobalNav() {
             )}
           </div>
         </div>
-
-        {/* Right: Compact Account Icon (Tablet/Mobile only - <1024px) */}
-        <div className="flex lg:hidden shrink-0">
-          <Link 
-            href="/app" 
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/5 border border-transparent hover:bg-black/10 transition-all"
-            aria-label="Account"
-          >
-            <User className="w-5 h-5 text-[#0f1a2c]" />
-          </Link>
-        </div>
       </div>
 
       {/* Unified Hamburger Menu Overlay */}
@@ -275,6 +264,7 @@ export default function GlobalNav() {
                     </Link>
                   );
                 })}
+                {/* Brand support links */}
                 <div className="h-px bg-black/5 my-2 mx-4" />
                 <Link 
                   href={isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over"} 
@@ -317,10 +307,10 @@ export default function GlobalNav() {
                 ) : (
                   <>
                     <Link href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
-                      {isFR ? "Connexion" : isDE ? "Login" : "Inloggen"}
+                      {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
                     </Link>
                     <Link href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
-                      {isFR ? "S'inscrire" : isDE ? "Starten" : "Aanmelden"}
+                      {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
                     </Link>
                   </>
                 )}
