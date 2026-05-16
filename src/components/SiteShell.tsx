@@ -8,6 +8,10 @@ import GlobalPersonaModal from "@/components/GlobalPersonaModal";
 import AffiliateBanner from "@/components/AffiliateBanner";
 import GlobalNav from "@/components/wz/GlobalNav";
 import Footer from "@/components/Footer";
+import MobilePageSwipe from "@/components/MobilePageSwipe";
+import WeatherScenarioToggle from "@/components/WeatherScenarioToggle";
+import CalendarEventOverlay from "@/components/CalendarEventOverlay";
+import CalendarEventToggle from "@/components/CalendarEventToggle";
 import Script from "next/script";
 import { detectLocale, type Locale } from "@/config/locales";
 
@@ -49,12 +53,16 @@ export default function SiteShell({
       )}
 
       <GlobalNav />
+      <MobilePageSwipe />
       <div className="min-h-[60vh]">{children}</div>
       <Footer />
+      <CalendarEventOverlay />
       <CookieBanner />
       <InstallPrompt />
       <FounderBanner />
       <GlobalPersonaModal />
+      <WeatherScenarioToggle />
+      <CalendarEventToggle />
     </>
   );
 }

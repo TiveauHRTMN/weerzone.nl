@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Info, Sparkles, Heart } from "lucide-react";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
@@ -126,43 +127,49 @@ export default async function OverPage() {
         initialWeather={initialWeather}
         beforeFooter={
           <div className="space-y-6">
-            <div className="card p-6 sm:p-8">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-3 h-3 rounded-full bg-sky-500" />
-                <span className="text-xs font-black uppercase tracking-widest text-sky-600">
+            <div className="card p-8 sm:p-12 lg:p-14">
+              <div className="flex items-center gap-2 mb-6">
+                <Info className="w-3.5 h-3.5 text-slate-400" strokeWidth={2.25} aria-hidden />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
                   Over · Weerzone
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-tight mb-2">
-                Weerzone maakt weer bruikbaar.
+              <h1 className="text-[40px] sm:text-[56px] font-black text-slate-900 leading-[1.04] tracking-[-0.025em] mb-6">
+                Weerzone maakt<br />weer bruikbaar.
               </h1>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-lg sm:text-xl text-slate-500 leading-[1.55] max-w-[34rem]">
                 WEERZONE is gebouwd voor mensen die iets met het weer moeten beslissen. Niet om eindeloos te scrollen door
                 lange verwachtingen, maar om te weten wat er vandaag en morgen op jouw plek gebeurt.
               </p>
             </div>
 
-            <div className="card p-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2">
-                Waar we voor staan
-              </p>
-              <p className="text-slate-900 font-black text-lg mb-2">
+            <div className="card p-6 sm:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-3.5 h-3.5 text-slate-400" strokeWidth={2.25} aria-hidden />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  Waar we voor staan
+                </span>
+              </div>
+              <p className="text-slate-900 font-black text-xl sm:text-2xl tracking-tight mb-3">
                 Hyperlokaal, kort op de bal en bruikbaar.
               </p>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-[15px] sm:text-base text-slate-600 leading-[1.6] max-w-[34rem]">
                 WEERZONE focust op de komende 48 uur, omdat dat de periode is waarin weersverwachtingen het meest bruikbaar
                 zijn voor planning per uur. Verder vooruit kan richting geven, maar is minder geschikt voor concrete keuzes.
               </p>
             </div>
 
-            <div className="card p-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2">
-                Onze filosofie
-              </p>
-              <p className="text-slate-900 font-black text-lg mb-2">
+            <div className="card p-6 sm:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Heart className="w-3.5 h-3.5 text-slate-400" strokeWidth={2.25} aria-hidden />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  Onze filosofie
+                </span>
+              </div>
+              <p className="text-slate-900 font-black text-xl sm:text-2xl tracking-tight mb-3">
                 Eerlijke data, zonder poespas.
               </p>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-[15px] sm:text-base text-slate-600 leading-[1.6] max-w-[34rem]">
                 WEERZONE gebruikt de meest nauwkeurige bronnen om temperatuur, regen, wind en risico&apos;s zo
                 relevant mogelijk per locatie te tonen. Daarna vertalen we dat naar momenten en gevolgen: kun je droog
                 fietsen, buiten werken, of moet je rekening houden met een omslag in het weer.
@@ -218,28 +225,18 @@ export default async function OverPage() {
               </div>
             </div>
 
-            <div className="card p-6 text-center">
-              <p className="text-slate-900 font-black text-lg mb-2">Meer weten of beginnen?</p>
-              <p className="text-sm text-slate-600 leading-relaxed mb-5">
+            <div className="card p-6 sm:p-8 text-center">
+              <p className="text-slate-900 font-black text-xl sm:text-2xl tracking-tight mb-3">
+                Meer weten of beginnen?
+              </p>
+              <p className="text-[15px] text-slate-600 leading-[1.6] max-w-[28rem] mx-auto mb-6">
                 Bekijk het actuele weer, lees meer over de abonnementen of stuur direct een bericht naar info@weerzone.nl.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/"
-                  className="px-6 py-3 rounded-2xl text-white font-black text-sm transition-opacity hover:opacity-90"
-                  style={{ background: "var(--wz-brand)" }}
-                >
+                <Link href="/" className="btn btn-primary btn-lg">
                   Naar homepage
                 </Link>
-                <Link
-                  href="/prijzen"
-                  className="px-6 py-3 rounded-2xl text-text-primary font-black text-sm transition-all hover:brightness-95"
-                  style={{
-                    background: "rgba(255,255,255,0.6)",
-                    border: "1px solid rgba(255,255,255,0.8)",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-                  }}
-                >
+                <Link href="/prijzen" className="btn btn-ghost btn-lg">
                   Bekijk prijzen
                 </Link>
               </div>

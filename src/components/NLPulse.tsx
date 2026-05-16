@@ -41,13 +41,18 @@ export default function NLPulse() {
   return (
     <div
       className="relative overflow-hidden h-9 flex items-center border-b"
-      style={{ borderColor: "var(--wz-border)", background: "var(--ink-050)" }}
+      style={{
+        borderColor: "rgba(15,26,44,0.06)",
+        background: "#ffffff",
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 2px rgba(15,26,44,0.04), 0 2px 6px rgba(15,26,44,0.03)",
+      }}
     >
       {/* Live label */}
       <div
         className="absolute left-0 top-0 bottom-0 z-20 flex items-center gap-1.5 px-3 pr-5"
         style={{
-          background: "linear-gradient(to right, var(--ink-050) 80%, transparent)",
+          background: "linear-gradient(to right, #ffffff 75%, transparent)",
           pointerEvents: "none",
         }}
       >
@@ -92,7 +97,7 @@ export default function NLPulse() {
       {/* Right fade */}
       <div
         className="absolute right-0 top-0 bottom-0 z-10 w-12 pointer-events-none"
-        style={{ background: "linear-gradient(to left, var(--ink-050), transparent)" }}
+        style={{ background: "linear-gradient(to left, #ffffff, transparent)" }}
       />
 
       <style>{`

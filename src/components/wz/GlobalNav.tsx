@@ -113,16 +113,21 @@ export default function GlobalNav() {
     { code: 'lu', component: <FlagLU />, label: 'LU', href: '/fr/meteo/luxembourg' }
   ];
 
-  const headerBg = "linear-gradient(160deg, #ffe874 0%, #ffd21a 50%, #e8ba00 100%)";
+  // Puur WEERZONE-zon gradient: lichter top → kern → diepere onderkant.
+  // Radiale sheen bovenaan voor frosted-glow effect. Geen brushed lijnen.
+  const headerBg =
+    "radial-gradient(ellipse at top, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 40%, transparent 65%)," +
+    "linear-gradient(180deg, #ffe060 0%, #ffd21a 55%, #f5c500 100%)";
+  const headerOverlayBg = "linear-gradient(180deg, #ffd21a 0%, #f0c500 100%)";
 
   return (
     <header
       className="sticky top-0 z-50"
       style={{
         background: headerBg,
-        borderBottom: "1px solid rgba(160,110,0,0.22)",
+        borderBottom: "1px solid rgba(180,130,0,0.25)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.07)",
+          "inset 0 1px 0 rgba(255,255,255,0.75), inset 0 -1px 0 rgba(160,110,0,0.10), 0 1px 2px rgba(160,110,0,0.10), 0 8px 24px rgba(160,110,0,0.12)",
         color: "#0f1a2c",
       }}
     >
@@ -218,8 +223,10 @@ export default function GlobalNav() {
       {/* Unified Hamburger Menu Overlay */}
       {open && (
         <div
-          className="absolute top-full left-0 right-0 shadow-2xl border-t border-black/5 z-50 animate-in slide-in-from-top duration-200"
-          style={{ background: headerBg, backdropFilter: "blur(20px)" }}
+          className="absolute top-full left-0 right-0 shadow-2xl border-t border-white/30 z-50 animate-in slide-in-from-top duration-200"
+          style={{
+            background: headerOverlayBg,
+          }}
         >
           <div className="max-w-[1200px] mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             

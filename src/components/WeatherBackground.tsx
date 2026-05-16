@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { resolveWxScenario, WX_QUERY_KEY } from "@/lib/wx-scenarios";
 
 interface Props {
   weatherCode: number;
@@ -9,14 +11,20 @@ interface Props {
 }
 
 function getWeatherTheme(code: number, isDay: boolean) {
+  // Custom WMO+ codes voor luchtkwaliteit/stof
+  if (code === 200) return { bg1: "#9c8c7c", bg2: "#bba898" }; // Smog
+  if (code === 201) return { bg1: "#d99c4a", bg2: "#f0c890" }; // Sahara-zand
+
   if (!isDay) {
     if (code === 0) return { bg1: "#0b1026", bg2: "#162050" };
+    if (code === 1) return { bg1: "#0d1530", bg2: "#1a2658" };
     if (code >= 95) return { bg1: "#10141e", bg2: "#1e2438" };
     return { bg1: "#0f1828", bg2: "#1e3048" };
   }
   if (code === 0) return { bg1: "#3a9ae8", bg2: "#7ec4f6" };
-  if (code <= 2) return { bg1: "#5aa8e0", bg2: "#94c8ec" };
-  if (code === 3) return { bg1: "#7898ae", bg2: "#a0b8c8" };
+  if (code === 1) return { bg1: "#4ca0e0", bg2: "#86c2ec" }; // mainly clear
+  if (code === 2) return { bg1: "#5aa8e0", bg2: "#94c8ec" }; // partly cloudy
+  if (code === 3) return { bg1: "#7898ae", bg2: "#a0b8c8" }; // overcast
   if (code <= 48) return { bg1: "#8898a5", bg2: "#b0bec5" };
   if (code <= 57) return { bg1: "#607888", bg2: "#8098a8" };
   if (code <= 67) return { bg1: "#4a6474", bg2: "#6a8898" };
@@ -31,23 +39,37 @@ export { getWeatherTheme };
 
 export default function WeatherBackground({ weatherCode, isDay }: Props) {
   const [mounted, setMounted] = useState(false);
-  const theme = getWeatherTheme(weatherCode, isDay);
+  const searchParams = useSearchParams();
+
+  // Dev-override: ?wx=<scenario> forceert een weersituatie voor visuele tests.
+  const override = resolveWxScenario(searchParams?.get(WX_QUERY_KEY));
+  const effectiveCode = override ? override.code : weatherCode;
+  const effectiveIsDay = override ? override.isDay : isDay;
+
+  const theme = getWeatherTheme(effectiveCode, effectiveIsDay);
 
   useEffect(() => setMounted(true), []);
 
-  const showClouds = weatherCode >= 1 && weatherCode <= 86;
+  const showClouds = effectiveCode >= 1 && effectiveCode <= 86;
   const showRain =
-    (weatherCode >= 51 && weatherCode <= 67) ||
-    (weatherCode >= 80 && weatherCode <= 82) ||
-    weatherCode >= 95;
-  const showHeavyRain = weatherCode >= 63 && weatherCode <= 67;
-  const showSnow = weatherCode >= 71 && weatherCode <= 77;
-  const showStorm = weatherCode >= 95;
-  const showSun = weatherCode === 0 && isDay;
-  const showMoon = weatherCode <= 2 && !isDay; 
-  const showStars = !isDay && weatherCode <= 2; 
+    (effectiveCode >= 51 && effectiveCode <= 67) ||
+    (effectiveCode >= 80 && effectiveCode <= 82) ||
+    effectiveCode >= 95;
+  const showHeavyRain = effectiveCode >= 63 && effectiveCode <= 67;
+  const showSnow = effectiveCode >= 71 && effectiveCode <= 77;
+  const showStorm = effectiveCode >= 95;
+  const showSun = effectiveCode === 0 && effectiveIsDay;
+  const showMoon = effectiveCode <= 2 && !effectiveIsDay;
+  const showStars = !effectiveIsDay && effectiveCode <= 2;
+  const showMist = effectiveCode >= 45 && effectiveCode <= 48;
+  const showSmog = effectiveCode === 200;
+  const showSaharaDust = effectiveCode === 201;
 
-  const cloudCount = weatherCode <= 2 ? 2 : weatherCode === 3 ? 4 : 3;
+  const cloudCount =
+    effectiveCode === 1 ? 1 :
+    effectiveCode === 2 ? 2 :
+    effectiveCode === 3 ? 4 :
+    3;
 
   const rainDrops = useMemo(
     () =>
@@ -85,6 +107,32 @@ export default function WeatherBackground({ weatherCode, isDay }: Props) {
     []
   );
 
+  const mistBlobs = useMemo(
+    () =>
+      Array.from({ length: 6 }, (_, i) => ({
+        id: i,
+        left: (i * 19) % 100,
+        top: 8 + (i * 14) % 70,
+        width: 220 + (i * 50) % 180,
+        height: 110 + (i * 30) % 100,
+        duration: 22 + (i * 5) % 18,
+        delay: -(i * 4),
+      })),
+    []
+  );
+
+  const dustParticles = useMemo(
+    () =>
+      Array.from({ length: 36 }, (_, i) => ({
+        id: i,
+        top: (i * 13.3) % 100,
+        delay: -(i * 0.7),
+        duration: 24 + (i * 1.4) % 18,
+        size: 3 + (i * 0.45) % 5,
+      })),
+    []
+  );
+
   return (
     <>
       <motion.div
@@ -95,19 +143,92 @@ export default function WeatherBackground({ weatherCode, isDay }: Props) {
         style={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
       />
 
+      {/* Atmospheric haze — subtiele radial sheen voor depth */}
+      <div className="ambient-haze" aria-hidden />
+
       <div className="fixed inset-0 z-[1] overflow-hidden pointer-events-none">
         <AnimatePresence>
           {showSun && (
-            <motion.div 
+            <motion.div
               key="sun"
-              initial={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 2, ease: "easeOut" }}
               className="sun-glow"
-              style={{ opacity: 1, transform: 'scale(1)' }}
             >
+              <div className="sun-rays" aria-hidden />
               <div className="sun-core" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showSmog && (
+            <motion.div
+              key="smog"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2 }}
+              className="smog-haze"
+              aria-hidden
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showSaharaDust && (
+            <motion.div
+              key="sahara"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2 }}
+              className="absolute inset-0"
+            >
+              <div className="sahara-overlay" aria-hidden />
+              {dustParticles.map((d) => (
+                <div
+                  key={d.id}
+                  className="dust-particle"
+                  style={{
+                    top: `${d.top}%`,
+                    width: d.size,
+                    height: d.size,
+                    animationDuration: `${d.duration}s`,
+                    animationDelay: `${d.delay}s`,
+                  }}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showMist && (
+            <motion.div
+              key="mist"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2.5 }}
+              className="absolute inset-0"
+            >
+              {mistBlobs.map((m) => (
+                <div
+                  key={m.id}
+                  className="mist-blob"
+                  style={{
+                    left: `${m.left}%`,
+                    top: `${m.top}%`,
+                    width: m.width,
+                    height: m.height,
+                    animationDuration: `${m.duration}s`,
+                    animationDelay: `${m.delay}s`,
+                  }}
+                />
+              ))}
             </motion.div>
           )}
         </AnimatePresence>
@@ -176,7 +297,7 @@ export default function WeatherBackground({ weatherCode, isDay }: Props) {
                   key={i}
                   className={`cloud-shape cloud-${i + 1}`}
                   style={{
-                    opacity: weatherCode <= 2 ? 0.2 : weatherCode === 3 ? 0.35 : 0.25,
+                    opacity: effectiveCode <= 2 ? 0.2 : effectiveCode === 3 ? 0.35 : 0.25,
                   }}
                 />
               ))}
@@ -215,12 +336,12 @@ export default function WeatherBackground({ weatherCode, isDay }: Props) {
           {showSnow && (
             <motion.div
               key="snow"
-              initial={{ opacity: 1 }}
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 2 }}
-              style={{ opacity: 1 }}
             >
+              <div className="frost-edge" aria-hidden />
               {snowFlakes.map((s) => (
                 <div
                   key={s.id}
@@ -241,20 +362,44 @@ export default function WeatherBackground({ weatherCode, isDay }: Props) {
         <AnimatePresence>
           {showStorm && (
             <motion.div
-              key="lightning"
-              className="absolute inset-0 bg-white z-50 mix-blend-overlay"
+              key="storm-flash-and-bolts"
               initial={{ opacity: 0 }}
-              animate={{ 
-                opacity: [0, 1, 0, 0.8, 0, 0, 0, 0, 0, 0] 
-              }}
-              transition={{ 
-                duration: 6,
-                repeat: Infinity,
-                repeatType: "loop",
-                ease: "linear",
-                times: [0, 0.02, 0.04, 0.06, 0.1, 0.3, 0.5, 0.7, 0.9, 1] 
-              }}
-            />
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+            >
+              {/* Ambient bliksemflits — full-screen */}
+              <motion.div
+                className="absolute inset-0 bg-white z-40 mix-blend-overlay pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0, 0.8, 0, 0, 0, 0, 0, 0] }}
+                transition={{
+                  duration: 7.2,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  ease: "linear",
+                  times: [0, 0.006, 0.015, 0.023, 0.031, 0.3, 0.5, 0.7, 0.9, 1],
+                }}
+              />
+
+              {/* Zigzag bliksem-bolts — 3 instanties, staggered */}
+              {[1, 2, 3].map((i) => (
+                <svg
+                  key={`bolt-${i}`}
+                  className={`lightning-bolt lightning-bolt-${i}`}
+                  width="42"
+                  height="140"
+                  viewBox="0 0 42 140"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="M24 0 L8 58 L20 58 L4 140 L30 70 L20 70 L26 0 Z"
+                    fill="#ffffff"
+                  />
+                </svg>
+              ))}
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
