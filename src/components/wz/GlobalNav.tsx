@@ -248,7 +248,11 @@ export default function GlobalNav() {
 
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">Menu</p>
               <nav className="grid gap-1">
-                {links.map(l => {
+                {[
+                  ...links,
+                  { key: "a-propos", label: isFR ? "À Propos" : isDE ? "Über uns" : "Over ons", href: isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over" },
+                  { key: "contact", label: "Contact", href: isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact" }
+                ].map(l => {
                   const active = isActive(l.href, l.key);
                   return (
                     <Link
@@ -266,22 +270,6 @@ export default function GlobalNav() {
                     </Link>
                   );
                 })}
-                <Link 
-                  href={isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over"} 
-                  onClick={() => setOpen(false)}
-                  className="px-4 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all flex items-center justify-between group text-[#0f1a2c] hover:bg-[#3b7ff0/5]"
-                >
-                  <span>{isFR ? "À Propos" : isDE ? "Über uns" : "Over ons"}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0f1a2c] transition-transform scale-0 group-hover:scale-50" />
-                </Link>
-                <Link 
-                  href={isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact"} 
-                  onClick={() => setOpen(false)}
-                  className="px-4 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all flex items-center justify-between group text-[#0f1a2c] hover:bg-[#3b7ff0/5]"
-                >
-                  <span>Contact</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0f1a2c] transition-transform scale-0 group-hover:scale-50" />
-                </Link>
               </nav>
             </div>
 
