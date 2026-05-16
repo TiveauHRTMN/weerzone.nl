@@ -25,6 +25,13 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "https://weerzone.nl",
+    languages: {
+      "nl-NL": "https://weerzone.nl",
+      "nl-BE": "https://weerzone.nl",
+      "de-DE": "https://weerzone.nl/de",
+      "fr-FR": "https://weerzone.nl/fr",
+      "x-default": "https://weerzone.nl",
+    },
   },
   openGraph: {
     title: "WEERZONE - Hyperlokaal weer voor vandaag en morgen",

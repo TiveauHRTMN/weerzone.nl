@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     canonical: "https://weerzone.nl/fr",
     languages: {
       "nl-NL": "https://weerzone.nl",
+      "nl-BE": "https://weerzone.nl",
       "de-DE": "https://weerzone.nl/de",
       "fr-FR": "https://weerzone.nl/fr",
       "x-default": "https://weerzone.nl",
