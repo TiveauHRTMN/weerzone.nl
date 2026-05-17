@@ -316,7 +316,7 @@ export default function WeatherDashboard({
               {/* TAGLINE */}
               <div className="text-center py-6 sm:py-10">
                 <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-3" style={{
-                  background: "linear-gradient(135deg, #ff8400 0%, #6d28d9 100%)",
+                  background: "linear-gradient(135deg, #ff8400 0%, #cbd5e1 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",

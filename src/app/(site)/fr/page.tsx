@@ -129,7 +129,7 @@ export default async function FranceHomepage() {
                     <h2
                       className="text-4xl sm:text-5xl font-black leading-tight mb-5"
                       style={{
-                        background: "linear-gradient(135deg, #ff8400 0%, #6d28d9 100%)",
+                        background: "linear-gradient(135deg, #ff8400 0%, #cbd5e1 100%)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -232,7 +232,7 @@ export default async function FranceHomepage() {
                   <h2
                     className="text-3xl sm:text-5xl font-black leading-[1.05] mb-5"
                     style={{
-                      background: "linear-gradient(135deg, #ff8400 0%, #6d28d9 100%)",
+                      background: "linear-gradient(135deg, #ff8400 0%, #cbd5e1 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
