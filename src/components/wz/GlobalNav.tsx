@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Globe2, Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "@/components/NLPulse";
 import DEPulse from "@/components/DEPulse";
@@ -25,23 +25,6 @@ const TIER_COLOR: Record<string, string> = {
 const TIER_LABEL: Record<string, string> = {
   piet: "P", reed: "R", steve: "S", founder: "★",
 };
-
-// SVG Flag Components
-const FlagNL = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#21468b"/><rect width="640" height="320" fill="#fff"/><rect width="640" height="160" fill="#ae1c28"/></svg>
-);
-const FlagBE = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#ed2939"/><rect width="426.7" height="480" fill="#fae042"/><rect width="213.3" height="480" fill="#000"/></svg>
-);
-const FlagDE = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#ffce00"/><rect width="640" height="320" fill="#d00"/><rect width="640" height="160" fill="#000"/></svg>
-);
-const FlagFR = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#ed2939"/><rect width="426.7" height="480" fill="#fff"/><rect width="213.3" height="480" fill="#002395"/></svg>
-);
-const FlagLU = () => (
-  <svg viewBox="0 0 640 480" className="w-full h-full"><rect width="640" height="480" fill="#00a3e0"/><rect width="640" height="320" fill="#fff"/><rect width="640" height="160" fill="#ea1423"/></svg>
-);
 
 function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: boolean }) {
   const key = isFounder ? "founder" : (tier ?? null);
@@ -72,6 +55,90 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
 
 const HIDDEN_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", "/auth"];
 
+const COUNTRIES = [
+  { code: "nl", label: "NL", href: "/" },
+  { code: "be", label: "BE", href: "/weer/wallonie" },
+  { code: "de", label: "DE", href: "/de" },
+  { code: "fr", label: "FR", href: "/fr" },
+  { code: "lu", label: "LU", href: "/fr/meteo/luxembourg" },
+  { code: "es", label: "ES", href: "/es" },
+] as const;
+
+function activeCountry(pathname: string, locale: Locale) {
+  if (pathname.includes("luxembourg")) return "lu";
+  if (pathname.includes("wallonie")) return "be";
+  if (locale === "de") return "de";
+  if (locale === "fr") return "fr";
+  if (locale === "es") return "es";
+  return "nl";
+}
+
+function CountryDropdown({
+  value,
+  onNavigate,
+  compact = false,
+}: {
+  value: string;
+  onNavigate?: () => void;
+  compact?: boolean;
+}) {
+  const [countryOpen, setCountryOpen] = useState(false);
+  const selected = COUNTRIES.find((country) => country.code === value) ?? COUNTRIES[0];
+
+  return (
+    <div className={`relative ${compact ? "w-full" : "w-[112px]"}`}>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={countryOpen}
+        onClick={() => setCountryOpen((current) => !current)}
+        className="flex w-full items-center justify-between rounded-xl px-3 text-[10px] font-black uppercase tracking-widest text-[#0f1a2c] shadow-sm transition-all active:scale-95"
+        style={{
+          height: BTN_H,
+          background: "linear-gradient(180deg, #ffe060 0%, #ffd21a 100%)",
+          border: "1px solid rgba(180,130,0,0.35)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 2px rgba(160,110,0,0.15)",
+        }}
+      >
+        <span className="flex items-center gap-2">
+          <Globe2 className="h-3.5 w-3.5 text-black/55" />
+          {selected.label}
+        </span>
+        <ChevronDown className="h-3.5 w-3.5 text-black/55" />
+      </button>
+
+      {countryOpen && (
+        <div
+          role="listbox"
+          className="absolute right-0 top-[calc(100%+6px)] z-[70] w-full min-w-[112px] overflow-hidden rounded-xl shadow-xl"
+          style={{
+            background: "linear-gradient(180deg, #ffd21a 0%, #f0c500 100%)",
+            border: "1px solid rgba(180,130,0,0.35)",
+          }}
+        >
+          {COUNTRIES.map((country) => (
+            <button
+              key={country.code}
+              type="button"
+              role="option"
+              aria-selected={country.code === value}
+              onClick={() => {
+                setCountryOpen(false);
+                onNavigate?.();
+                window.location.href = country.href;
+              }}
+              className="flex h-9 w-full items-center px-4 text-left text-[10px] font-black uppercase tracking-widest text-[#0f1a2c] transition-colors hover:bg-black/10"
+              style={{ background: country.code === value ? "rgba(0,0,0,0.12)" : undefined }}
+            >
+              {country.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function GlobalNav() {
   const pathname = usePathname() ?? "/";
   const { user, tier, isFounder } = useSession();
@@ -89,6 +156,7 @@ export default function GlobalNav() {
   const homeHref = localeConfig.routes.home;
   const isDE = locale === "de";
   const isFR = locale === "fr";
+  const country = activeCountry(pathname, locale);
 
   function isActive(linkHref: string, key: string) {
     if (key === "piet" || key === "mein-wetter" || key === "ma-meteo") {
@@ -104,14 +172,6 @@ export default function GlobalNav() {
   }
 
   const actionBtnClass = "inline-flex items-center justify-center px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap min-w-[100px]";
-
-  const flags = [
-    { code: 'nl', component: <FlagNL />, label: 'NL', href: '/' },
-    { code: 'be', component: <FlagBE />, label: 'BE', href: '/weer/wallonie' },
-    { code: 'de', component: <FlagDE />, label: 'DE', href: '/de' },
-    { code: 'fr', component: <FlagFR />, label: 'FR', href: '/fr' },
-    { code: 'lu', component: <FlagLU />, label: 'LU', href: '/fr/meteo/luxembourg' }
-  ];
 
   // Puur WEERZONE-zon gradient: lichter top → kern → diepere onderkant.
   // Radiale sheen bovenaan voor frosted-glow effect. Geen brushed lijnen.
@@ -166,27 +226,7 @@ export default function GlobalNav() {
 
         {/* Right: Flags & Actions (Desktop only - 1024px+) */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
-          <div className="flex bg-black/5 rounded-lg p-0.5 border border-black/10">
-            {flags.map((loc) => {
-                const active = (loc.code === 'nl' && !isDE && !isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) || 
-                             (loc.code === 'de' && isDE && !pathname.includes('luxembourg')) || 
-                             (loc.code === 'fr' && isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) ||
-                             (loc.code === 'be' && pathname.includes('wallonie')) ||
-                             (loc.code === 'lu' && pathname.includes('luxembourg'));
-                return (
-                  <Link 
-                    key={loc.code}
-                    href={loc.href} 
-                    className={`w-9 h-8 flex items-center justify-center rounded-md p-1.5 transition-all ${active ? 'bg-white shadow-sm grayscale-0' : 'grayscale opacity-50 hover:opacity-100 hover:grayscale-0'}`}
-                    title={loc.label}
-                  >
-                    <div className="w-full h-full rounded-[1px] overflow-hidden">
-                      {loc.component}
-                    </div>
-                  </Link>
-                );
-            })}
-          </div>
+          <CountryDropdown value={country} />
 
           <div className="flex items-center gap-2">
             {user ? (
@@ -232,25 +272,8 @@ export default function GlobalNav() {
             
             {/* Column 1: Main Pages & Flags (Flags moved here for mobile/tablet) */}
             <div>
-              <div className="flex lg:hidden bg-black/5 rounded-xl p-1 border border-black/10 mb-6 justify-between">
-                {flags.map((loc) => {
-                    const active = (loc.code === 'nl' && !isDE && !isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) || 
-                                 (loc.code === 'de' && isDE && !pathname.includes('luxembourg')) || 
-                                 (loc.code === 'fr' && isFR && !pathname.includes('wallonie') && !pathname.includes('luxembourg')) ||
-                                 (loc.code === 'be' && pathname.includes('wallonie')) ||
-                                 (loc.code === 'lu' && pathname.includes('luxembourg'));
-                    return (
-                      <Link 
-                        key={loc.code}
-                        href={loc.href} 
-                        className={`flex-1 h-10 flex items-center justify-center rounded-lg transition-all ${active ? 'bg-white shadow-sm grayscale-0' : 'grayscale opacity-40 hover:opacity-100 hover:grayscale-0'}`}
-                      >
-                        <div className="w-6 h-5 rounded-[1px] overflow-hidden">
-                          {loc.component}
-                        </div>
-                      </Link>
-                    );
-                })}
+              <div className="lg:hidden mb-6">
+                <CountryDropdown value={country} compact onNavigate={() => setOpen(false)} />
               </div>
 
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">Menu</p>
