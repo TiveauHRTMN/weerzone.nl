@@ -26,7 +26,8 @@ import Footer from "./Footer";
 import WeatherAdvice from "./WeatherAdvice";
 import dynamic from "next/dynamic";
 import WeatherBackground from "./WeatherBackground";
-import { getKarlWeatherVerdict } from "@/app/actions";
+import { getKarlWeatherVerdict, getLucWeatherVerdict, getJuanWeatherVerdict } from "@/app/actions";
+import type { Locale } from "@/config/locales";
 
 const RainRadar = dynamic(() => import("./RainRadar"), {
   ssr: false,
@@ -37,7 +38,7 @@ interface DashboardProps {
   initialWeather?: WeatherData;
   initialWeatherCode?: number;
   initialIsDay?: boolean;
-  locale?: "nl" | "de";
+  locale?: Locale;
   topContent?: React.ReactNode;
   beforeFooter?: React.ReactNode;
   titleOverride?: string;
@@ -56,6 +57,108 @@ const TILE_PALETTE: Record<string, { tint: string; accent: string }> = {
   "Wind":   { tint: "rgba(100,116,139,0.09)", accent: "#64748b" },
   "Gevoel": { tint: "rgba(239,68,68,0.08)",   accent: "#f97316" },
   "Vocht":  { tint: "rgba(14,165,233,0.10)",  accent: "#0ea5e9" },
+};
+
+const DASHBOARD_COPY: Record<Locale, {
+  connectionTitle: string;
+  connectionBody: (city: string) => string;
+  retry: string;
+  locationName: string;
+  tagline: React.ReactNode;
+  currentWeather: string;
+  feelsLike: string;
+  narrativeLabel: string;
+  ctaHref: string;
+  ctaKicker: string;
+  ctaTitle: string;
+  ctaBody: string;
+  ctaAction: string;
+  warningsHref: string;
+  warningsKicker: string;
+  warningsTitle: string;
+  warningsBody: string;
+  warningsAction: string;
+}> = {
+  nl: {
+    connectionTitle: "Oeps! Geen verbinding",
+    connectionBody: (city) => `We kunnen de weersgegevens voor ${city} momenteel niet ophalen.`,
+    retry: "Probeer opnieuw",
+    locationName: "Jouw locatie",
+    tagline: <>Hyperlokaal weer.<br />Vandaag en morgen.</>,
+    currentWeather: "Actueel weer",
+    feelsLike: "Voelt als",
+    narrativeLabel: "Piet z'n kijk op vandaag",
+    ctaHref: "/mijnweer",
+    ctaKicker: "Piet · Mijn Weer",
+    ctaTitle: "Jouw persoonlijke weerbericht",
+    ctaBody: "Kledingadvies, terras- en fietsscore, dagdelen, pollen, UV-index en vandaag vs. morgen - precies wat je moet weten.",
+    ctaAction: "Bekijk Mijn Weer",
+    warningsHref: "/waarschuwingen",
+    warningsKicker: "Reed · Waarschuwingen",
+    warningsTitle: "Geen verrassingen bij extreem weer",
+    warningsBody: "We houden de horizon 24/7 voor je in de gaten. Van zware windstoten tot naderend onweer - je ziet het direct voor jouw locatie.",
+    warningsAction: "Bekijk Waarschuwingen",
+  },
+  de: {
+    connectionTitle: "Verbindung fehlt",
+    connectionBody: (city) => `Wir koennen die Wetterdaten fuer ${city} gerade nicht laden.`,
+    retry: "Erneut versuchen",
+    locationName: "Dein Standort",
+    tagline: <>Hyperlokales Wetter.<br />Heute und morgen.</>,
+    currentWeather: "Aktuelles Wetter",
+    feelsLike: "Fuehlt sich an wie",
+    narrativeLabel: "Karls Blick auf heute",
+    ctaHref: "/de/mein-wetter",
+    ctaKicker: "Karl · Mein Wetter",
+    ctaTitle: "Dein persoenlicher Wetterbericht",
+    ctaBody: "Kleidungstipps, Tagesabschnitte, UV und heute versus morgen - direkt fuer deine Entscheidung.",
+    ctaAction: "Mein Wetter ansehen",
+    warningsHref: "/de/warnungen",
+    warningsKicker: "Reed · Warnungen",
+    warningsTitle: "Keine Ueberraschungen bei Extremwetter",
+    warningsBody: "Wir beobachten die Lage rund um die Uhr. Von starken Boeen bis zu nahendem Gewitter - du siehst es direkt fuer deinen Standort.",
+    warningsAction: "Warnungen ansehen",
+  },
+  fr: {
+    connectionTitle: "Connexion indisponible",
+    connectionBody: (city) => `Les donnees meteo pour ${city} ne chargent pas pour le moment.`,
+    retry: "Reessayer",
+    locationName: "Votre position",
+    tagline: <>Meteo hyperlocale.<br />Aujourd'hui et demain.</>,
+    currentWeather: "Meteo actuelle",
+    feelsLike: "Ressenti",
+    narrativeLabel: "Le regard de Luc aujourd'hui",
+    ctaHref: "/fr/mon-meteo",
+    ctaKicker: "Luc · Ma Meteo",
+    ctaTitle: "Votre meteo personnelle",
+    ctaBody: "Un bulletin clair pour ta ville: pluie, vent, soleil et le bon conseil pour les prochaines 48 heures.",
+    ctaAction: "Voir Ma Meteo",
+    warningsHref: "/fr/alertes",
+    warningsKicker: "Reed · Alertes",
+    warningsTitle: "Pas de surprise en cas de temps violent",
+    warningsBody: "Vent, pluie, orages ou chaleur: les seuils importants sont traduits en decisions simples pour votre lieu.",
+    warningsAction: "Voir les alertes",
+  },
+  es: {
+    connectionTitle: "Sin conexion",
+    connectionBody: (city) => `No podemos cargar ahora los datos del tiempo para ${city}.`,
+    retry: "Intentar de nuevo",
+    locationName: "Tu ubicacion",
+    tagline: <>Tiempo hiperlocal.<br />Hoy y manana.</>,
+    currentWeather: "Tiempo actual",
+    feelsLike: "Sensacion",
+    narrativeLabel: "La lectura de Juan para hoy",
+    ctaHref: "/es/mi-tiempo",
+    ctaKicker: "Juan · Mi tiempo",
+    ctaTitle: "Tu parte personal del tiempo",
+    ctaBody: "Juan traduce las proximas 48 horas a decisiones concretas para tu calle, costa, isla, sierra o ciudad.",
+    ctaAction: "Ver Mi tiempo",
+    warningsHref: "/es/alertas",
+    warningsKicker: "Reed · Alertas",
+    warningsTitle: "Sin sorpresas con tiempo extremo",
+    warningsBody: "Lluvia, viento, tormenta, calor o frio: las alertas se explican para tu ubicacion y tus limites.",
+    warningsAction: "Ver alertas",
+  },
 };
 
 const DetailItem = ({ label, value, subValue, icon, unit, fillPct }: {
@@ -119,10 +222,11 @@ export default function WeatherDashboard({
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
   const [activeActivity, setActiveActivity] = useState<string | null>(null);
-  const [deNarrative, setDeNarrative] = useState<string | null>(initialNarrative ?? null);
+  const [personaNarrative, setPersonaNarrative] = useState<string | null>(initialNarrative ?? null);
   const { tier } = useSession();
   const hourlyScrollRef = useRef<HTMLDivElement>(null);
-  const isDE = locale === "de";
+  const copy = DASHBOARD_COPY[locale];
+  const isNL = locale === "nl";
 
   useEffect(() => {
     const el = hourlyScrollRef.current;
@@ -134,7 +238,7 @@ export default function WeatherDashboard({
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [isDE, locale]);
+  }, []);
 
 
   const loadData = useCallback(async (targetCity: City) => {
@@ -176,14 +280,14 @@ export default function WeatherDashboard({
       }
     }
 
-    if (!isDE) {
+    if (isNL) {
       loadWWS(targetCity.lat, targetCity.lon).then((wwsPayload) => {
         if (!cancelled) setWWS(wwsPayload);
       });
     }
 
     return () => { cancelled = true; };
-  }, []);
+  }, [isNL, locale]);
 
   useEffect(() => {
     if (!needsWeatherData) {
@@ -200,23 +304,30 @@ export default function WeatherDashboard({
   }, [city, loadData, needsWeatherData]);
 
   useEffect(() => {
-    if (!isDE || !weather) return;
+    if (isNL || !weather) return;
     let cancelled = false;
     if (initialNarrative) {
-      setDeNarrative(initialNarrative);
+      setPersonaNarrative(initialNarrative);
       return;
     }
-    getKarlWeatherVerdict(weather, city.name, "Deutschland")
+    const contextCity = city as City & { character?: string; province?: string };
+    const verdictPromise = locale === "de"
+      ? getKarlWeatherVerdict(weather, city.name, "Deutschland")
+      : locale === "fr"
+        ? getLucWeatherVerdict(weather, city.name, contextCity.province || "France", contextCity.character)
+        : getJuanWeatherVerdict(weather, city.name, contextCity.province || "Espana", contextCity.character);
+
+    verdictPromise
       .then((text) => {
-        if (!cancelled) setDeNarrative(text);
+        if (!cancelled) setPersonaNarrative(text);
       })
       .catch(() => {
-        if (!cancelled) setDeNarrative(null);
+        if (!cancelled) setPersonaNarrative(null);
       });
     return () => {
       cancelled = true;
     };
-  }, [city.name, initialNarrative, isDE, weather]);
+  }, [city, initialNarrative, isNL, locale, weather]);
 
   const handleLocationClick = () => {
     if (!("geolocation" in navigator)) return;
@@ -224,7 +335,7 @@ export default function WeatherDashboard({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
-        const provisional: City = { name: isDE ? "Dein Standort" : "Jouw locatie", lat, lon };
+        const provisional: City = { name: copy.locationName, lat, lon };
         setCity(provisional);
         setIsLocating(false);
         reverseGeocode(lat, lon).then((geoCity) => {
@@ -258,19 +369,17 @@ export default function WeatherDashboard({
           <AlertTriangle className="text-accent-orange w-8 h-8" />
         </div>
         <h2 className="text-xl font-black text-white mb-2 uppercase tracking-wider">
-          {isDE ? "Verbindung fehlt" : "Oeps! Geen verbinding"}
+          {copy.connectionTitle}
         </h2>
         <p className="text-white/60 text-sm max-w-[280px] mb-6">
-          {isDE
-            ? `Wir können die Wetterdaten für ${city.name} gerade nicht laden.`
-            : `We kunnen de weersgegevens voor ${city.name} momenteel niet ophalen.`}
+          {copy.connectionBody(city.name)}
         </p>
         <button 
           onClick={() => loadData(city)}
           className="btn btn-primary"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
-          {isDE ? "Erneut versuchen" : "Probeer opnieuw"}
+          {copy.retry}
         </button>
       </div>
     );
@@ -293,11 +402,12 @@ export default function WeatherDashboard({
 
   const summaryWords = weather?.summaryVerdict?.split(/\s+/).filter(Boolean).length ?? 0;
   const narrative = weather
-    ? (isDE
-      ? deNarrative
-      : wws?.piet_update?.content
+    ? (isNL
+      ? wws?.piet_update?.content
         || (summaryWords >= 20 ? weather.summaryVerdict : null)
-        || getMainCommentary(weather))
+        || getMainCommentary(weather)
+      : personaNarrative
+        || (summaryWords >= 20 ? weather.summaryVerdict : null))
     : null;
   const backgroundWeatherCode = weather?.current.weatherCode ?? initialWeatherCode ?? 2;
   const backgroundIsDay = weather?.current.isDay ?? initialIsDay ?? true;
@@ -321,7 +431,7 @@ export default function WeatherDashboard({
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                 }}>
-                  {isDE ? <>Hyperlokales Wetter.<br />Heute und morgen.</> : <>Hyperlokaal weer.<br />Vandaag en morgen.</>}
+                  {copy.tagline}
                 </h2>
               </div>
 
@@ -335,7 +445,7 @@ export default function WeatherDashboard({
                       className="text-[12px] font-black uppercase tracking-[0.3em] text-white px-3 py-1.5 rounded-[10px] shadow-sm"
                       style={{ background: "#3b7ff0" }}
                     >
-                      {isDE ? "Aktuelles Wetter" : "Actueel weer"}
+                      {copy.currentWeather}
                     </span>
                   </div>
                   <h1 className="text-3xl font-black uppercase tracking-[0.2em] text-text-secondary mb-3">{city.name}</h1>
@@ -354,7 +464,7 @@ export default function WeatherDashboard({
                  <div className="flex flex-wrap items-center gap-5">
                    <span className="text-4xl font-black text-text-primary">{getWeatherDescription(weather.current.weatherCode, locale)}</span>
                    <span className="text-lg font-bold text-text-secondary bg-[var(--wz-blue)]/5 px-4 py-1.5 rounded-full shadow-inner border border-[var(--wz-blue)]/10">
-                     {isDE ? "Fühlt sich an wie" : "Voelt als"} {weather.current.feelsLike}°
+                     {copy.feelsLike} {weather.current.feelsLike}°
                    </span>
                  </div>
                </div>
@@ -367,7 +477,7 @@ export default function WeatherDashboard({
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">
-                  {isDE ? "Karls Blick auf heute" : wws ? "Piet z'n kijk op vandaag" : "De essentie"}
+                  {copy.narrativeLabel}
                   </span>
               </div>
               <p className="text-base font-medium text-text-primary leading-relaxed">{narrative}</p>
@@ -375,58 +485,58 @@ export default function WeatherDashboard({
           )}
 
           {/* CTA: Mijn Weer */}
-          <Link href={isDE ? "/de/mein-wetter" : "/mijnweer"} className="block group">
+          <Link href={copy.ctaHref} className="block group">
             <div className="card p-8 sm:p-10">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-3xl">💬</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">
-                  {isDE ? "Karl · Mein Wetter" : "Piet · Mijn Weer"}
+                  {copy.ctaKicker}
                 </span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-text-primary mb-2 tracking-tight">
-                {isDE ? "Dein persönlicher Wetterbericht" : "Jouw persoonlijke weerbericht"}
+                {copy.ctaTitle}
               </h3>
               <p className="text-sm text-text-secondary leading-relaxed mb-4">
-                {isDE
-                  ? "Kleidungstipps, Tagesabschnitte, UV und heute versus morgen - direkt für deine Entscheidung."
-                  : "Kledingadvies, terras- en fietsscore, dagdelen, pollen, UV-index en vandaag vs. morgen — precies wat je moet weten."}
+                {copy.ctaBody}
               </p>
               <span className="inline-flex items-center text-sm font-black text-blue-600 group-hover:gap-3 gap-2 transition-all">
-                {isDE ? "Mein Wetter ansehen" : "Bekijk Mijn Weer"} <span className="text-lg">→</span>
+                {copy.ctaAction} <span className="text-lg">-&gt;</span>
               </span>
             </div>
           </Link>
 
           {/* CTA: Waarschuwingen */}
-          <Link href={isDE ? "/de/warnungen" : "/waarschuwingen"} className="block group">
+          <Link href={copy.warningsHref} className="block group">
           <div className="card p-8 sm:p-10">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-3xl">⚡</span>
             <span className="text-[10px] font-black uppercase tracking-widest text-rose-500">
-              {isDE ? "Reed · Warnungen" : "Reed · Waarschuwingen"}
+              {copy.warningsKicker}
             </span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-black text-text-primary mb-2 tracking-tight">
-            {isDE ? "Keine Überraschungen bei Extremwetter" : "Geen verrassingen bij extreem weer"}
+            {copy.warningsTitle}
           </h3>
           <p className="text-sm text-text-secondary leading-relaxed mb-4">
-            {isDE
-              ? "Wir beobachten die Lage rund um die Uhr. Von starken Böen bis zu nahendem Gewitter - du siehst es direkt für deinen Standort."
-              : "We houden de horizon 24/7 voor je in de gaten. Van zware windstoten tot naderend onweer — je ziet het direct voor jouw locatie."}
+            {copy.warningsBody}
           </p>
           <span className="inline-flex items-center text-sm font-black text-rose-500 group-hover:gap-3 gap-2 transition-all">
-            {isDE ? "Warnungen ansehen" : "Bekijk Waarschuwingen"} <span className="text-lg">→</span>
+            {copy.warningsAction} <span className="text-lg">-&gt;</span>
           </span>
           </div>
           </Link>
           <EmailSubscribe city={city} locale={locale} />
-          <WeatherAdvice 
-            temperature={weather.current.temperature} 
-            precipitation={weather.current.precipitation} 
-            isFreezing={weather.current.temperature < 2} 
-            locale={locale}
-          />
-          <AffiliateCard weather={weather} placeName={city.name} locale={locale} />
+          {(locale === "nl" || locale === "de") && (
+            <>
+              <WeatherAdvice
+                temperature={weather.current.temperature}
+                precipitation={weather.current.precipitation}
+                isFreezing={weather.current.temperature < 2}
+                locale={locale}
+              />
+              <AffiliateCard weather={weather} placeName={city.name} locale={locale} />
+            </>
+          )}
               </>)}
           </>
           )}
@@ -437,7 +547,7 @@ export default function WeatherDashboard({
           </div>
         )}
         {beforeFooter}
-        {weather && <AmazonStickyBar weather={weather} />}
+        {weather && locale === "nl" && <AmazonStickyBar weather={weather} />}
       </div>
     </div>
   );
