@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ALL_PLACES, findPlace, placeRouteSlug, nearbyPlaces } from "@/lib/places-data";
-import { fetchWeatherData, getWeatherDescription, getWeatherEmoji, getWindBeaufort } from "@/lib/weather";
+import { fetchWeatherData } from "@/lib/weather";
 import { getLocationSEOContent, getJuanWeatherVerdict } from "@/app/actions";
+import { schemaBreadcrumb, schemaCityDataset, schemaWebPage } from "@/lib/schema";
+import WeatherDashboard from "@/components/WeatherDashboard";
 
 interface PageProps {
   params: Promise<{ ciudad: string }>;
@@ -71,151 +73,140 @@ export default async function SpainCityWeatherPage({ params }: PageProps) {
   const regionLabel = spanishRegionLabel(place.character);
   const characterLabel = spanishCharacterLabel(place.character);
 
-  const weather = await fetchWeatherData(place.lat, place.lon, false, false, place, "es").catch(() => null);
+  const initialWeather = await fetchWeatherData(place.lat, place.lon, false, false, place, "es").catch(() => undefined);
   const [juanVerdict, seoText] = await Promise.all([
-    weather ? getJuanWeatherVerdict(weather, place.name, regionLabel, place.character).catch(() => null) : null,
+    initialWeather ? getJuanWeatherVerdict(initialWeather, place.name, regionLabel, place.character).catch(() => null) : null,
     getLocationSEOContent(place.name, regionLabel, place.character, "es").catch(() => null),
   ]);
-  const nearby = nearbyPlaces(place, 10).filter((candidate) => candidate.province === "spanje");
-  const wind = weather ? getWindBeaufort(weather.current.windSpeed, "es") : null;
-  const now = weather?.current;
-  const today = weather?.daily[0];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WeatherForecast",
-    name: `Tiempo en ${place.name}`,
-    areaServed: {
-      "@type": "City",
-      name: place.name,
-      addressCountry: "ES",
+  const nearby = nearbyPlaces(place, 8).filter((candidate) => candidate.province === "spanje");
+
+  const pageUrl = `https://weerzone.nl/es/tiempo/espana/${ciudad}`;
+  const jsonLd = [
+    schemaBreadcrumb([
+      { name: "WEERZONE", item: "https://weerzone.nl" },
+      { name: "Tiempo", item: "https://weerzone.nl/es/tiempo" },
+      { name: "Espana", item: "https://weerzone.nl/es/tiempo/espana" },
+      { name: place.name, item: pageUrl },
+    ]),
+    schemaWebPage({
+      name: `Tiempo en ${place.name} - WEERZONE`,
+      url: pageUrl,
+      description: `Consulta el tiempo en ${place.name}, Espana. Prevision local de 48 horas con temperatura, lluvia, viento y el comentario de Juan.`,
+      inLanguage: "es-ES",
+      speakableSelectors: ["h1", "[data-speakable]", ".card"],
+    }),
+    schemaCityDataset({
+      placeName: place.name,
+      url: pageUrl,
+      inLanguage: "es-ES",
+      name: `Datos meteorologicos hiperlocales ${place.name}`,
+      description: `Prevision hiperlocal para ${place.name} con temperatura, lluvia, viento y horizonte de 48 horas.`,
+    }),
+    {
+      "@context": "https://schema.org",
+      "@type": "WeatherForecast",
+      name: `Tiempo en ${place.name}`,
+      areaServed: {
+        "@type": "City",
+        name: place.name,
+        addressCountry: "ES",
+      },
+      url: pageUrl,
+      provider: {
+        "@type": "Organization",
+        name: "WEERZONE",
+        url: "https://weerzone.nl",
+      },
     },
-    url: `https://weerzone.nl/es/tiempo/espana/${ciudad}`,
-    provider: {
-      "@type": "Organization",
-      name: "WEERZONE",
-      url: "https://weerzone.nl",
-    },
-  };
+  ];
 
   return (
-    <main className="min-h-screen bg-[#f7f4ee] text-slate-950">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="border-b border-slate-950/10 bg-[#fffaf0]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Link href="/es/tiempo/espana" className="text-sm font-black tracking-[0.18em] text-slate-950">
-            WEERZONE ESPANA
-          </Link>
-          <Link href={`/weer/spanje/${ciudad}`} className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-slate-950">
-            Version NL
-          </Link>
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-6xl gap-8 px-5 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:py-14">
-        <div>
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-amber-700">
-            {regionLabel} · 48 horas
-          </p>
-          <h1 className="max-w-3xl text-4xl font-black leading-none tracking-tight sm:text-6xl">
-            Tiempo en {place.name}
-          </h1>
-          <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-slate-700">
-            Prevision hiperlocal para {place.name}: lluvia, viento, temperatura y ventanas secas para decidir si conviene salir, pasear, ir a la terraza o esperar.
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-slate-950/10 bg-white p-5 shadow-sm">
-          {now ? (
-            <>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Ahora</p>
-                  <p className="mt-2 text-5xl font-black leading-none">{Math.round(now.temperature)}°</p>
-                </div>
-                <div className="text-5xl">{getWeatherEmoji(now.weatherCode, now.isDay)}</div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main>
+        <WeatherDashboard
+          initialCity={place}
+          initialWeather={initialWeather}
+          locale="es"
+          initialNarrative={juanVerdict}
+          beforeFooter={
+            <div className="space-y-6 pt-10">
+              {/* CTAs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link
+                  href={`/app/signup?tier=juan&lang=es&city=${encodeURIComponent(place.name)}`}
+                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-amber-500 text-slate-900 shadow-xl hover:scale-[1.02] transition-all text-center border border-white/20"
+                >
+                  <span className="text-3xl mb-3">📬</span>
+                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">
+                    Activar el parte de Juan
+                  </span>
+                  <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest italic">
+                    Gratis para {place.name}
+                  </span>
+                </Link>
+                <Link
+                  href="/es/precios#reed"
+                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 border border-white/10 text-white shadow-xl hover:scale-[1.02] transition-all text-center backdrop-blur-sm"
+                >
+                  <span className="text-3xl mb-3">⚡</span>
+                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">
+                    Alertas Reed
+                  </span>
+                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest italic">
+                    Tus limites personales
+                  </span>
+                </Link>
               </div>
-              <p className="mt-4 text-lg font-black">{getWeatherDescription(now.weatherCode, "es")}</p>
-              <p className="mt-1 text-sm font-semibold text-slate-600">
-                Sensacion {Math.round(now.feelsLike)}° · lluvia {now.precipitation} mm · viento {Math.round(now.windSpeed)} km/h
-              </p>
-            </>
-          ) : (
-            <p className="text-sm font-semibold text-slate-600">
-              La prevision se actualiza cada pocos minutos. Vuelve a cargar la pagina si los datos aun no aparecen.
-            </p>
-          )}
-        </div>
-      </section>
 
-      <section className="mx-auto grid max-w-6xl gap-4 px-5 pb-10 md:grid-cols-4">
-        <div className="rounded-lg border border-slate-950/10 bg-white p-5">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Maxima hoy</p>
-          <p className="mt-2 text-3xl font-black">{today ? `${Math.round(today.tempMax)}°` : "-"}</p>
-        </div>
-        <div className="rounded-lg border border-slate-950/10 bg-white p-5">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Lluvia hoy</p>
-          <p className="mt-2 text-3xl font-black">{today ? `${today.precipitationSum} mm` : "-"}</p>
-        </div>
-        <div className="rounded-lg border border-slate-950/10 bg-white p-5">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Viento</p>
-          <p className="mt-2 text-3xl font-black">{wind ? wind.label : "-"}</p>
-        </div>
-        <div className="rounded-lg border border-slate-950/10 bg-white p-5">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Contexto local</p>
-          <p className="mt-2 text-xl font-black capitalize">{characterLabel}</p>
-        </div>
-      </section>
+              {/* Perfil local — texto SEO unico via Mariana */}
+              <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
+                <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4">
+                  Tiempo en {place.name} — Perfil local
+                </h2>
+                <p className="text-white/65 text-xs leading-relaxed italic" data-speakable>
+                  {seoText ||
+                    `${place.name} esta en ${regionLabel} (${characterLabel}). WEERZONE traduce las proximas 48 horas a una decision concreta: terraza, paseo, playa, chaqueta o esperar.`}
+                </p>
+              </div>
 
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 pb-16 lg:grid-cols-[0.85fr_1.15fr]">
-        <div className="rounded-lg border border-amber-700/20 bg-amber-50 p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-600 text-lg font-black text-white">J</div>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-800">Juan</p>
-              <h2 className="text-xl font-black">La lectura local</h2>
-            </div>
-          </div>
-          <p className="text-sm font-semibold leading-7 text-slate-700">
-            {juanVerdict || `Juan mira ${place.name} con contexto local: ${characterLabel}, viento, lluvia y temperatura de las proximas 48 horas.`}
-          </p>
-        </div>
+              {/* Back to Spain index */}
+              <div className="text-center">
+                <Link
+                  href="/es/tiempo/espana"
+                  className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  ← Todas las ciudades en Espana
+                </Link>
+              </div>
 
-        <div className="rounded-lg border border-slate-950/10 bg-white p-6">
-          <h2 className="text-xl font-black">Por que el tiempo aqui cambia</h2>
-          <p className="mt-3 text-sm font-semibold leading-7 text-slate-700">
-            {seoText || `En ${place.name}, el tiempo depende del caracter local: ${characterLabel}. Mariana compara los modelos disponibles y prioriza la decision practica para las proximas 48 horas.`}
-          </p>
-          {weather?.hourly?.length ? (
-            <div className="mt-6 grid gap-2 sm:grid-cols-4">
-              {weather.hourly.slice(0, 8).map((hour) => (
-                <div key={hour.time} className="rounded-md bg-slate-50 p-3">
-                  <p className="text-xs font-black text-slate-500">{new Date(hour.time).getHours()}:00</p>
-                  <p className="mt-1 text-lg font-black">{Math.round(hour.temperature)}°</p>
-                  <p className="text-xs font-semibold text-slate-600">{hour.precipitation} mm</p>
+              {/* Nearby ES cities */}
+              {nearby.length > 0 && (
+                <div>
+                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-4">
+                    Cerca de {place.name}
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {nearby.map((candidate) => (
+                      <Link
+                        key={`${candidate.province}/${placeRouteSlug(candidate)}`}
+                        href={`/es/tiempo/espana/${placeRouteSlug(candidate)}`}
+                        className="card p-3 hover:border-amber-500/50 transition-all border border-white/5 text-center"
+                      >
+                        <span className="text-sm font-bold text-text-primary">{candidate.name}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
-          ) : null}
-        </div>
-      </section>
-
-      {nearby.length > 0 && (
-        <section className="mx-auto max-w-6xl px-5 pb-20">
-          <h2 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-slate-500">Cerca de {place.name}</h2>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-            {nearby.map((candidate) => (
-              <Link
-                key={`${candidate.province}/${placeRouteSlug(candidate)}`}
-                href={`/es/tiempo/espana/${placeRouteSlug(candidate)}`}
-                className="rounded-lg border border-slate-950/10 bg-white p-4 text-sm font-black hover:border-amber-600"
-              >
-                {candidate.name}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-    </main>
+          }
+        />
+      </main>
+    </>
   );
 }
