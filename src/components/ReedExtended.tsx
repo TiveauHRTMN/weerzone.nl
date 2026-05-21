@@ -320,8 +320,7 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
                         warning.enriched.windPeakKmh > 30;
 
                       const showThunderDynamics =
-                        isThunderWarning ||
-                        warning.enriched.capeMaxJkg > 100;
+                        warning.enriched.capeMaxJkg !== undefined;
 
                       if (!showDirectWeatherImpact && !showThunderDynamics) return null;
 
@@ -650,31 +649,25 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
 
                           {/* Atmospheric Badges */}
                           <div className="flex flex-wrap gap-2 text-[10px] font-bold">
-                            {period.maxCape > 0 && (
-                              <span className="px-2 py-1 rounded-lg bg-orange-500/5 text-orange-600 dark:text-orange-300 border border-orange-500/10">
-                                Piek CAPE: {Math.round(period.maxCape)} J/kg
-                              </span>
-                            )}
-                            {period.minLiftedIndex < 99 && period.maxCape > 0 && (
+                            <span className="px-2 py-1 rounded-lg bg-orange-500/5 text-orange-600 dark:text-orange-300 border border-orange-500/10">
+                              Piek CAPE: {Math.round(period.maxCape)} J/kg
+                            </span>
+                            {period.minLiftedIndex < 99 && (
                               <span className="px-2 py-1 rounded-lg bg-blue-500/5 text-blue-600 dark:text-blue-300 border border-blue-500/10">
                                 Lifted Index: {period.minLiftedIndex}°C
                               </span>
                             )}
-                            {period.maxCin > 0 && period.maxCape > 0 && (
-                              <span className="px-2 py-1 rounded-lg bg-red-500/5 text-red-600 dark:text-red-300 border border-red-500/10">
-                                Remming (CIN): {Math.round(period.maxCin)} J/kg
-                              </span>
-                            )}
+                            <span className="px-2 py-1 rounded-lg bg-red-500/5 text-red-600 dark:text-red-300 border border-red-500/10">
+                              Remming (CIN): {Math.round(period.maxCin)} J/kg
+                            </span>
                             {period.maxPrecipitation > 0 && (
                               <span className="px-2 py-1 rounded-lg bg-cyan-500/5 text-cyan-600 dark:text-cyan-300 border border-cyan-500/10">
                                 Piek intensiteit: {period.maxPrecipitation.toFixed(1)} mm/h
                               </span>
                             )}
-                            {period.avgWindShear > 0 && (
-                              <span className="px-2 py-1 rounded-lg bg-purple-500/5 text-purple-600 dark:text-purple-300 border border-purple-500/10">
-                                Gem. Schering: {period.avgWindShear} km/h
-                              </span>
-                            )}
+                            <span className="px-2 py-1 rounded-lg bg-purple-500/5 text-purple-600 dark:text-purple-300 border border-purple-500/10">
+                              Gem. Schering: {period.avgWindShear} km/h
+                            </span>
                           </div>
 
                           {/* Narrative Explanation */}
