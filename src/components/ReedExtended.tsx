@@ -306,27 +306,29 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
                       )}
                     </div>
                     <p className="text-sm font-medium text-text-primary leading-snug whitespace-pre-line">{warning.description}</p>
-                    {warning.enriched && (() => {
+                    {(() => {
                       const warningTypeLower = warning.type.toLowerCase();
                       const isThunderWarning = warningTypeLower.includes("onweer");
                       const isRainWarning = warningTypeLower.includes("regen") || warningTypeLower.includes("water") || warningTypeLower.includes("neerslag") || warningTypeLower.includes("sneeuw") || warningTypeLower.includes("hagel");
                       const isWindWarning = warningTypeLower.includes("wind") || warningTypeLower.includes("storm") || warningTypeLower.includes("orkaan");
 
-                      const showDirectWeatherImpact =
-                        isRainWarning ||
-                        isWindWarning ||
-                        isThunderWarning ||
-                        warning.enriched.precipitationTotalMm > 0 ||
-                        warning.enriched.windPeakKmh > 30;
+                      const showDirectWeatherImpact = true;
+                      const showThunderDynamics = true;
 
-                      const showThunderDynamics =
-                        warning.enriched.capeMaxJkg !== undefined;
+                      const gridClass = "grid grid-cols-1 md:grid-cols-2 gap-4";
 
-                      if (!showDirectWeatherImpact && !showThunderDynamics) return null;
-
-                      const gridClass = showDirectWeatherImpact && showThunderDynamics
-                        ? "grid grid-cols-1 md:grid-cols-2 gap-4"
-                        : "grid grid-cols-1 gap-4";
+                      const enriched = warning.enriched || {
+                        capeMaxJkg: 0,
+                        precipitationPeakMm: 0,
+                        precipitationPeakHour: null,
+                        precipitationTotalMm: 0,
+                        windPeakKmh: 0,
+                        windPeakHour: null,
+                        cinMaxJkg: 0,
+                        dewPointMaxC: undefined,
+                        windShearMaxKmh: 0,
+                        liftedIndexMinC: 0,
+                      };
 
                       return (
                         <div className="mt-5 pt-4 border-t border-black/10 dark:border-white/10 space-y-4">
@@ -341,193 +343,179 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
 
                           <div className={gridClass}>
                             {/* Column 1: Direct Weather Impact (Rain & Wind) */}
-                            {showDirectWeatherImpact && (
-                              <div className="space-y-3">
-                                <h4 className="text-[10px] font-black uppercase text-text-muted/80 tracking-wider">
-                                  Directe Weerimpact
-                                </h4>
-                                <div className="space-y-2.5">
-                                  {/* Expected Rain */}
-                                  {(isRainWarning || isThunderWarning || warning.enriched.precipitationTotalMm > 0) && (
-                                    <div className="flex items-start gap-3 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
-                                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400 shrink-0">
-                                        <CloudRain className="w-4 h-4" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <p className="text-[9px] font-black uppercase tracking-wider text-text-muted/80">{copy.expectedRain}</p>
-                                        <p className="text-sm font-black text-text-primary mt-0.5">
-                                          {warning.enriched.precipitationTotalMm} mm totaal
-                                        </p>
-                                        {warning.enriched.precipitationPeakMm > 0 && (
-                                          <p className="text-[11px] text-text-secondary mt-1 leading-snug">
-                                            Piek: <span className="font-bold text-text-primary">{warning.enriched.precipitationPeakMm} mm</span> {copy.around} {fmtTime(warning.enriched.precipitationPeakHour)}
-                                          </p>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-black uppercase text-text-muted/80 tracking-wider">
+                                Directe Weerimpact
+                              </h4>
+                              <div className="space-y-2.5">
+                                {/* Expected Rain */}
+                                <div className="flex items-start gap-3 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
+                                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400 shrink-0">
+                                    <CloudRain className="w-4 h-4" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] font-black uppercase tracking-wider text-text-muted/80">{copy.expectedRain}</p>
+                                    <p className="text-sm font-black text-text-primary mt-0.5">
+                                      {enriched.precipitationTotalMm} mm totaal
+                                    </p>
+                                    {enriched.precipitationPeakMm > 0 && (
+                                      <p className="text-[11px] text-text-secondary mt-1 leading-snug">
+                                        Piek: <span className="font-bold text-text-primary">{enriched.precipitationPeakMm} mm</span> {copy.around} {fmtTime(enriched.precipitationPeakHour)}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
 
-                                  {/* Wind Gusts */}
-                                  {(isWindWarning || isThunderWarning || warning.enriched.windPeakKmh > 30) && (
-                                    <div className="flex items-start gap-3 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
-                                      <div className="p-2 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
-                                        <Wind className="w-4 h-4" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <p className="text-[9px] font-black uppercase tracking-wider text-text-muted/80">{copy.gusts}</p>
-                                        <p className="text-sm font-black text-text-primary mt-0.5">
-                                          {warning.enriched.windPeakKmh} km/h
-                                        </p>
-                                        <p className="text-[11px] text-text-secondary mt-1 leading-snug">
-                                          {warning.enriched.windPeakKmh >= 75 ? (
-                                            <span className="text-rose-600 dark:text-rose-400 font-medium">Gevaar voor omwaaiende takken/voorwerpen</span>
-                                          ) : (
-                                            <span>Geen extreem windrisico verwacht</span>
-                                          )}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  )}
+                                {/* Wind Gusts */}
+                                <div className="flex items-start gap-3 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
+                                  <div className="p-2 bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400 shrink-0">
+                                    <Wind className="w-4 h-4" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] font-black uppercase tracking-wider text-text-muted/80">{copy.gusts}</p>
+                                    <p className="text-sm font-black text-text-primary mt-0.5">
+                                      {enriched.windPeakKmh} km/h
+                                    </p>
+                                    <p className="text-[11px] text-text-secondary mt-1 leading-snug">
+                                      {enriched.windPeakKmh >= 75 ? (
+                                        <span className="text-rose-600 dark:text-rose-400 font-medium">Gevaar voor omwaaiende takken/voorwerpen</span>
+                                      ) : (
+                                        <span>Geen extreem windrisico verwacht</span>
+                                      )}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            )}
+                            </div>
 
                             {/* Column 2: Atmospheric Dynamics (Storm ingredients) */}
-                            {showThunderDynamics && (
-                              <div className="space-y-3">
-                                <h4 className="text-[10px] font-black uppercase text-text-muted/80 tracking-wider">
-                                  Onweerspotentie & Dynamiek
-                                </h4>
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-black uppercase text-text-muted/80 tracking-wider">
+                                Onweerspotentie & Dynamiek
+                              </h4>
 
-                                <div className="p-3.5 rounded-xl bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/15 space-y-3.5">
-                                  {/* 1. Fuel / Energy */}
-                                  <div className="flex items-start gap-3">
-                                    <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-600 dark:text-orange-400 shrink-0 mt-0.5">
-                                      <Zap className="w-3.5 h-3.5" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex justify-between items-baseline gap-2">
-                                        <h5 className="text-[10px] font-black uppercase tracking-wider text-orange-700 dark:text-orange-300">1. Brandstof (Energie)</h5>
-                                        <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
-                                          {warning.enriched.capeMaxJkg} J/kg
-                                        </span>
-                                      </div>
-                                      <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
-                                        {warning.enriched.capeMaxJkg === 0 ? (
-                                          <span>
-                                            <strong className="text-text-muted">Stabiel:</strong> Geen directe energie (CAPE: 0) berekend op deze locatie. Onweersbuien kunnen echter van elders binnentrekken.
-                                          </span>
-                                        ) : warning.enriched.capeMaxJkg > 1000 ? (
-                                          <span>
-                                            <strong className="text-orange-600 dark:text-orange-400">Zeer onstabiel:</strong> Broeierige lucht (dauwpunt {warning.enriched.dewPointMaxC !== undefined ? `${warning.enriched.dewPointMaxC}°C` : 'hoog'}). Veel energie voor zwaar onweer.
-                                          </span>
-                                        ) : warning.enriched.capeMaxJkg > 500 ? (
-                                          <span>
-                                            <strong className="text-amber-600 dark:text-amber-400">Matig onstabiel:</strong> Voldoende energie voor actieve buien met kans op ontladingen.
-                                          </span>
-                                        ) : (
-                                          <span>
-                                            <strong className="text-text-muted">Lichte onstabiliteit:</strong> Beperkte energie; ontladingen zijn mogelijk maar waarschijnlijk zwak.
-                                          </span>
-                                        )}
-                                      </p>
-                                    </div>
+                              <div className="p-3.5 rounded-xl bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/15 space-y-3.5">
+                                {/* 1. Fuel / Energy */}
+                                <div className="flex items-start gap-3">
+                                  <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-600 dark:text-orange-400 shrink-0 mt-0.5">
+                                    <Zap className="w-3.5 h-3.5" />
                                   </div>
-
-                                  {/* 2. Lid / Cap */}
-                                  {warning.enriched.cinMaxJkg !== undefined && (
-                                    <div className="flex items-start gap-3 border-t border-black/5 dark:border-white/5 pt-3">
-                                      <div className="p-1.5 bg-red-500/10 rounded-lg text-red-600 dark:text-red-400 shrink-0 mt-0.5">
-                                        <ShieldAlert className="w-3.5 h-3.5" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex justify-between items-baseline gap-2">
-                                          <h5 className="text-[10px] font-black uppercase tracking-wider text-red-700 dark:text-red-300">2. De Deksel (CIN-Rem)</h5>
-                                          <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
-                                            {warning.enriched.cinMaxJkg} J/kg
-                                          </span>
-                                        </div>
-                                        <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
-                                          {warning.enriched.cinMaxJkg > 100 ? (
-                                            <span>
-                                              <strong className="text-rose-600 dark:text-rose-400">Sterke rem:</strong> Hoge deksel onderdrukt buienvorming. Grote kans dat het droog blijft, tenzij er een sterke trigger komt.
-                                            </span>
-                                          ) : warning.enriched.cinMaxJkg > 30 ? (
-                                            <span>
-                                              <strong className="text-amber-600 dark:text-amber-400">Matige deksel:</strong> Buien hebben een duidelijke trigger nodig (zoals windvlagen of een koufront) om door te breken.
-                                            </span>
-                                          ) : (
-                                            <span>
-                                              <strong className="text-emerald-600 dark:text-emerald-400">Geen deksel:</strong> Buien kunnen ongehinderd en snel ontstaan zodra de zon de grond opwarmt.
-                                            </span>
-                                          )}
-                                        </p>
-                                      </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex justify-between items-baseline gap-2">
+                                      <h5 className="text-[10px] font-black uppercase tracking-wider text-orange-700 dark:text-orange-300">1. Brandstof (Energie)</h5>
+                                      <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
+                                        {enriched.capeMaxJkg} J/kg
+                                      </span>
                                     </div>
-                                  )}
+                                    <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
+                                      {enriched.capeMaxJkg === 0 ? (
+                                        <span>
+                                          <strong className="text-text-muted">Stabiel:</strong> Geen directe energie (CAPE: 0) berekend op deze locatie. Onweersbuien kunnen echter van elders binnentrekken.
+                                        </span>
+                                      ) : enriched.capeMaxJkg > 1000 ? (
+                                        <span>
+                                          <strong className="text-orange-600 dark:text-orange-400">Zeer onstabiel:</strong> Broeierige lucht (dauwpunt {enriched.dewPointMaxC !== undefined ? `${enriched.dewPointMaxC}°C` : 'hoog'}). Veel energie voor zwaar onweer.
+                                        </span>
+                                      ) : enriched.capeMaxJkg > 500 ? (
+                                        <span>
+                                          <strong className="text-amber-600 dark:text-amber-400">Matig onstabiel:</strong> Voldoende energie voor actieve buien met kans op ontladingen.
+                                        </span>
+                                      ) : (
+                                        <span>
+                                          <strong className="text-text-muted">Lichte onstabiliteit:</strong> Beperkte energie; ontladingen zijn mogelijk maar waarschijnlijk zwak.
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
 
-                                  {/* 3. Storm Organization */}
-                                  {warning.enriched.windShearMaxKmh !== undefined && (
-                                    <div className="flex items-start gap-3 border-t border-black/5 dark:border-white/5 pt-3">
-                                      <div className="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 shrink-0 mt-0.5">
-                                        <Layers className="w-3.5 h-3.5" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex justify-between items-baseline gap-2">
-                                          <h5 className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300">3. Stormstructuur (Windschering)</h5>
-                                          <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
-                                            {warning.enriched.windShearMaxKmh} km/h
-                                          </span>
-                                        </div>
-                                        <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
-                                          {warning.enriched.windShearMaxKmh >= 35 ? (
-                                            <span>
-                                              <strong className="text-purple-600 dark:text-purple-400">Georganiseerde stormen:</strong> Sterke windschering. Kans op grotere hagel en zware windstoten door georganiseerde buienlijnen.
-                                            </span>
-                                          ) : (
-                                            <span>
-                                              <strong className="text-text-muted">Losstaande buien:</strong> Zwakke windschering. Buien zijn kortstondig en storten snel in op hun eigen regenval.
-                                            </span>
-                                          )}
-                                        </p>
-                                      </div>
+                                {/* 2. Lid / Cap */}
+                                <div className="flex items-start gap-3 border-t border-black/5 dark:border-white/5 pt-3">
+                                  <div className="p-1.5 bg-red-500/10 rounded-lg text-red-600 dark:text-red-400 shrink-0 mt-0.5">
+                                    <ShieldAlert className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex justify-between items-baseline gap-2">
+                                      <h5 className="text-[10px] font-black uppercase tracking-wider text-red-700 dark:text-red-300">2. De Deksel (CIN-Rem)</h5>
+                                      <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
+                                        {enriched.cinMaxJkg ?? 0} J/kg
+                                      </span>
                                     </div>
-                                  )}
+                                    <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
+                                      {(enriched.cinMaxJkg ?? 0) > 100 ? (
+                                        <span>
+                                          <strong className="text-rose-600 dark:text-rose-400">Sterke rem:</strong> Hoge deksel onderdrukt buienvorming. Grote kans dat het droog blijft, tenzij er een sterke trigger komt.
+                                        </span>
+                                      ) : (enriched.cinMaxJkg ?? 0) > 30 ? (
+                                        <span>
+                                          <strong className="text-amber-600 dark:text-amber-400">Matige deksel:</strong> Buien hebben een duidelijke trigger nodig (zoals windvlagen of een koufront) om door te breken.
+                                        </span>
+                                      ) : (
+                                        <span>
+                                          <strong className="text-emerald-600 dark:text-emerald-400">Geen deksel:</strong> Buien kunnen ongehinderd en snel ontstaan zodra de zon de grond opwarmt.
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
 
-                                  {/* 4. Stability (Lifted Index) */}
-                                  {warning.enriched.liftedIndexMinC !== undefined && (
-                                    <div className="flex items-start gap-3 border-t border-black/5 dark:border-white/5 pt-3">
-                                      <div className="p-1.5 bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
-                                        <Thermometer className="w-3.5 h-3.5" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex justify-between items-baseline gap-2">
-                                          <h5 className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">4. Stabiliteit (Lifted Index)</h5>
-                                          <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
-                                            {warning.enriched.liftedIndexMinC} °C
-                                          </span>
-                                        </div>
-                                        <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
-                                          {warning.enriched.liftedIndexMinC <= -6 ? (
-                                            <span>
-                                              <strong className="text-rose-600 dark:text-rose-400">Extreem onstabiel:</strong> Zeer sterke stijgstromen mogelijk. Kans op zware onweersbuien met hagel en windstoten.
-                                            </span>
-                                          ) : warning.enriched.liftedIndexMinC < 0 ? (
-                                            <span>
-                                              <strong className="text-amber-600 dark:text-amber-400">Onstabiel:</strong> Atmosfeer is gevoelig voor buienvorming en onweer.
-                                            </span>
-                                          ) : (
-                                            <span>
-                                              <strong className="text-emerald-600 dark:text-emerald-400">Stabiel:</strong> Warme lucht stijgt niet makkelijk op. De kans op actieve onweersbuien is klein.
-                                            </span>
-                                          )}
-                                        </p>
-                                      </div>
+                                {/* 3. Storm Organization */}
+                                <div className="flex items-start gap-3 border-t border-black/5 dark:border-white/5 pt-3">
+                                  <div className="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400 shrink-0 mt-0.5">
+                                    <Layers className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex justify-between items-baseline gap-2">
+                                      <h5 className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300">3. Stormstructuur (Windschering)</h5>
+                                      <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
+                                        {enriched.windShearMaxKmh ?? 0} km/h
+                                      </span>
                                     </div>
-                                  )}
+                                    <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
+                                      {(enriched.windShearMaxKmh ?? 0) >= 35 ? (
+                                        <span>
+                                          <strong className="text-purple-600 dark:text-purple-400">Georganiseerde stormen:</strong> Sterke windschering. Kans op grotere hagel en zware windstoten door georganiseerde buienlijnen.
+                                        </span>
+                                      ) : (
+                                        <span>
+                                          <strong className="text-text-muted">Losstaande buien:</strong> Zwakke windschering. Buien zijn kortstondig en storten snel in op hun eigen regenval.
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* 4. Stability (Lifted Index) */}
+                                <div className="flex items-start gap-3 border-t border-black/5 dark:border-white/5 pt-3">
+                                  <div className="p-1.5 bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                                    <Thermometer className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex justify-between items-baseline gap-2">
+                                      <h5 className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">4. Stabiliteit (Lifted Index)</h5>
+                                      <span className="text-[10px] font-mono font-bold text-text-muted shrink-0">
+                                        {enriched.liftedIndexMinC ?? 0} °C
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-text-secondary mt-0.5 leading-normal">
+                                      {(enriched.liftedIndexMinC ?? 0) <= -6 ? (
+                                        <span>
+                                          <strong className="text-rose-600 dark:text-rose-400">Extreem onstabiel:</strong> Zeer sterke stijgstromen mogelijk. Kans op zware onweersbuien met hagel en windstoten.
+                                        </span>
+                                      ) : (enriched.liftedIndexMinC ?? 0) < 0 ? (
+                                        <span>
+                                          <strong className="text-amber-600 dark:text-amber-400">Onstabiel:</strong> Atmosfeer is gevoelig voor buienvorming en onweer.
+                                        </span>
+                                      ) : (
+                                        <span>
+                                          <strong className="text-emerald-600 dark:text-emerald-400">Stabiel:</strong> Warme lucht stijgt niet makkelijk op. De kans op actieve onweersbuien is klein.
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            )}
+                            </div>
                           </div>
                         </div>
                       );
