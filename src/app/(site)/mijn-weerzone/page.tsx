@@ -6,6 +6,7 @@ import { getSavedLocationServer } from "@/lib/location-cookies";
 import { getDayContext } from "@/lib/agents/day-context";
 import ProfileEditForm from "@/components/wz/ProfileEditForm";
 import LogoutButton from "@/components/LogoutButton";
+import WeerzoneBackground from "@/components/WeerzoneBackground";
 
 export const dynamic = "force-dynamic";
 
@@ -74,22 +75,24 @@ export default async function MijnWeerzonePage() {
     : day.weekday;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:py-14">
+    <>
+      <WeerzoneBackground />
+      <main className="relative z-10 min-h-screen px-4 py-10 sm:py-14 text-white">
       <div className="mx-auto max-w-3xl space-y-10">
         {/* Header */}
         <header className="space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
             Mijn Weerzone
           </p>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white drop-shadow-sm">
             {firstName ? `Welkom, ${firstName}` : "Welkom"}
           </h1>
-          <p className="text-sm text-slate-500 capitalize">{dayLabel}</p>
+          <p className="text-sm text-white/75 capitalize">{dayLabel}</p>
         </header>
 
         {/* Vandaag — agent-blokken */}
         <section className="space-y-3">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 px-1">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
             Vandaag
           </h2>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -116,7 +119,7 @@ export default async function MijnWeerzonePage() {
 
         {/* Mijn plek */}
         <section className="space-y-3">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 px-1">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
             Mijn plek
           </h2>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -160,7 +163,7 @@ export default async function MijnWeerzonePage() {
 
         {/* Mijn gegevens */}
         <section className="space-y-3">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 px-1">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
             Mijn gegevens
           </h2>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -180,18 +183,19 @@ export default async function MijnWeerzonePage() {
         </section>
 
         {/* Footer-acties */}
-        <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6">
-          <div className="flex gap-5 text-xs font-bold text-slate-500">
-            <Link href="/privacy" className="hover:text-slate-900 transition-colors">
+        <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-6">
+          <div className="flex gap-5 text-xs font-bold text-white/75">
+            <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <Link href="/contact" className="hover:text-slate-900 transition-colors">
+            <Link href="/contact" className="hover:text-white transition-colors">
               Contact
             </Link>
           </div>
-          <LogoutButton />
+          <LogoutButton className="!text-white/75 hover:!text-white" />
         </footer>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
