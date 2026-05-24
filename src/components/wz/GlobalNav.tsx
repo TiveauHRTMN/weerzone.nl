@@ -275,7 +275,7 @@ export default function GlobalNav() {
             {user ? (
               <>
                 <Link
-                  href="/app"
+                  href="/mijn-weerzone"
                   className={actionBtnClass}
                   style={{
                     height: BTN_H,
@@ -285,7 +285,7 @@ export default function GlobalNav() {
                     color: "#0f1a2c",
                   }}
                 >
-                  Dashboard
+                  Mijn Weerzone
                 </Link>
                 <button
                   onClick={async () => {
@@ -424,8 +424,8 @@ export default function GlobalNav() {
               <div className="grid grid-cols-2 gap-2">
                 {user ? (
                   <>
-                    <Link href="/app" onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
-                      Dashboard
+                    <Link href="/mijn-weerzone" onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
+                      Mijn Weerzone
                     </Link>
                     <button
                       onClick={async () => {
