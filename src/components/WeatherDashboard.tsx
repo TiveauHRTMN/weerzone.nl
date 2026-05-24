@@ -3,8 +3,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { MapPin, Send, RefreshCw, Thermometer, CloudRain, Wind, AlertTriangle, Sun, Users, Droplets, Zap } from "lucide-react";
-import PremiumGate from "./PremiumGate";
-import { useSession } from "@/lib/session-context";
 import { loadWeather, loadWWS } from "@/lib/weatherCache";
 import { DUTCH_CITIES, reverseGeocode, type City, type WeatherData, type WWSPayload } from "@/lib/types";
 import {
@@ -17,22 +15,24 @@ import {
   getWandelScore,
 } from "@/lib/commentary";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
-import { motion, AnimatePresence } from "framer-motion";
-import AffiliateCard from "./AffiliateCard";
-import AmazonStickyBar from "./AmazonStickyBar";
-import EmailSubscribe from "./EmailSubscribe";
-import SupportBanner from "./SupportBanner";
-import Footer from "./Footer";
-import WeatherAdvice from "./WeatherAdvice";
 import dynamic from "next/dynamic";
-import WeatherBackground from "./WeatherBackground";
-import { getKarlWeatherVerdict, getLucWeatherVerdict, getJuanWeatherVerdict } from "@/app/actions";
 import type { Locale } from "@/config/locales";
+
+const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />,
+});
 
 const RainRadar = dynamic(() => import("./RainRadar"), {
   ssr: false,
   loading: () => <div className="card p-4 text-center text-xs text-text-secondary">Radar laadt…</div>,
 });
+
+const EmailSubscribe = dynamic(() => import("./EmailSubscribe"), { ssr: false });
+const WeatherAdvice = dynamic(() => import("./WeatherAdvice"), { ssr: false });
+const SupportBanner = dynamic(() => import("./SupportBanner"), { ssr: false });
+const PersonaNarrativeLoader = dynamic(() => import("./PersonaNarrativeLoader"), { ssr: false });
+
 interface DashboardProps {
   initialCity?: City;
   initialWeather?: WeatherData;
@@ -40,12 +40,17 @@ interface DashboardProps {
   initialIsDay?: boolean;
   locale?: Locale;
   topContent?: React.ReactNode;
+  afterWeatherContent?: React.ReactNode;
   beforeFooter?: React.ReactNode;
   titleOverride?: string;
   hideWeatherInfo?: boolean;
   slimMode?: boolean;
   showRainRadar?: boolean;
   initialNarrative?: string | null;
+  deferBelowFold?: boolean;
+  lightweightBackground?: boolean;
+  showSupportBanner?: boolean;
+  staticWeatherFallback?: boolean;
 }
 
 
@@ -58,6 +63,37 @@ const TILE_PALETTE: Record<string, { tint: string; accent: string }> = {
   "Gevoel": { tint: "rgba(239,68,68,0.08)",   accent: "#f97316" },
   "Vocht":  { tint: "rgba(14,165,233,0.10)",  accent: "#0ea5e9" },
 };
+
+function SimpleWeatherBackground({ weatherCode, isDay }: { weatherCode: number; isDay: boolean }) {
+  const theme = !isDay
+    ? { bg1: "#0f1828", bg2: "#1e3048" }
+    : weatherCode >= 51
+      ? { bg1: "#4a6474", bg2: "#6a8898" }
+      : weatherCode >= 3
+        ? { bg1: "#7898ae", bg2: "#a0b8c8" }
+        : { bg1: "#3a9ae8", bg2: "#7ec4f6" };
+
+  return (
+    <div
+      className="fixed inset-0 z-0"
+      style={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
+      aria-hidden
+    />
+  );
+}
+
+function DashboardBackground({
+  weatherCode,
+  isDay,
+  lightweight,
+}: {
+  weatherCode: number;
+  isDay: boolean;
+  lightweight?: boolean;
+}) {
+  if (lightweight) return <SimpleWeatherBackground weatherCode={weatherCode} isDay={isDay} />;
+  return <WeatherBackground weatherCode={weatherCode} isDay={isDay} />;
+}
 
 const DASHBOARD_COPY: Record<Locale, {
   connectionTitle: string;
@@ -84,17 +120,17 @@ const DASHBOARD_COPY: Record<Locale, {
     connectionBody: (city) => `We kunnen de weersgegevens voor ${city} momenteel niet ophalen.`,
     retry: "Probeer opnieuw",
     locationName: "Jouw locatie",
-    tagline: <>Hyperlokaal weer.<br />Vandaag en morgen.</>,
+    tagline: <>Weer voor jouw plek.<br />Vandaag en morgen.</>,
     currentWeather: "Actueel weer",
     feelsLike: "Voelt als",
-    narrativeLabel: "Piet z'n kijk op vandaag",
+    narrativeLabel: "Kort weerbericht voor vandaag",
     ctaHref: "/mijnweer",
-    ctaKicker: "Piet · Mijn Weer",
+    ctaKicker: "Mijn Weer",
     ctaTitle: "Jouw persoonlijke weerbericht",
     ctaBody: "Kledingadvies, terras- en fietsscore, dagdelen, pollen, UV-index en vandaag vs. morgen - precies wat je moet weten.",
     ctaAction: "Bekijk Mijn Weer",
     warningsHref: "/waarschuwingen",
-    warningsKicker: "Reed · Waarschuwingen",
+    warningsKicker: "Waarschuwingen",
     warningsTitle: "Geen verrassingen bij extreem weer",
     warningsBody: "We houden de horizon 24/7 voor je in de gaten. Van zware windstoten tot naderend onweer - je ziet het direct voor jouw locatie.",
     warningsAction: "Bekijk Waarschuwingen",
@@ -104,17 +140,17 @@ const DASHBOARD_COPY: Record<Locale, {
     connectionBody: (city) => `Wir koennen die Wetterdaten fuer ${city} gerade nicht laden.`,
     retry: "Erneut versuchen",
     locationName: "Dein Standort",
-    tagline: <>Hyperlokales Wetter.<br />Heute und morgen.</>,
+    tagline: <>Wetter fuer deinen Ort.<br />Heute und morgen.</>,
     currentWeather: "Aktuelles Wetter",
     feelsLike: "Fuehlt sich an wie",
-    narrativeLabel: "Karls Blick auf heute",
+    narrativeLabel: "Kurzer Wetterbericht fuer heute",
     ctaHref: "/de/mein-wetter",
-    ctaKicker: "Karl · Mein Wetter",
+    ctaKicker: "Mein Wetter",
     ctaTitle: "Dein persoenlicher Wetterbericht",
     ctaBody: "Kleidungstipps, Tagesabschnitte, UV und heute versus morgen - direkt fuer deine Entscheidung.",
     ctaAction: "Mein Wetter ansehen",
     warningsHref: "/de/warnungen",
-    warningsKicker: "Reed · Warnungen",
+    warningsKicker: "Warnungen",
     warningsTitle: "Keine Ueberraschungen bei Extremwetter",
     warningsBody: "Wir beobachten die Lage rund um die Uhr. Von starken Boeen bis zu nahendem Gewitter - du siehst es direkt fuer deinen Standort.",
     warningsAction: "Warnungen ansehen",
@@ -124,17 +160,17 @@ const DASHBOARD_COPY: Record<Locale, {
     connectionBody: (city) => `Les donnees meteo pour ${city} ne chargent pas pour le moment.`,
     retry: "Reessayer",
     locationName: "Votre position",
-    tagline: <>Meteo hyperlocale.<br />Aujourd'hui et demain.</>,
+    tagline: <>La météo pour votre lieu.<br />Aujourd'hui et demain.</>,
     currentWeather: "Meteo actuelle",
     feelsLike: "Ressenti",
-    narrativeLabel: "Le regard de Luc aujourd'hui",
+    narrativeLabel: "Le point météo du jour",
     ctaHref: "/fr/mon-meteo",
-    ctaKicker: "Luc · Ma Meteo",
+    ctaKicker: "Ma Météo",
     ctaTitle: "Votre meteo personnelle",
     ctaBody: "Un bulletin clair pour ta ville: pluie, vent, soleil et le bon conseil pour les prochaines 48 heures.",
     ctaAction: "Voir Ma Meteo",
     warningsHref: "/fr/alertes",
-    warningsKicker: "Reed · Alertes",
+    warningsKicker: "Alertes",
     warningsTitle: "Pas de surprise en cas de temps violent",
     warningsBody: "Vent, pluie, orages ou chaleur: les seuils importants sont traduits en decisions simples pour votre lieu.",
     warningsAction: "Voir les alertes",
@@ -144,17 +180,17 @@ const DASHBOARD_COPY: Record<Locale, {
     connectionBody: (city) => `No podemos cargar ahora los datos del tiempo para ${city}.`,
     retry: "Intentar de nuevo",
     locationName: "Tu ubicacion",
-    tagline: <>Tiempo hiperlocal.<br />Hoy y manana.</>,
+    tagline: <>El tiempo para tu lugar.<br />Hoy y manana.</>,
     currentWeather: "Tiempo actual",
     feelsLike: "Sensacion",
-    narrativeLabel: "La lectura de Juan para hoy",
+    narrativeLabel: "Resumen del tiempo para hoy",
     ctaHref: "/es/mi-tiempo",
-    ctaKicker: "Juan · Mi tiempo",
+    ctaKicker: "Mi tiempo",
     ctaTitle: "Tu parte personal del tiempo",
-    ctaBody: "Juan traduce las proximas 48 horas a decisiones concretas para tu calle, costa, isla, sierra o ciudad.",
+    ctaBody: "Las proximas 48 horas traducidas a decisiones concretas para tu calle, costa, isla, sierra o ciudad.",
     ctaAction: "Ver Mi tiempo",
     warningsHref: "/es/alertas",
-    warningsKicker: "Reed · Alertas",
+    warningsKicker: "Alertas",
     warningsTitle: "Sin sorpresas con tiempo extremo",
     warningsBody: "Lluvia, viento, tormenta, calor o frio: las alertas se explican para tu ubicacion y tus limites.",
     warningsAction: "Ver alertas",
@@ -206,12 +242,17 @@ export default function WeatherDashboard({
   initialIsDay,
   locale = "nl",
   topContent,
+  afterWeatherContent,
   beforeFooter,
   titleOverride,
   hideWeatherInfo,
   slimMode,
   showRainRadar,
   initialNarrative,
+  deferBelowFold = false,
+  lightweightBackground = false,
+  showSupportBanner = true,
+  staticWeatherFallback = false,
 }: DashboardProps) {
   const needsWeatherData = !hideWeatherInfo || !!showRainRadar;
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
@@ -223,7 +264,7 @@ export default function WeatherDashboard({
   const [isLocating, setIsLocating] = useState(false);
   const [activeActivity, setActiveActivity] = useState<string | null>(null);
   const [personaNarrative, setPersonaNarrative] = useState<string | null>(initialNarrative ?? null);
-  const { tier } = useSession();
+  const [showDeferredContent, setShowDeferredContent] = useState(!deferBelowFold);
   const hourlyScrollRef = useRef<HTMLDivElement>(null);
   const copy = DASHBOARD_COPY[locale];
   const isNL = locale === "nl";
@@ -239,6 +280,21 @@ export default function WeatherDashboard({
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
+
+  useEffect(() => {
+    if (!deferBelowFold) return;
+    const win = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const timeout = window.matchMedia("(max-width: 767px)").matches ? 1800 : 900;
+    if (win.requestIdleCallback) {
+      const id = win.requestIdleCallback(() => setShowDeferredContent(true), { timeout });
+      return () => win.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(() => setShowDeferredContent(true), timeout);
+    return () => window.clearTimeout(id);
+  }, [deferBelowFold]);
 
 
   const loadData = useCallback(async (targetCity: City) => {
@@ -303,32 +359,6 @@ export default function WeatherDashboard({
     };
   }, [city, loadData, needsWeatherData]);
 
-  useEffect(() => {
-    if (isNL || !weather) return;
-    let cancelled = false;
-    if (initialNarrative) {
-      setPersonaNarrative(initialNarrative);
-      return;
-    }
-    const contextCity = city as City & { character?: string; province?: string };
-    const verdictPromise = locale === "de"
-      ? getKarlWeatherVerdict(weather, city.name, "Deutschland")
-      : locale === "fr"
-        ? getLucWeatherVerdict(weather, city.name, contextCity.province || "France", contextCity.character)
-        : getJuanWeatherVerdict(weather, city.name, contextCity.province || "Espana", contextCity.character);
-
-    verdictPromise
-      .then((text) => {
-        if (!cancelled) setPersonaNarrative(text);
-      })
-      .catch(() => {
-        if (!cancelled) setPersonaNarrative(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [city, initialNarrative, isNL, locale, weather]);
-
   const handleLocationClick = () => {
     if (!("geolocation" in navigator)) return;
     setIsLocating(true);
@@ -362,6 +392,50 @@ export default function WeatherDashboard({
     return () => window.removeEventListener("wz:locate", fn);
   }, []);
 
+  if (needsWeatherData && !weather && staticWeatherFallback) {
+    const wCode = initialWeatherCode ?? 2;
+    const isD = initialIsDay ?? true;
+    return (
+      <div className="min-h-screen relative overflow-x-hidden">
+        <DashboardBackground weatherCode={wCode} isDay={isD} lightweight={lightweightBackground} />
+        <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
+          <div className="text-center py-6 sm:py-10">
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-3" style={{
+              background: "linear-gradient(135deg, #ff5400 0%, #ffd200 50%, #ff5400 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              {copy.tagline}
+            </h2>
+          </div>
+          <div className="card p-8 sm:p-12">
+            <span
+              className="inline-flex text-[12px] font-black uppercase tracking-[0.3em] text-white px-3 py-1.5 rounded-[10px] shadow-sm"
+              style={{ background: "#3b7ff0" }}
+            >
+              {copy.currentWeather}
+            </span>
+            <h1 className="mt-6 text-3xl font-black uppercase tracking-[0.12em] text-text-primary">
+              {titleOverride ?? city.name}
+            </h1>
+            <p className="mt-4 max-w-md text-base font-bold leading-7 text-text-secondary">
+              We halen het actuele weer opnieuw op. De rest van WEERZONE blijft beschikbaar.
+            </p>
+            <button
+              onClick={() => loadData(city)}
+              className="mt-6 btn btn-primary"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              {copy.retry}
+            </button>
+          </div>
+          {showDeferredContent && beforeFooter}
+        </div>
+      </div>
+    );
+  }
+
   if (needsWeatherData && error && !weather) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
@@ -391,10 +465,10 @@ export default function WeatherDashboard({
     
     return (
       <div className="min-h-screen relative overflow-x-hidden">
-        <WeatherBackground weatherCode={wCode} isDay={isD} />
+        <DashboardBackground weatherCode={wCode} isDay={isD} lightweight={lightweightBackground} />
         <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
           {topContent}
-          {beforeFooter}
+          {showDeferredContent && beforeFooter}
         </div>
       </div>
     );
@@ -413,10 +487,23 @@ export default function WeatherDashboard({
   const backgroundIsDay = weather?.current.isDay ?? initialIsDay ?? true;
   return (
     <div className="min-h-screen relative overflow-x-hidden">
-      <WeatherBackground weatherCode={backgroundWeatherCode} isDay={backgroundIsDay} />
+      <DashboardBackground
+        weatherCode={backgroundWeatherCode}
+        isDay={backgroundIsDay}
+        lightweight={lightweightBackground}
+      />
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
-        <SupportBanner locale={locale} />
+        {showSupportBanner && <SupportBanner locale={locale} />}
         {topContent}
+        {!isNL && weather && (
+          <PersonaNarrativeLoader
+            city={city}
+            weather={weather}
+            locale={locale}
+            initialNarrative={initialNarrative}
+            onNarrative={setPersonaNarrative}
+          />
+        )}
 
         <div className="flex flex-col gap-6 animate-fade-in">
           {!hideWeatherInfo && weather && (
@@ -448,7 +535,7 @@ export default function WeatherDashboard({
                       {copy.currentWeather}
                     </span>
                   </div>
-                  <h1 className="text-3xl font-black uppercase tracking-[0.2em] text-text-secondary mb-3">{city.name}</h1>
+                  <h1 className="text-3xl font-black uppercase tracking-[0.2em] text-text-secondary mb-3">{titleOverride ?? city.name}</h1>
                   <div className="flex items-start">
                     <span className="text-[9rem] sm:text-[11rem] font-black tracking-tighter leading-none text-text-primary">{weather.current.temperature}</span>
                     <span className="text-5xl sm:text-6xl font-black mt-5 ml-1 text-text-primary leading-none">°</span>
@@ -483,6 +570,8 @@ export default function WeatherDashboard({
               <p className="text-base font-medium text-text-primary leading-relaxed">{narrative}</p>
             </div>
           )}
+
+          {afterWeatherContent}
 
           {/* CTA: Mijn Weer */}
           <Link href={copy.ctaHref} className="block group">
@@ -525,17 +614,14 @@ export default function WeatherDashboard({
           </span>
           </div>
           </Link>
-          <EmailSubscribe city={city} locale={locale} />
-          {(locale === "nl" || locale === "de") && (
-            <>
-              <WeatherAdvice
-                temperature={weather.current.temperature}
-                precipitation={weather.current.precipitation}
-                isFreezing={weather.current.temperature < 2}
-                locale={locale}
-              />
-              <AffiliateCard weather={weather} placeName={city.name} locale={locale} />
-            </>
+          {showDeferredContent && <EmailSubscribe city={city} locale={locale} />}
+          {showDeferredContent && (locale === "nl" || locale === "de") && (
+            <WeatherAdvice
+              temperature={weather.current.temperature}
+              precipitation={weather.current.precipitation}
+              isFreezing={weather.current.temperature < 2}
+              locale={locale}
+            />
           )}
               </>)}
           </>
@@ -546,8 +632,7 @@ export default function WeatherDashboard({
             <RainRadar data={weather.minutely} locale={locale} />
           </div>
         )}
-        {beforeFooter}
-        {weather && locale === "nl" && <AmazonStickyBar weather={weather} />}
+        {showDeferredContent && beforeFooter}
       </div>
     </div>
   );

@@ -15,6 +15,8 @@ export interface HreflangEntry {
   href: string;
 }
 
+export type NavWeight = "default" | "strong" | "muted";
+
 export interface LocaleConfig {
   code: Locale;
   label: string;
@@ -25,8 +27,16 @@ export interface LocaleConfig {
     myWeather: string;
     warnings: string;
   };
-  nav: Array<{ key: string; label: string; href: string }>;
+  nav: Array<{
+    key: string;
+    label: string;
+    href: string;
+    sublabel?: string;
+    weight?: NavWeight;
+  }>;
 }
+
+export type NavLink = LocaleConfig["nav"][number];
 
 export const LOCALES: Record<Locale, LocaleConfig> = {
   nl: {
@@ -40,9 +50,13 @@ export const LOCALES: Record<Locale, LocaleConfig> = {
       warnings: "/waarschuwingen",
     },
     nav: [
-      { key: "mijnweer", label: "Mijn Weer", href: "/mijnweer" },
-      { key: "waarschuwingen", label: "Alerts", href: "/waarschuwingen" },
-      { key: "prijzen", label: "Prijzen", href: "/prijzen" },
+      { key: "piet",          label: "Piet",          href: "/mijnweer",        sublabel: "Je dagelijkse heads-up" },
+      { key: "reed",          label: "Reed",          href: "/waarschuwingen",  sublabel: "Voor buien, wind en onweer" },
+      { key: "koos",          label: "Koos",          href: "/koos",            sublabel: "Als je eropuit wilt" },
+      { key: "steve",         label: "Steve",         href: "/steve",           sublabel: "Je zakelijke heads-up" },
+      { key: "over",          label: "About",         href: "/over",            weight: "muted" },
+      { key: "contact",       label: "Contact",       href: "/contact",         weight: "muted" },
+      { key: "mijn-weerzone", label: "Mijn Weerzone", href: "/mijn-weerzone",   weight: "strong" },
     ],
   },
   de: {
@@ -100,6 +114,7 @@ export const DEFAULT_LOCALE: Locale = "nl";
 export function detectLocale(pathname: string): Locale {
   if (pathname.startsWith("/de")) return "de";
   if (pathname.startsWith("/fr")) return "fr";
+  if (pathname.startsWith("/lu")) return "fr";
   if (pathname.startsWith("/es")) return "es";
   return "nl";
 }
@@ -131,7 +146,7 @@ export const PROVINCE_TO_DE_BUNDESLAND: Partial<Record<Province, string>> = {
   "noordrijn-westfalen":     "nordrhein-westfalen",
   nedersaksen:               "niedersachsen",
   saksen:                    "sachsen",
-  "sachsen-anhalt":           "sachsen-anhalt",
+  "saksen-anhalt":            "sachsen-anhalt",
   thuringen:                 "thueringen",
   "mecklenburg-voorpommeren":"mecklenburg-vorpommern",
   "sleeswijk-holstein":      "schleswig-holstein",

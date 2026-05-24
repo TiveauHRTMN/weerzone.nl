@@ -144,28 +144,10 @@ export function buildStaticSitemap(): string {
   entries.push({ url: `${BASE_URL}/zakelijk`,          lastmod: today, changefreq: "weekly",  priority: 0.8 });
   entries.push({ url: `${BASE_URL}/prijzen`,           lastmod: today, changefreq: "monthly", priority: 0.7 });
   entries.push({ url: `${BASE_URL}/over`,              lastmod: today, changefreq: "monthly", priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/piet`,              lastmod: today, changefreq: "monthly", priority: 0.5 });
-  entries.push({ url: `${BASE_URL}/reed`,              lastmod: today, changefreq: "monthly", priority: 0.5 });
   entries.push({ url: `${BASE_URL}/weer/48-uur`,       lastmod: today, changefreq: "hourly",  priority: 0.7 });
   entries.push({ url: `${BASE_URL}/weer/onweer`,       lastmod: today, changefreq: "hourly",  priority: 0.6 });
   entries.push({ url: `${BASE_URL}/weer/regen`,        lastmod: today, changefreq: "hourly",  priority: 0.6 });
   entries.push({ url: `${BASE_URL}/weer/regen-op-vakantie`, lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone`,          lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/citytrip`, lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/strandweer`, lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/waar-is-het-droog`, lastmod: today, changefreq: "daily",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/dagje-weg`, lastmod: today, changefreq: "daily",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/dagje-weg-bij-regen`, lastmod: today, changefreq: "daily",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/dit-weekend`, lastmod: today, changefreq: "daily",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/reiszone/pretparkweer`, lastmod: today, changefreq: "daily",  priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/reiszone/wandelweer`, lastmod: today, changefreq: "daily",  priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/reiszone/festivalweer`, lastmod: today, changefreq: "daily",  priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/reiszone/campingweekend`, lastmod: today, changefreq: "weekly",  priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/reiszone/spanje`,   lastmod: today, changefreq: "weekly",  priority: 0.8 });
-  entries.push({ url: `${BASE_URL}/reiszone/spanje/citytrip`, lastmod: today, changefreq: "weekly",  priority: 0.8 });
-  entries.push({ url: `${BASE_URL}/reiszone/spanje/strandweer`, lastmod: today, changefreq: "weekly",  priority: 0.8 });
-  entries.push({ url: `${BASE_URL}/reiszone/spanje/beste-reistijd`, lastmod: today, changefreq: "monthly",  priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/reiszone/spanje/regenrisico`, lastmod: today, changefreq: "monthly",  priority: 0.6 });
   entries.push({ url: `${BASE_URL}/contact`,           lastmod: today, changefreq: "monthly", priority: 0.4 });
   entries.push({ url: `${BASE_URL}/privacy`,           lastmod: today, changefreq: "monthly", priority: 0.3 });
 
@@ -191,7 +173,6 @@ export function buildStaticSitemap(): string {
   entries.push({ url: `${BASE_URL}/de/warnungen`,   lastmod: today, changefreq: "weekly",  priority: 0.7 });
   entries.push({ url: `${BASE_URL}/de/preise`,      lastmod: today, changefreq: "monthly", priority: 0.7 });
   entries.push({ url: `${BASE_URL}/de/uber-uns`,    lastmod: today, changefreq: "monthly", priority: 0.5 });
-  entries.push({ url: `${BASE_URL}/de/karl`,        lastmod: today, changefreq: "monthly", priority: 0.5 });
   entries.push({ url: `${BASE_URL}/de/kontakt`,     lastmod: today, changefreq: "monthly", priority: 0.4 });
 
   // DE Bundesland-overzichten
@@ -214,7 +195,6 @@ export function buildStaticSitemap(): string {
   entries.push({ url: `${BASE_URL}/fr/alertes`,     lastmod: today, changefreq: "weekly",  priority: 0.7 });
   entries.push({ url: `${BASE_URL}/fr/tarifs`,      lastmod: today, changefreq: "monthly", priority: 0.7 });
   entries.push({ url: `${BASE_URL}/fr/a-propos`,    lastmod: today, changefreq: "monthly", priority: 0.5 });
-  entries.push({ url: `${BASE_URL}/fr/luc`,         lastmod: today, changefreq: "monthly", priority: 0.5 });
   entries.push({ url: `${BASE_URL}/fr/contact`,     lastmod: today, changefreq: "monthly", priority: 0.4 });
 
   // FR Région-overzichten
@@ -275,7 +255,7 @@ export function buildBESitemap(): string {
     if (!isSitemapPlace(place)) continue;
     // Mariana treatment: include Wallonia in Belgian sitemap
     if (!BE_PROVINCES.has(place.province) && place.province !== "wallonie") continue;
-    
+
     const slug = placeRouteSlug(place);
     const url = `${BASE_URL}/weer/${place.province}/${slug}`;
     if (seen.has(url)) continue;
@@ -358,11 +338,11 @@ export function buildFRSitemap(): string {
     const url = `${BASE_URL}/fr/meteo/${region}/${slug}`;
     if (seen.has(url)) continue;
     seen.add(url);
-    
+
     // Mariana treatment: dynamic frequency and priority
     const priority = placePriority(place.population);
     const changefreq = (place.population && place.population > 50000) ? "hourly" : "daily";
-    
+
     entries.push({ url, lastmod: today, changefreq, priority });
   }
 
@@ -393,3 +373,7 @@ export function buildESSitemap(): string {
   entries.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   return xmlUrlset(entries);
 }
+
+// Reiszone-sitemaps zijn verwijderd in v2 (agent-first relaunch — Reiszone
+// als sub-brand is opgeheven). De buildReiszone*-functies en bijbehorende
+// /sitemap-reiszone-*.xml routes zijn verwijderd; oude URLs leveren 308 → /.

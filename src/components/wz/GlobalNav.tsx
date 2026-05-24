@@ -6,8 +6,11 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Globe2, Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "@/components/NLPulse";
+import BEPulse from "@/components/BEPulse";
 import DEPulse from "@/components/DEPulse";
 import FRPulse from "@/components/FRPulse";
+import LuxPulse from "@/components/LuxPulse";
+import ESPulse from "@/components/ESPulse";
 import LocatieButton from "@/components/wz/LocatieButton";
 import { useSession } from "@/lib/session-context";
 import type { PersonaTier } from "@/lib/personas";
@@ -23,7 +26,7 @@ const TIER_COLOR: Record<string, string> = {
   founder: "#8b5cf6",
 };
 const TIER_LABEL: Record<string, string> = {
-  piet: "P", reed: "R", steve: "S", founder: "★",
+  piet: "P", reed: "R", steve: "S", founder: "*",
 };
 
 function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: boolean }) {
@@ -57,20 +60,40 @@ const HIDDEN_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", 
 
 const COUNTRIES = [
   { code: "nl", label: "NL", href: "/" },
-  { code: "be", label: "BE", href: "/weer/wallonie" },
+  { code: "be", label: "BE", href: "/be" },
   { code: "de", label: "DE", href: "/de" },
   { code: "fr", label: "FR", href: "/fr" },
-  { code: "lu", label: "LU", href: "/fr/meteo/luxembourg" },
+  { code: "lu", label: "LU", href: "/lu" },
   { code: "es", label: "ES", href: "/es" },
 ] as const;
 
+const BE_PROVINCES = [
+  "antwerpen",
+  "limburg-be",
+  "oost-vlaanderen",
+  "vlaams-brabant",
+  "west-vlaanderen",
+  "wallonie",
+] as const;
+
 function activeCountry(pathname: string, locale: Locale) {
+  if (pathname === "/be" || pathname.startsWith("/be/")) return "be";
+  if (pathname === "/lu" || pathname.startsWith("/lu/")) return "lu";
   if (pathname.includes("luxembourg")) return "lu";
-  if (pathname.includes("wallonie")) return "be";
+  if (BE_PROVINCES.some((province) => pathname.includes(`/${province}`))) return "be";
   if (locale === "de") return "de";
   if (locale === "fr") return "fr";
   if (locale === "es") return "es";
   return "nl";
+}
+
+function CountryPulse({ country }: { country: string }) {
+  if (country === "be") return <BEPulse />;
+  if (country === "de") return <DEPulse />;
+  if (country === "fr") return <FRPulse />;
+  if (country === "lu") return <LuxPulse />;
+  if (country === "es") return <ESPulse />;
+  return <NLPulse />;
 }
 
 function CountryDropdown({
@@ -156,25 +179,45 @@ export default function GlobalNav() {
   const homeHref = localeConfig.routes.home;
   const isDE = locale === "de";
   const isFR = locale === "fr";
+  const isES = locale === "es";
   const country = activeCountry(pathname, locale);
+  // Overlay-regio's (België → NL-basis, Luxembourg → FR-basis). De auth-flow
+  // herkent deze via ?lang=be / ?lang=lu zodat home-link en regionale touches
+  // kloppen na inloggen.
+  const isBE = country === "be";
+  const isLU = country === "lu";
+  const loginHref = isBE ? "/app/login?lang=be"
+    : isLU ? "/app/login?lang=lu"
+    : isES ? "/app/login?lang=es"
+    : isFR ? "/app/login?lang=fr"
+    : isDE ? "/app/login?lang=de"
+    : "/app/login";
+  const signupHref = isES ? "/es/precios"
+    : isFR ? "/fr/tarifs"
+    : isDE ? "/de/preise"
+    : isLU ? "/app/signup?lang=lu"
+    : isBE ? "/app/signup?lang=be"
+    : "/app/signup";
 
   function isActive(linkHref: string, key: string) {
-    if (key === "piet" || key === "mein-wetter" || key === "ma-meteo") {
-      return pathname.startsWith(isFR ? "/fr/ma-meteo" : isDE ? "/de/mein-wetter" : "/mijnweer") || pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer") || pathname.startsWith("/jouwweer");
+    if (key === "mijnweer" || key === "piet" || key === "mein-wetter" || key === "ma-meteo" || key === "mi-tiempo") {
+      const myWeatherPath = isES ? "/es/mi-tiempo" : isFR ? "/fr/mon-meteo" : isDE ? "/de/mein-wetter" : "/mijnweer";
+      const weatherPath = isES ? "/es/tiempo" : isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer";
+      return pathname.startsWith(myWeatherPath) || pathname.startsWith(weatherPath) || pathname.startsWith("/jouwweer");
     }
-    if (key === "reed" || key === "warnungen" || key === "waarschuwingen" || key === "alertes") {
-      return pathname.startsWith(isFR ? "/fr/alertes" : isDE ? "/de/warnungen" : "/waarschuwingen");
+    if (key === "reed" || key === "warnungen" || key === "waarschuwingen" || key === "alertes" || key === "alertas") {
+      return pathname.startsWith(isES ? "/es/alertas" : isFR ? "/fr/alertes" : isDE ? "/de/warnungen" : "/waarschuwingen");
     }
-    if (key === "preise" || key === "prijzen" || key === "tarifs") return pathname.startsWith(isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/prijzen");
-    if (key === "uber-uns" || key === "over" || key === "a-propos") return pathname.startsWith(isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over");
-    if (key === "kontakt" || key === "contact") return pathname.startsWith(isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact");
+    if (key === "preise" || key === "prijzen" || key === "tarifs" || key === "precios") return pathname.startsWith(isES ? "/es/precios" : isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/prijzen");
+    if (key === "uber-uns" || key === "over" || key === "a-propos" || key === "sobre-nosotros") return pathname.startsWith(isES ? "/es/sobre-nosotros" : isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over");
+    if (key === "kontakt" || key === "contact" || key === "contacto") return pathname.startsWith(isES ? "/es/contacto" : isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact");
     return pathname === linkHref || pathname.startsWith(linkHref + "/");
   }
 
   const actionBtnClass = "inline-flex items-center justify-center px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap min-w-[100px]";
 
-  // Puur WEERZONE-zon gradient: lichter top → kern → diepere onderkant.
-  // Radiale sheen bovenaan voor frosted-glow effect. Geen brushed lijnen.
+  // Puur WEERZONE-zon gradient: lichter boven, warmer midden, diepere onderkant.
+  // Radiale glans bovenaan voor een rustig frosted effect.
   const headerBg =
     "radial-gradient(ellipse at top, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 40%, transparent 65%)," +
     "linear-gradient(180deg, #ffe060 0%, #ffd21a 55%, #f5c500 100%)";
@@ -191,7 +234,7 @@ export default function GlobalNav() {
         color: "#0f1a2c",
       }}
     >
-      {isFR ? <FRPulse /> : isDE ? <DEPulse /> : <NLPulse />}
+      <CountryPulse country={country} />
 
       {/* Main Bar */}
       <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-2 md:gap-3">
@@ -219,7 +262,7 @@ export default function GlobalNav() {
         <div className="flex-1 min-w-0 flex justify-end lg:justify-start">
           <LocatieButton 
             locale={locale} 
-            active={pathname.startsWith(isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")}
+            active={pathname.startsWith(isES ? "/es/tiempo" : isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")}
             className="!h-[36px] !px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest shadow-sm"
           />
         </div>
@@ -253,13 +296,13 @@ export default function GlobalNav() {
                   className={actionBtnClass}
                   style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}
                 >
-                  {isFR ? "Déconnexion" : isDE ? "Abmelden" : "Log uit"}
+                  {isES ? "Cerrar sesion" : isFR ? "Deconnexion" : isDE ? "Abmelden" : "Log uit"}
                 </button>
               </>
             ) : (
               <>
                 <Link
-                  href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"}
+                  href={loginHref}
                   className={actionBtnClass}
                   style={{
                     height: BTN_H,
@@ -269,10 +312,10 @@ export default function GlobalNav() {
                     color: "#0f1a2c",
                   }}
                 >
-                  {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                  {isES ? "Iniciar sesion" : isFR || isLU ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
                 </Link>
-                <Link href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"} className={actionBtnClass} style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}>
-                  {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                <Link href={signupHref} className={actionBtnClass} style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}>
+                  {isES ? "Empezar" : isFR || isLU ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
                 </Link>
               </>
             )}
@@ -298,35 +341,85 @@ export default function GlobalNav() {
 
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">Menu</p>
               <nav className="grid gap-1">
-                {[
-                  ...links,
-                  { key: "a-propos", label: isFR ? "À Propos" : isDE ? "Über uns" : "Over ons", href: isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over" },
-                  { key: "contact", label: "Contact", href: isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact" }
-                ].map(l => {
-                  const active = isActive(l.href, l.key);
-                  return (
-                    <Link
-                      key={l.key}
-                      href={l.href}
-                      onClick={() => setOpen(false)}
-                      className="px-4 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all flex items-center justify-between group"
-                      style={{
-                        color: active ? "#0f1a2c" : "rgba(15,26,44,0.60)",
-                        background: active ? "rgba(0,0,0,0.08)" : "transparent",
-                      }}
-                    >
-                      <span>{l.label}</span>
-                      <span className={`w-1.5 h-1.5 rounded-full bg-[#0f1a2c] transition-transform ${active ? 'scale-100' : 'scale-0 group-hover:scale-50'}`} />
-                    </Link>
-                  );
-                })}
+                {(() => {
+                  const composed: typeof links = [...links];
+                  const overHref    = isES ? "/es/sobre-nosotros" : isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns"  : "/over";
+                  const contactHref = isES ? "/es/contacto"       : isFR ? "/fr/contact"  : isDE ? "/de/kontakt"   : "/contact";
+                  const overLabel    = isES ? "Sobre nosotros" : isFR ? "A propos" : isDE ? "Ueber uns" : "About";
+                  const contactLabel = isES ? "Contacto" : "Contact";
+                  if (!composed.some(l => l.href === overHref)) {
+                    composed.push({ key: isES ? "sobre-nosotros" : "a-propos", label: overLabel,    href: overHref,    weight: "muted" });
+                  }
+                  if (!composed.some(l => l.href === contactHref)) {
+                    composed.push({ key: isES ? "contacto" : "contact",        label: contactLabel, href: contactHref, weight: "muted" });
+                  }
+                  return composed.map(l => {
+                    const active = isActive(l.href, l.key);
+                    const isStrong = l.weight === "strong";
+                    const isMuted  = l.weight === "muted";
+
+                    if (isStrong) {
+                      return (
+                        <Link
+                          key={l.key}
+                          href={l.href}
+                          onClick={() => setOpen(false)}
+                          className="mt-3 px-4 py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all flex items-center justify-between group"
+                          style={{
+                            background: "#0f1a2c",
+                            color: "white",
+                            boxShadow: "0 2px 8px rgba(15,26,44,0.25)",
+                          }}
+                        >
+                          <span>{l.label}</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
+                        </Link>
+                      );
+                    }
+
+                    return (
+                      <Link
+                        key={l.key}
+                        href={l.href}
+                        onClick={() => setOpen(false)}
+                        className="px-4 py-3 rounded-2xl transition-all flex items-start justify-between group"
+                        style={{
+                          color: active ? "#0f1a2c" : "rgba(15,26,44,0.60)",
+                          background: active ? "rgba(0,0,0,0.08)" : "transparent",
+                        }}
+                      >
+                        <div className="flex flex-col">
+                          <span
+                            className={
+                              isMuted
+                                ? "text-[11px] font-bold uppercase tracking-[0.18em] opacity-70"
+                                : "text-sm font-black uppercase tracking-widest"
+                            }
+                          >
+                            {l.label}
+                          </span>
+                          {l.sublabel && (
+                            <span className="text-[11px] font-medium mt-1 normal-case tracking-normal opacity-65">
+                              {l.sublabel}
+                            </span>
+                          )}
+                        </div>
+                        <span
+                          className={`mt-1.5 w-1.5 h-1.5 rounded-full bg-[#0f1a2c] transition-transform ${
+                            active ? "scale-100" : "scale-0 group-hover:scale-50"
+                          }`}
+                        />
+                      </Link>
+                    );
+                  });
+                })()}
               </nav>
             </div>
 
             {/* Column 2: Account Actions (Shown in menu for mobile/tablet) */}
             <div className="lg:hidden">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">
-                {isFR ? "Compte" : "Account"}
+                {isES ? "Cuenta" : isFR ? "Compte" : "Account"}
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {user ? (
@@ -343,16 +436,16 @@ export default function GlobalNav() {
                       }}
                       className="py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]"
                     >
-                      {isFR ? "Déconnexion" : isDE ? "Abmelden" : "Log uit"}
+                      {isES ? "Cerrar sesion" : isFR ? "Deconnexion" : isDE ? "Abmelden" : "Log uit"}
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link href={isFR ? "/app/login?lang=fr" : isDE ? "/app/login?lang=de" : "/app/login"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
-                      {isFR ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                    <Link href={loginHref} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
+                      {isES ? "Iniciar sesion" : isFR || isLU ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
                     </Link>
-                    <Link href={isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/app/signup"} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
-                      {isFR ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                    <Link href={signupHref} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
+                      {isES ? "Empezar" : isFR || isLU ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
                     </Link>
                   </>
                 )}
@@ -365,7 +458,17 @@ export default function GlobalNav() {
                <div className="space-y-4">
                   <div className="p-5 rounded-3xl bg-black/5 border border-black/5">
                      <p className="text-base font-black text-slate-900 leading-tight">
-                        {isFR ? "Météo hyperlocale. Aujourd'hui et demain." : "Hyperlokaal weer. Vandaag en morgen."}
+                        {country === "be"
+                          ? "Lokaal weer voor Belgie. Vandaag en morgen."
+                          : country === "lu"
+                            ? "Meteo locale au Luxembourg. Aujourd'hui et demain."
+                            : isES
+                              ? "Tiempo local. Hoy y manana."
+                              : isFR
+                                ? "Meteo locale. Aujourd'hui et demain."
+                                : isDE
+                                  ? "Lokales Wetter. Heute und morgen."
+                                  : "Weer voor jouw plek. Vandaag en morgen."}
                      </p>
                   </div>
                </div>

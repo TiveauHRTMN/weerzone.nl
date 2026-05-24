@@ -50,6 +50,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Canonicals zijn slash-loos (https://weerzone.nl, https://weerzone.nl/weer/...)
+  // dus zet trailingSlash expliciet uit om verwarring tussen Vercel-redirects en
+  // canonical te voorkomen.
+  trailingSlash: false,
   turbopack: {},
   typescript: {
     ignoreBuildErrors: true,
@@ -59,9 +63,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/homepage", destination: "/", permanent: true },
-      { source: "/piet", destination: "/mijnweer", permanent: true },
-      { source: "/reed", destination: "/waarschuwingen", permanent: true },
+      { source: "/homepage",        destination: "/",               permanent: true },
+      { source: "/piet",            destination: "/mijnweer",       permanent: true },
+      { source: "/reed",            destination: "/waarschuwingen", permanent: true },
+      // Reiszone is verwijderd in v2 (agent-first relaunch). Alle Reiszone-URLs
+      // worden hard naar de homepage gestuurd; voor crawlers is dat een 308.
+      { source: "/reisweer",        destination: "/",               permanent: true },
+      { source: "/reisweer/:path*", destination: "/",               permanent: true },
+      { source: "/reiszone",        destination: "/",               permanent: true },
+      { source: "/reiszone/:path*", destination: "/",               permanent: true },
     ];
   },
   webpack(config) {

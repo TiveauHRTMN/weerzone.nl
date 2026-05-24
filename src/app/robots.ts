@@ -6,12 +6,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/auth/", "/app/"],
+        disallow: ["/api/", "/admin/", "/auth/", "/app/", "/reiszone/"],
       },
       // Zoekmachines
       { userAgent: "Bingbot", crawlDelay: 1 },
-      // AdSense crawler — expliciet toegelaten (anders valt 'ie onder *)
-      { userAgent: "Mediapartners-Google", allow: "/" },
       // AI search crawlers — expliciet welkom
       { userAgent: "GPTBot", allow: "/" },
       { userAgent: "OAI-SearchBot", allow: "/" },
@@ -31,6 +29,7 @@ export default function robots(): MetadataRoute.Robots {
       "https://weerzone.nl/sitemap-de.xml",
       "https://weerzone.nl/sitemap-fr.xml",
       "https://weerzone.nl/sitemap-lu.xml",
+      "https://weerzone.nl/sitemap-es.xml",
     ],
   };
 }

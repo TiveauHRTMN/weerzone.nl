@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 
-const ADSENSE_CLIENT = "ca-pub-6187487207780127";
-
 // (site) is een route group. SiteShell wordt gerenderd vanuit de root
 // layout (src/app/layout.tsx) — hier alleen metadata en pass-through,
 // anders krijg je dubbele GlobalNav/Footer (Next.js 16 PPR-streaming
@@ -21,30 +19,10 @@ export const metadata: Metadata = {
     template: "%s | WEERZONE",
   },
   description:
-    "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Hyperlokaal, tot 48 uur vooruit.",
-  keywords: [
-    "weer",
-    "weer nederland",
-    "weerbericht",
-    "weersverwachting",
-    "weer vandaag",
-    "weer morgen",
-    "48 uur weer",
-    "weer komende 48 uur",
-    "regen verwachting",
-    "WEERZONE",
-    "nauwkeurig weer",
-    "weerzone.nl",
-    "buienradar alternatief",
-    "weerbericht nederland",
-    "actueel weer",
-    "neerslagverwachting",
-    "zonkracht vandaag",
-    "weerstation nederland",
-  ],
+    "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Helder, reclamevrij en tot 48 uur vooruit.",
   openGraph: {
     title: "WEERZONE | Weerkeuzes voor vandaag en morgen",
-    description: "Hyperlokaal weer voor concrete keuzes in de komende 48 uur.",
+    description: "Helder weerbericht voor concrete keuzes in de komende 48 uur.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl",
@@ -61,7 +39,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "WEERZONE | Weerkeuzes voor vandaag en morgen",
-    description: "Hyperlokaal weer voor concrete keuzes in de komende 48 uur.",
+    description: "Helder weerbericht voor concrete keuzes in de komende 48 uur.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -83,9 +61,6 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "NwNAWZ0Op3b4pguSizj32bSXRf4gpQRfTzhEPFyu2B8",
-  },
-  other: {
-    "google-adsense-account": ADSENSE_CLIENT,
   },
 };
 

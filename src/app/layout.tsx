@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { headers } from "next/headers";
-import Script from "next/script";
 import { Providers } from "./providers";
 import PostHogPageView from "@/components/PostHogPageView";
 import SiteShell from "@/components/SiteShell";
-import { getSupabase } from "@/lib/supabase";
-import { detectLocale } from "@/config/locales";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -59,53 +55,123 @@ const globalSchemasLd = [
   },
 ];
 
+const LOCALE_LANG = {
+  nl: "nl",
+  de: "de",
+  fr: "fr",
+  es: "es",
+} as const;
+
+const LOCALE_GLOBAL_SCHEMA = {
+  nl: globalSchemasLd,
+  de: [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "WEERZONE",
+      url: "https://weerzone.nl",
+      logo: "https://weerzone.nl/weerzone-icon.png",
+      description:
+        "Hyperlokale Wettervorhersage fuer Deutschland, 48 Stunden voraus und pro Ort erklaert.",
+      areaServed: { "@type": "Country", name: "Deutschland" },
+      inLanguage: "de-DE",
+      sameAs: globalSchemasLd[0].sameAs,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "WEERZONE Deutschland",
+      url: "https://weerzone.nl/de",
+      applicationCategory: "WeatherApplication",
+      operatingSystem: "Web, iOS, Android",
+      inLanguage: "de-DE",
+      description:
+        "48-Stunden-Wettervorhersage fuer deutsche Orte, uebersetzt in praktische Entscheidungen.",
+      publisher: { "@type": "Organization", name: "WEERZONE", url: "https://weerzone.nl" },
+    },
+  ],
+  fr: [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "WEERZONE",
+      url: "https://weerzone.nl",
+      logo: "https://weerzone.nl/weerzone-icon.png",
+      description:
+        "Previsions meteo hyperlocales pour la France, a 48 heures et par commune.",
+      areaServed: { "@type": "Country", name: "France" },
+      inLanguage: "fr-FR",
+      sameAs: globalSchemasLd[0].sameAs,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "WEERZONE France",
+      url: "https://weerzone.nl/fr",
+      applicationCategory: "WeatherApplication",
+      operatingSystem: "Web, iOS, Android",
+      inLanguage: "fr-FR",
+      description:
+        "Previsions meteo a 48 heures pour la France, avec contexte local pour la pluie, le vent et la temperature.",
+      publisher: { "@type": "Organization", name: "WEERZONE", url: "https://weerzone.nl" },
+    },
+  ],
+  es: [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "WEERZONE",
+      url: "https://weerzone.nl",
+      logo: "https://weerzone.nl/weerzone-icon.png",
+      description:
+        "Tiempo hiperlocal para Espana, con prevision de 48 horas por ciudad, costa, isla y montana.",
+      areaServed: { "@type": "Country", name: "Espana" },
+      inLanguage: "es-ES",
+      sameAs: globalSchemasLd[0].sameAs,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "WEERZONE Espana",
+      url: "https://weerzone.nl/es",
+      applicationCategory: "WeatherApplication",
+      operatingSystem: "Web, iOS, Android",
+      inLanguage: "es-ES",
+      description:
+        "Prevision de 48 horas para Espana, traducida en decisiones practicas sobre lluvia, viento y temperatura.",
+      publisher: { "@type": "Organization", name: "WEERZONE", url: "https://weerzone.nl" },
+    },
+  ],
+} as const;
+
 // Root layout wraps alle pagina's met SiteShell. Eerder zat SiteShell in
 // (site)/layout.tsx maar dat veroorzaakte een dubbele render in Next.js 16
 // (twee identieke <header>+<footer>-paren in de HTML output). Door SiteShell
 // hier te renderen wordt de async layer geëlimineerd en is er gegarandeerd
 // maar één instance van de chrome.
-export const dynamic = "force-dynamic";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let activeDeal = null;
-  const supabase = getSupabase();
-  if (supabase) {
-    try {
-      const { data: state } = await supabase
-        .from("system_state")
-        .select("*")
-        .eq("id", "global")
-        .single();
-      if (state?.is_active) {
-        activeDeal = state;
-      }
-    } catch {
-      // Stil falen — activeDeal bleibt null
-    }
-  }
-
+  // LET OP: GEEN headers()/cookies() hier — die zijn dynamic APIs en blokkeren
+  // CDN-caching op alle 88k descendants. <html lang="nl"> is een hint voor
+  // assistive tech en search; per-pagina hreflang + JSON-LD inLanguage zijn
+  // autoritatief voor Google's locale-matching, niet dit attribuut.
+  // De /de, /fr, /es route-group layouts injecteren hun eigen JSON-LD,
+  // dus we shippen hier alleen de NL globalSchemasLd als baseline.
   return (
     <html lang="nl" className="antialiased">
       <head>
         <meta name="theme-color" content="#0f172a" />
       </head>
       <body className="min-h-screen">
-        <Script
-          id="adsense-loader"
-          async
-          strategy="afterInteractive"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6187487207780127"
-          crossOrigin="anonymous"
-        />
         <Providers>
           <Suspense fallback={null}>
             <PostHogPageView />
           </Suspense>
-          <SiteShell activeDeal={activeDeal} globalSchemasLd={globalSchemasLd}>
+          <SiteShell globalSchemasLd={LOCALE_GLOBAL_SCHEMA.nl}>
             {children}
           </SiteShell>
         </Providers>

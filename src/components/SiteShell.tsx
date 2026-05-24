@@ -1,34 +1,43 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import CookieBanner from "@/components/CookieBanner";
-import InstallPrompt from "@/components/InstallPrompt";
-import FounderBanner from "@/components/FounderBanner";
-import GlobalPersonaModal from "@/components/GlobalPersonaModal";
-import AffiliateBanner from "@/components/AffiliateBanner";
+import { Suspense, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import GlobalNav from "@/components/wz/GlobalNav";
 import Footer from "@/components/Footer";
-import MobilePageSwipe from "@/components/MobilePageSwipe";
-import WeatherScenarioToggle from "@/components/WeatherScenarioToggle";
-import CalendarEventOverlay from "@/components/CalendarEventOverlay";
-import CalendarEventToggle from "@/components/CalendarEventToggle";
-import Script from "next/script";
-import { detectLocale, type Locale } from "@/config/locales";
+
+const MobilePageSwipe = dynamic(() => import("@/components/MobilePageSwipe"), { ssr: false });
+const CookieBanner = dynamic(() => import("@/components/CookieBanner"), { ssr: false });
+const InstallPrompt = dynamic(() => import("@/components/InstallPrompt"), { ssr: false });
+const FounderBanner = dynamic(() => import("@/components/FounderBanner"), { ssr: false });
+const GlobalPersonaModal = dynamic(() => import("@/components/GlobalPersonaModal"), { ssr: false });
+const WeatherScenarioToggle = dynamic(() => import("@/components/WeatherScenarioToggle"), { ssr: false });
+const CalendarEventOverlay = dynamic(() => import("@/components/CalendarEventOverlay"), { ssr: false });
+const CalendarEventToggle = dynamic(() => import("@/components/CalendarEventToggle"), { ssr: false });
 
 type SiteShellProps = {
-  activeDeal: any;
-  globalSchemasLd: unknown[];
+  globalSchemasLd: readonly unknown[];
   children: React.ReactNode;
 };
 
 export default function SiteShell({
-  activeDeal,
   globalSchemasLd,
   children,
 }: SiteShellProps) {
-  const pathname = usePathname() ?? "/";
-  const locale: Locale = detectLocale(pathname);
-  const isDE = locale === "de";
+  const [showDeferredShell, setShowDeferredShell] = useState(false);
+
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const timeout = window.matchMedia("(max-width: 767px)").matches ? 1800 : 900;
+    if (win.requestIdleCallback) {
+      const id = win.requestIdleCallback(() => setShowDeferredShell(true), { timeout });
+      return () => win.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(() => setShowDeferredShell(true), timeout);
+    return () => window.clearTimeout(id);
+  }, []);
 
   return (
     <>
@@ -36,33 +45,30 @@ export default function SiteShell({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchemasLd) }}
       />
-      <Script
-        id="adsense-loader"
-        strategy="lazyOnload"
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6187487207780127"
-        crossOrigin="anonymous"
-      />
 
-      {activeDeal && (
-        <AffiliateBanner
-          message={activeDeal.flash_deal_message}
-          link={activeDeal.flash_deal_link}
-          cta={isDE ? "Jetzt sichern" : "Profiteer nu"}
-          type={activeDeal.flash_deal_type as any}
-        />
-      )}
-
-      <GlobalNav />
-      <MobilePageSwipe />
+      <Suspense fallback={null}>
+        <GlobalNav />
+      </Suspense>
       <div className="min-h-[60vh]">{children}</div>
       <Footer />
-      <CalendarEventOverlay />
-      <CookieBanner />
-      <InstallPrompt />
-      <FounderBanner />
-      <GlobalPersonaModal />
-      <WeatherScenarioToggle />
-      <CalendarEventToggle />
+      {showDeferredShell && (
+        <>
+          <MobilePageSwipe />
+          <Suspense fallback={null}>
+            <CalendarEventOverlay />
+          </Suspense>
+          <CookieBanner />
+          <InstallPrompt />
+          <FounderBanner />
+          <GlobalPersonaModal />
+          <Suspense fallback={null}>
+            <WeatherScenarioToggle />
+          </Suspense>
+          <Suspense fallback={null}>
+            <CalendarEventToggle />
+          </Suspense>
+        </>
+      )}
     </>
   );
 }
