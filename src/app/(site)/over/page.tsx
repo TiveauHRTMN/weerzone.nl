@@ -1,28 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Info, Sparkles, Heart } from "lucide-react";
-import WeatherDashboard from "@/components/WeatherDashboard";
-import { DUTCH_CITIES } from "@/lib/types";
-import { fetchWeatherData } from "@/lib/weather";
-import { getSavedLocationServer } from "@/lib/location-cookies";
+import WeerzoneBackground from "@/components/WeerzoneBackground";
 
 export const metadata: Metadata = {
-  title: "Over ons",
+  title: "About",
   description:
-    "Lees waar WEERZONE voor staat: hyperlokale 48-uurs weersverwachting voor Nederland, zonder ruis en gericht op keuzes voor vandaag en morgen.",
-  keywords: [
-    "WEERZONE",
-    "over weerzone",
-    "hyperlokaal weer",
-    "48 uur weer",
-    "persoonlijk weerbericht",
-    "weerdienst nederland",
-  ],
+    "Weerzone is je persoonlijke weeragent voor de komende 48 uur. Piet geeft je dagelijkse heads-up, Reed helpt bij buien, wind en onweer, Koos helpt als je eropuit wilt.",
   alternates: { canonical: "https://weerzone.nl/over" },
   openGraph: {
-    title: "Over WEERZONE",
+    title: "About Weerzone",
     description:
-      "WEERZONE maakt weer bruikbaar: hyperlokaal, reclamevrij en gericht op beslissingen voor vandaag en morgen.",
+      "Weerzone is je persoonlijke weeragent voor de komende 48 uur. Piet, Reed en Koos helpen je beslissen.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl/over",
@@ -30,220 +18,236 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Over WEERZONE",
-    description:
-      "Waarom WEERZONE focust op 48 uur vooruit en hyperlokaal weeradvies.",
+    title: "About Weerzone",
+    description: "Je persoonlijke weeragent voor de komende 48 uur.",
   },
 };
 
-const PERSONAS = [
+const AGENTS = [
   {
+    key: "piet",
     name: "Piet",
+    role: "Je dagelijkse heads-up",
     href: "/mijnweer",
     color: "#10b981",
-    role: "Dagelijks weerbericht",
-    desc: "Piet vertaalt de komende 48 uur naar gewone taal: droogte, regen, wind en wat dat vandaag en morgen voor jou betekent.",
+    text:
+      "Piet helpt je elke dag snel begrijpen wat slim is. Naar buiten, wachten of later beter. Met aandacht voor weekend, schooldag en de plekken die voor jou tellen.",
   },
   {
+    key: "reed",
     name: "Reed",
+    role: "Voor buien, wind en onweer",
     href: "/waarschuwingen",
     color: "#ef4444",
-    role: "Waarschuwingen",
-    desc: "Reed meldt alleen als er echt iets op komst is, zoals onweer, storm, hitte of zware neerslag.",
+    text:
+      "Reed is de scherpe laag boven Piet. Buienkans, wind, onweer en omslagmomenten — met timing en onzekerheid als die nog meespeelt.",
   },
   {
-    name: "Steve",
-    href: "/zakelijk",
-    color: "#0ea5e9",
-    role: "Zakelijk",
-    desc: "Steve vertaalt weerdata naar operationele keuzes voor bedrijven die buiten werken of op bezoek, drukte en planning draaien.",
+    key: "koos",
+    name: "Koos",
+    role: "Als je eropuit wilt",
+    href: "/koos",
+    color: "#f59e0b",
+    text:
+      "Koos vergelijkt jouw plekken met andere locaties en zoekt waar het de komende 48 uur het prettigst is. Voor een vrije dag, weekend of dagje weg.",
+  },
+] as const;
+
+const FAQ_ITEMS = [
+  {
+    q: "Waarom kijkt Weerzone maar 48 uur vooruit?",
+    a: "Omdat je daar echt iets aan hebt. Vandaag en morgen kun je nog plannen — fiets pakken, was buiten, terras open, klus uitstellen. Verder vooruit geeft richting, maar te weinig zekerheid om op te beslissen. Weerzone kiest voor bruikbaar boven indrukwekkend.",
+  },
+  {
+    q: "Wat doet een agent eigenlijk?",
+    a: "Een agent is een vaste rol in Weerzone die uit het weer een heads-up maakt: wat moet je hiermee doen? Piet doet je dagelijkse beslismomenten, Reed let op risico's, Koos kijkt waar het beter is. Geen open chat — een heads-up komt naar jou toe, niet andersom.",
+  },
+  {
+    q: "Waarom geen heads-up als er niets bijzonders is?",
+    a: "Omdat ruis even erg is als geen verwachting. Heeft Weerzone niets te zeggen, dan zie je rust: \"Geen heads-ups. Je weerbeeld is stabiel.\" Dat is geen fout, dat is het signaal dat je gewoon kunt doen wat je van plan was.",
+  },
+  {
+    q: "Hoe werkt mijn locatie?",
+    a: "Je kiest je plek via de locatieknop bovenin. Die wordt onthouden voor je volgende bezoek. In Mijn Weerzone kun je later meerdere plekken bewaren; alleen die plekken kijken Piet en Reed actief voor je in de gaten.",
+  },
+  {
+    q: "Is Weerzone gratis?",
+    a: "Tot augustus 2026 is Weerzone volledig gratis te gebruiken. We bepalen daarna welke functies in een betaald abonnement passen, op basis van wat mensen écht waardevol vinden.",
+  },
+  {
+    q: "Hoe zit het met advertenties of partners?",
+    a: "Weerzone heeft geen advertenties, affiliate-links, hotelboekingen of reisdeals. Het is één product met één doel: jou helpen kiezen voor de komende 48 uur. Andere business-modellen passen daar niet bij.",
   },
 ];
 
-export default async function OverPage() {
-  const loc = await getSavedLocationServer().catch(() => null);
-  const activeLoc = loc || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
-  const initialWeather = await fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => undefined);
-  const faqItems = [
-    {
-      q: "Waarom kijkt WEERZONE maar 48 uur vooruit?",
-      a: "Weersverwachtingen worden exponentieel onnauwkeuriger naarmate de tijd vordert. De atmosfeer is een chaotisch systeem: kleine afwijkingen in de begintoestand leiden na 48 à 72 uur tot grote onzekerheden. WEERZONE focust bewust op de komende 48 uur omdat dit de periode is waarin modellen als HARMONIE, ICON-D2 en AROME nog uur-voor-uur betrouwbare uitkomsten geven. Verder vooruit geeft hoogstens een grove tendens — nuttig voor planning, maar niet voor concrete keuzes als 'ga ik fietsen' of 'plan ik buiten werk in'. Wij kiezen voor bruikbaarheid boven indruk.",
-    },
-    {
-      q: "Wat maakt WEERZONE anders dan Buienradar of Weerplaza?",
-      a: "WEERZONE combineert drie weermodellen tegelijk — HARMONIE (KNMI), ICON-D2 (DWD) en AROME — en vertaalt die ruwe modeldata naar één helder antwoord per locatie. Buienradar en Weerplaza tonen de data, WEERZONE interpreteert hem. Bovendien is WEERZONE reclamevrij en werkt het op 1×1 kilometer resolutie, waardoor een gehucht andere data kan krijgen dan de dichtstbijzijnde stad. De nadruk ligt op de vraag die iedereen eigenlijk stelt: wat betekent dit voor mij vandaag en morgen?",
-    },
-    {
-      q: "Hoe werkt de locatiebepaling?",
-      a: "WEERZONE vraagt je eenmalig om een plaatsnaam of postcode. Die locatie wordt opgeslagen in een cookie zodat je bij elk volgend bezoek direct de juiste weersverwachting ziet zonder opnieuw te zoeken. Je kunt de locatie altijd aanpassen via de locatieknop bovenin de pagina. De database bevat meer dan 14.000 plaatsen in Nederland en Vlaanderen — van grote steden tot kleine gehuchten en buurtschappen — zodat zelfs de meest afgelegen locatie eigen, hyperlokale data krijgt.",
-    },
-    {
-      q: "Is WEERZONE gratis?",
-      a: "WEERZONE is tijdelijk gratis te proberen tijdens de bètaperiode. Na de bèta worden de basisfuncties (weersverwachting per locatie) gratis gehouden. Uitgebreide functies zoals persoonlijke weerberichten van Piet, extreme-weerwaarschuwingen van Reed en zakelijke integraties via Steve vallen onder een betaald abonnement. De exacte tarieven en wat je per plan krijgt staan op de prijzenpagina. Er zijn geen verborgen kosten — je ziet altijd vooraf wat je betaalt.",
-    },
-    {
-      q: "Kan ik meerdere locaties opslaan?",
-      a: "Op dit moment volgt WEERZONE één actieve locatie tegelijk. Je kunt die locatie op elk moment wisselen via de locatieknop. De mogelijkheid om meerdere locaties op te slaan en snel te schakelen — handig als je op twee adressen woont of regelmatig ergens anders werkt — staat gepland voor een latere versie. Gebruikers van het betaalde plan krijgen dit als eerste. Als je je wilt aanmelden voor updates over nieuwe functies, kun je je registreren via de aanmeldpagina.",
-    },
-    {
-      q: "Hoe kan ik contact opnemen?",
-      a: "Je kunt WEERZONE bereiken via info@weerzone.nl of via het contactformulier op de contactpagina. Op werkdagen antwoorden we doorgaans binnen 24 uur. Voor technische vragen over de app, ontbrekende locaties of dataproblemen is e-mail de snelste weg. Voor zakelijke vragen — partnerships, API-integraties of B2B-abonnementen — kun je direct mailen met als onderwerp 'Zakelijk' zodat je bericht bij de juiste persoon terechtkomt.",
-    },
-  ];
+const JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "About Weerzone",
+    description:
+      "Weerzone is je persoonlijke weeragent voor de komende 48 uur, met Piet, Reed en Koos.",
+    url: "https://weerzone.nl/over",
+    inLanguage: "nl-NL",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+  },
+];
 
-  const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "AboutPage",
-      name: "Over WEERZONE",
-      description:
-        "WEERZONE richt zich op hyperlokale weersverwachtingen voor de komende 48 uur.",
-      url: "https://weerzone.nl/over",
-      inLanguage: "nl-NL",
-      speakable: {
-        "@type": "SpeakableSpecification",
-        cssSelector: ["h1", ".wz-about-intro", ".wz-about-philosophy"],
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faqItems.map(({ q, a }) => ({
-        "@type": "Question",
-        name: q,
-        acceptedAnswer: { "@type": "Answer", text: a },
-      })),
-    },
-  ];
-
+export default function OverPage() {
   return (
-    <main>
-      {jsonLd.map((schema, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-      ))}
-      <WeatherDashboard
-        hideWeatherInfo
-        initialCity={activeLoc}
-        initialWeather={initialWeather}
-        beforeFooter={
-          <div className="space-y-6">
-            <div className="card p-8 sm:p-12 lg:p-14">
-              <div className="flex items-center gap-2 mb-6">
-                <Info className="w-3.5 h-3.5 text-slate-400" strokeWidth={2.25} aria-hidden />
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                  Over · Weerzone
-                </span>
-              </div>
-              <h1 className="text-[40px] sm:text-[56px] font-black text-slate-900 leading-[1.04] tracking-[-0.025em] mb-6">
-                Weerzone maakt<br />weer bruikbaar.
-              </h1>
-              <p className="text-lg sm:text-xl text-slate-500 leading-[1.55] max-w-[34rem]">
-                WEERZONE is gebouwd voor mensen die iets met het weer moeten beslissen. Niet om eindeloos te scrollen door
-                lange verwachtingen, maar om te weten wat er vandaag en morgen op jouw plek gebeurt.
+    <>
+      <WeerzoneBackground />
+      <main className="relative z-10 px-4 py-12 sm:py-16 text-white">
+        {JSON_LD.map((schema, i) => (
+          <script
+            key={i}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
+
+        <div className="mx-auto max-w-3xl space-y-12">
+          {/* Header */}
+          <header className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
+              About
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white drop-shadow-sm leading-[1.05]">
+              Het idee achter Weerzone
+            </h1>
+          </header>
+
+          {/* Het idee — letterlijk uit de productdefinitie */}
+          <section className="rounded-2xl border border-white/20 bg-white p-7 sm:p-10 shadow-sm">
+            <p className="text-lg leading-relaxed text-slate-800">
+              Weerzone is gebouwd vanuit één simpele gedachte:
+              <br />
+              je wilt niet alleen weten wat het weer wordt, je wilt weten wat
+              je ermee moet doen.
+            </p>
+            <p className="mt-5 text-base leading-relaxed text-slate-700">
+              Daarom kijkt Weerzone 48 uur vooruit met Piet, Reed en Koos.
+              Piet geeft je dagelijkse heads-up. Reed helpt bij buien, wind en
+              onweer. Koos helpt als je eropuit wilt.
+            </p>
+          </section>
+
+          {/* Waarom gewone weerapps tekortschieten */}
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
+              Waarom gewone weerapps tekortschieten
+            </h2>
+            <div className="rounded-2xl border border-white/20 bg-white p-7 sm:p-9 shadow-sm">
+              <p className="text-base leading-relaxed text-slate-800">
+                De meeste weerapps geven je data. Tien dagen vooruit, vier
+                modellen, zes grafieken — en dan zelf maar uitzoeken wat je
+                vanavond doet. Weerzone draait die volgorde om. Je krijgt geen
+                ruwe data om te ontcijferen, maar een korte heads-up over wat
+                er ertoe doet, in jouw woorden, voor de komende 48 uur.
+              </p>
+              <p className="mt-4 text-base leading-relaxed text-slate-700">
+                Geen advertenties, geen reisdeals, geen partners die mee
+                willen praten. Eén product, één doel.
               </p>
             </div>
+          </section>
 
-            <div className="card p-6 sm:p-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-3.5 h-3.5 text-slate-400" strokeWidth={2.25} aria-hidden />
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                  Waar we voor staan
-                </span>
-              </div>
-              <p className="text-slate-900 font-black text-xl sm:text-2xl tracking-tight mb-3">
-                Hyperlokaal, kort op de bal en bruikbaar.
-              </p>
-              <p className="text-[15px] sm:text-base text-slate-600 leading-[1.6] max-w-[34rem]">
-                WEERZONE focust op de komende 48 uur, omdat dat de periode is waarin weersverwachtingen het meest bruikbaar
-                zijn voor planning per uur. Verder vooruit kan richting geven, maar is minder geschikt voor concrete keuzes.
-              </p>
-            </div>
-
-            <div className="card p-6 sm:p-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Heart className="w-3.5 h-3.5 text-slate-400" strokeWidth={2.25} aria-hidden />
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                  Onze filosofie
-                </span>
-              </div>
-              <p className="text-slate-900 font-black text-xl sm:text-2xl tracking-tight mb-3">
-                Eerlijke data, zonder poespas.
-              </p>
-              <p className="text-[15px] sm:text-base text-slate-600 leading-[1.6] max-w-[34rem]">
-                WEERZONE gebruikt de meest nauwkeurige bronnen om temperatuur, regen, wind en risico&apos;s zo
-                relevant mogelijk per locatie te tonen. Daarna vertalen we dat naar momenten en gevolgen: kun je droog
-                fietsen, buiten werken, of moet je rekening houden met een omslag in het weer.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-black text-white text-center mb-1">De onderdelen van WEERZONE</h2>
-              <p className="text-white/50 text-center mb-6 text-xs font-bold uppercase tracking-widest">
-                Voor thuis, waarschuwingen en zakelijk gebruik
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {PERSONAS.map((persona) => (
-                  <Link
-                    key={persona.name}
-                    href={persona.href}
-                    className="card p-5 hover:scale-[1.01] transition-transform"
-                  >
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: persona.color }}>
-                      {persona.name} · {persona.role}
-                    </p>
-                    <p className="text-text-secondary text-sm leading-relaxed">{persona.desc}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div id="faq">
-              <h2 className="text-2xl font-black text-white text-center mb-1">Veelgestelde vragen</h2>
-              <p className="text-white/50 text-center mb-6 text-xs font-bold uppercase tracking-widest">
-                Alles wat je wil weten over WEERZONE
-              </p>
-              <div className="space-y-2">
-                {[
-                  ["Waarom maar 48 uur vooruit?", "Omdat die periode het meest bruikbaar is voor concrete keuzes per uur. Verder vooruit geeft richting, maar voorspellingen worden snel onbetrouwbaar — wij houden ons aan wat de data accuraat kan zeggen."],
-                  ["Wat maakt WEERZONE anders dan Buienradar of Weerplaza?", "WEERZONE is reclamevrij en afgestemd op jouw situatie: postcode en de voorkeuren die je hebt doorgegeven. Geen eindeloze grafieken, maar één duidelijk antwoord op wat het weer vandaag en morgen voor jou betekent."],
-                  ["Hoe werkt de locatiebepaling?", "WEERZONE vraagt je eenmalig om een postcode of plaatsnaam. Je kunt dit altijd aanpassen via de locatieknop bovenin de pagina."],
-                  ["Is WEERZONE gratis?", "Tijdelijk gratis te proberen. Bekijk de abonnementspagina voor de tarieven na de bètaperiode."],
-                  ["Kan ik meerdere locaties opslaan?", "Op dit moment volgt WEERZONE één locatie tegelijk. Meerdere locaties is gepland voor een latere versie."],
-                  ["Hoe kan ik contact opnemen?", "Via info@weerzone.nl of via het contactformulier op de contactpagina. We antwoorden op werkdagen meestal binnen 24 uur."],
-                ].map(([q, a]) => (
-                  <details key={q} className="card group" style={{ padding: 0 }}>
-                    <summary
-                      className="flex justify-between items-center gap-3 cursor-pointer select-none list-none px-5 py-4"
-                      style={{ WebkitUserSelect: "none" }}
+          {/* Piet, Reed en Koos */}
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
+              Piet, Reed en Koos
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {AGENTS.map((agent) => (
+                <Link
+                  key={agent.key}
+                  href={agent.href}
+                  className="rounded-2xl border border-white/20 bg-white p-5 shadow-sm transition-transform hover:scale-[1.01]"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block h-1.5 w-1.5 rounded-full"
+                      style={{ background: agent.color }}
+                      aria-hidden
+                    />
+                    <span
+                      className="text-[10px] font-black uppercase tracking-[0.2em]"
+                      style={{ color: agent.color }}
                     >
-                      <span className="font-black text-text-primary text-sm">{q}</span>
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-black text-text-muted shrink-0 transition-transform group-open:rotate-45" style={{ background: "rgba(0,0,0,0.06)" }}>+</span>
-                    </summary>
-                    <div className="text-sm text-text-muted leading-relaxed px-5 pb-4">{a}</div>
-                  </details>
-                ))}
-              </div>
+                      {agent.name}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm font-bold text-slate-700">
+                    {agent.role}
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                    {agent.text}
+                  </p>
+                </Link>
+              ))}
             </div>
+            <p className="px-1 text-xs text-white/70">
+              Later komt Steve voor zakelijke heads-ups.
+            </p>
+          </section>
 
-            <div className="card p-6 sm:p-8 text-center">
-              <p className="text-slate-900 font-black text-xl sm:text-2xl tracking-tight mb-3">
-                Meer weten of beginnen?
-              </p>
-              <p className="text-[15px] text-slate-600 leading-[1.6] max-w-[28rem] mx-auto mb-6">
-                Bekijk het actuele weer, lees meer over de abonnementen of stuur direct een bericht naar info@weerzone.nl.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link href="/" className="btn btn-primary btn-lg">
-                  Naar homepage
-                </Link>
-                <Link href="/prijzen" className="btn btn-ghost btn-lg">
-                  Bekijk prijzen
-                </Link>
-              </div>
+          {/* Q&A */}
+          <section id="faq" className="space-y-3">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
+              Q&amp;A
+            </h2>
+            <div className="space-y-2">
+              {FAQ_ITEMS.map(({ q, a }) => (
+                <details
+                  key={q}
+                  className="group rounded-2xl border border-white/20 bg-white shadow-sm"
+                >
+                  <summary
+                    className="flex cursor-pointer select-none list-none items-center justify-between gap-3 px-5 py-4"
+                    style={{ WebkitUserSelect: "none" }}
+                  >
+                    <span className="text-sm font-black text-slate-900">{q}</span>
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-black text-slate-500 transition-transform group-open:rotate-45"
+                      style={{ background: "rgba(0,0,0,0.06)" }}
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <div className="px-5 pb-5 text-sm leading-relaxed text-slate-700">
+                    {a}
+                  </div>
+                </details>
+              ))}
             </div>
-          </div>
-        }
-      />
-    </main>
+          </section>
+
+          {/* Juridisch */}
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
+              Juridisch
+            </h2>
+            <div className="rounded-2xl border border-white/20 bg-white p-5 shadow-sm">
+              <ul className="space-y-2 text-sm font-bold text-slate-800">
+                <li>
+                  <Link href="/privacy" className="hover:text-slate-900 hover:underline">
+                    Privacybeleid
+                  </Link>
+                </li>
+                {/* Algemene voorwaarden en cookiebeleid komen in een latere fase. */}
+              </ul>
+            </div>
+          </section>
+        </div>
+      </main>
+    </>
   );
 }
