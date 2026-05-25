@@ -13,13 +13,9 @@ export const metadata: Metadata = {
     locale: "de_DE",
     siteName: "WEERZONE",
   },
-  alternates: {
-    languages: {
-      "nl-NL": "https://weerzone.nl",
-      "de-DE": "https://weerzone.nl/de",
-      "x-default": "https://weerzone.nl",
-    },
-  },
+  // Geen alternates op layout-niveau: het zou via metadata-merging op alle
+  // /de/* pagina's de root-cluster injecteren, terwijl elke pagina zijn eigen
+  // path-specifieke hreflang moet declareren. Zie src/lib/hreflang.ts.
 };
 
 const deStructuredData = [

@@ -4,20 +4,15 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import { ALL_PLACES } from "@/lib/places-data";
 import { fetchWeatherData } from "@/lib/weather";
 import { getJuanWeatherVerdict } from "@/app/actions";
+import { hreflangLanguages } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "Tiempo Espana hoy | Prevision local 48 horas | WEERZONE",
+  title: "Tiempo Espana hoy | Prevision local 48 horas",
   description:
     "Tiempo actual para Espana. Previsiones locales de 48 horas con temperatura, lluvia, viento y alertas para ciudades, pueblos, costas e islas.",
   alternates: {
     canonical: "https://weerzone.nl/es",
-    languages: {
-      "nl-NL": "https://weerzone.nl",
-      "de-DE": "https://weerzone.nl/de",
-      "fr-FR": "https://weerzone.nl/fr",
-      "es-ES": "https://weerzone.nl/es",
-      "x-default": "https://weerzone.nl",
-    },
+    languages: hreflangLanguages("/"),
   },
   openGraph: {
     title: "Tiempo Espana | WEERZONE",
@@ -31,7 +26,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "WEERZONE Espana",
-  description: "Prevision meteorologica hiperlocal para ciudades, pueblos, costas e islas de Espana.",
+  description: "Prevision local para ciudades, pueblos, costas e islas de Espana.",
   url: "https://weerzone.nl/es",
   inLanguage: "es-ES",
 };
@@ -98,6 +93,7 @@ export default async function EspanaHomepage() {
           initialWeather={initialWeather}
           locale="es"
           initialNarrative={juan}
+          titleOverride="WEERZONE — Tiempo hiperlocal en España, 48 horas por delante"
           beforeFooter={
             <>
               <section className="px-4 py-20">

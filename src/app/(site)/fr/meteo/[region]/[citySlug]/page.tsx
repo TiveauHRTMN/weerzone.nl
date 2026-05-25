@@ -5,8 +5,14 @@ import { fetchWeatherData } from "@/lib/weather";
 import { notFound } from "next/navigation";
 import { FR_REGION_TO_PROVINCE, FR_REGION_SLUGS, FR_REGION_LABELS } from "@/config/locales";
 import { getLucWeatherVerdict, getLocationSEOContent } from "@/app/actions";
+import { schemaBreadcrumb, schemaCityDataset, schemaLd, schemaWebPage } from "@/lib/schema";
+import { hreflangLuxembourg } from "@/lib/hreflang";
+import { getLocationWeatherProfile } from "@/lib/location-profile";
+import { buildCityGeoBlock } from "@/lib/geo-blocks";
+import CityGeoBlock from "@/components/CityGeoBlock";
 
 export function generateStaticParams() {
+  return [];
   const params: { region: string; citySlug: string }[] = [];
   for (const region of FR_REGION_SLUGS) {
     const province = FR_REGION_TO_PROVINCE[region];
@@ -39,15 +45,22 @@ export async function generateMetadata({
   const city = places.find((p) => placeSlug(p.name) === citySlug);
   if (!city) return {};
 
+  const frPath = `https://weerzone.nl/fr/meteo/${region}/${citySlug}`;
+  const languages: Record<string, string> =
+    region === "luxembourg"
+      ? hreflangLuxembourg(citySlug)
+      : {
+          "fr-FR": frPath,
+          "nl-NL": `https://weerzone.nl/weer/${province}/${citySlug}`,
+          "x-default": frPath,
+        };
+
   return {
     title: `Météo ${city.name} — Prévisions à 48 heures | WEERZONE`,
     description: `Météo hyperlocales pour ${city.name}. Prévisions heure par heure de la température, pluie, vent et alertes.`,
     alternates: {
-      canonical: `https://weerzone.nl/fr/meteo/${region}/${citySlug}`,
-      languages: {
-        "fr-FR": `https://weerzone.nl/fr/meteo/${region}/${citySlug}`,
-        "x-default": `https://weerzone.nl/fr/meteo/${region}/${citySlug}`,
-      },
+      canonical: frPath,
+      languages,
     },
     openGraph: {
       title: `Météo ${city.name} | WEERZONE`,
@@ -90,16 +103,40 @@ export default async function RegionCityPage({
     getLocationSEOContent(city.name, label, char, "fr"),
   ]);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl/fr" },
-      { "@type": "ListItem", position: 2, name: "Météo", item: "https://weerzone.nl/fr/meteo" },
-      { "@type": "ListItem", position: 3, name: label, item: `https://weerzone.nl/fr/meteo/${region}` },
-      { "@type": "ListItem", position: 4, name: city.name, item: `https://weerzone.nl/fr/meteo/${region}/${citySlug}` },
-    ],
-  };
+  const pageUrl = `https://weerzone.nl/fr/meteo/${region}/${citySlug}`;
+  const jsonLd = [
+    schemaBreadcrumb([
+      { name: "WEERZONE", item: "https://weerzone.nl/fr" },
+      { name: "Meteo", item: "https://weerzone.nl/fr/meteo" },
+      { name: label, item: `https://weerzone.nl/fr/meteo/${region}` },
+      { name: city.name, item: pageUrl },
+    ]),
+    schemaWebPage({
+      name: `Meteo ${city.name} - WEERZONE`,
+      url: pageUrl,
+      description: `Meteo hyperlocale pour ${city.name}. Previsions heure par heure de la temperature, pluie, vent et alertes.`,
+      inLanguage: "fr-FR",
+      speakableSelectors: ["h1", "[data-speakable]", ".card"],
+    }),
+    schemaCityDataset({
+      placeName: city.name,
+      url: pageUrl,
+      inLanguage: "fr-FR",
+      name: `Donnees meteo hyperlocales ${city.name}`,
+      description: `Previsions hyperlocales pour ${city.name}, avec temperature, pluie, vent et horizon de 48 heures.`,
+    }),
+  ];
+
+  const nowHour = new Date();
+  nowHour.setMinutes(0, 0, 0);
+  const geoBlock = buildCityGeoBlock({
+    place: city,
+    regionLabel: label,
+    profile: getLocationWeatherProfile(city),
+    weather: weather ?? undefined,
+    locale: "fr",
+    dateModified: nowHour,
+  });
 
   return (
     <>
@@ -115,6 +152,8 @@ export default async function RegionCityPage({
         locale="fr"
         beforeFooter={
           <div className="mt-12 mb-20 px-6 max-w-4xl mx-auto space-y-10">
+            <CityGeoBlock block={geoBlock} inLanguage="fr-FR" />
+
             {lucUrteil && (
               <div className="card p-6 bg-[#22c55e]/5 border border-[#22c55e]/20 overflow-hidden relative group">
                 <div className="absolute -right-4 -top-4 text-6xl opacity-10 group-hover:rotate-12 transition-transform">
@@ -138,7 +177,7 @@ export default async function RegionCityPage({
 
             {seoText && (
               <div className="card p-6 border-white/5">
-                <p className="text-sm text-text-secondary leading-relaxed">
+                <p className="text-sm text-text-secondary leading-relaxed" data-speakable>
                   {seoText}
                 </p>
               </div>

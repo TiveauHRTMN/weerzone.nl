@@ -12,7 +12,6 @@ import { fetchWeatherData } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import Link from "next/link";
-import { getMarianaLocalSEOIntelligence } from "@/lib/mariana/seo-intelligence";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
 
 interface PageProps {
@@ -24,6 +23,7 @@ interface PageProps {
  * Next.js genereert ze on-demand (ISR) zodra Google ze crawlt via de sitemap.
  */
 export function generateStaticParams() {
+  return [];
   // We pre-renderen de belangrijkste steden (pop > 10.000) voor razendsnelle initiële indexering.
   // De overige 10.000+ worden on-demand (ISR) gegenereerd.
   return ALL_PLACES
@@ -35,6 +35,10 @@ export function generateStaticParams() {
 }
 
 import { getHermesSEO } from "@/lib/seo";
+import { hreflangSelf } from "@/lib/hreflang";
+import { PROVINCE_TO_DE_BUNDESLAND, PROVINCE_TO_FR_REGION } from "@/config/locales";
+import { buildCityGeoBlock } from "@/lib/geo-blocks";
+import CityGeoBlock from "@/components/CityGeoBlock";
 
 export const revalidate = 300;
 
@@ -48,24 +52,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const locationProfile = getLocationWeatherProfile(place);
 
   const title = `Weer ${place.name} | 10x nauwkeuriger op straatniveau`;
-  const description = hermesSEO?.meta_description || `${locationProfile.summary} Bekijk het weer in ${place.name} (${provLabel}) per uur: temperatuur, regen, wind en lokale Mariana-correcties.`;
+  const description = hermesSEO?.meta_description || `${locationProfile.summary} Bekijk het weer in ${place.name} (${provLabel}) per uur: temperatuur, regen, wind en lokale context.`;
+
+  const nlPath = `/weer/${province}/${slug}`;
+  const languages: Record<string, string> = { ...hreflangSelf("nl", nlPath) };
+
+  // Cross-locale equivalenten: plaatsen die ook in een andere taal-host bestaan
+  // (Duitse/Franse/Spaanse/Luxemburgse plaatsen leven onder hun eigen provincie
+  // in NL én onder hun locale-route). Voeg hreflang toe zodat Google ze koppelt.
+  const bundesland = PROVINCE_TO_DE_BUNDESLAND[province as keyof typeof PROVINCE_TO_DE_BUNDESLAND];
+  const frRegion = PROVINCE_TO_FR_REGION[province as keyof typeof PROVINCE_TO_FR_REGION];
+  if (bundesland) {
+    languages["de-DE"] = `https://weerzone.nl/de/wetter/${bundesland}/${slug}`;
+  }
+  if (frRegion) {
+    languages["fr-FR"] = `https://weerzone.nl/fr/meteo/${frRegion}/${slug}`;
+  }
+  if (province === "spanje") {
+    languages["es-ES"] = `https://weerzone.nl/es/tiempo/espana/${slug}`;
+  }
 
   return {
     title,
     description,
     robots: { index: true, follow: true },
-    keywords: [
-      `weer ${place.name.toLowerCase()}`,
-      `weer ${place.name.toLowerCase()} vandaag`,
-      `weer ${place.name.toLowerCase()} morgen`,
-      `weerbericht ${place.name.toLowerCase()}`,
-      `temperatuur ${place.name.toLowerCase()}`,
-      `regen ${place.name.toLowerCase()}`,
-      `onweer ${place.name.toLowerCase()}`,
-      `weer ${provLabel.toLowerCase()}`,
-      "weer nederland",
-      "weerzone",
-    ],
     openGraph: {
       title: `Weer ${place.name} — WEERZONE`,
       description,
@@ -81,6 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     alternates: {
       canonical: `https://weerzone.nl/weer/${province}/${slug}`,
+      languages,
     },
   };
 }
@@ -92,16 +103,14 @@ const TOP_CITIES = [
   "Zwolle", "Zoetermeer", "Leiden", "Dordrecht", "'s-Hertogenbosch"
 ];
 
-import { headers } from "next/headers";
-
 export default async function PlaceWeatherPage({ params }: PageProps) {
   const { province, place: slug } = await params;
   let place = findPlace(province, slug);
-  
-  // Bot detectie voor besparen API limits
-  const headersList = await headers();
-  const userAgent = headersList.get("user-agent")?.toLowerCase() || "";
-  const isBot = /googlebot|bingbot|yandex|baiduspider|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator/i.test(userAgent);
+
+  // Bot-detectie via headers() is weggehaald — was dynamisch-renderen forceren
+  // zonder echt effect. fetchWeatherData hieronder geeft forceHighRes=false,
+  // waardoor de isBot-vlag intern alsnog nergens gelezen werd. Nu kan deze
+  // pagina via revalidate=300 cachebaar zijn.
 
   // Als niet in statische lijst, check DB (OpenClaw's vondsten)
   if (!place) {
@@ -135,12 +144,11 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   const locationProfile = getLocationWeatherProfile(place);
 
   // Fetch weather, KNMI warnings, and SEO data all in parallel
-  const [initialWeather, allWarnings, hermesSEO, seoContent, marianaSEO] = await Promise.all([
-    fetchWeatherData(place.lat, place.lon, isBot, false, place).catch(() => undefined),
+  const [initialWeather, allWarnings, hermesSEO, seoContent] = await Promise.all([
+    fetchWeatherData(place.lat, place.lon, false, false, place).catch(() => undefined),
     fetchKNMIWarnings().catch(() => []),
     getHermesSEO(place.name, province).catch(() => null),
     getLocationSEOContent(place.name, provLabel, place.character).catch(() => ""),
-    getMarianaLocalSEOIntelligence(place).catch(() => null),
   ]);
   const provinceWarnings = warningsForProvince(allWarnings, province);
 
@@ -190,6 +198,14 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   const city = { name: place.name, lat: place.lat, lon: place.lon };
 
+  const geoBlock = buildCityGeoBlock({
+    place,
+    regionLabel: provLabel,
+    profile: locationProfile,
+    weather: initialWeather,
+    locale: "nl",
+    dateModified: now,
+  });
 
   return (
     <>
@@ -205,10 +221,12 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
         <KnmiWarningBanner warnings={provinceWarnings} />
 
         <WeatherDashboard
-          initialCity={place} 
-          initialWeather={initialWeather} 
+          initialCity={place}
+          initialWeather={initialWeather}
           beforeFooter={
             <div className="space-y-6 pt-10">
+              <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
+
               {/* Action Grid: Piet & Zakelijk side-by-side */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link 
@@ -258,38 +276,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
                   />
                 )}
               </div>
-
-              {marianaSEO && (
-                <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
-                  <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <span className="text-accent-cyan">Mariana</span> Atmosferisch geheugen
-                  </h2>
-                  <p className="text-white/65 text-xs leading-relaxed mb-4">
-                    {marianaSEO.summary}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Dominant</p>
-                      <p className="text-xs font-black text-white">
-                        {marianaSEO.dominantModels.length ? marianaSEO.dominantModels.join(" + ") : "In opbouw"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Risico</p>
-                      <p className="text-xs font-black text-white">
-                        {marianaSEO.localRisks.length ? marianaSEO.localRisks.join(", ") : "geen duidelijke afwijking"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-white/8 border border-white/10 p-4">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Validaties</p>
-                      <p className="text-xs font-black text-white">{marianaSEO.sampleCount}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-[11px] font-semibold leading-relaxed text-white/45">
-                    {marianaSEO.confidenceNote} {marianaSEO.timingNote}
-                  </p>
-                </div>
-              )}
 
               <ProvinceTopCities province={province} currentCity={place.name} />
               <NearbyLinks currentCity={place.name} places={nearbyPlaces(place, 12)} />

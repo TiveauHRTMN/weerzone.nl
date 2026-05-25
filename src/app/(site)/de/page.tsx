@@ -4,20 +4,15 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import { ALL_PLACES } from "@/lib/places-data";
 import { fetchWeatherData } from "@/lib/weather";
 import { PERSONAS, PERSONA_ORDER_DE } from "@/lib/personas";
+import { hreflangLanguages } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "Wetter Deutschland heute | Lokale 48-Stunden-Wettervorhersage | WEERZONE",
+  title: "Wetter Deutschland heute | Lokale 48-Stunden-Wettervorhersage",
   description:
     "Aktuelles Wetter für Deutschland. Präzise lokale Wettervorhersagen, Temperaturen, Regenwahrscheinlichkeit, Wind und Warnungen für die nächsten 48 Stunden.",
   alternates: {
     canonical: "https://weerzone.nl/de",
-    languages: {
-      "nl-NL": "https://weerzone.nl",
-      "nl-BE": "https://weerzone.nl",
-      "de-DE": "https://weerzone.nl/de",
-      "fr-FR": "https://weerzone.nl/fr",
-      "x-default": "https://weerzone.nl",
-    },
+    languages: hreflangLanguages("/"),
   },
   openGraph: {
     title: "Wetter Deutschland | WEERZONE",
@@ -40,20 +35,26 @@ const berlin = ALL_PLACES.find((place) => place.name === "Berlin") ?? ALL_PLACES
 
 // Duitse copy voor persona's — Karl is DE-equivalent van Piet, Reed/Steve krijgen
 // hier hun DE-vertaling omdat de centrale PERSONAS-config nog NL-copy heeft.
-const DE_PERSONA_COPY: Record<string, { tagline: string; description: string; cta: string }> = {
+const DE_PERSONA_COPY: Record<string, { name: string; label: string; tagline: string; description: string; cta: string }> = {
   karl: {
+    name: "Karl",
+    label: "Basis",
     tagline: "Dein lokaler Wetterassistent für Deutschland.",
     description:
       "Karl schickt dir jeden Morgen vor 7 Uhr eine kurze Mail: Was das Wetter heute und morgen an deiner genauen Adresse macht.",
     cta: "Karl ansehen",
   },
   reed: {
+    name: "Reed",
+    label: "Warnungen",
     tagline: "Warnung, wenn das Wetter deine Grenze überschreitet.",
     description:
       "Reed meldet sich nur, wenn das Wetter durch deine Schwelle geht. Bei allem anderen lässt er dich in Ruhe.",
     cta: "Reed ansehen",
   },
   steve: {
+    name: "Steve",
+    label: "Business",
     tagline: "Wetter, übersetzt in eine Geschäftsentscheidung.",
     description:
       "Steve liest das Wetter 48 Stunden voraus und übersetzt es: öffnen, schließen, einkaufen oder absagen.",
@@ -118,6 +119,7 @@ export default async function DeutschlandHomepage() {
           initialCity={berlin}
           initialWeather={initialWeather}
           locale="de"
+          titleOverride="WEERZONE — Wetter für Deutschland, 48 Stunden voraus"
           beforeFooter={
             <>
               {/* TrustSection — DE-equivalent van src/components/TrustSection.tsx */}
@@ -190,7 +192,7 @@ export default async function DeutschlandHomepage() {
                         Genauigkeit pro Tag
                       </p>
                       <p className="text-white/35 text-[10px] font-bold mb-6">
-                        Typische Modellgenauigkeit (DWD ICON-D2) für Deutschland
+                        Typische Zuverlaessigkeit fuer Deutschland
                       </p>
 
                       <div className="flex flex-col gap-3 flex-1">
@@ -263,7 +265,7 @@ export default async function DeutschlandHomepage() {
                         <div className="flex items-center gap-2 mb-4">
                           <span className="w-3 h-3 rounded-full" style={{ background: p.color }} />
                           <span className="text-xs font-black uppercase tracking-widest" style={{ color: p.color }}>
-                            {p.name} · {p.label}
+                            {de.name} · {de.label}
                           </span>
                         </div>
                         <h3 className="font-black text-slate-900 text-xl leading-snug mb-3">{de.tagline}</h3>

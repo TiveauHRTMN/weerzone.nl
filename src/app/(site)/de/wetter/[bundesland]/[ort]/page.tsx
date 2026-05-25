@@ -6,17 +6,22 @@ import { getKarlWeatherVerdict, getLocationSEOContent } from "@/app/actions";
 import { fetchWeatherData } from "@/lib/weather";
 import Link from "next/link";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
+import { schemaBreadcrumb, schemaCityDataset, schemaLd, schemaWebPage } from "@/lib/schema";
 import {
   DE_BUNDESLAND_TO_PROVINCE,
   DE_BUNDESLAND_LABELS,
   PROVINCE_TO_DE_BUNDESLAND,
 } from "@/config/locales";
+import { hreflangLuxembourg } from "@/lib/hreflang";
+import { buildCityGeoBlock } from "@/lib/geo-blocks";
+import CityGeoBlock from "@/components/CityGeoBlock";
 
 interface PageProps {
   params: Promise<{ bundesland: string; ort: string }>;
 }
 
 export function generateStaticParams() {
+  return [];
   return ALL_PLACES.filter((p) => {
     const bl = PROVINCE_TO_DE_BUNDESLAND[p.province as keyof typeof PROVINCE_TO_DE_BUNDESLAND];
     return bl && p.population && p.population >= 20000;
@@ -36,23 +41,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!place) return {};
   const label = DE_BUNDESLAND_LABELS[bundesland] ?? bundesland;
 
+  const dePath = `https://weerzone.nl/de/wetter/${bundesland}/${ort}`;
+  const languages: Record<string, string> =
+    bundesland === "luxembourg"
+      ? hreflangLuxembourg(ort)
+      : {
+          "de-DE": dePath,
+          "nl-NL": `https://weerzone.nl/weer/${province}/${ort}`,
+          "x-default": dePath,
+        };
+
   return {
-    title: `Wetter ${place.name} | 48h Vorhersage ${label} | WEERZONE`,
+    title: `Wetter ${place.name} | 48h Vorhersage ${label}`,
     description: `Aktuelles Wetter in ${place.name} (${label}). Stündliche Prognose für Temperatur, Regen und Wind — 48 Stunden voraus, auf 1 km genau.`,
     robots: { index: true, follow: true },
     alternates: {
-      canonical: `https://weerzone.nl/de/wetter/${bundesland}/${ort}`,
-      languages: {
-        "de-DE": `https://weerzone.nl/de/wetter/${bundesland}/${ort}`,
-        "x-default": `https://weerzone.nl/de/wetter/${bundesland}/${ort}`,
-      },
+      canonical: dePath,
+      languages,
     },
     openGraph: {
       title: `Wetter ${place.name} — WEERZONE`,
       description: `48h Wettervorhersage für ${place.name} in ${label}.`,
       type: "website",
       locale: "de_DE",
-      url: `https://weerzone.nl/de/wetter/${bundesland}/${ort}`,
+      url: dePath,
       siteName: "WEERZONE",
     },
   };
@@ -82,21 +94,40 @@ export default async function OrtWeatherPage({ params }: PageProps) {
     PROVINCE_TO_DE_BUNDESLAND[p.province as keyof typeof PROVINCE_TO_DE_BUNDESLAND],
   );
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
-      { "@type": "ListItem", position: 2, name: "Wetter", item: "https://weerzone.nl/de/wetter" },
-      { "@type": "ListItem", position: 3, name: label, item: `https://weerzone.nl/de/wetter/${bundesland}` },
-      {
-        "@type": "ListItem",
-        position: 4,
-        name: place.name,
-        item: `https://weerzone.nl/de/wetter/${bundesland}/${ort}`,
-      },
-    ],
-  };
+  const pageUrl = `https://weerzone.nl/de/wetter/${bundesland}/${ort}`;
+  const jsonLd = [
+    schemaBreadcrumb([
+      { name: "WEERZONE", item: "https://weerzone.nl" },
+      { name: "Wetter", item: "https://weerzone.nl/de/wetter" },
+      { name: label, item: `https://weerzone.nl/de/wetter/${bundesland}` },
+      { name: place.name, item: pageUrl },
+    ]),
+    schemaWebPage({
+      name: `Wetter ${place.name} - WEERZONE`,
+      url: pageUrl,
+      description: `Aktuelles Wetter in ${place.name} (${label}). Stundliche Prognose fuer Temperatur, Regen und Wind.`,
+      inLanguage: "de-DE",
+      speakableSelectors: ["h1", "[data-speakable]", ".card"],
+    }),
+    schemaCityDataset({
+      placeName: place.name,
+      url: pageUrl,
+      inLanguage: "de-DE",
+      name: `Hyperlokale Wetterdaten ${place.name}`,
+      description: `Lokale Vorhersage fuer ${place.name} in ${label}, mit Temperatur, Regen, Wind und 48-Stunden-Horizont.`,
+    }),
+  ];
+
+  const nowHour = new Date();
+  nowHour.setMinutes(0, 0, 0);
+  const geoBlock = buildCityGeoBlock({
+    place,
+    regionLabel: label,
+    profile: locationProfile,
+    weather: initialWeather,
+    locale: "de",
+    dateModified: nowHour,
+  });
 
   return (
     <>
@@ -112,6 +143,8 @@ export default async function OrtWeatherPage({ params }: PageProps) {
           initialNarrative={karlVerdict}
           beforeFooter={
             <div className="space-y-6 pt-10">
+              <CityGeoBlock block={geoBlock} inLanguage="de-DE" />
+
               {/* CTAs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link

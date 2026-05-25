@@ -4,20 +4,15 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import { FRENCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 import { PERSONAS, PERSONA_ORDER } from "@/lib/personas";
+import { hreflangLanguages } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "Météo France aujourd'hui | Prévisions locales à 48h | WEERZONE",
+  title: "Météo France aujourd'hui | Prévisions locales à 48h",
   description:
     "Météo actuelle pour la France. Prévisions météo locales précises, températures, probabilité de pluie, vent et alertes pour les 48 prochaines heures.",
   alternates: {
     canonical: "https://weerzone.nl/fr",
-    languages: {
-      "nl-NL": "https://weerzone.nl",
-      "nl-BE": "https://weerzone.nl",
-      "de-DE": "https://weerzone.nl/de",
-      "fr-FR": "https://weerzone.nl/fr",
-      "x-default": "https://weerzone.nl",
-    },
+    languages: hreflangLanguages("/"),
   },
   openGraph: {
     title: "Météo France | WEERZONE",
@@ -38,21 +33,26 @@ const jsonLd = {
 
 const paris = FRENCH_CITIES.find((place) => place.name === "Paris") ?? FRENCH_CITIES[0];
 
-// French copy for personas — Piet becomes the default entry tier for now
-const FR_PERSONA_COPY: Record<string, { tagline: string; description: string; cta: string }> = {
+const FR_PERSONA_COPY: Record<string, { name: string; label: string; tagline: string; description: string; cta: string }> = {
   piet: {
+    name: "Luc",
+    label: "Base",
     tagline: "Votre assistant météo local pour la France.",
     description:
       "Luc vous envoie un court e-mail tous les matins avant 7h : ce que fait la météo aujourd'hui et demain à votre adresse précise.",
     cta: "Découvrir la Base",
   },
   reed: {
+    name: "Reed",
+    label: "Alertes",
     tagline: "Alerte lorsque la météo dépasse vos limites.",
     description:
       "Reed ne vous contacte que lorsque la météo franchit votre seuil. Pour le reste, il vous laisse tranquille.",
     cta: "Découvrir Reed",
   },
   steve: {
+    name: "Steve",
+    label: "Professionnel",
     tagline: "La météo traduite en décision commerciale.",
     description:
       "Steve lit la météo 48h à l'avance et la traduit : ouvrir, fermer, acheter ou annuler.",
@@ -117,6 +117,7 @@ export default async function FranceHomepage() {
           initialCity={paris}
           initialWeather={initialWeather}
           locale="fr"
+          titleOverride="WEERZONE — Météo hyperlocale pour la France, à 48 heures"
           beforeFooter={
             <>
               {/* TrustSection */}
@@ -189,7 +190,7 @@ export default async function FranceHomepage() {
                         Précision par jour
                       </p>
                       <p className="text-white/35 text-[10px] font-bold mb-6">
-                        Précision typique des modèles (AROME/ICON) pour la France
+                        Fiabilite typique pour la France
                       </p>
 
                       <div className="flex flex-col gap-3 flex-1">
@@ -262,7 +263,7 @@ export default async function FranceHomepage() {
                         <div className="flex items-center gap-2 mb-4">
                           <span className="w-3 h-3 rounded-full" style={{ background: p.color }} />
                           <span className="text-xs font-black uppercase tracking-widest" style={{ color: p.color }}>
-                            {p.name} · {p.label}
+                            {fr.name} · {fr.label}
                           </span>
                         </div>
                         <h3 className="font-black text-slate-900 text-xl leading-snug mb-3">{fr.tagline}</h3>
