@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `src/lib/supabase.ts` `getSupabase()` (legacy, used by server components like `layout.tsx`)
   - `src/lib/supabase/{client,server,admin}.ts` (SSR cookie-aware + service-role admin)
   - SQL lives in `supabase/*.sql` and `supabase/migrations/`
-- Auth: Supabase magic links (`src/app/(site)/auth`, `AuthGate.tsx`, `AuthShell.tsx`, `wz/WzAuthShell.tsx`)
+- Auth: Supabase magic links (`src/app/(site)/auth`, `AuthShell.tsx`, `wz/WzAuthShell.tsx`); auth-page copy + locale lives in `src/lib/auth-i18n.tsx`
 - Payments: Mollie (`src/lib/mollie.ts`, `(site)/api/checkout-persona`, `(site)/api/webhooks`)
 - Email: Resend + React Email templates (`src/lib/*-email.ts`, `supabase/email-templates/`)
 - LLMs/AI: Anthropic SDK, OpenAI, Google Generative AI — wired through the orchestrators in `src/lib`
@@ -84,7 +84,7 @@ When adding logic, prefer extending an existing `lib/*.ts` file over introducing
 
 ### Components (`src/components/`)
 
-Flat directory of ~90 feature components — no `ui/` subfolder convention. The `wz/` subfolder owns the global chrome (`SiteShell` mounts `wz/GlobalNav`, `WzFooter`, etc.). Persona/paywall flow centers on `GlobalPersonaModal`, `PersonaModal`, `PersonaCard`, `PremiumGate`, `AuthGate`. Locale-specific pulse banners: `BEPulse`, `DEPulse`, `ESPulse`, `FRPulse`, `LuxPulse`.
+Flat directory of ~90 feature components — no `ui/` subfolder convention. The `wz/` subfolder owns the global chrome (`SiteShell` mounts `wz/GlobalNav`, `WzFooter`, etc.). Persona/paywall flow centers on `GlobalPersonaModal`, `PersonaModal`, `PersonaCard`, `PremiumGate`. Locale-specific pulse banners: `BEPulse`, `DEPulse`, `ESPulse`, `FRPulse`, `LuxPulse`.
 
 ### Scripts (`scripts/`)
 

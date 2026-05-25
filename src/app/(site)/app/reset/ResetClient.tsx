@@ -2,18 +2,19 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import WzAuthShell from "@/components/wz/WzAuthShell";
-import { detectLocale } from "@/config/locales";
 import { WzTextField } from "@/components/wz/WzForm";
+import { appendLang, audienceCopy, resolveAuthAudience } from "@/lib/auth-i18n";
 
 export default function ResetClient() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const locale = searchParams?.get("lang") === "de" ? "de" : detectLocale("/");
-  const isDE = locale === "de";
+  const audience = resolveAuthAudience(searchParams?.get("lang"), pathname);
+  const t = audienceCopy(audience);
 
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -23,12 +24,13 @@ export default function ResetClient() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !/.+@.+\..+/.test(email)) {
-      setError(isDE ? "Gib eine gültige E-Mail-Adresse ein" : "Vul een geldig e-mailadres in");
+      setError(t.invalidEmail);
       return;
     }
     setError(null);
     setLoading(true);
-    const redirectTo = `${window.location.origin}/auth/callback?next=/app/reset/confirm${isDE ? "&lang=de" : ""}`;
+    const next = appendLang("/app/reset/confirm", audience);
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
     const { error: resetErr } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
       { redirectTo },
@@ -42,24 +44,19 @@ export default function ResetClient() {
   }
 
   return (
-    <WzAuthShell
-      title={isDE ? "Keine Sorge, das bekommen wir hin." : "Geen zorgen, dat lossen we zo op."}
-      subtitle={isDE ? "Gib deine E-Mail-Adresse ein und wir schicken dir innerhalb einer Minute einen Link, um ein neues Passwort festzulegen." : "Vul je e-mailadres in en we sturen je binnen een minuut een link om een nieuw wachtwoord in te stellen."}
-    >
+    <WzAuthShell title={t.resetSideTitle} subtitle={t.resetSideSubtitle}>
       {!sent ? (
         <>
-          <h1 className="wz-h-1 mb-2">{isDE ? "Passwort vergessen" : "Wachtwoord vergeten"}</h1>
-          <p className="wz-body mb-6">
-            {isDE ? "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link, um dein Passwort neu festzulegen." : "Vul je e-mailadres in. We sturen je een link om je wachtwoord opnieuw in te stellen."}
-          </p>
+          <h1 className="wz-h-1 mb-2">{t.resetHeading}</h1>
+          <p className="wz-body mb-6">{t.resetBody}</p>
 
           <form onSubmit={handleSubmit} noValidate>
             <WzTextField
-              label={isDE ? "E-Mail-Adresse" : "E-mailadres"}
+              label={t.email}
               type="email"
               value={email}
               onChange={setEmail}
-              placeholder={isDE ? "du@beispiel.de" : "je@voorbeeld.nl"}
+              placeholder={t.emailPlaceholder}
               error={error ?? undefined}
               autoFocus
               autoComplete="email"
@@ -69,17 +66,17 @@ export default function ResetClient() {
               disabled={loading}
               className="wz-btn wz-btn-primary wz-btn-block wz-btn-lg disabled:opacity-60"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : isDE ? "Reset-Link senden" : "Stuur reset link"}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t.resetSubmit}
             </button>
           </form>
 
           <p className="text-sm text-center mt-5" style={{ color: "var(--wz-text-mute)" }}>
             <Link
-              href={isDE ? "/app/login?lang=de" : "/app/login"}
+              href={appendLang("/app/login", audience)}
               className="font-bold no-underline hover:underline"
               style={{ color: "var(--wz-brand)" }}
             >
-              {isDE ? "← Zurück zum Login" : "← Terug naar inloggen"}
+              {t.resetBackToLogin}
             </Link>
           </p>
         </>
@@ -91,24 +88,23 @@ export default function ResetClient() {
           >
             <Check className="w-8 h-8" strokeWidth={2.5} />
           </div>
-          <h1 className="wz-h-1 mb-2">{isDE ? "Posteingang prüfen" : "Check je inbox"}</h1>
-          <p className="wz-body mb-6">
-            {isDE ? "Wir haben einen Link an" : "We hebben een link gestuurd naar"}{" "}
-            <strong style={{ color: "var(--wz-text)" }}>{email}</strong>.
-            {isDE ? " Klicke darauf, um dein Passwort zurückzusetzen." : " Klik erop om je wachtwoord opnieuw in te stellen."}
-          </p>
-          <Link href={isDE ? "/app/login?lang=de" : "/app/login"} className="wz-btn wz-btn-ghost wz-btn-block">
-            {isDE ? "Zurück zum Login" : "Terug naar inloggen"}
+          <h1 className="wz-h-1 mb-2">{t.resetSentTitle}</h1>
+          <p className="wz-body mb-6">{t.resetSentBody(email)}</p>
+          <Link
+            href={appendLang("/app/login", audience)}
+            className="wz-btn wz-btn-ghost wz-btn-block"
+          >
+            {t.resetBackToLogin.replace(/^← ?/, "")}
           </Link>
           <p className="text-sm mt-5" style={{ color: "var(--wz-text-mute)" }}>
-            {isDE ? "Keine E-Mail erhalten?" : "Geen e-mail ontvangen?"}{" "}
+            {t.resetNotReceived}{" "}
             <button
               type="button"
               onClick={() => setSent(false)}
               className="font-bold bg-transparent border-0 cursor-pointer p-0"
               style={{ color: "var(--wz-brand)" }}
             >
-              {isDE ? "Erneut versuchen" : "Opnieuw proberen"}
+              {t.resetTryAgain}
             </button>
           </p>
         </div>
