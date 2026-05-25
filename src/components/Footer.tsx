@@ -14,155 +14,169 @@ const SOCIALS = [
   { label: "Wikidata", href: "https://www.wikidata.org/wiki/Q139675943" },
 ];
 
+type NavItem = { label: string; href: string };
+type FooterCopy = { tagline: [string, string]; credits: string; back: string };
+
+const BE_PROVINCES = new Set(["antwerpen", "limburg-be", "oost-vlaanderen", "vlaams-brabant", "west-vlaanderen"]);
+
+const FOOTER_COPY: Record<Locale, FooterCopy> = {
+  nl: {
+    tagline: ["Weer voor jouw plek.", "Vandaag en morgen."],
+    credits: "WEERZONE combineert actuele weergegevens met heldere uitleg voor jouw locatie. De officiële bronnen behouden hun eigen credits.",
+    back: "Terug naar home",
+  },
+  de: {
+    tagline: ["Wetter für deinen Ort.", "Heute und morgen."],
+    credits: "WEERZONE verbindet aktuelle Wetterdaten mit klarer Erklärung für deinen Ort. Die offiziellen Quellen behalten ihre eigenen Credits.",
+    back: "Zur Startseite",
+  },
+  fr: {
+    tagline: ["Météo pour votre lieu.", "Aujourd'hui et demain."],
+    credits: "WEERZONE relie les données météo actuelles à une explication claire pour votre lieu. Les sources officielles gardent leurs propres crédits.",
+    back: "Retour à l'accueil",
+  },
+  es: {
+    tagline: ["Tiempo para tu lugar.", "Hoy y mañana."],
+    credits: "WEERZONE combina datos actuales del tiempo con una explicación clara para tu lugar. Las fuentes oficiales conservan sus propios créditos.",
+    back: "Volver al inicio",
+  },
+};
+
+function navItems(pathname: string, locale: Locale): NavItem[] {
+  if (pathname === "/lu" || pathname.startsWith("/lu/") || pathname.includes("/luxembourg")) {
+    return [
+      { label: "Luxembourg", href: locale === "de" ? "/de/wetter/luxembourg" : "/fr/meteo/luxembourg" },
+      { label: "Esch-sur-Alzette", href: locale === "de" ? "/de/wetter/luxembourg/esch-sur-alzette" : "/fr/meteo/luxembourg/esch-sur-alzette" },
+      { label: "Differdange", href: locale === "de" ? "/de/wetter/luxembourg/differdange" : "/fr/meteo/luxembourg/differdange" },
+      { label: "Dudelange", href: locale === "de" ? "/de/wetter/luxembourg/dudelange" : "/fr/meteo/luxembourg/dudelange" },
+    ];
+  }
+
+  if (pathname === "/be" || pathname.startsWith("/be/")) {
+    return [
+      { label: "Brussel", href: "/weer/vlaams-brabant/brussel" },
+      { label: "Antwerpen", href: "/weer/antwerpen/antwerpen" },
+      { label: "Gent", href: "/weer/oost-vlaanderen/gent" },
+      { label: "Luik", href: "/weer/wallonie/liege" },
+    ];
+  }
+
+  if (pathname.startsWith("/weer/")) {
+    const parts = pathname.split("/").filter(Boolean);
+    const province = parts[1];
+
+    if (province === "wallonie" || BE_PROVINCES.has(province)) {
+      return [
+        { label: "Brussel", href: "/weer/vlaams-brabant/brussel" },
+        { label: "Antwerpen", href: "/weer/antwerpen/antwerpen" },
+        { label: "Gent", href: "/weer/oost-vlaanderen/gent" },
+        { label: "Liège", href: "/weer/wallonie/liege" },
+      ];
+    }
+  }
+
+  if (locale === "de") {
+    return [
+      { label: "Berlin", href: "/de/wetter/berlin/berlin" },
+      { label: "Hamburg", href: "/de/wetter/hamburg/hamburg" },
+      { label: "München", href: "/de/wetter/bayern/munchen" },
+      { label: "Köln", href: "/de/wetter/nordrhein-westfalen/koln" },
+    ];
+  }
+
+  if (locale === "fr") {
+    return [
+      { label: "Paris", href: "/fr/meteo/paris/paris" },
+      { label: "Marseille", href: "/fr/meteo/bouches-du-rhone/marseille" },
+      { label: "Lyon", href: "/fr/meteo/rhone/lyon" },
+      { label: "Toulouse", href: "/fr/meteo/haute-garonne/toulouse" },
+    ];
+  }
+
+  if (locale === "es") {
+    return [
+      { label: "Madrid", href: "/es/tiempo/espana/madrid" },
+      { label: "Barcelona", href: "/es/tiempo/espana/barcelona" },
+      { label: "Valencia", href: "/es/tiempo/espana/valencia" },
+      { label: "Sevilla", href: "/es/tiempo/espana/sevilla" },
+    ];
+  }
+
+  return [
+    { label: "Hooikoorts", href: "/weer/themas/hooikoorts" },
+    { label: "Amsterdam", href: "/weer/noord-holland/amsterdam" },
+    { label: "Den Haag", href: "/weer/zuid-holland/den-haag" },
+    { label: "BBQ weer", href: "/weer/themas/bbq-weer" },
+  ];
+}
+
 export default function Footer() {
   const pathname = usePathname() ?? "/";
   const locale: Locale = detectLocale(pathname);
-  const isDE = locale === "de";
   const cfg = LOCALES[locale];
   const isHome = pathname === cfg.routes.home;
-
-  const sections = isDE
-    ? [
-        {
-          title: "WEERZONE",
-          links: [
-            { label: "Über WEERZONE", href: "/de/uber-uns" },
-            { label: "Häufige Fragen", href: "/de/uber-uns#faq" },
-            { label: "Preise", href: "/de/preise" },
-            { label: "Kontakt", href: "/de/kontakt" },
-          ],
-        },
-        {
-          title: "Mein Wetter",
-          links: [
-            { label: "Mein Wetter", href: "/de/mein-wetter" },
-            { label: "Warnungen", href: "/de/warnungen" },
-            { label: "Startseite", href: "/de" },
-          ],
-        },
-        {
-          title: "Info",
-          links: [
-            { label: "Datenschutz", href: "/privacy" },
-            { label: "Cookie-Einstellungen", href: "#" },
-          ],
-        },
-      ]
-    : [
-        {
-          title: "Weerzone",
-          links: [
-            { label: "Over Weerzone", href: "/over" },
-            { label: "Veelgestelde vragen", href: "/over#faq" },
-            { label: "Abonnementen", href: "/prijzen" },
-            { label: "Zakelijk", href: "/zakelijk" },
-            { label: "Contact", href: "/contact" },
-          ],
-        },
-        {
-          title: "Mijn Weer",
-          links: [
-            { label: "Mijn Weer", href: "/mijnweer" },
-            { label: "Waarschuwingen", href: "/waarschuwingen" },
-            { label: "Prijzen", href: "/prijzen" },
-            { label: "Homepage", href: "/" },
-          ],
-        },
-        {
-          title: "Info",
-          links: [
-            { label: "Privacybeleid", href: "/privacy" },
-            { label: "Cookie-instellingen", href: "#" },
-          ],
-        },
-      ];
+  const items = navItems(pathname, locale);
+  const copy = FOOTER_COPY[locale];
 
   return (
-    <footer className="w-full flex flex-col items-center pb-12 mt-12 relative z-10">
-      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 flex flex-col items-center">
+    <footer className="w-full flex flex-col items-center pb-10 mt-12 relative z-10">
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6">
         {!isHome && (
           <Link
             href={cfg.routes.home}
-            className="mb-8 px-6 py-3 rounded-2xl text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/20 flex items-center gap-2"
+            className="mb-4 inline-flex rounded-2xl px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-white transition-transform hover:scale-[1.01]"
             style={{ background: "#3b7ff0" }}
           >
-            <span className="text-sm">←</span> {isDE ? "Zur Startseite" : "Terug naar home"}
+            {copy.back}
           </Link>
         )}
 
-        <p className="mb-8 text-center text-white/30 text-[11px] font-medium tracking-wide uppercase px-6">
-          {isDE
-            ? "Weiter als 48 Stunden schauen wir nicht - dann wird es Raten."
-            : "Verder dan 48 uur kijken we niet vooruit - dan wordt het gokken."}
-        </p>
-
-        <div className="card-blue px-8 sm:px-10 pt-14 pb-10 w-full">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
-              <div className="md:col-span-5">
-                <Link href={cfg.routes.home} className="inline-block mb-5 hover:opacity-80 transition-opacity">
-                  <LogoFull height={28} />
-                </Link>
-                <p className="text-xs leading-relaxed font-black mb-3 opacity-90 uppercase tracking-wider">
-                  {isDE ? (
-                    <>
-                      DER EHRLICHE WETTERBERICHT.
-                      <br />
-                      48 STUNDEN VORAUS. DER REST IST RAUSCH.
-                    </>
-                  ) : (
-                    <>
-                      HET EERLIJKE WEERBERICHT.
-                      <br />
-                      48 UUR VOORUIT. DE REST IS RUIS.
-                    </>
-                  )}
-                </p>
-                <a
-                  href="mailto:info@weerzone.nl"
-                  className="text-sm font-black transition-colors hover:opacity-70 text-white"
-                >
-                  info@weerzone.nl
-                </a>
-              </div>
-
-              <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6">
-                {sections.map((section) => (
-                  <div key={section.title}>
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.22em] mb-4 opacity-50 text-white">
-                      {section.title}
-                    </h4>
-                    <ul className="space-y-2.5">
-                      {section.links.map((link) => (
-                        <li key={link.label}>
-                          <Link href={link.href} className="text-[13px] font-black transition-colors hover:opacity-70 text-white">
-                            {link.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+        <div className="card-blue w-full px-6 sm:px-8 py-8">
+          <div className="space-y-6 text-center">
+            <div className="space-y-3 flex flex-col items-center">
+              <Link href={cfg.routes.home} className="inline-block hover:opacity-80 transition-opacity">
+                <LogoFull height={28} />
+              </Link>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-white/90 leading-tight">
+                {copy.tagline[0]}
+                <br />
+                {copy.tagline[1]}
+              </p>
             </div>
 
-            <div className="pt-8 flex flex-col items-center gap-4 border-t border-white/10">
-              <span className="text-[10px] font-black uppercase tracking-[0.22em] opacity-40 text-white">
-                © {new Date().getFullYear()} WEERZONE.nl — POWERED BY TIVEAU
-              </span>
-              <div className="flex flex-wrap justify-center gap-5">
-                {SOCIALS.map(({ label, href }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target={href !== "#" ? "_blank" : undefined}
-                    rel={href !== "#" ? "noopener noreferrer" : undefined}
-                    className="text-[11px] uppercase font-black tracking-widest transition-colors hover:opacity-70 opacity-60 text-white"
-                  >
-                    {label}
-                  </a>
-                ))}
-              </div>
+            <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+              {items.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-[13px] font-black uppercase tracking-[0.08em] text-white/90 transition-opacity hover:opacity-70"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            <p className="mx-auto max-w-md text-[11px] font-semibold leading-relaxed text-white/55">
+              {copy.credits}
+            </p>
+
+            <div className="space-y-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/35">
+              <p>WEERZONE © {new Date().getFullYear()}</p>
+              <p>Powered by Tiveau</p>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-4">
+              {SOCIALS.map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] uppercase font-black tracking-widest text-white/65 transition-opacity hover:opacity-90"
+                >
+                  {label}
+                </a>
+              ))}
             </div>
           </div>
         </div>
