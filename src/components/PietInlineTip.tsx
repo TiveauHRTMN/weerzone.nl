@@ -1,70 +1,39 @@
 "use client";
 
-/**
- * Één-regelige Piet-tip met contextuele Amazon-link, onder de hoofd-commentary.
- * Kleine tekstlink, voelt natuurlijk (niet als banner).
- */
-
-import { useMemo, useState } from "react";
 import type { WeatherData } from "@/lib/types";
-import { matchProducts } from "@/lib/amazon-matcher";
-import { productHref } from "@/lib/amazon-catalog";
-import { getConditionTag } from "@/lib/affiliate-orchestrator";
-import { useSession } from "@/lib/session-context";
 
 interface Props {
   weather: WeatherData;
 }
 
-function tipIntro(weather: WeatherData): string {
-  const c = weather.current;
-  const rainSoon = weather.hourly.slice(0, 6).reduce((a, h) => a + h.precipitation, 0);
-  if (c.precipitation > 0.3 || rainSoon > 1) return "Piet's tip voor vandaag:";
-  if (c.windSpeed > 45) return "Piet houdt het kort:";
-  if (c.temperature >= 25) return "Piet fluistert:";
-  if (c.temperature <= 2) return "Piet knipoogt:";
-  return "Piet's tip:";
+function buildTip(weather: WeatherData): string | null {
+  const current = weather.current;
+  const nextSixHours = weather.hourly.slice(0, 6);
+  const rainSoon = nextSixHours.reduce((total, hour) => total + hour.precipitation, 0);
+  const strongestWind = Math.max(current.windSpeed, ...nextSixHours.map((hour) => hour.windSpeed));
+
+  if (current.precipitation > 0.3 || rainSoon > 1) {
+    return "Piet: neem het droge moment serieus. Check het komende uur voordat je vertrekt.";
+  }
+  if (strongestWind > 45) {
+    return "Piet: reken op stevige wind. Plan fietsen of buitenwerk liever met wat marge.";
+  }
+  if (current.temperature >= 25) {
+    return "Piet: het warmste deel zit later op de dag. Vroeg op pad is slimmer.";
+  }
+  if (current.temperature <= 2) {
+    return "Piet: kans op kou aan de grond. Vertrek iets rustiger en check gladheid lokaal.";
+  }
+  return null;
 }
 
 export default function PietInlineTip({ weather }: Props) {
-  const { products } = useMemo(() => matchProducts(weather, 1), [weather]);
-  const [sessionId] = useState(() => Math.random().toString(36).slice(2));
-  const { tier, loading } = useSession();
-  const pick = products[0];
-  if (!pick) return null;
-  // Abonnees: geen affiliate-tip in de commentary.
-  if (loading || tier) return null;
-
-  const tag = getConditionTag(weather);
-
-  function onClick() {
-    fetch("/api/affiliate/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventType: "CLICK",
-        tag,
-        productId: pick.id,
-        platform: "SITE_INLINE",
-        sessionId,
-      }),
-    }).catch(() => {});
-  }
+  const tip = buildTip(weather);
+  if (!tip) return null;
 
   return (
-    <p className="text-[13px] text-text-secondary leading-snug mb-3 relative z-10">
-      <span className="font-bold text-text-primary">{tipIntro(weather)}</span>{" "}
-      <a
-        href={productHref(pick)}
-        target="_blank"
-        rel="noopener noreferrer sponsored"
-        onClick={onClick}
-        className="underline decoration-accent-orange decoration-2 underline-offset-2 font-semibold text-text-primary hover:text-accent-orange transition-colors"
-      >
-        {pick.title}
-      </a>
-      {pick.priceHint && <span className="text-text-muted"> — {pick.priceHint}</span>}
-      <span className="text-[10px] text-text-muted ml-1">(Amazon · affiliate)</span>
+    <p className="relative z-10 mb-3 text-[13px] font-semibold leading-snug text-text-secondary">
+      {tip}
     </p>
   );
 }

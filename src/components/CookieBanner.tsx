@@ -45,15 +45,15 @@ export default function CookieBanner() {
             <p className="text-[11px] md:text-xs text-gray-700 md:text-gray-600 md:mt-1 md:leading-relaxed">
               <span className="md:hidden">
                 {isDE ? (
-                  <>🍪 Cookies für Stats + Affiliates. <a href="/privacy" className="underline">Mehr</a></>
+                  <>Cookies fuer Einstellungen und anonyme Stats. <a href="/privacy" className="underline">Mehr</a></>
                 ) : (
-                  <>🍪 Cookies voor stats + affiliates. <a href="/privacy" className="underline">Meer</a></>
+                  <>Cookies voor voorkeuren en anonieme stats. <a href="/privacy" className="underline">Meer</a></>
                 )}
               </span>
               <span className="hidden md:inline">
                 {isDE
-                  ? "Wir verwenden Cookies, um deine Einstellungen zu merken und anonyme Statistiken zu erfassen. Affiliate-Links (Bol.com, Booking.com) setzen Tracking-Cookies, wenn du weiterklickst. Kein versteckter Kram, kein Datenhandel."
-                  : "We gebruiken cookies voor het onthouden van je voorkeuren en anonieme statistieken. Affiliate-links (Bol.com, Booking.com) gebruiken tracking-cookies als je doorklikt. Geen stiekeme zooi, geen datahandel. Beloofd."}
+                  ? "Wir verwenden Cookies, um deine Einstellungen zu merken und anonyme Statistiken zu erfassen. Keine Werbung, keine Affiliate-Cookies, kein Datenhandel."
+                  : "We gebruiken cookies voor je voorkeuren en anonieme statistieken. Geen advertenties, geen affiliate-cookies, geen datahandel."}
               </span>
             </p>
           </div>

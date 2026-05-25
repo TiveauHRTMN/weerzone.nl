@@ -9,12 +9,12 @@ const CONTACT_EMAIL = "contact@weerzone.nl";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Neem contact op met Weerzone. Voor vragen, pers, partnerships of serieuze samenwerkingen.",
+    "Neem contact op met Weerzone. Voor vragen, pers of technische meldingen.",
   alternates: { canonical: "https://weerzone.nl/contact" },
   openGraph: {
     title: "Contact Weerzone",
     description:
-      "Voor vragen, pers, partnerships of serieuze samenwerkingen.",
+      "Voor vragen, pers of technische meldingen.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl/contact",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Contact Weerzone",
-    description: "Voor vragen, pers, partnerships of serieuze samenwerkingen.",
+    description: "Voor vragen, pers of technische meldingen.",
   },
 };
 
@@ -52,8 +52,8 @@ export default function ContactPage() {
               Neem contact op met Weerzone
             </h1>
             <p className="max-w-xl text-base sm:text-lg text-white/85 leading-relaxed">
-              Voor vragen, pers, partnerships of serieuze samenwerkingen.
-              Gebruik een echt e-mailadres, zodat we je kunnen bereiken.
+              Voor vragen, pers of technische meldingen. Gebruik een echt
+              e-mailadres, zodat we je kunnen bereiken.
             </p>
           </header>
 

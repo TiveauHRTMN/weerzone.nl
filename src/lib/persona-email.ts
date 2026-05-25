@@ -375,7 +375,7 @@ ${tomorrowTeaser ? `
 
   // ---- AMAZON TIP ----
   let amazonHtml = "";
-  if (amazonTip) {
+  if (false && amazonTip) {
     const tipBg = amazonTip.color
       ? `${amazonTip.color}15`
       : "rgba(245,158,11,0.08)";

@@ -4,7 +4,7 @@ import { getContactConfirmationHtml } from "@/lib/contact-email";
 
 export const runtime = "nodejs";
 
-const VALID_TOPICS = new Set(["vraag", "partnership", "pers", "technisch", "anders"]);
+const VALID_TOPICS = new Set(["vraag", "pers", "technisch", "anders"]);
 
 export async function POST(req: Request) {
   try {

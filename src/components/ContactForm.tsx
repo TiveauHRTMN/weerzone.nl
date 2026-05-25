@@ -6,7 +6,7 @@ interface Props {
   locale?: "nl" | "de" | "fr" | "es";
 }
 
-type ContactTopic = "vraag" | "partnership" | "pers" | "technisch" | "anders";
+type ContactTopic = "vraag" | "pers" | "technisch" | "anders";
 
 const COPY = {
   nl: {
@@ -21,7 +21,6 @@ const COPY = {
     topic: "Type bericht",
     topicOptions: {
       vraag: "Vraag",
-      partnership: "Partnership",
       pers: "Pers",
       technisch: "Technisch probleem",
       anders: "Anders",
@@ -47,7 +46,6 @@ const COPY = {
     topic: "Art der Nachricht",
     topicOptions: {
       vraag: "Frage",
-      partnership: "Partnerschaft",
       pers: "Presse",
       technisch: "Technisches Problem",
       anders: "Sonstiges",
@@ -73,7 +71,6 @@ const COPY = {
     topic: "Type de message",
     topicOptions: {
       vraag: "Question",
-      partnership: "Partenariat",
       pers: "Presse",
       technisch: "Probleme technique",
       anders: "Autre",
@@ -99,7 +96,6 @@ const COPY = {
     topic: "Tipo de mensaje",
     topicOptions: {
       vraag: "Pregunta",
-      partnership: "Colaboracion",
       pers: "Prensa",
       technisch: "Problema tecnico",
       anders: "Otro",
@@ -117,7 +113,6 @@ const COPY = {
 
 const TOPICS: readonly ContactTopic[] = [
   "vraag",
-  "partnership",
   "pers",
   "technisch",
   "anders",

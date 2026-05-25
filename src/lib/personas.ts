@@ -124,8 +124,8 @@ export function formatPrice(cents: number): string {
   return `€${euros.toFixed(2).replace(".", ",")}`;
 }
 
-// Trial-einddatum (1 juni 2026). Alle pre-launch signups zijn founders.
-export const TRIAL_END = new Date("2026-06-01T00:00:00+02:00");
+// Alles gratis tot augustus 2026. Daarna bepalen we pas welke betaalde laag zinvol is.
+export const TRIAL_END = new Date("2026-08-01T00:00:00+02:00");
 export const FOUNDER_SLOTS = 25;
 
 export function daysUntilLaunch(): number {

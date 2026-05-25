@@ -20,8 +20,7 @@ export interface ConfirmCheckoutResult {
 /**
  * Bevestig aanmelding voor een Tijdelijk-gratis abonnement.
  * - Updatet user_profile (naam, postcode, GPS).
- * - Zorgt dat er één actief abonnement op deze tier staat (trialing,
- *   founder tot 2026-06-01).
+ * - Zorgt dat er een actief beta-abonnement op deze tier staat.
  * - Zet GPS-locatie als primaire locatie.
  * - Geen Mollie — betalen komt pas na launch.
  */
@@ -101,7 +100,7 @@ export async function confirmCheckout(
   //    (a) bestaat en (b) de juiste tier/price heeft. De unieke index op
   //    (user_id, tier) WHERE status IN (trialing, active, past_due)
   //    voorkomt duplicaten binnen dezelfde tier.
-  const trialEnd = "2026-06-01T00:00:00+02:00";
+  const trialEnd = "2026-08-01T00:00:00+02:00";
 
   const { data: currentActive } = await supabase
     .from("subscriptions")

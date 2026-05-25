@@ -15,7 +15,6 @@ export default function WeatherAdvice({
   isFreezing,
   locale = "nl",
 }: WeatherAdviceProps) {
-  const affiliateTag = "tiveaubusines-21";
   let condition: WeatherCondition = "default";
 
   if (isFreezing || temperature < 2) {
@@ -31,47 +30,41 @@ export default function WeatherAdvice({
   const contentMap = {
     rain: locale === "de"
       ? {
-          title: "Vorhersage: Kräftige Schauer. Bleib unterwegs trocken.",
-          buttonText: "Die besten Regenschirme ansehen",
-          url: `https://www.amazon.de/s?k=regenregenschirm&tag=${affiliateTag}`,
-          icon: "☂️",
+          title: "Kraeftige Schauer. Ga nu alleen als je een droog venster ziet.",
+          action: "Wacht op een lichter moment of vertrek met marge.",
+          icon: "!",
           color: "bg-blue-50 border-blue-200 text-blue-800",
         }
       : {
-          title: "Verwachting: Flinke buien. Blijf droog onderweg.",
-          buttonText: "Bekijk de best geteste stormparaplu's",
-          url: `https://www.amazon.nl/s?k=stormparaplu&tag=${affiliateTag}`,
-          icon: "☂️",
+          title: "Flinke buien. Ga nu alleen als je een droog venster ziet.",
+          action: "Wacht op een lichter moment of vertrek met marge.",
+          icon: "!",
           color: "bg-blue-50 border-blue-200 text-blue-800",
         },
     heat: locale === "de"
       ? {
-          title: "Richtig warm! Perfekt für Grillen oder Abkühlung.",
-          buttonText: "Ventilatoren & Airco ansehen",
-          url: `https://www.amazon.de/s?k=ventilator+klimaanlage&tag=${affiliateTag}`,
-          icon: "☀️",
+          title: "Warm. Het beste moment ligt vroeg of later op de avond.",
+          action: "Plan inspanning buiten de middagpiek.",
+          icon: "!",
           color: "bg-yellow-50 border-yellow-200 text-yellow-800",
         }
       : {
-          title: "Zomers warm! Ideaal BBQ weer of tijd voor verkoeling.",
-          buttonText: "Houd het huis koel: Ventilatoren & Airco's",
-          url: `https://www.amazon.nl/s?k=ventilator+airco&tag=${affiliateTag}`,
-          icon: "☀️",
+          title: "Warm. Het beste moment ligt vroeg of later op de avond.",
+          action: "Plan inspanning buiten de middagpiek.",
+          icon: "!",
           color: "bg-yellow-50 border-yellow-200 text-yellow-800",
         },
     frost: locale === "de"
       ? {
-          title: "Achtung: Frost möglich. Mach dich vor der Fahrt bereit.",
-          buttonText: "Eiskratzer ansehen",
-          url: `https://www.amazon.de/s?k=eiskratzer+scheibenenteiser&tag=${affiliateTag}`,
-          icon: "❄️",
+          title: "Frost moeglich. Vertrek rustiger en check lokale gladheid.",
+          action: "Neem extra tijd voor de eerste rit.",
+          icon: "!",
           color: "bg-indigo-50 border-indigo-200 text-indigo-800",
         }
       : {
-          title: "Let op: Kans op vorst. Zorg dat je klaar bent voor vertrek.",
-          buttonText: "Ruitontdooier & IJskrabbers",
-          url: `https://www.amazon.nl/s?k=ijskrabber+ruitontdooier&tag=${affiliateTag}`,
-          icon: "❄️",
+          title: "Kans op vorst. Vertrek rustiger en check lokale gladheid.",
+          action: "Neem extra tijd voor de eerste rit.",
+          icon: "!",
           color: "bg-indigo-50 border-indigo-200 text-indigo-800",
         },
   };
@@ -79,24 +72,19 @@ export default function WeatherAdvice({
   const advice = contentMap[condition];
 
   return (
-    <div className={`mt-6 p-4 rounded-xl border-2 ${advice.color} shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 transition-all hover:shadow-md`}>
+    <div className={`mt-6 flex flex-col gap-3 rounded-xl border-2 p-4 shadow-sm md:flex-row md:items-center md:justify-between ${advice.color}`}>
       <div className="flex items-center gap-3">
-        <span className="text-3xl">{advice.icon}</span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-lg font-black">
+          {advice.icon}
+        </span>
         <div>
-          <h3 className="font-semibold text-lg m-0">
-            {locale === "de" ? "WEERZONE Empfehlung" : "Weerzone Advies"}
+          <h3 className="m-0 text-lg font-semibold">
+            {locale === "de" ? "Weerzone Hinweis" : "Weerzone advies"}
           </h3>
-          <p className="opacity-90 text-sm mt-1">{advice.title}</p>
+          <p className="mt-1 text-sm opacity-90">{advice.title}</p>
         </div>
       </div>
-      <a
-        href={advice.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="shrink-0 bg-white text-gray-900 px-5 py-2.5 rounded-lg font-medium shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors text-center w-full md:w-auto"
-      >
-        {advice.buttonText}
-      </a>
+      <p className="text-sm font-bold md:max-w-[240px] md:text-right">{advice.action}</p>
     </div>
   );
 }

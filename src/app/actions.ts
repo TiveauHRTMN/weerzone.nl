@@ -140,6 +140,58 @@ export async function getDEStationsWeather(): Promise<Array<{ name: string; temp
  * Haalt de actuele temperatuur op voor alle FR-steden in één batch.
  * Gebruikt voor de FRPulse-Ticker in de GlobalNav.
  */
+async function getOpenMeteoStationsWeather(
+  stations: Array<{ name: string; lat: number; lon: number }>,
+  timezone: string,
+): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
+  const lats = stations.map((station) => station.lat).join(",");
+  const lons = stations.map((station) => station.lon).join(",");
+
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day&timezone=${timezone}`,
+      { next: { revalidate: 600 } },
+    );
+
+    if (!res.ok) throw new Error("Open-Meteo station batch fetch failed");
+
+    const data = await res.json();
+    const results = Array.isArray(data) ? data : [data];
+
+    return stations.map((station, i) => ({
+      name: station.name,
+      temp: Math.round(results[i].current.temperature_2m),
+      weatherCode: results[i].current.weather_code ?? 0,
+      isDay: results[i].current.is_day === 1,
+    }));
+  } catch (error) {
+    console.error("getOpenMeteoStationsWeather error:", error);
+    return [];
+  }
+}
+
+export async function getBEStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
+  return getOpenMeteoStationsWeather([
+    { name: "Brussel", lat: 50.8503, lon: 4.3517 },
+    { name: "Antwerpen", lat: 51.2194, lon: 4.4025 },
+    { name: "Gent", lat: 51.0543, lon: 3.7174 },
+    { name: "Brugge", lat: 51.2093, lon: 3.2247 },
+    { name: "Hasselt", lat: 50.9307, lon: 5.3325 },
+    { name: "Luik", lat: 50.6326, lon: 5.5797 },
+    { name: "Namur", lat: 50.4674, lon: 4.8719 },
+  ], "Europe/Brussels");
+}
+
+export async function getLUStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
+  return getOpenMeteoStationsWeather([
+    { name: "Luxembourg", lat: 49.6116, lon: 6.1319 },
+    { name: "Esch", lat: 49.4958, lon: 5.9806 },
+    { name: "Diekirch", lat: 49.8678, lon: 6.1558 },
+    { name: "Ettelbruck", lat: 49.8475, lon: 6.1042 },
+    { name: "Grevenmacher", lat: 49.6808, lon: 6.4400 },
+  ], "Europe/Luxembourg");
+}
+
 export async function getFRStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
   const { FR_STATIONS } = await import("@/lib/types");
 

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { fetchWeatherData } from "@/lib/weather";
 import { DUTCH_CITIES } from "@/lib/types";
-import { getRecommendedDeals } from "@/lib/affiliate-orchestrator";
 import { PERSONAS } from "@/lib/personas";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hermesChat } from "@/lib/hermes";
@@ -63,11 +62,7 @@ export async function GET(request: Request) {
       };
     });
 
-    // 3. Smart Affiliate Deal
-    const deals = getRecommendedDeals(main, "Nederland", "MAIL");
-    const topDeal = deals[0];
-
-    // 4. AI Copy (Piet Style)
+    // 3. AI Copy (Piet Style)
     const commentary = await hermesChat([
       {
         role: "system",
@@ -147,21 +142,6 @@ Data:
                </div>
             </div>
 
-            <!-- Affiliate Section (Smart Match) -->
-            ${topDeal ? `
-              <div style="margin: 0 40px 40px; background: #000; border-radius: 24px; padding: 30px; position: relative; overflow: hidden;">
-                <div style="position: absolute; top:0; right:0; background: #ffd60a; color: #000; font-size: 10px; font-weight: 900; padding: 5px 15px; border-radius: 0 0 0 15px;">PRODUCT TIP</div>
-                <div style="display: flex; align-items: center; gap: 20px;">
-                  <div style="font-size: 40px;">📦</div>
-                  <div style="flex: 1;">
-                    <h3 style="color: white; margin: 0; font-size: 18px; font-weight: 900;">${topDeal.name}</h3>
-                    <p style="color: #94a3b8; margin: 5px 0 15px; font-size: 14px; font-weight: 500;">${topDeal.reason}</p>
-                    <a href="${topDeal.url}" style="display: inline-block; background: #ffd60a; color: #000; padding: 12px 25px; border-radius: 10px; text-decoration: none; font-weight: 900; font-size: 14px; text-transform: uppercase;">Check Prijs op ${topDeal.platform}</a>
-                  </div>
-                </div>
-              </div>
-            ` : ''}
-
             <!-- Footer -->
             <div style="background: #f8fafc; padding: 40px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0; font-weight: 900; color: #1e293b; letter-spacing: 1px;">WEERZONE OFFICIAL SYSTEM</p>
@@ -174,7 +154,7 @@ Data:
       `
     });
 
-    // 6. Store in Supabase for /mijnweer
+    // 4. Store in Supabase for /mijnweer
     const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
     const supabase = createSupabaseAdminClient();
     await supabase.from("piet_daily_briefing").upsert({
@@ -189,7 +169,7 @@ Data:
       })),
     }, { onConflict: "date" });
 
-    // 7. Paperclip Heartbeat
+    // 5. Paperclip Heartbeat
     const { logPaperclipHeartbeat } = await import("@/lib/agent-logger");
     await logPaperclipHeartbeat("Piet Briefing", "healthy");
 

@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PERSONAS } from "@/lib/personas";
-import { getWeeklyReport } from "@/lib/affiliate-orchestrator";
 
 export const dynamic = "force-dynamic";
 
@@ -43,8 +42,6 @@ export async function GET() {
     (stats.piet * (PERSONAS.piet.priceCents || 0)) +
     (stats.reed * (PERSONAS.reed.priceCents || 0)) +
     (stats.steve * (PERSONAS.steve.priceCents || 0));
-  const affiliateReport = await getWeeklyReport();
-
   return NextResponse.json({
     status: "ok",
     timestamp: new Date().toISOString(),
@@ -64,7 +61,6 @@ export async function GET() {
         monthlyFormatted: `€${(monthlyIncome / 100).toFixed(2).replace(".", ",")}`,
         yearlyEstimated: `€${((monthlyIncome * 12) / 100).toFixed(2).replace(".", ",")}`
       },
-      affiliates: affiliateReport,
       scale: {
         locations: 9071,
         coverage: "100% NL"
