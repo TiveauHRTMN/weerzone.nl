@@ -23,17 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title,
-    description,
-    keywords: [
-      "mein wetter",
-      "persönlicher wetterbericht",
-      "48 stunden wetter",
-      "wetter am standort",
-      "regenvorhersage",
-      "windvorhersage",
-      "wetter heute",
-    ],
-    alternates: {
+    description,    alternates: {
       canonical: "https://weerzone.nl/de/mein-wetter",
       languages: {
         "nl-NL": "https://weerzone.nl/mijnweer",
@@ -165,16 +155,15 @@ export default async function MeinWetterPage() {
                   Weiter voraus wird es Spekulation — und Spekulation machen wir nicht.
                 </p>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Unsere Daten kommen direkt von den verlässlichsten Quellen in Deutschland: das DWD
-                  ICON-D2-Modell als primäre Basis, ergänzt mit europäischen Modellen. Wir vergleichen
-                  die besten Wettermodelle und zeigen dir das ehrliche Ergebnis — pro Stunde, an deinem Standort.
+                  Wir nutzen aktuelle Daten und machen daraus eine ehrliche Ansage: pro Stunde, an deinem
+                  Standort, ohne Fachsprache nur für den Eindruck.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="card p-5">
                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Standort</p>
-                  <p className="font-black text-slate-900 mb-1">Hyperlokal auf 1×1 km</p>
+                  <p className="font-black text-slate-900 mb-1">Für deine Umgebung</p>
                   <p className="text-sm text-slate-500 leading-relaxed">
                     Nicht das Wetter für die Region oder das Bundesland — sondern für deine genaue Postleitzahl.
                     Regen kann zwei Kilometer entfernt fallen, während es bei dir trocken bleibt.

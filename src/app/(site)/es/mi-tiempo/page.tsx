@@ -23,16 +23,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    keywords: [
-      "mi tiempo",
-      "parte del tiempo personal",
-      "tiempo 48 horas",
-      "tiempo local Espana",
-      "prevision lluvia",
-      "prevision viento",
-      "tiempo hoy",
-      "juan weerzone",
-    ],
     alternates: {
       canonical: "https://weerzone.nl/es/mi-tiempo",
       languages: {
@@ -71,8 +61,8 @@ const jsonLd = {
     "@type": "Person",
     name: "Juan",
     description:
-      "Juan es el meteorologo del barrio de WEERZONE para Espana. Mira el tiempo por ti y te cuenta el dia como un vecino que conoce la calle, la costa o la sierra.",
-    jobTitle: "Meteorologo del barrio en Weerzone",
+      "Juan es la voz de barrio de WEERZONE para Espana. Mira el tiempo por ti y te cuenta el dia como un vecino que conoce la calle, la costa o la sierra.",
+    jobTitle: "Voz del tiempo en Weerzone",
     worksFor: { "@type": "Organization", name: "WEERZONE", url: "https://weerzone.nl" },
   },
   about: [
@@ -236,10 +226,8 @@ export default async function MiTiempoPage() {
                   especulacion no la vendemos.
                 </p>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Nuestra capa de modelos Mariana pone varios modelos europeos en paralelo
-                  y destila una respuesta local para tu direccion exacta. Cuales usa Mariana
-                  aparece al pie de cada pagina; las fuentes y sus derechos siguen siendo
-                  de sus proveedores originales.
+                  Usamos datos actuales y los convertimos en una conclusion clara para tu direccion.
+                  Sin palabras grandes para parecer importantes: hora, lugar y consejo practico.
                 </p>
               </div>
 
@@ -301,7 +289,7 @@ export default async function MiTiempoPage() {
                   El vecino que sabe de tiempo, no el presentador de la tele.
                 </h2>
                 <p className="text-[15px] text-slate-600 leading-[1.7] mb-4">
-                  Juan no es un servicio meteorologico. No habla en porcentajes ni en
+                  Juan no suena como un servicio clasico. No habla en porcentajes ni en
                   &laquo;probabilidad alta de&raquo;. Escribe como si te conociera — y un
                   poco te conoce, porque le dijiste donde vives, si tienes terraza, si
                   bajas a la playa, si el perro tiene que salir si o si.

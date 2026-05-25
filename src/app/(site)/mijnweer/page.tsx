@@ -19,24 +19,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const place = loc?.name || "jouw locatie";
   const title = loc?.name
     ? `Mijn Weer voor ${place} - 48 uur vooruit`
-    : "Mijn Weer - Hyperlokaal weerbericht";
+    : "Mijn Weer - jouw weerbericht";
   const description = loc?.name
     ? `Persoonlijk weerbericht voor ${place}. Je ziet wat de komende 48 uur betekenen voor regen, wind en planning.`
     : "Persoonlijk weerbericht voor de komende 48 uur op jouw locatie. In gewone taal, zonder reclame en zonder gokwerk over twee weken vooruit.";
 
   return {
     title,
-    description,
-    keywords: [
-      "mijn weer",
-      "persoonlijk weerbericht",
-      "48 uur weer",
-      "weer op locatie",
-      "regen verwachting",
-      "wind voorspelling",
-      "weer vandaag",
-    ],
-    alternates: { canonical: "https://weerzone.nl/mijnweer" },
+    description,    alternates: { canonical: "https://weerzone.nl/mijnweer" },
     openGraph: {
       title,
       description,
@@ -57,15 +47,15 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "Mijn Weer",
-  headline: "Piet - Hyperlokaal 48-uurs weerbericht",
+  headline: "Mijn Weer - 48 uur vooruit",
   description:
-    "De dagelijkse weeranalyse van Piet voor jouw GPS-locatie. Geen 14-daagse gok, gewoon de komende 48 uur in gewone taal.",
+    "Een duidelijk weerbericht voor jouw locatie. Geen 14-daagse gok, gewoon de komende 48 uur in gewone taal.",
   author: { "@type": "Organization", name: "WEERZONE" },
   url: "https://weerzone.nl/mijnweer",
   inLanguage: "nl-NL",
   about: {
     "@type": "Thing",
-    name: "Hyperlokaal weerbericht voor de komende 48 uur",
+    name: "Weerbericht voor de komende 48 uur",
   },
   mainEntity: [
     {
@@ -157,15 +147,16 @@ export default async function MijnWeerPage() {
                   of een afspraak buiten plant. Verder vooruit wordt het giswerk — wij doen niet aan giswerk.
                 </p>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Onze data komt rechtstreeks van de meest betrouwbare bronnen in Nederland. We vergelijken de beste weermodellen en tonen je het eerlijke resultaat — per uur, op jouw locatie.
+                  We gebruiken actuele gegevens en maken daar een eerlijk verhaal van: per uur, op jouw locatie,
+                  zonder moeilijke termen om indruk te maken.
                 </p>              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="card p-5">
                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Locatie</p>
-                  <p className="font-black text-slate-900 mb-1">Hyperlokaal op 1×1 km</p>
+                  <p className="font-black text-slate-900 mb-1">Voor jouw buurt</p>
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    Niet het weer voor de regio of de provincie — maar voor jouw specifieke postcode.
+                    Niet alleen het weer voor de regio of provincie, maar zo dicht mogelijk bij jouw plek.
                     Regen kan twee kilometer verderop vallen terwijl het bij jou droog blijft.
                     WEERZONE maakt dat verschil zichtbaar.
                   </p>
@@ -188,12 +179,11 @@ export default async function MijnWeerPage() {
                   </p>
                 </div>
                 <div className="card p-5">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Nauwkeurigheid</p>
-                  <p className="font-black text-slate-900 mb-1">92–98% voor de komende 48 uur</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Betrouwbaarheid</p>
+                  <p className="font-black text-slate-900 mb-1">Eerlijk over wat we weten</p>
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    Voor de komende 24 uur zijn onze voorspellingen 95–98% nauwkeurig. Voor 24–48 uur
-                    is dat 92–95%. Daarna neemt de betrouwbaarheid snel af — vandaar onze bewuste keuze
-                    voor die tijdshorizon.
+                    De komende 48 uur zijn meestal het meest bruikbaar voor echte keuzes. Verder vooruit
+                    neemt de onzekerheid snel toe, daarom maken we daar geen grote beloftes over.
                   </p>
                 </div>
               </div>
@@ -206,8 +196,8 @@ export default async function MijnWeerPage() {
                   Waarschuwingen die er echt toe doen
                 </p>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Met Reed ontvang je een bericht zodra het weer over jouw persoonlijke drempel gaat —
-                  of dat nu zware neerslag, harde wind, hitte of onweer is. Je stelt zelf in wanneer
+                  Je ontvangt een bericht zodra het weer over jouw persoonlijke drempel gaat —
+                  of dat nu zware regen, harde wind, hitte of onweer is. Je stelt zelf in wanneer
                   je gewaarschuwd wilt worden. Geen ruis, alleen meldingen die voor jou relevant zijn.
                 </p>
               </div>

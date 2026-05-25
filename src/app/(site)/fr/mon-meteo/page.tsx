@@ -3,7 +3,7 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import RainMap from "@/components/RainMap";
 import PollenWidget from "@/components/PollenWidget";
 import MarineWidget from "@/components/MarineWidget";
-import DwdForecastCard from "@/components/DwdForecastCard"; // Using DWD layout as basis
+import DwdForecastCard from "@/components/DwdForecastCard";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { FRENCH_CITIES } from "@/lib/types";
 import { fetchWeatherData, fetchAirQuality, fetchMarineData } from "@/lib/weather";
@@ -21,17 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title,
-    description,
-    keywords: [
-      "ma meteo",
-      "bulletin meteo personnel",
-      "meteo 48 heures",
-      "meteo locale",
-      "previsions pluie",
-      "previsions vent",
-      "meteo aujourd'hui",
-    ],
-    alternates: {
+    description,    alternates: {
       canonical: "https://weerzone.nl/fr/mon-meteo",
       languages: {
         "nl-NL": "https://weerzone.nl/mijnweer",
@@ -161,16 +151,15 @@ export default async function MonMeteoPage() {
                   Au-delà, cela devient de la spéculation — et nous ne faisons pas de spéculation.
                 </p>
                 <p className="text-sm text-slate-600 leading-relaxed">
-                  Nos données proviennent directement des modèles météorologiques les plus fiables (ICON, AROME).
-                  Nous comparons les meilleurs modèles et vous montrons le résultat honnête — heure par heure,
-                  pour votre emplacement.
+                  WEERZONE rassemble les meilleures donnees disponibles et les traduit en une reponse simple:
+                  heure par heure, pour votre emplacement, sans jargon inutile.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="card p-5">
                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Emplacement</p>
-                  <p className="font-black text-slate-900 mb-1">Hyperlocal sur 1×1 km</p>
+                  <p className="font-black text-slate-900 mb-1">Pour votre quartier</p>
                   <p className="text-sm text-slate-500 leading-relaxed">
                     Pas la météo de la région ou du département — mais celle de votre code postal précis.
                     Il peut pleuvoir à deux kilomètres de là alors qu'il fait sec chez vous.
