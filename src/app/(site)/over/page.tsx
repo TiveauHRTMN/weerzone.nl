@@ -230,21 +230,238 @@ export default function OverPage() {
             </div>
           </section>
 
-          {/* Juridisch */}
+          {/* Juridisch — links naar de drie blokken hieronder + externe privacypagina */}
           <section className="space-y-3">
             <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
               Juridisch
             </h2>
             <div className="rounded-2xl border border-white/20 bg-white p-5 shadow-sm">
-              <ul className="space-y-2 text-sm font-bold text-slate-800">
+              <ul className="grid gap-2 text-sm font-bold text-slate-800 sm:grid-cols-3">
+                <li>
+                  <a href="#voorwaarden" className="hover:text-slate-900 hover:underline">
+                    Algemene voorwaarden
+                  </a>
+                </li>
                 <li>
                   <Link href="/privacy" className="hover:text-slate-900 hover:underline">
                     Privacybeleid
                   </Link>
                 </li>
-                {/* Algemene voorwaarden en cookiebeleid komen in een latere fase. */}
+                <li>
+                  <a href="#cookiebeleid" className="hover:text-slate-900 hover:underline">
+                    Cookiebeleid
+                  </a>
+                </li>
               </ul>
             </div>
+          </section>
+
+          {/* Algemene voorwaarden */}
+          <section id="voorwaarden" className="space-y-3 scroll-mt-24">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
+              Algemene voorwaarden
+            </h2>
+            <details className="group rounded-2xl border border-white/20 bg-white shadow-sm" open>
+              <summary
+                className="flex cursor-pointer select-none list-none items-center justify-between gap-3 px-5 py-4"
+                style={{ WebkitUserSelect: "none" }}
+              >
+                <span className="text-sm font-black text-slate-900">
+                  Voorwaarden voor gebruik van Weerzone
+                </span>
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-black text-slate-500 transition-transform group-open:rotate-45"
+                  style={{ background: "rgba(0,0,0,0.06)" }}
+                >
+                  +
+                </span>
+              </summary>
+              <div className="space-y-5 px-5 pb-6 text-sm leading-relaxed text-slate-700">
+                <p className="text-xs text-slate-400">Laatst bijgewerkt: 24 mei 2026</p>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">1. Wat Weerzone is</h3>
+                  <p>
+                    Weerzone is een persoonlijke weeragent voor de komende 48
+                    uur, met Piet, Reed en Koos. We helpen je beslissen wat je
+                    met het weer doet — we verkopen niets, tonen geen advertenties
+                    en werken niet met affiliate-partners.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">2. Gebruik van de dienst</h3>
+                  <p>
+                    Je mag Weerzone gebruiken zoals het bedoeld is: om voor jezelf
+                    of je gezin te kijken wat slim is om te doen. Niet toegestaan
+                    is: geautomatiseerd grootschalig scrapen van de site,
+                    misbruik van de API's, het omzeilen van beveiligingen, of het
+                    doorverkopen van onze content als eigen product.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">3. Geen garanties op weersverwachtingen</h3>
+                  <p>
+                    Weersverwachtingen blijven verwachtingen. Hoewel we het beste
+                    doen om actuele en betrouwbare data te tonen, kunnen we niet
+                    garanderen dat een voorspelling klopt. Beslissingen die je
+                    maakt op basis van Weerzone neem je voor eigen rekening en
+                    risico. Voor veiligheidskritieke situaties (luchtvaart,
+                    scheepvaart, professionele meteorologische beslissingen)
+                    raadpleeg altijd de officiële diensten zoals KNMI.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">4. Aansprakelijkheid</h3>
+                  <p>
+                    Voor zover wettelijk toegestaan zijn wij niet aansprakelijk
+                    voor indirecte schade, gevolgschade of gederfde inkomsten
+                    voortvloeiend uit het gebruik van Weerzone. Bij directe
+                    schade is onze aansprakelijkheid beperkt tot het bedrag dat
+                    je in de twaalf maanden voorafgaand aan het voorval voor
+                    Weerzone hebt betaald — voor gratis gebruik is dat nihil.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">5. Account en Mijn Weerzone</h3>
+                  <p>
+                    Je kunt op elk moment je Mijn Weerzone-account verwijderen
+                    via een mail naar contact@weerzone.nl. We verwijderen dan
+                    binnen redelijke termijn je profiel- en plek-gegevens. Wij
+                    behouden het recht om accounts te schorsen bij misbruik.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">6. Wijzigingen</h3>
+                  <p>
+                    Weerzone is in ontwikkeling. We kunnen functies toevoegen,
+                    aanpassen of verwijderen, en deze voorwaarden bijwerken. De
+                    meest actuele versie staat altijd op deze pagina.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">7. Toepasselijk recht</h3>
+                  <p>
+                    Op deze voorwaarden en het gebruik van Weerzone is
+                    Nederlands recht van toepassing. Geschillen leggen we voor
+                    aan de bevoegde rechter in Nederland.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">8. Contact</h3>
+                  <p>
+                    Vragen over deze voorwaarden? Mail{" "}
+                    <a
+                      href="mailto:contact@weerzone.nl"
+                      className="font-bold underline underline-offset-2 hover:text-slate-900"
+                    >
+                      contact@weerzone.nl
+                    </a>
+                    .
+                  </p>
+                </div>
+              </div>
+            </details>
+          </section>
+
+          {/* Cookiebeleid */}
+          <section id="cookiebeleid" className="space-y-3 scroll-mt-24">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
+              Cookiebeleid
+            </h2>
+            <details className="group rounded-2xl border border-white/20 bg-white shadow-sm" open>
+              <summary
+                className="flex cursor-pointer select-none list-none items-center justify-between gap-3 px-5 py-4"
+                style={{ WebkitUserSelect: "none" }}
+              >
+                <span className="text-sm font-black text-slate-900">
+                  Welke cookies Weerzone gebruikt
+                </span>
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-black text-slate-500 transition-transform group-open:rotate-45"
+                  style={{ background: "rgba(0,0,0,0.06)" }}
+                >
+                  +
+                </span>
+              </summary>
+              <div className="space-y-5 px-5 pb-6 text-sm leading-relaxed text-slate-700">
+                <p className="text-xs text-slate-400">Laatst bijgewerkt: 24 mei 2026</p>
+
+                <p>
+                  Cookies zijn kleine tekstbestandjes die in je browser worden
+                  opgeslagen. Weerzone gebruikt cookies alleen waar ze functioneel
+                  zijn — niet om je te volgen voor advertenties of derden.
+                </p>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">Functioneel</h3>
+                  <ul className="list-disc space-y-1 pl-5">
+                    <li>
+                      <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">wz_lat</code>,{" "}
+                      <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">wz_lon</code>,{" "}
+                      <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">wz_name</code>{" "}
+                      — onthouden welke plek je hebt gekozen, zodat je niet bij
+                      elk bezoek opnieuw hoeft te zoeken (1 jaar geldig).
+                    </li>
+                    <li>
+                      <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">sb-*</code>{" "}
+                      (Supabase) — alleen wanneer je bent ingelogd in Mijn
+                      Weerzone, om je sessie veilig te houden.
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">Analytics</h3>
+                  <p>
+                    We gebruiken PostHog en Vercel Analytics om geanonimiseerd
+                    te zien welke pagina's bezocht worden en hoe snel ze laden.
+                    Er wordt geen profiel van jou opgebouwd voor advertenties.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">Wat Weerzone niet doet</h3>
+                  <ul className="list-disc space-y-1 pl-5">
+                    <li>Geen advertentie-cookies (geen AdSense, geen tracking pixels).</li>
+                    <li>Geen affiliate-cookies (geen Amazon, Bol, Booking, Expedia).</li>
+                    <li>Geen profielopbouw voor verkoop aan derden.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">Cookies beheren</h3>
+                  <p>
+                    Je kunt cookies altijd verwijderen of blokkeren via je
+                    browserinstellingen. De locatie-cookies worden dan niet
+                    onthouden en je krijgt elke sessie opnieuw de vraag om een
+                    plek te kiezen. Inloggen op Mijn Weerzone vereist
+                    functionele cookies.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="mb-1 font-black text-slate-900">Wijzigingen</h3>
+                  <p>
+                    Als we cookies toevoegen of weghalen, werken we deze pagina
+                    bij. Voor de volledige uitleg over je gegevens zie het{" "}
+                    <Link
+                      href="/privacy"
+                      className="font-bold underline underline-offset-2 hover:text-slate-900"
+                    >
+                      privacybeleid
+                    </Link>
+                    .
+                  </p>
+                </div>
+              </div>
+            </details>
           </section>
         </div>
       </main>
