@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStationsWeather } from "@/app/actions";
+import { getESStationsWeather } from "@/app/actions";
 import PulseTicker, { type PulseStation } from "@/components/PulseTicker";
 
 function weatherEmoji(code: number, isDay: boolean): string {
   if (code === 0) return isDay ? "☀️" : "🌙";
-  if (code <= 2) return isDay ? "🌤️" : "🌤️";
+  if (code <= 2) return "🌤️";
   if (code === 3) return "☁️";
   if (code <= 48) return "🌫️";
   if (code <= 55) return "🌦️";
@@ -20,13 +20,13 @@ function weatherEmoji(code: number, isDay: boolean): string {
   return "🌡️";
 }
 
-export default function NLPulse() {
+export default function ESPulse() {
   const [stations, setStations] = useState<PulseStation[]>([]);
 
   useEffect(() => {
     const load = () => {
-      getStationsWeather().then((data) => {
-        setStations([...data].sort((a, b) => a.name.localeCompare(b.name)));
+      getESStationsWeather().then((data) => {
+        setStations([...data].sort((a, b) => a.name.localeCompare(b.name, "es")));
       });
     };
     load();
@@ -37,15 +37,12 @@ export default function NLPulse() {
   return (
     <PulseTicker
       items={stations}
-      label="Live"
+      label="En directo"
       emoji={weatherEmoji}
-      shellStyle={{
-        borderColor: "rgba(15,26,44,0.06)",
-        background: "#ffffff",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), 0 1px 2px rgba(15,26,44,0.04), 0 2px 6px rgba(15,26,44,0.03)",
-      }}
-      labelStyle={{ background: "linear-gradient(to right, #ffffff 75%, transparent)", pointerEvents: "none" }}
-      rightFadeStyle={{ background: "linear-gradient(to left, #ffffff, transparent)" }}
+      shellStyle={{ borderColor: "var(--wz-border)", background: "var(--ink-050)" }}
+      labelStyle={{ background: "linear-gradient(to right, var(--ink-050) 80%, transparent)", pointerEvents: "none" }}
+      rightFadeStyle={{ background: "linear-gradient(to left, var(--ink-050), transparent)" }}
+      hotThreshold={26}
     />
   );
 }
