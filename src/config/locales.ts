@@ -1,7 +1,7 @@
 /**
  * Centrale locale-configuratie voor Weerzone.
  *
- * NL  → Piet-tier,  routes zonder prefix  (/mijnweer, /weer/…)
+ * NL  → Piet-tier,  routes zonder prefix  (/piet, /weer/…)
  * DE  → Karl-tier,  routes onder /de/     (/de/mein-wetter, /de/wetter/…)
  * FR  → Luc-tier,   routes onder /fr/     (/fr/mon-meteo, /fr/meteo/…)
  */
@@ -46,12 +46,12 @@ export const LOCALES: Record<Locale, LocaleConfig> = {
     routes: {
       home: "/",
       weather: "/weer",
-      myWeather: "/mijnweer",
-      warnings: "/waarschuwingen",
+      myWeather: "/piet",
+      warnings: "/reed",
     },
     nav: [
-      { key: "piet",          label: "Piet",          href: "/mijnweer",        sublabel: "Je dagelijkse heads-up" },
-      { key: "reed",          label: "Reed",          href: "/waarschuwingen",  sublabel: "Voor buien, wind en onweer" },
+      { key: "piet",          label: "Piet",          href: "/piet",            sublabel: "Je dagelijkse heads-up" },
+      { key: "reed",          label: "Reed",          href: "/reed",            sublabel: "Voor buien, wind en onweer" },
       { key: "koos",          label: "Koos",          href: "/koos",            sublabel: "Als je eropuit wilt" },
       { key: "steve",         label: "Steve",         href: "/steve",           sublabel: "Je zakelijke heads-up" },
       { key: "over",          label: "About",         href: "/over",            weight: "muted" },
@@ -70,9 +70,9 @@ export const LOCALES: Record<Locale, LocaleConfig> = {
       warnings: "/de/warnungen",
     },
     nav: [
-      { key: "mein-wetter", label: "Mein Wetter", href: "/de/mein-wetter" },
-      { key: "warnungen", label: "Warnungen", href: "/de/warnungen" },
-      { key: "preise", label: "Preise", href: "/de/preise" },
+      { key: "mein-wetter", label: "Mein Wetter", href: "/de/mein-wetter", sublabel: "Dein taeglicher Heads-up" },
+      { key: "warnungen", label: "Reed", href: "/de/warnungen", sublabel: "Fuer Regen, Wind und Gewitter" },
+      { key: "steve", label: "Steve", href: "/steve", sublabel: "Dein Business-Heads-up" },
     ],
   },
   fr: {
@@ -87,8 +87,8 @@ export const LOCALES: Record<Locale, LocaleConfig> = {
     },
     nav: [
       { key: "ma-meteo", label: "Ma Météo", href: "/fr/mon-meteo" },
-      { key: "alertes", label: "Alertes", href: "/fr/alertes" },
-      { key: "tarifs", label: "Tarifs", href: "/fr/tarifs" },
+      { key: "alertes", label: "Reed", href: "/fr/alertes", sublabel: "Pour pluie, vent et orages" },
+      { key: "steve", label: "Steve", href: "/steve", sublabel: "Votre heads-up business" },
     ],
   },
   es: {

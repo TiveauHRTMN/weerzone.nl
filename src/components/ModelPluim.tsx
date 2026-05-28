@@ -9,9 +9,9 @@ interface Props {
 }
 
 const MODELS = [
-  { key: "harmonie" as const, label: "Harmonie", color: "#059669" },
-  { key: "icon"     as const, label: "ICON-D2",  color: "#2563eb" },
-  { key: "arome"    as const, label: "Arome",    color: "#ea580c" },
+  { key: "harmonie" as const, label: "Verwachting 1", color: "#059669" },
+  { key: "icon"     as const, label: "Verwachting 2", color: "#2563eb" },
+  { key: "arome"    as const, label: "Verwachting 3", color: "#ea580c" },
 ];
 
 // ─── SVG layout ───────────────────────────────────────────────
@@ -124,10 +124,10 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5">
-            Modelonzekerheid · 3 modellen
+            Komende 48 uur
           </p>
           <h3 className="text-sm font-black text-slate-800 leading-none">
-            Temperatuur Pluim — 48 uur
+            Temperatuurverwachting
           </h3>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
@@ -245,7 +245,7 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
       <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400 pt-3 border-t border-slate-100">
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-3 rounded-sm bg-slate-200" />
-          <span>Spread = onzekerheid</span>
+          <span>Grijs = marge</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-blue-400" />

@@ -3,21 +3,16 @@ import Link from "next/link";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "Weerwebsites vergelijken — WEERZONE vs Buienradar, Weerplaza en meer",
   description:
     "Vergelijk de beste Nederlandse weerwebsites en apps. WEERZONE vs Buienradar, Weerplaza, Weeronline en KNMI — eerlijk, actueel en onafhankelijk.",
-  keywords: [
-    "weerwebsites vergelijken",
-    "weerzone vs buienradar",
-    "beste weerwebsite",
-    "weer app vergelijking",
-    "buienradar alternatief",
-    "weerplaza vs weerzone",
-    "weeronline alternatief",
-  ],
-  alternates: { canonical: "https://weerzone.nl/vergelijken" },
+  alternates: {
+    canonical: "https://weerzone.nl/vergelijken",
+    languages: hreflangSelf("nl", "/vergelijken"),
+  },
   openGraph: {
     title: "Weerwebsites vergelijken — WEERZONE vs Buienradar, Weerplaza en meer",
     description:
@@ -64,7 +59,7 @@ const COMPARISONS = [
     title: "Vergelijkingstabel Weerapps",
     href: "/vergelijken/vergelijkingstabel",
     summary:
-      "Complete feature-matrix van alle weerapps: prijzen, radar, waarschuwingen, API, en meer in één overzicht.",
+      "Complete feature-matrix van alle weerapps: radar, waarschuwingen, API, en meer in één overzicht.",
     label: "Tabel",
     color: "#8b5cf6",
   },
@@ -145,7 +140,7 @@ export default async function VergelijkenIndexPage() {
               <p className="text-sm text-slate-600 leading-relaxed">
                 Alle vergelijkingen op deze pagina zijn gebaseerd op publiek beschikbare informatie
                 van de betreffende diensten, reviewplatforms zoals G2 en Trustpilot, en eigen
-                praktijktests. Prijzen zijn gecontroleerd per{" "}
+                praktijktests. Ervaring zijn gecontroleerd per{" "}
                 {new Date().toLocaleDateString("nl-NL", { year: "numeric", month: "long", day: "numeric" })}.
                 WEERZONE is een eigen product van Tiveau. Voor elke vergelijking vermelden we
                 duidelijk welk product van ons is.

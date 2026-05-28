@@ -443,7 +443,7 @@ ${tomorrowTeaser ? `
       </div>
       <div style="display:table;width:100%;max-width:200px;margin:0 auto;">
         <div style="display:table-cell;padding:0 10px;">
-            <a href="https://weerzone.nl/mijnweer" style="font-size:11px;font-weight:700;color:${t.accent};text-decoration:none;">Mijn weer</a>
+            <a href="https://weerzone.nl/piet" style="font-size:11px;font-weight:700;color:${t.accent};text-decoration:none;">Piet</a>
         </div>
         <div style="display:table-cell;padding:0 10px;border-left:1px solid ${t.cardBorder};">
             <a href="${esc(unsubscribeUrl)}" style="font-size:11px;font-weight:700;color:${t.textLabel};text-decoration:none;">Uitschrijven</a>

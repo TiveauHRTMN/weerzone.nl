@@ -23,7 +23,8 @@ export default function SupportCard() {
         </h3>
         
         <p className="text-sm text-text-secondary leading-relaxed mb-6 max-w-lg">
-          Weerzone wordt volledig onafhankelijk ontwikkeld. Jouw bijdrage helpt ons om de servers draaiende te houden, dure weermodellen in te kopen en de website nóg beter te maken. Groei jij mee?
+          Weerzone wordt volledig onafhankelijk ontwikkeld. Jouw bijdrage helpt ons om de servers draaiende te houden,
+          actuele gegevens te verwerken en de website beter te maken. Groei jij mee?
         </p>
         
         <Link 

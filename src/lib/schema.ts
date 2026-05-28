@@ -1,9 +1,5 @@
 /**
  * Centrale schema.org JSON-LD builders voor WEERZONE.
- *
- * Gebruik:
- *   import { schemaBreadcrumb, schemaService, schemaLd } from "@/lib/schema";
- *   <script type="application/ld+json" {...schemaLd(schemaService(...))} />
  */
 
 const ORG = {
@@ -16,14 +12,14 @@ const ORG = {
   inLanguage: "nl-NL",
   contactPoint: {
     "@type": "ContactPoint",
-    "contactType": "customer support",
-    "email": "info@weerzone.nl",
-    "url": "https://weerzone.nl/contact"
-  }
+    contactType: "customer support",
+    email: "info@weerzone.nl",
+    url: "https://weerzone.nl/contact",
+  },
 } as const;
 
 /** Props voor <script type="application/ld+json" {...schemaLd(schema)} /> */
-export function schemaLd(schema: object | object[]) {
+export function schemaLd(schema: object | readonly object[]) {
   return {
     type: "application/ld+json" as const,
     dangerouslySetInnerHTML: { __html: JSON.stringify(schema) },
@@ -34,21 +30,19 @@ export function schemaSearchAction() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "url": "https://weerzone.nl",
-    "potentialAction": {
+    url: "https://weerzone.nl",
+    potentialAction: {
       "@type": "SearchAction",
-      "target": {
+      target: {
         "@type": "EntryPoint",
-        "urlTemplate": "https://weerzone.nl/weer?q={search_term_string}"
+        urlTemplate: "https://weerzone.nl/weer?q={search_term_string}",
       },
-      "query-input": "required name=search_term_string"
-    }
+      "query-input": "required name=search_term_string",
+    },
   };
 }
 
-export function schemaBreadcrumb(
-  items: Array<{ name: string; item?: string }>
-) {
+export function schemaBreadcrumb(items: Array<{ name: string; item?: string }>) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -68,6 +62,7 @@ export function schemaWebPage(opts: {
   dateModified?: string;
   about?: object;
   speakableSelectors?: string[];
+  inLanguage?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -77,12 +72,29 @@ export function schemaWebPage(opts: {
     ...(opts.description ? { description: opts.description } : {}),
     ...(opts.dateModified ? { dateModified: opts.dateModified } : {}),
     ...(opts.about ? { about: opts.about } : {}),
-    inLanguage: "nl-NL",
+    inLanguage: opts.inLanguage ?? "nl-NL",
     publisher: ORG,
     speakable: {
       "@type": "SpeakableSpecification",
       cssSelector: opts.speakableSelectors ?? ["h1", "h2", "[data-speakable]"],
     },
+  };
+}
+
+/**
+ * FAQPage JSON-LD voor citatie door AI Overviews / ChatGPT / Perplexity.
+ * Houd antwoorden 40-80 woorden, vragen letterlijke query-formaten.
+ */
+export function schemaFAQ(items: Array<{ q: string; a: string }>, inLanguage = "nl-NL") {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    inLanguage,
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
   };
 }
 
@@ -125,6 +137,8 @@ export function schemaService(opts: {
   serviceType: string;
   audience?: string;
   offers?: { price: string; priceCurrency: string };
+  inLanguage?: string;
+  areaServed?: object;
 }) {
   return {
     "@context": "https://schema.org",
@@ -134,9 +148,9 @@ export function schemaService(opts: {
     description: opts.description,
     url: opts.url,
     serviceType: opts.serviceType,
-    areaServed: { "@type": "Country", name: "Nederland" },
+    areaServed: opts.areaServed ?? { "@type": "Country", name: "Nederland" },
     provider: ORG,
-    inLanguage: "nl-NL",
+    inLanguage: opts.inLanguage ?? "nl-NL",
     ...(opts.audience
       ? { audience: { "@type": "Audience", audienceType: opts.audience } }
       : {}),
@@ -162,7 +176,8 @@ export function schemaWeatherWarnings(
     validUntil?: string | null;
     issuedAt?: string | null;
     areaServed?: string;
-  }>
+  }>,
+  inLanguage = "nl-NL",
 ) {
   return warnings.map((warning) => ({
     "@context": "https://schema.org",
@@ -171,7 +186,7 @@ export function schemaWeatherWarnings(
     text: warning.description,
     url: warning.url,
     category: "https://www.wikidata.org/wiki/Q81054",
-    inLanguage: "nl-NL",
+    inLanguage,
     publisher: ORG,
     ...(warning.areaServed ? { spatialCoverage: { "@type": "AdministrativeArea", name: warning.areaServed } } : {}),
     ...(warning.validFrom ? { datePosted: warning.validFrom } : {}),
@@ -186,14 +201,19 @@ export function schemaCityWeatherPage(opts: {
   lon: number;
   province: string;
   slug: string;
+  inLanguage?: string;
+  name?: string;
+  description?: string;
+  speakableSelectors?: string[];
 }) {
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `Weersverwachting ${opts.placeName} — 48 uur`,
+    name: opts.name ?? `Weersverwachting ${opts.placeName} — 48 uur`,
     url: `https://weerzone.nl/weer/${opts.province}/${opts.slug}`,
     dateModified: new Date().toISOString(),
-    inLanguage: "nl-NL",
+    ...(opts.description ? { description: opts.description } : {}),
+    inLanguage: opts.inLanguage ?? "nl-NL",
     about: {
       "@type": "City",
       name: opts.placeName,
@@ -206,7 +226,7 @@ export function schemaCityWeatherPage(opts: {
     publisher: ORG,
     speakable: {
       "@type": "SpeakableSpecification",
-      cssSelector: ["h1", "[data-speakable]", ".wz-essentials", ".wz-geo-summary"],
+      cssSelector: opts.speakableSelectors ?? ["h1", "[data-speakable]", ".wz-essentials", ".wz-geo-summary"],
     },
   };
 }
@@ -214,20 +234,24 @@ export function schemaCityWeatherPage(opts: {
 export function schemaCityDataset(opts: {
   placeName: string;
   url: string;
+  description?: string;
+  inLanguage?: string;
+  name?: string;
 }) {
   return {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: `Hyperlokale Weerdata ${opts.placeName} (1x1 km resolutie)`,
-    description: `Real-time weersverwachting, temperatuur, neerslag en wind op 1 bij 1 kilometer grid voor ${opts.placeName}. Data gecombineerd uit HARMONIE, ICON-D2 en AROME weermodellen.`,
+    name: opts.name ?? `Hyperlokale Weerdata ${opts.placeName} (1x1 km resolutie)`,
+    description: opts.description ?? `Actuele weersverwachting, temperatuur, neerslag en wind op straatniveau voor ${opts.placeName}. Helder weergegeven voor vandaag en morgen.`,
     url: opts.url,
     license: "https://creativecommons.org/licenses/by/4.0/",
     creator: ORG,
-    temporalCoverage: `${new Date().toISOString().split('T')[0]}/${new Date(Date.now() + 48 * 3600 * 1000).toISOString().split('T')[0]}`,
+    inLanguage: opts.inLanguage ?? "nl-NL",
+    temporalCoverage: `${new Date().toISOString().split("T")[0]}/${new Date(Date.now() + 48 * 3600 * 1000).toISOString().split("T")[0]}`,
     spatialCoverage: {
       "@type": "Place",
-      name: opts.placeName
-    }
+      name: opts.placeName,
+    },
   };
 }
 
@@ -245,7 +269,7 @@ export function schemaAggregateRating(opts: {
       ratingValue: opts.ratingValue.toFixed(1),
       reviewCount: opts.ratingCount,
       bestRating: "5",
-      worstRating: "1"
-    }
+      worstRating: "1",
+    },
   };
 }

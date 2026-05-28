@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import ReedExtended from "@/components/ReedExtended";
 import PremiumGate from "@/components/PremiumGate";
@@ -9,29 +9,19 @@ import { fetchWeatherData } from "@/lib/weather";
 import { Check } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Alertas — Avisos de tiempo extremo en Espana",
+  title: "Alertas — Avisos de tiempo extremo en España",
   description:
-    "Weerzone avisa de tormentas, calor extremo, lluvia torrencial, viento fuerte y frio en Espana. Solo cuando algo se acerca de verdad — sin spam, sin ruido.",
+    "Weerzone avisa de tormentas, calor extremo, lluvia torrencial, viento fuerte y frio en España. Solo cuando algo se acerca de verdad — sin spam, sin ruido.",
   alternates: {
     canonical: "https://weerzone.nl/es/alertas",
     languages: {
-      "nl-NL": "https://weerzone.nl/waarschuwingen",
+      "nl-NL": "https://weerzone.nl/reed",
       "de-DE": "https://weerzone.nl/de/warnungen",
       "fr-FR": "https://weerzone.nl/fr/alertes",
       "es-ES": "https://weerzone.nl/es/alertas",
-      "x-default": "https://weerzone.nl/waarschuwingen",
+      "x-default": "https://weerzone.nl/reed",
     },
   },
-  keywords: [
-    "alertas meteorologicas",
-    "aviso AEMET",
-    "alerta tormenta",
-    "alerta calor",
-    "DANA",
-    "borrasca",
-    "viento fuerte",
-    "lluvia torrencial",
-  ],
   openGraph: {
     title: "Alertas de tiempo extremo | WEERZONE Espana",
     description:
@@ -78,7 +68,7 @@ export default async function AlertasPage() {
   const lat = activeLoc.lat;
   const lon = activeLoc.lon;
 
-  const initialWeather = await fetchWeatherData(lat, lon, false, false, undefined, "es").catch(() => undefined);
+  const initialWeather = await fetchWeatherData(lat, lon, false, true, undefined, "es").catch(() => undefined);
 
   return (
     <main>
@@ -150,9 +140,8 @@ export default async function AlertasPage() {
                 ))}
               </div>
               <p className="text-xs text-slate-400 mt-5 leading-relaxed">
-                AEMET sigue siendo la referencia oficial para avisos en Espana. Weerzone no sustituye
-                a AEMET — usamos sus boletines como una de las capas que Mariana cruza, junto a
-                modelos europeos, para avisarte cuando algo afecta concretamente a tu codigo postal.
+                AEMET sigue siendo la referencia oficial para avisos en Espana. Weerzone no la sustituye:
+                te lo contamos en lenguaje normal cuando algo afecta concretamente a tu codigo postal.
               </p>
             </div>
 

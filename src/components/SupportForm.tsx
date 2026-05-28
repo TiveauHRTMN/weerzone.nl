@@ -144,12 +144,6 @@ export default function SupportForm() {
               <p className="text-xs font-medium text-slate-500 text-center">
                 Geen Revolut-account? Geen probleem. Je kunt simpel betalen via <strong>Apple Pay, Google Pay</strong> of <strong>Card</strong>.
               </p>
-              <p className="text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest">
-                Gebruik je liever de affiliate bonus?
-              </p>
-              <p className="text-xs font-medium text-slate-500 text-center">
-                <a href="https://www.revolut.com/nl-NL/referral/?referral-code=rowanl6tw%21MAY1-26-VR-NL" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline font-bold">Open gratis een account</a> en steun ons via de signup-bonus!
-              </p>
             </div>
           )}
           {method === "phantom" && (

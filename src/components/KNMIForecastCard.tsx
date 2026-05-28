@@ -54,7 +54,7 @@ function label(code?: number) {
   return WC_LABEL[Number(code)] ?? "wisselvallig";
 }
 
-function quickPietForecast(weather: WeatherData | undefined, city: string) {
+function quickForecast(weather: WeatherData | undefined, city: string) {
   if (!weather) return null;
   const current = weather.current;
   const today = weather.daily?.[0];
@@ -83,7 +83,7 @@ function quickPietForecast(weather: WeatherData | undefined, city: string) {
 }
 
 export default function KNMIForecastCard({ lat, lon, city, initialWeather }: Props) {
-  const initialForecast = quickPietForecast(initialWeather, city);
+  const initialForecast = quickForecast(initialWeather, city);
   const [forecast, setForecast] = useState<string | null>(initialForecast);
   const [loading, setLoading] = useState(!initialForecast);
   const [enhanced, setEnhanced] = useState(false);
@@ -132,7 +132,7 @@ export default function KNMIForecastCard({ lat, lon, city, initialWeather }: Pro
       <div className="flex items-center gap-2 mb-4">
         <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">
-          Piet · weerbericht
+          Weerbericht
         </span>
       </div>
       <div className="space-y-3">
@@ -141,7 +141,7 @@ export default function KNMIForecastCard({ lat, lon, city, initialWeather }: Pro
         ))}
       </div>
       <p className="text-[9px] text-slate-400 mt-4">
-        Gebaseerd op KNMI-data · {enhanced ? "AI-versie geladen" : "snelle versie"} · elke 30 minuten bijgewerkt
+        Gebaseerd op actuele gegevens · {enhanced ? "uitgebreide versie" : "snelle versie"} · elke 30 minuten bijgewerkt
       </p>
     </div>
   );

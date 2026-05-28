@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DE_BUNDESLAND_LABELS, DE_BUNDESLAND_SLUGS } from "@/config/locales";
 
 export const metadata: Metadata = {
-  title: "Wetter Deutschland | Alle Bundesländer | WEERZONE",
+  title: "Wetter Deutschland | Alle Bundesländer",
   description:
     "Aktuelles Wetter für alle deutschen Bundesländer und Städte. Wähle dein Bundesland für präzise 48-Stunden-Prognosen.",
   alternates: {

@@ -110,7 +110,7 @@ function buildAlertEmailHtml(
 ): string {
   const style = SEVERITY_STYLE[warning.severity];
   const unsubUrl = `https://weerzone.nl/api/unsubscribe?email=\${encodeURIComponent(email)}`;
-  const detailsUrl = "https://weerzone.nl/waarschuwingen";
+  const detailsUrl = "https://weerzone.nl/reed";
   const window = formatWindowLabel(warning);
   const enriched = warning.enriched;
 
@@ -120,6 +120,30 @@ function buildAlertEmailHtml(
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">CAPE-piek</td>
         <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.capeMaxJkg} J/kg</td>
       </tr>
+      \${enriched.cinMaxJkg !== undefined ? \`
+      <tr>
+        <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">De Deksel (CIN)</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.cinMaxJkg} J/kg</td>
+      </tr>
+      \` : ""}
+      \${enriched.dewPointMaxC !== undefined ? \`
+      <tr>
+        <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Dauwpunt max</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.dewPointMaxC} °C</td>
+      </tr>
+      \` : ""}
+      \${enriched.windShearMaxKmh !== undefined ? \`
+      <tr>
+        <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Windschering max</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.windShearMaxKmh} km/h</td>
+      </tr>
+      \` : ""}
+      \${enriched.liftedIndexMinC !== undefined ? \`
+      <tr>
+        <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Lifted Index min</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.liftedIndexMinC} °C</td>
+      </tr>
+      \` : ""}
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Regen totaal</td>
         <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.precipitationTotalMm} mm</td>

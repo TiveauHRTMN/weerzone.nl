@@ -1,4 +1,4 @@
-import { PERSONAS, type PersonaTier, formatPrice } from "@/lib/personas";
+import { PERSONAS, type PersonaTier } from "@/lib/personas";
 
 /**
  * De officiële "Weerzone style" welkomstbrief.
@@ -9,11 +9,6 @@ export function getWelcomeEmailHtml(email: string, tier: PersonaTier, city?: str
   // We laten Piet en Reed altijd zien in de introductie, 
   // maar sturen de persona die ze kozen als focus.
 
-  const hasPrice = persona.priceCents !== undefined;
-  const pricingText = hasPrice 
-    ? `Nu tijdelijk gratis te proberen. Straks ${formatPrice(persona.priceCents!)}/mnd.`
-    : "Binnenkort beschikbaar voor zakelijk gebruik.";
-  
   return `
 <!DOCTYPE html>
 <html lang="nl">
@@ -74,7 +69,7 @@ export function getWelcomeEmailHtml(email: string, tier: PersonaTier, city?: str
 
     <div style="padding:40px;background:#f8fafc;text-align:center;border-top:1px solid #f1f5f9;">
       <p style="margin:0;font-size:14px;color:#1e293b;font-weight:900;text-transform:uppercase;letter-spacing:1px;">48 uur vooruit. De rest is ruis.</p>
-      <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Je betaalt tijdelijk niks. ${pricingText}</p>
+      <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Geen advertenties. Geen betaalmuur. Alleen je persoonlijke 48-uurs heads-up.</p>
     </div>
   </div>
 </body>

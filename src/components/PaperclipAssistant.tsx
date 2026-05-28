@@ -21,10 +21,10 @@ export default function PaperclipAssistant() {
   useEffect(() => {
     // Geef de gebruiker even de tijd om te landen
     const timer = setTimeout(() => {
-      // Mockup of an AI "Task" being completed by Steve
+      // Mockup of a proactive Steve note.
       setMessage({
         id: "init",
-        text: "Pst... Steve hier. Ik zie dat er wat regen aan komt in de regio. Heb je die 'Impulse Deal' voor die slimme paraplu al gezien? Bespaart je 40%!",
+        text: "Er komt mogelijk regen aan in je regio. Bekijk of deze aanbieding voor een stevige paraplu handig is.",
         persona: "STEVE",
         actionLabel: "BEKIJK DEAL",
         actionUrl: "#deals"
@@ -54,7 +54,7 @@ export default function PaperclipAssistant() {
                 message.persona === "REED" ? "bg-red-600" : "bg-accent-cyan"
               }`} />
               <span className="text-[10px] font-black uppercase tracking-tighter text-slate-400">
-                AI LABOR: {message.persona}
+                WEERZONE: {message.persona}
               </span>
             </div>
 

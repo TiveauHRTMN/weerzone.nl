@@ -112,7 +112,7 @@ export default function TrustSection() {
               Nauwkeurigheid per dag
             </p>
             <p className="text-white/35 text-[10px] font-bold mb-6">
-              Typische modelnauwkeurigheid voor Nederland
+              Typische betrouwbaarheid voor Nederland
             </p>
 
             <div className="flex flex-col gap-3 flex-1">

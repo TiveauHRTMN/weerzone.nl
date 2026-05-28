@@ -181,7 +181,6 @@ export default function DwdForecastCard({ lat, lon, city, initialWeather, locale
 
   const paragraphs = forecast.split(/\n+/).map((p) => p.trim()).filter(Boolean);
 
-  const sourceLabel = isFR ? "Météo-France" : "DWD";
   const personaName = isFR ? "Luc" : "Karl";
   const bulletinLabel = isFR ? "Bulletin météo" : "Wetterbericht";
 
@@ -200,8 +199,8 @@ export default function DwdForecastCard({ lat, lon, city, initialWeather, locale
       </div>
       <p className="text-[9px] text-slate-400 mt-4">
         {isFR 
-          ? `Basé sur les prévisions ${sourceLabel} · ${enhanced ? "Version IA chargée" : "Version rapide"} · mis à jour toutes les 30 minutes`
-          : `Basiert auf ${sourceLabel}-Wetterbericht · ${enhanced ? "KI-Version geladen" : "Schnellversion"} · alle 30 Minuten aktualisiert`
+          ? `Base sur les donnees actuelles · ${enhanced ? "Version complete" : "Version rapide"} · mis a jour toutes les 30 minutes`
+          : `Basiert auf aktuellen Daten · ${enhanced ? "ausfuhrliche Version" : "Schnellversion"} · alle 30 Minuten aktualisiert`
         }
       </p>
     </div>

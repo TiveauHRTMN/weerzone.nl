@@ -2,19 +2,15 @@ import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/pla
 import Link from "next/link";
 import type { Metadata } from "next";
 import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "48 uur weer voor keuzes vandaag en morgen",
   description:
-    "Waarom WEERZONE focust op de komende 48 uur: de periode waarin weerdata het meest bruikbaar is voor planning per uur.",
-  keywords: [
-    "48 uur weer",
-    "48 uur weerbericht",
-    "waarom geen 14 daagse",
-    "weermodel harmonie",
-    "weer 2 dagen vooruit",
-  ],
-  alternates: { canonical: "https://weerzone.nl/weer/48-uur" },
+    "Waarom WEERZONE focust op de komende 48 uur: de periode waarin het weer het meest bruikbaar is voor planning per uur.",  alternates: {
+    canonical: "https://weerzone.nl/weer/48-uur",
+    languages: hreflangSelf("nl", "/weer/48-uur"),
+  },
 };
 
 export default function FortyEightPage() {
@@ -28,7 +24,7 @@ export default function FortyEightPage() {
   return (
     <>
       <script {...schemaLd([
-        schemaWebPage({ name: "48 uur weer voor keuzes vandaag en morgen", url: "https://weerzone.nl/weer/48-uur", description: "Waarom WEERZONE focust op de komende 48 uur: de periode waarin weerdata het meest bruikbaar is voor planning per uur." }),
+        schemaWebPage({ name: "48 uur weer voor keuzes vandaag en morgen", url: "https://weerzone.nl/weer/48-uur", description: "Waarom WEERZONE focust op de komende 48 uur: de periode waarin het weer het meest bruikbaar is voor planning per uur." }),
         schemaBreadcrumb([{ name: "WEERZONE", item: "https://weerzone.nl" }, { name: "Weer", item: "https://weerzone.nl/weer" }, { name: "48 uur" }]),
       ])} />
       <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white px-4 py-12">
@@ -45,7 +41,7 @@ export default function FortyEightPage() {
               48 uur weer. <span className="text-accent-cyan">Voor keuzes vandaag en morgen.</span>
             </h1>
             <p className="text-white/70 text-lg leading-relaxed">
-              WEERZONE richt zich op de periode waarin weerdata het meest bruikbaar is: vandaag, vannacht en morgen. Per uur, hyperlokaal en direct toepasbaar.
+              WEERZONE richt zich op de periode waarin het weer het meest bruikbaar is: vandaag, vannacht en morgen. Per uur, helder en direct toepasbaar.
             </p>
           </header>
 
@@ -56,12 +52,12 @@ export default function FortyEightPage() {
             </p>
             <div className="grid sm:grid-cols-2 gap-4 mt-6">
                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="font-bold text-white mb-1 uppercase text-xs tracking-widest text-accent-cyan">Data focus</div>
+                  <div className="font-bold text-white mb-1 uppercase text-xs tracking-widest text-accent-cyan">Vandaag telt</div>
                   <p className="text-xs text-white/50 italic">Per uur: regen, windstoten, UV en onweersenergie.</p>
                </div>
                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="font-bold text-white mb-1 uppercase text-xs tracking-widest text-accent-cyan">Duidelijkheid</div>
-                  <p className="text-xs text-white/50 italic">Je ziet direct of twee modellen het met elkaar eens zijn.</p>
+                  <p className="text-xs text-white/50 italic">Je ziet direct wat dit voor jouw plan betekent.</p>
                </div>
             </div>
           </section>

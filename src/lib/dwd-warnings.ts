@@ -171,6 +171,8 @@ function stripJsonp(body: string): string {
 
 /** Haal alle actieve DWD-warnings op (alle bundeslands tegelijk). */
 export async function fetchDWDWarnings(): Promise<DWDWarning[]> {
+  if (process.env.NEXT_PHASE === "phase-production-build") return [];
+
   const url = "https://www.dwd.de/DWD/warnungen/warnapp_landkreise/json/warnings.json";
   try {
     const res = await fetch(url, {

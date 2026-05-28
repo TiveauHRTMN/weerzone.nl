@@ -115,6 +115,7 @@ export default async function DeutschlandHomepage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main>
+        <h1 className="sr-only">Wetter Deutschland heute — 48-Stunden-Wettervorhersage</h1>
         <WeatherDashboard
           initialCity={berlin}
           initialWeather={initialWeather}
@@ -272,7 +273,7 @@ export default async function DeutschlandHomepage() {
                         <p className="text-sm text-slate-500 leading-relaxed mb-6">{de.description}</p>
 
                         <div className="pt-4 border-t border-slate-100">
-                          <div className="text-2xl font-black text-slate-900">Abonnieren</div>
+                          <div className="text-2xl font-black text-slate-900">Aktivieren</div>
                           <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter mt-1">
                             In der Beta vorerst kostenlos
                           </p>
@@ -291,7 +292,7 @@ export default async function DeutschlandHomepage() {
 
                 <div className="text-center">
                   <Link
-                    href="/de/preise"
+                    href="/app/signup?lang=de"
                     className="inline-block px-8 py-4 rounded-full bg-white text-slate-900 font-black text-sm shadow-2xl hover:bg-accent-orange hover:text-white transition-all transform hover:scale-105"
                   >
                     Tarife vergleichen →

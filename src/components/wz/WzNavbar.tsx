@@ -98,7 +98,7 @@ export default function WzNavbar() {
               <Link href="/app/login" className="btn btn-ghost btn-sm">
                 {isDE ? "Anmelden" : "Inloggen"}
               </Link>
-              <Link href={isDE ? "/de/preise" : "/app/signup"} className="btn btn-primary btn-sm">
+              <Link href={isDE ? "/app/signup?lang=de" : "/app/signup"} className="btn btn-primary btn-sm">
                 {isDE ? "Jetzt starten" : "Aanmelden"}
               </Link>
             </>
@@ -178,7 +178,7 @@ export default function WzNavbar() {
                 <Link href="/app/login" onClick={() => setOpen(false)} className="btn btn-ghost btn-block">
                   {isDE ? "Anmelden" : "Inloggen"}
                 </Link>
-                <Link href={isDE ? "/de/preise" : "/app/signup"} onClick={() => setOpen(false)} className="btn btn-primary btn-block">
+                <Link href={isDE ? "/app/signup?lang=de" : "/app/signup"} onClick={() => setOpen(false)} className="btn btn-primary btn-block">
                   {isDE ? "Jetzt starten" : "Aanmelden"}
                 </Link>
               </>

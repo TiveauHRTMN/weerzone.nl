@@ -788,7 +788,7 @@ input.wk-score-input::placeholder {
    Premium polish — globaal
    Consistente focus-rings, reduced-motion respect,
    tactiele button-press, en betere text-rendering voor
-   headings. Subtiele upgrades, geen breaking changes.
+   headings. Subtiele verfijning, geen breaking changes.
    ============================================ */
 
 /* Tactiele focus-ring op alle interactieve elementen */
@@ -812,13 +812,13 @@ button:not(:disabled):active,
   transition: transform .06s ease;
 }
 
-/* Headings: optimale weergave + ligatures voor premium uitstraling */
+/* Headings: optimale weergave + ligatures voor rustige uitstraling */
 h1, h2, h3, h4, h5, h6 {
   text-rendering: optimizeLegibility;
   font-feature-settings: "ss01", "cv11", "kern";
 }
 
-/* Body: zachte cijferweergave (tabular nums) bij temperatuur/prijzen */
+/* Body: zachte cijferweergave (tabular nums) bij temperatuur/ervaring */
 .tabular-nums,
 .tnum {
   font-variant-numeric: tabular-nums;

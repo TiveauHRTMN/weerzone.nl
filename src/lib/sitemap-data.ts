@@ -26,6 +26,14 @@ export const DE_PROVINCES = new Set([
   "saarland", "saksen", "saksen-anhalt", "sleeswijk-holstein", "thuringen", "baden-wurttemberg",
 ]);
 
+// DE is gesplitst over twee sitemap-files omdat het totaal aantal entries
+// (>50k) Google's per-file limiet overschrijdt. West = zuidelijk + westelijk,
+// East = nieuwe Bundesländer + Berlin.
+export const DE_GROUP_EAST = new Set([
+  "berlijn", "brandenburg", "mecklenburg-voorpommeren",
+  "saksen", "saksen-anhalt", "thuringen",
+]);
+
 export const FR_PROVINCES = new Set([
   "ain", "aisne", "allier", "alpes-de-haute-provence", "hautes-alpes", "alpes-maritimes",
   "ardeche", "ardennes", "ariege", "aube", "aude", "aveyron", "bouches-du-rhone",
@@ -60,6 +68,22 @@ export interface SitemapEntry {
   priority?: number;
 }
 
+interface SitemapIndexEntry {
+  url: string;
+  lastmod: string;
+}
+
+export const SITEMAP_FILES = [
+  "sitemap-static.xml",
+  "sitemap-nl.xml",
+  "sitemap-be.xml",
+  "sitemap-de.xml",
+  "sitemap-de-east.xml",
+  "sitemap-fr.xml",
+  "sitemap-lu.xml",
+  "sitemap-es.xml",
+] as const;
+
 function escapeXml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -87,24 +111,29 @@ function placePriority(pop?: number): number {
 }
 
 function todayIso(): string {
-  return new Date(new Date().toDateString()).toISOString();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Amsterdam",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (type: string) => parts.find((part) => part.type === type)?.value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
 function xmlUrlset(entries: SitemapEntry[]): string {
   const items = entries.map((e) => {
     let line = `  <url><loc>${escapeXml(e.url)}</loc>`;
-    if (e.lastmod)     line += `<lastmod>${e.lastmod}</lastmod>`;
-    if (e.changefreq)  line += `<changefreq>${e.changefreq}</changefreq>`;
-    if (e.priority !== undefined) line += `<priority>${e.priority.toFixed(1)}</priority>`;
+    if (e.lastmod) line += `<lastmod>${e.lastmod}</lastmod>`;
     line += `</url>`;
     return line;
   }).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${items}\n</urlset>`;
 }
 
-function xmlSitemapIndex(urls: string[]): string {
-  const items = urls
-    .map((u) => `  <sitemap><loc>${escapeXml(u)}</loc></sitemap>`)
+function xmlSitemapIndex(entries: SitemapIndexEntry[]): string {
+  const items = entries
+    .map((entry) => `  <sitemap><loc>${escapeXml(entry.url)}</loc><lastmod>${entry.lastmod}</lastmod></sitemap>`)
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${items}\n</sitemapindex>`;
 }
@@ -120,15 +149,11 @@ export function xmlResponse(body: string): Response {
 
 // ─── Sitemap index ────────────────────────────────────────────────────────────
 export function buildSitemapIndex(): string {
-  return xmlSitemapIndex([
-    `${BASE_URL}/sitemap-static.xml`,
-    `${BASE_URL}/sitemap-nl.xml`,
-    `${BASE_URL}/sitemap-be.xml`,
-    `${BASE_URL}/sitemap-de.xml`,
-    `${BASE_URL}/sitemap-fr.xml`,
-    `${BASE_URL}/sitemap-lu.xml`,
-    `${BASE_URL}/sitemap-es.xml`,
-  ]);
+  const lastmod = todayIso();
+  return xmlSitemapIndex(SITEMAP_FILES.map((file) => ({
+    url: `${BASE_URL}/${file}`,
+    lastmod,
+  })));
 }
 
 // ─── Statische sitemap (NL + BE + DE + FR static pages + provincie/Bundesland overzichten) ──
@@ -139,15 +164,14 @@ export function buildStaticSitemap(): string {
   // NL statisch
   entries.push({ url: BASE_URL,                        lastmod: today, changefreq: "hourly",  priority: 1.0 });
   entries.push({ url: `${BASE_URL}/weer`,              lastmod: today, changefreq: "hourly",  priority: 0.9 });
-  entries.push({ url: `${BASE_URL}/mijnweer`,          lastmod: today, changefreq: "weekly",  priority: 0.8 });
-  entries.push({ url: `${BASE_URL}/waarschuwingen`,    lastmod: today, changefreq: "weekly",  priority: 0.8 });
-  entries.push({ url: `${BASE_URL}/zakelijk`,          lastmod: today, changefreq: "weekly",  priority: 0.8 });
-  entries.push({ url: `${BASE_URL}/prijzen`,           lastmod: today, changefreq: "monthly", priority: 0.7 });
+  entries.push({ url: `${BASE_URL}/piet`,              lastmod: today, changefreq: "weekly",  priority: 0.8 });
+  entries.push({ url: `${BASE_URL}/reed`,              lastmod: today, changefreq: "weekly",  priority: 0.8 });
+  entries.push({ url: `${BASE_URL}/koos`,              lastmod: today, changefreq: "weekly",  priority: 0.7 });
+  entries.push({ url: `${BASE_URL}/steve`,             lastmod: today, changefreq: "weekly",  priority: 0.7 });
   entries.push({ url: `${BASE_URL}/over`,              lastmod: today, changefreq: "monthly", priority: 0.6 });
   entries.push({ url: `${BASE_URL}/weer/48-uur`,       lastmod: today, changefreq: "hourly",  priority: 0.7 });
   entries.push({ url: `${BASE_URL}/weer/onweer`,       lastmod: today, changefreq: "hourly",  priority: 0.6 });
   entries.push({ url: `${BASE_URL}/weer/regen`,        lastmod: today, changefreq: "hourly",  priority: 0.6 });
-  entries.push({ url: `${BASE_URL}/weer/regen-op-vakantie`, lastmod: today, changefreq: "weekly",  priority: 0.7 });
   entries.push({ url: `${BASE_URL}/contact`,           lastmod: today, changefreq: "monthly", priority: 0.4 });
   entries.push({ url: `${BASE_URL}/privacy`,           lastmod: today, changefreq: "monthly", priority: 0.3 });
 
@@ -171,7 +195,6 @@ export function buildStaticSitemap(): string {
   entries.push({ url: `${BASE_URL}/de/wetter`,      lastmod: today, changefreq: "hourly",  priority: 0.8 });
   entries.push({ url: `${BASE_URL}/de/mein-wetter`, lastmod: today, changefreq: "weekly",  priority: 0.8 });
   entries.push({ url: `${BASE_URL}/de/warnungen`,   lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/de/preise`,      lastmod: today, changefreq: "monthly", priority: 0.7 });
   entries.push({ url: `${BASE_URL}/de/uber-uns`,    lastmod: today, changefreq: "monthly", priority: 0.5 });
   entries.push({ url: `${BASE_URL}/de/kontakt`,     lastmod: today, changefreq: "monthly", priority: 0.4 });
 
@@ -193,7 +216,6 @@ export function buildStaticSitemap(): string {
   entries.push({ url: `${BASE_URL}/fr/meteo`,       lastmod: today, changefreq: "hourly",  priority: 0.9 });
   entries.push({ url: `${BASE_URL}/fr/mon-meteo`,   lastmod: today, changefreq: "weekly",  priority: 0.8 });
   entries.push({ url: `${BASE_URL}/fr/alertes`,     lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/fr/tarifs`,      lastmod: today, changefreq: "monthly", priority: 0.7 });
   entries.push({ url: `${BASE_URL}/fr/a-propos`,    lastmod: today, changefreq: "monthly", priority: 0.5 });
   entries.push({ url: `${BASE_URL}/fr/contact`,     lastmod: today, changefreq: "monthly", priority: 0.4 });
 
@@ -214,7 +236,6 @@ export function buildStaticSitemap(): string {
   entries.push({ url: `${BASE_URL}/es/tiempo`,         lastmod: today, changefreq: "hourly",  priority: 0.9 });
   entries.push({ url: `${BASE_URL}/es/mi-tiempo`,      lastmod: today, changefreq: "weekly",  priority: 0.8 });
   entries.push({ url: `${BASE_URL}/es/alertas`,        lastmod: today, changefreq: "weekly",  priority: 0.7 });
-  entries.push({ url: `${BASE_URL}/es/precios`,        lastmod: today, changefreq: "monthly", priority: 0.7 });
   entries.push({ url: `${BASE_URL}/es/sobre-nosotros`, lastmod: today, changefreq: "monthly", priority: 0.5 });
   entries.push({ url: `${BASE_URL}/es/contacto`,       lastmod: today, changefreq: "monthly", priority: 0.4 });
 
@@ -268,7 +289,10 @@ export function buildBESitemap(): string {
 }
 
 // ─── DE-plaatsen ─────────────────────────────────────────────────────────────
-export function buildDESitemap(): string {
+// Gesplitst over twee bestanden om onder Google's 50k-URLs-per-sitemap te
+// blijven. `group` selecteert west (zuidelijk + westelijk) of east (nieuwe
+// Bundesländer + Berlin). Default = west voor backwards-compatibele URL.
+export function buildDESitemap(group: "west" | "east" = "west"): string {
   const today = todayIso();
   const seen = new Set<string>();
   const entries: SitemapEntry[] = [];
@@ -276,6 +300,9 @@ export function buildDESitemap(): string {
   for (const place of ALL_PLACES) {
     if (!isSitemapPlace(place)) continue;
     if (!DE_PROVINCES.has(place.province)) continue;
+    const isEast = DE_GROUP_EAST.has(place.province);
+    if (group === "east" && !isEast) continue;
+    if (group === "west" && isEast) continue;
     const bundesland = PROVINCE_TO_DE_BUNDESLAND[place.province as Province];
     if (!bundesland) continue;
     const slug = placeRouteSlug(place);

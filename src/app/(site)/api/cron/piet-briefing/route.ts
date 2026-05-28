@@ -154,7 +154,7 @@ Data:
       `
     });
 
-    // 4. Store in Supabase for /mijnweer
+    // 4. Store in Supabase for /piet
     const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
     const supabase = createSupabaseAdminClient();
     await supabase.from("piet_daily_briefing").upsert({

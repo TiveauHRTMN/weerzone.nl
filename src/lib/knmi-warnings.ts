@@ -36,6 +36,10 @@ export interface KNMIWarningEnriched extends KNMIWarning {
     precipitationTotalMm: number;
     windPeakKmh: number;
     windPeakHour: string | null;
+    cinMaxJkg?: number;
+    dewPointMaxC?: number;
+    windShearMaxKmh?: number;
+    liftedIndexMinC?: number;
   };
 }
 
@@ -195,6 +199,8 @@ async function fetchProvincePage(slug: string): Promise<KNMIWarning[]> {
 
 /** Haal alle actieve KNMI-waarschuwingen op (12 provincies parallel). */
 export async function fetchKNMIWarnings(): Promise<KNMIWarning[]> {
+  if (process.env.NEXT_PHASE === "phase-production-build") return [];
+
   const all = await Promise.all(PROVINCE_SLUGS.map(fetchProvincePage));
   return all.flat();
 }
@@ -230,7 +236,7 @@ export async function enrichWarning(
       new URLSearchParams({
         latitude: lat.toString(),
         longitude: lon.toString(),
-        hourly: "precipitation,wind_speed_10m,wind_gusts_10m,cape",
+        hourly: "precipitation,wind_speed_10m,wind_gusts_10m,cape,dew_point_2m,convective_inhibition,lifted_index,wind_speed_80m,wind_direction_80m,wind_direction_10m",
         timezone: "Europe/Amsterdam",
         forecast_days: "3",
       }).toString();
@@ -250,6 +256,11 @@ export async function enrichWarning(
     let precipTotal = 0;
     let windPeak = 0;
     let windPeakHour: string | null = null;
+    let cinMax = 0;
+    let dewPointMax = -999;
+    let windShearMax = 0;
+    let liftedIndexMin = 999;
+    let hasExtraConvective = false;
 
     for (let i = 0; i < h.time.length; i++) {
       const t = new Date(h.time[i]).getTime();
@@ -261,6 +272,37 @@ export async function enrichWarning(
       if (precip > precipPeak) { precipPeak = precip; precipPeakHour = h.time[i]; }
       precipTotal += precip;
       if (wind > windPeak) { windPeak = wind; windPeakHour = h.time[i]; }
+
+      // Advanced convective parameters
+      const cin = h.convective_inhibition?.[i] ?? 0;
+      const dewPoint = h.dew_point_2m?.[i] ?? 0;
+      const liftedIndex = h.lifted_index?.[i];
+      
+      const windSpeed10 = h.wind_speed_10m?.[i];
+      const windDir10 = h.wind_direction_10m?.[i];
+      const windSpeed80 = h.wind_speed_80m?.[i];
+      const windDir80 = h.wind_direction_80m?.[i];
+      
+      let windShear = 0;
+      if (windSpeed10 !== undefined && windDir10 !== undefined && windSpeed80 !== undefined && windDir80 !== undefined) {
+        const rad10 = (windDir10 * Math.PI) / 180;
+        const u10 = windSpeed10 * Math.cos(rad10);
+        const v10 = windSpeed10 * Math.sin(rad10);
+
+        const rad80 = (windDir80 * Math.PI) / 180;
+        const u80 = windSpeed80 * Math.cos(rad80);
+        const v80 = windSpeed80 * Math.sin(rad80);
+        
+        windShear = Math.round(Math.sqrt((u80 - u10) ** 2 + (v80 - v10) ** 2));
+      }
+      
+      if (cin > cinMax) cinMax = cin;
+      if (dewPoint > dewPointMax) dewPointMax = dewPoint;
+      if (windShear > windShearMax) windShearMax = windShear;
+      if (liftedIndex !== undefined && liftedIndex !== null && liftedIndex < liftedIndexMin) {
+        liftedIndexMin = liftedIndex;
+      }
+      hasExtraConvective = true;
     }
 
     return {
@@ -272,6 +314,10 @@ export async function enrichWarning(
         precipitationTotalMm: Math.round(precipTotal * 10) / 10,
         windPeakKmh: Math.round(windPeak),
         windPeakHour,
+        cinMaxJkg: hasExtraConvective ? Math.round(cinMax) : undefined,
+        dewPointMaxC: hasExtraConvective && dewPointMax !== -999 ? Math.round(dewPointMax) : undefined,
+        windShearMaxKmh: hasExtraConvective ? Math.round(windShearMax) : undefined,
+        liftedIndexMinC: hasExtraConvective && liftedIndexMin !== 999 ? Math.round(liftedIndexMin) : undefined,
       },
     };
   } catch (err) {

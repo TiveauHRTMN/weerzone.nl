@@ -12,8 +12,7 @@ import { WzTextField } from "@/components/wz/WzForm";
 type TopicKey = "rain" | "temp" | "wind" | "uv" | "snow";
 type TimeKey = "06:30" | "07:00" | "08:00" | "avond";
 
-// `reed: true` markeert onderwerpen die alleen in het Reed-abonnement zitten.
-// De gebruiker mag ze aanvinken; bij checkout op Piet wordt het gated.
+// `reed: true` markeert onderwerpen waarbij Reed extra scherp meekijkt.
 const TOPICS: Array<{ k: TopicKey; t: string; d: string; reed?: boolean }> = [
   { k: "rain", t: "Regen & buien", d: "Meldingen bij regenkans boven 70%" },
   { k: "temp", t: "Temperatuur", d: "Bij hitte, vorst of scherpe wisselingen" },
@@ -160,8 +159,8 @@ export default function OnboardingClient({ email }: { email: string }) {
         });
       }
 
-      // Onderwerpen + meldingstijd: in user_metadata. Worden bij /checkout
-      // gekoppeld aan persona_preferences zodra een tier is gekozen.
+      // Onderwerpen + meldingstijd: in user_metadata. Mijn Weerzone gebruikt
+      // deze later voor persoonlijke heads-ups.
       await supabase.auth.updateUser({
         data: { topics, notification_time: time },
       });
@@ -174,12 +173,11 @@ export default function OnboardingClient({ email }: { email: string }) {
   }
 
   async function handleFinish() {
-    const next = preTier ? `/app/checkout/${preTier}` : "/prijzen";
-    await persistAndGo(next);
+    await persistAndGo("/mijn-weerzone");
   }
 
   async function handleSkip() {
-    await persistAndGo(preTier ? `/app/checkout/${preTier}` : "/prijzen");
+    await persistAndGo("/mijn-weerzone");
   }
 
   const s = stepTitles[step];

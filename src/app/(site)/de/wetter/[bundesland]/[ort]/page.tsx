@@ -15,6 +15,8 @@ import {
 import { hreflangLuxembourg } from "@/lib/hreflang";
 import { buildCityGeoBlock } from "@/lib/geo-blocks";
 import CityGeoBlock from "@/components/CityGeoBlock";
+import MarianaSeoUpdate from "@/components/MarianaSeoUpdate";
+import OracleSeoUpdate from "@/components/OracleSeoUpdate";
 
 interface PageProps {
   params: Promise<{ bundesland: string; ort: string }>;
@@ -81,7 +83,7 @@ export default async function OrtWeatherPage({ params }: PageProps) {
   const label = DE_BUNDESLAND_LABELS[bundesland] ?? bundesland;
 
   const [initialWeather, marianaSeoText] = await Promise.all([
-    fetchWeatherData(place.lat, place.lon, false, false, undefined, "de"),
+    fetchWeatherData(place.lat, place.lon, false, true, place, "de", true),
     getLocationSEOContent(place.name, label, place.character, "de").catch(() => null),
   ]);
   const locationProfile = getLocationWeatherProfile(place);
@@ -136,6 +138,7 @@ export default async function OrtWeatherPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main>
+        <h1 className="sr-only">Wetter {place.name} — 48-Stunden-Vorhersage in {label}</h1>
         <WeatherDashboard
           initialCity={place}
           initialWeather={initialWeather}
@@ -144,6 +147,8 @@ export default async function OrtWeatherPage({ params }: PageProps) {
           beforeFooter={
             <div className="space-y-6 pt-10">
               <CityGeoBlock block={geoBlock} inLanguage="de-DE" />
+              <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="de" />
+              <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="de" />
 
               {/* CTAs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -160,7 +165,7 @@ export default async function OrtWeatherPage({ params }: PageProps) {
                   </span>
                 </Link>
                 <Link
-                  href="/de/preise#reed"
+                  href="/de/warnungen"
                   className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 border border-white/10 text-white shadow-xl hover:scale-[1.02] transition-all text-center backdrop-blur-sm"
                 >
                   <span className="text-3xl mb-3">⚡</span>

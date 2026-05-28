@@ -3,7 +3,8 @@ import { fetchNearestStationObservation } from "@/lib/knmi-edr";
 import { KNMI_STATIONS } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 import { isMarianaAuthorized, marianaUnauthorized } from "@/lib/mariana/http";
-import { forecastsFromWeatherData, logMarianaActual, logMarianaForecasts } from "@/lib/mariana/service";
+import { forecastsFromWeatherData as marianaForecasts, logMarianaActual, logMarianaForecasts } from "@/lib/mariana/service";
+import { forecastsFromWeatherData as oracleForecasts, logOracleForecasts } from "@/lib/oracle/service";
 import { toMarianaLocation } from "@/lib/mariana/location";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      const forecasts = forecastsFromWeatherData({
+      const forecasts = marianaForecasts({
         location: station,
         weather,
         forecastTimestamp: new Date(),
@@ -43,6 +44,15 @@ export async function GET(request: NextRequest) {
       });
       const forecastResult = await logMarianaForecasts(forecasts);
       results.forecastRows += forecastResult.inserted;
+
+      const oForecasts = oracleForecasts({
+        location: station,
+        weather,
+        forecastTimestamp: new Date(),
+        runId,
+      });
+      const oracleResult = await logOracleForecasts(oForecasts);
+      results.forecastRows += oracleResult.inserted;
 
       const observation = await fetchNearestStationObservation(station.lat, station.lon).catch(() => null);
       if (observation) {

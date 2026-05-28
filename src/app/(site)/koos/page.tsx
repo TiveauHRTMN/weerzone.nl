@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import WeerzoneBackground from "@/components/WeerzoneBackground";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "Koos — als je eropuit wilt | Weerzone",
+  title: "Koos — als je eropuit wilt",
   description:
     "Koos helpt je kiezen waar je heen kunt als je eropuit wilt. Binnenkort beschikbaar.",
-  alternates: { canonical: "https://weerzone.nl/koos" },
+  alternates: {
+    canonical: "https://weerzone.nl/koos",
+    languages: hreflangSelf("nl", "/koos"),
+  },
 };
 
 export default function KoosPage() {

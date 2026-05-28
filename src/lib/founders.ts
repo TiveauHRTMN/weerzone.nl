@@ -2,7 +2,7 @@ import type { PersonaTier } from "@/lib/personas";
 
 /**
  * Founder-bypass: eigenaren/architects die altijd de hoogste tier
- * krijgen, ongeacht of er een abonnement in de DB staat.
+ * krijgen, ongeacht of er een agent-toegang in de DB staat.
  *
  * Eén bron van waarheid — gebruikt door:
  * - lib/session-context (client-side tier)

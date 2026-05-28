@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { Suspense, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { resolveWxScenario, WX_QUERY_KEY } from "@/lib/wx-scenarios";
@@ -38,6 +38,14 @@ function getWeatherTheme(code: number, isDay: boolean) {
 export { getWeatherTheme };
 
 export default function WeatherBackground({ weatherCode, isDay }: Props) {
+  return (
+    <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" />}>
+      <WeatherBackgroundInner weatherCode={weatherCode} isDay={isDay} />
+    </Suspense>
+  );
+}
+
+function WeatherBackgroundInner({ weatherCode, isDay }: Props) {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
 
@@ -45,7 +53,6 @@ export default function WeatherBackground({ weatherCode, isDay }: Props) {
   const override = resolveWxScenario(searchParams?.get(WX_QUERY_KEY));
   const effectiveCode = override ? override.code : weatherCode;
   const effectiveIsDay = override ? override.isDay : isDay;
-
   const theme = getWeatherTheme(effectiveCode, effectiveIsDay);
 
   useEffect(() => setMounted(true), []);

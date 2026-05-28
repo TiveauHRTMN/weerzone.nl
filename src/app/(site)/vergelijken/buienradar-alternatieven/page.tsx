@@ -5,22 +5,14 @@ import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 
 export const metadata: Metadata = {
-  title: "5 Beste Buienradar Alternatieven in 2026 (Gratis & Premium)",
+  title: "5 Beste Buienradar Alternatieven in 2026 ",
   description:
     "Op zoek naar een goed alternatief voor Buienradar? Wij vergeleken WEERZONE, Weerplaza, Weeronline, KNMI en Windy. Vind de beste weerapp voor jouw situatie.",
-  keywords: [
-    "buienradar alternatief",
-    "beste buienradar alternatieven",
-    "weerapp alternatief",
-    "weerzone buienradar alternatief",
-    "beste weerwebsite nederland",
-    "vervanger buienradar",
-  ],
   alternates: { canonical: "https://weerzone.nl/vergelijken/buienradar-alternatieven" },
   openGraph: {
-    title: "5 Beste Buienradar Alternatieven in 2026 (Gratis & Premium)",
+    title: "5 Beste Buienradar Alternatieven in 2026 ",
     description:
-      "Vergelijk de 5 beste Buienradar alternatieven: WEERZONE, Weerplaza, Weeronline, KNMI en Windy — gratis en premium opties.",
+      "Vergelijk de 5 beste Buienradar alternatieven: WEERZONE, Weerplaza, Weeronline, KNMI en Windy — rustige en bruikbare opties.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl/vergelijken/buienradar-alternatieven",
@@ -37,12 +29,12 @@ export const metadata: Metadata = {
 const ALTERNATIVES = [
   {
     name: "WEERZONE",
-    tagline: "Hyperlokaal, 48 uur vooruit, reclamevrij",
+    tagline: "48 uur vooruit, reclamevrij",
     tag: "AANRADER",
     tagColor: "#10b981",
     pros: [
-      "Hyperlokaal op 1x1 km grid",
-      "Drie weermodellen naast elkaar",
+      "Weer voor jouw plek",
+      "Meerdere bronnen naast elkaar",
       "Volledig reclamevrij",
       "Persoonlijke waarschuwingen op maat",
       "E-mail notificaties",
@@ -71,7 +63,7 @@ const ALTERNATIVES = [
     ],
     cons: [
       "Veel advertenties op de website",
-      "Minder hyperlokaal dan WEERZONE",
+      "Minder persoonlijk dan WEERZONE",
       "Beperkte personalisatie",
       "Geen API voor zakelijk gebruik",
     ],
@@ -92,7 +84,7 @@ const ALTERNATIVES = [
       "Mobiele app beschikbaar",
     ],
     cons: [
-      "Advertentiegedreven model",
+      "Draait op advertenties",
       "Minder geschikt voor zakelijk gebruik",
       "Personalisatie beperkt tot locatie",
     ],
@@ -109,7 +101,7 @@ const ALTERNATIVES = [
     pros: [
       "Wetenschappelijk meest betrouwbaar",
       "Onafhankelijk en niet-commercieel",
-      "Uitgebreide data en modellen",
+      "Uitgebreide kaarten en gegevens",
       "Code rood/geel/oranje waarschuwingen als bron",
     ],
     cons: [
@@ -132,7 +124,7 @@ const ALTERNATIVES = [
       "Prachtige visuele weerkaarten",
       "Gratis en uitgebreid",
       "Wereldwijde dekking",
-      "ECMWF, GFS en andere modellen beschikbaar",
+      "Veel weerlagen beschikbaar",
     ],
     cons: [
       "Niet Nederlands-specifiek",
@@ -140,7 +132,7 @@ const ALTERNATIVES = [
       "Geen persoonlijk weerbericht",
       "Vooral gericht op weerkaarten, niet op locatie",
     ],
-    bestFor: "Weerliefhebbers en professionals die visuele kaarten en meerdere modellen willen verkennen.",
+    bestFor: "Weerliefhebbers en professionals die visuele kaarten en veel weerlagen willen verkennen.",
     cta: "Bekijk Windy",
     ctaHref: "https://www.windy.com",
     isOurs: false,
@@ -195,7 +187,7 @@ export default async function BuienradarAlternatievenPage() {
                 Buienradar is al jaren vertrouwd, maar misschien ben je toe aan iets anders.
                 Minder advertenties, meer precisie, of een compleet andere manier van
                 weer kijken. Wij zetten de 5 beste alternatieven voor je op een rij — van
-                hyperlokaal tot wetenschappelijk.
+                dagelijks gebruik tot officiële bronnen.
               </p>
             </div>
 

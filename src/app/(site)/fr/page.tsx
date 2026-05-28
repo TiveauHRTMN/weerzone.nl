@@ -113,6 +113,7 @@ export default async function FranceHomepage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main>
+        <h1 className="sr-only">Météo France aujourd'hui — Prévisions locales à 48 heures</h1>
         <WeatherDashboard
           initialCity={paris}
           initialWeather={initialWeather}
@@ -270,7 +271,7 @@ export default async function FranceHomepage() {
                         <p className="text-sm text-slate-500 leading-relaxed mb-6">{fr.description}</p>
 
                         <div className="pt-4 border-t border-slate-100">
-                          <div className="text-2xl font-black text-slate-900">S'abonner</div>
+                          <div className="text-2xl font-black text-slate-900">Activer</div>
                           <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter mt-1">
                             Gratuit pendant la bêta
                           </p>
@@ -289,10 +290,10 @@ export default async function FranceHomepage() {
 
                 <div className="text-center">
                   <Link
-                    href="/fr/tarifs"
+                    href="/app/signup?lang=fr"
                     className="inline-block px-8 py-4 rounded-full bg-white text-slate-900 font-black text-sm shadow-2xl hover:bg-accent-orange hover:text-white transition-all transform hover:scale-105"
                   >
-                    Comparer les tarifs →
+                    Ouvrir mon Weerzone -&gt;
                   </Link>
                 </div>
               </section>

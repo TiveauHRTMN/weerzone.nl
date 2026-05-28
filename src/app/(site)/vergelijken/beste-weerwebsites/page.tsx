@@ -7,21 +7,12 @@ import { fetchWeatherData } from "@/lib/weather";
 export const metadata: Metadata = {
   title: "8 Beste Weerwebsites en Apps in 2026, Vergeleken & Gerangschikt",
   description:
-    "De beste Nederlandse weerwebsites van 2026 gerangschikt. WEERZONE, Buienradar, Weerplaza, Weeronline, KNMI, Windy, Meteoblue en YR.no vergeleken op nauwkeurigheid, features en prijs.",
-  keywords: [
-    "beste weerwebsite 2026",
-    "top weerwebsites nederland",
-    "beste weerapp 2026",
-    "weerwebsites vergelijken",
-    "nauwkeurigste weerbericht",
-    "weerzone review",
-    "beste weersite",
-  ],
+    "De beste Nederlandse weerwebsites van 2026 gerangschikt. WEERZONE, Buienradar, Weerplaza, Weeronline, KNMI, Windy, Meteoblue en YR.no vergeleken op nauwkeurigheid, features en bruikbaarheid.",
   alternates: { canonical: "https://weerzone.nl/vergelijken/beste-weerwebsites" },
   openGraph: {
     title: "8 Beste Weerwebsites en Apps in 2026, Vergeleken & Gerangschikt",
     description:
-      "De 8 beste weerwebsites van 2026 gerangschikt. Van hyperlokaal tot wetenschappelijk — vind de beste weerapp voor jou.",
+      "De 8 beste weerwebsites van 2026 gerangschikt. Van dagelijks gebruik tot officiële bronnen — vind de beste weerapp voor jou.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl/vergelijken/beste-weerwebsites",
@@ -31,7 +22,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "8 Beste Weerwebsites in 2026 | WEERZONE",
     description:
-      "De 8 beste weerwebsites van 2026 gerangschikt op nauwkeurigheid, features en prijs.",
+      "De 8 beste weerwebsites van 2026 gerangschikt op nauwkeurigheid, features en bruikbaarheid.",
   },
 };
 
@@ -42,9 +33,9 @@ const RANKINGS = [
     url: "https://weerzone.nl",
     slug: "weerzone",
     score: "9.2 / 10",
-    bestFor: "Hyperlokaal dagelijks gebruik",
+    bestFor: "Dagelijks gebruik",
     highlight: "Meest nauwkeurige 48-uurs verwachting per postcode",
-    pros: ["Hyperlokaal 1x1 km grid", "Reclamevrij", "Persoonlijke waarschuwingen", "Drie weermodellen", "E-mail notificaties"],
+    pros: ["Weer voor jouw plek", "Reclamevrij", "Persoonlijke waarschuwingen", "Meerdere bronnen", "E-mail notificaties"],
     cons: ["Nieuwe dienst", "Geen native app", "Korte termijn focus"],
     isOurs: true,
   },
@@ -57,7 +48,7 @@ const RANKINGS = [
     bestFor: "Snelle neerslagradar check",
     highlight: "Beste neerslagradar met 5-min updates",
     pros: ["Uitstekende radar", "14-daagse verwachting", "Bekend en vertrouwd", "Mobiele app"],
-    cons: ["Veel advertenties", "Minder hyperlokaal", "Weinig personalisatie"],
+    cons: ["Veel advertenties", "Minder persoonlijk", "Weinig personalisatie"],
     isOurs: false,
   },
   {
@@ -69,7 +60,7 @@ const RANKINGS = [
     bestFor: "Lange termijn en video weerberichten",
     highlight: "Uitgebreide content met video-weerberichten",
     pros: ["14-daagse verwachting", "Video weerberichten", "Goede neerslagradar", "Specialisatie landbouw"],
-    cons: ["Advertentiegedreven", "Minder hyperlokaal", "Beperkte API"],
+    cons: ["Advertentiegedreven", "Minder persoonlijk", "Beperkte API"],
     isOurs: false,
   },
   {
@@ -90,9 +81,9 @@ const RANKINGS = [
     url: "https://www.windy.com",
     slug: "windy",
     score: "7.5 / 10",
-    bestFor: "Visuele weerkaarten en modellen",
+    bestFor: "Visuele weerkaarten en weerlagen",
     highlight: "Prachtige, interactieve weerkaarten wereldwijd",
-    pros: ["Visueel prachtig", "Wereldwijde dekking", "Gratis", "Meerdere modellen"],
+    pros: ["Visueel prachtig", "Wereldwijde dekking", "Gratis", "Meerdere weerlagen"],
     cons: ["Niet Nederlands-specifiek", "Informatie-overload", "Geen persoonlijk advies"],
     isOurs: false,
   },
@@ -115,8 +106,8 @@ const RANKINGS = [
     slug: "meteoblue",
     score: "7.0 / 10",
     bestFor: "Nauwkeurige data voor specifieke locaties",
-    highlight: "Zeer nauwkeurige modellen met historische data",
-    pros: ["Nauwkeurige modellen", "Historische data", "Gedetailleerde grafieken", "Wereldwijd"],
+    highlight: "Zeer nauwkeurige verwachtingen met historische data",
+    pros: ["Nauwkeurige verwachtingen", "Historische data", "Gedetailleerde grafieken", "Wereldwijd"],
     cons: ["Complexe interface", "Engelstalig", "Minder geschikt voor snelle check"],
     isOurs: false,
   },
@@ -181,7 +172,7 @@ export default async function BesteWeerwebsitesPage() {
                 Of je nu het meest nauwkeurige weerbericht zoekt, een goede neerslagradar of
                 wetenschappelijke data — deze ranglijst helpt je de beste weerwebsite voor jouw
                 situatie te vinden. We hebben getest op nauwkeurigheid, gebruiksgemak, features
-                en prijs-kwaliteit.
+                en dagelijkse bruikbaarheid.
               </p>
             </div>
 
@@ -191,11 +182,11 @@ export default async function BesteWeerwebsitesPage() {
               </p>
               <p className="text-slate-900 font-black text-lg mb-3">Waarop is dit gebaseerd?</p>
               <ul className="space-y-2 text-sm text-slate-600">
-                <li className="flex gap-2"><span className="text-sky-600 font-black">1.</span> Nauwkeurigheid van de verwachting (o.a. modelkwaliteit en resolutie)</li>
+                <li className="flex gap-2"><span className="text-sky-600 font-black">1.</span> Nauwkeurigheid van de verwachting en lokale scherpte</li>
                 <li className="flex gap-2"><span className="text-sky-600 font-black">2.</span> Gebruiksgemak en interface</li>
                 <li className="flex gap-2"><span className="text-sky-600 font-black">3.</span> Featureset (radar, waarschuwingen, personalisatie, API)</li>
                 <li className="flex gap-2"><span className="text-sky-600 font-black">4.</span> Nederlandsegerichtheid en taal</li>
-                <li className="flex gap-2"><span className="text-sky-600 font-black">5.</span> Prijs-kwaliteit (gratis vs betaalde features)</li>
+                <li className="flex gap-2"><span className="text-sky-600 font-black">5.</span> Rust, duidelijkheid en reclamevrije ervaring</li>
               </ul>
             </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Sobre nosotros | WEERZONE Espana",
+  title: "Sobre nosotros",
   description:
     "WEERZONE traduce el tiempo en decisiones para tu calle, tu costa o tu sierra. Sin pronosticos de 14 dias, sin publicidad, sin tracking. Asi pensamos.",
   alternates: {

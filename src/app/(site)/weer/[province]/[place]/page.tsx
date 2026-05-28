@@ -39,6 +39,8 @@ import { hreflangSelf } from "@/lib/hreflang";
 import { PROVINCE_TO_DE_BUNDESLAND, PROVINCE_TO_FR_REGION } from "@/config/locales";
 import { buildCityGeoBlock } from "@/lib/geo-blocks";
 import CityGeoBlock from "@/components/CityGeoBlock";
+import MarianaSeoUpdate from "@/components/MarianaSeoUpdate";
+import OracleSeoUpdate from "@/components/OracleSeoUpdate";
 
 export const revalidate = 300;
 
@@ -145,7 +147,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   // Fetch weather, KNMI warnings, and SEO data all in parallel
   const [initialWeather, allWarnings, hermesSEO, seoContent] = await Promise.all([
-    fetchWeatherData(place.lat, place.lon, false, false, place).catch(() => undefined),
+    fetchWeatherData(place.lat, place.lon, false, true, place, "nl", true).catch(() => undefined),
     fetchKNMIWarnings().catch(() => []),
     getHermesSEO(place.name, province).catch(() => null),
     getLocationSEOContent(place.name, provLabel, place.character).catch(() => ""),
@@ -226,6 +228,8 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
           beforeFooter={
             <div className="space-y-6 pt-10">
               <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
+              <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
+              <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
 
               {/* Action Grid: Piet & Zakelijk side-by-side */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

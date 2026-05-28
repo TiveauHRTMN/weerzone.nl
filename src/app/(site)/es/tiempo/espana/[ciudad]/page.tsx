@@ -6,6 +6,11 @@ import { fetchWeatherData } from "@/lib/weather";
 import { getLocationSEOContent, getJuanWeatherVerdict } from "@/app/actions";
 import { schemaBreadcrumb, schemaCityDataset, schemaWebPage } from "@/lib/schema";
 import WeatherDashboard from "@/components/WeatherDashboard";
+import { getLocationWeatherProfile } from "@/lib/location-profile";
+import { buildCityGeoBlock } from "@/lib/geo-blocks";
+import CityGeoBlock from "@/components/CityGeoBlock";
+import MarianaSeoUpdate from "@/components/MarianaSeoUpdate";
+import OracleSeoUpdate from "@/components/OracleSeoUpdate";
 
 interface PageProps {
   params: Promise<{ ciudad: string }>;
@@ -30,6 +35,7 @@ function spanishRegionLabel(character?: string): string {
 }
 
 export function generateStaticParams() {
+  return [];
   return ALL_PLACES
     .filter((place) => place.province === "spanje" && (place.population ?? 0) >= 100000)
     .map((place) => ({ ciudad: placeRouteSlug(place) }));
@@ -43,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!place) return {};
 
   return {
-    title: `Tiempo en ${place.name} | Prevision 48 horas | WEERZONE`,
+    title: `Tiempo en ${place.name} | Prevision 48 horas`,
     description: `Consulta el tiempo en ${place.name}, Espana. Prevision local de 48 horas con temperatura, lluvia, viento y el comentario de Juan.`,
     robots: { index: true, follow: true },
     alternates: {
@@ -73,7 +79,7 @@ export default async function SpainCityWeatherPage({ params }: PageProps) {
   const regionLabel = spanishRegionLabel(place.character);
   const characterLabel = spanishCharacterLabel(place.character);
 
-  const initialWeather = await fetchWeatherData(place.lat, place.lon, false, false, place, "es").catch(() => undefined);
+  const initialWeather = await fetchWeatherData(place.lat, place.lon, false, true, place, "es", true).catch(() => undefined);
   const [juanVerdict, seoText] = await Promise.all([
     initialWeather ? getJuanWeatherVerdict(initialWeather, place.name, regionLabel, place.character).catch(() => null) : null,
     getLocationSEOContent(place.name, regionLabel, place.character, "es").catch(() => null),
@@ -121,6 +127,17 @@ export default async function SpainCityWeatherPage({ params }: PageProps) {
     },
   ];
 
+  const nowHour = new Date();
+  nowHour.setMinutes(0, 0, 0);
+  const geoBlock = buildCityGeoBlock({
+    place,
+    regionLabel: regionLabel,
+    profile: getLocationWeatherProfile(place),
+    weather: initialWeather,
+    locale: "es",
+    dateModified: nowHour,
+  });
+
   return (
     <>
       <script
@@ -128,6 +145,7 @@ export default async function SpainCityWeatherPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main>
+        <h1 className="sr-only">Tiempo en {place.name}, España — Previsión a 48 horas</h1>
         <WeatherDashboard
           initialCity={place}
           initialWeather={initialWeather}
@@ -135,6 +153,10 @@ export default async function SpainCityWeatherPage({ params }: PageProps) {
           initialNarrative={juanVerdict}
           beforeFooter={
             <div className="space-y-6 pt-10">
+              <CityGeoBlock block={geoBlock} inLanguage="es-ES" />
+              <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="es" />
+              <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="es" />
+
               {/* CTAs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link
@@ -150,7 +172,7 @@ export default async function SpainCityWeatherPage({ params }: PageProps) {
                   </span>
                 </Link>
                 <Link
-                  href="/es/precios#reed"
+                  href="/es/alertas"
                   className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 border border-white/10 text-white shadow-xl hover:scale-[1.02] transition-all text-center backdrop-blur-sm"
                 >
                   <span className="text-3xl mb-3">⚡</span>

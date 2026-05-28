@@ -27,7 +27,7 @@ export async function generateMetadata({
   if (!label) return {};
 
   return {
-    title: `Météo ${label} — Prévisions actuelles par ville | WEERZONE`,
+    title: `Météo ${label} — Prévisions actuelles par ville`,
     description: `Météo actuelle en ${label}. Prévisions précises à 48 heures pour toutes les villes et communes. Température, précipitations et vent par heure.`,
     alternates: {
       canonical: `https://weerzone.nl/fr/meteo/${region}`,
@@ -105,6 +105,7 @@ export default async function RegionPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <h1 className="sr-only">Météo {label} — Prévisions actuelles par ville</h1>
       <WeatherDashboard
         initialCity={refCity}
         initialWeather={weather ?? undefined}
@@ -154,39 +155,44 @@ export default async function RegionPage({
               </div>
             )}
 
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-6">
-              Toutes les localités en {label}
-            </h2>
-            {Object.entries(
-              places.reduce(
-                (acc, place) => {
-                  const letter = place.name.charAt(0).toUpperCase();
-                  if (!acc[letter]) acc[letter] = [];
-                  acc[letter].push(place);
-                  return acc;
-                },
-                {} as Record<string, typeof places>,
-              ),
-            )
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(([letter, letterPlaces]) => (
-                <div key={letter} className="mb-10">
-                  <h3 className="text-xl font-black text-white/20 mb-4 border-b border-white/5 pb-2">
-                    {letter}
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-1">
-                    {letterPlaces.map((place) => (
-                      <Link
-                        key={place.name}
-                        href={`/fr/meteo/${region}/${placeSlug(place.name)}`}
-                        className="text-sm py-1 text-white/40 hover:text-[#22c55e] transition-colors truncate"
-                      >
-                        {place.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            <details className="mb-10 group">
+              <summary className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-6 cursor-pointer hover:text-[#22c55e] transition-colors list-none flex items-center gap-2">
+                <span className="text-[10px] group-open:rotate-90 transition-transform">▶</span>
+                Toutes les {places.length} localités en {label}
+              </summary>
+              <div className="mt-6">
+                {Object.entries(
+                  places.reduce(
+                    (acc, place) => {
+                      const letter = place.name.charAt(0).toUpperCase();
+                      if (!acc[letter]) acc[letter] = [];
+                      acc[letter].push(place);
+                      return acc;
+                    },
+                    {} as Record<string, typeof places>,
+                  ),
+                )
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([letter, letterPlaces]) => (
+                    <div key={letter} className="mb-10">
+                      <h3 className="text-xl font-black text-white/20 mb-4 border-b border-white/5 pb-2">
+                        {letter}
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-1">
+                        {letterPlaces.map((place) => (
+                          <a
+                            key={place.name}
+                            href={`/fr/meteo/${region}/${placeSlug(place.name)}`}
+                            className="text-sm py-1 text-white/40 hover:text-[#22c55e] transition-colors truncate"
+                          >
+                            {place.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </details>
           </div>
         }
       />

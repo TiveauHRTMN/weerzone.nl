@@ -4,6 +4,7 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import { ALL_PLACES } from "@/lib/places-data";
 import { fetchWeatherData } from "@/lib/weather";
 import { getSavedLocationServer } from "@/lib/location-cookies";
+import { hreflangCluster } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "Über uns",
@@ -19,11 +20,12 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "https://weerzone.nl/de/uber-uns",
-    languages: {
-      "nl-NL": "https://weerzone.nl/over",
-      "de-DE": "https://weerzone.nl/de/uber-uns",
-      "x-default": "https://weerzone.nl/over",
-    },
+    languages: hreflangCluster({
+      nl: "/over",
+      de: "/de/uber-uns",
+      fr: "/fr/a-propos",
+      es: "/es/sobre-nosotros",
+    }),
   },
   openGraph: {
     title: "Über WEERZONE",
@@ -59,7 +61,7 @@ const PERSONAS = [
   },
   {
     name: "Steve",
-    href: "/de/preise#steve",
+    href: "/steve",
     color: "#0ea5e9",
     role: "Unternehmen",
     desc: "Steve übersetzt Wetterdaten in operative Entscheidungen für Unternehmen, die draußen arbeiten oder von Besuch, Andrang und Planung leben.",
@@ -237,7 +239,7 @@ export default async function UberUnsPage() {
                   Zur Startseite
                 </Link>
                 <Link
-                  href="/de/preise"
+                  href="/app/signup?lang=de"
                   className="px-6 py-3 rounded-2xl text-text-primary font-black text-sm transition-all hover:brightness-95"
                   style={{
                     background: "rgba(255,255,255,0.6)",

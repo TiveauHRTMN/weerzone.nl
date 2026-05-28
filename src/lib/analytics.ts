@@ -1,13 +1,13 @@
 
-import posthog from 'posthog-js'
-
 /**
  * Centraal analytics punt.
  * Gebruikt PostHog voor gedrag (views/clicks).
  */
 export const trackEvent = (name: string, properties?: Record<string, any>) => {
   if (typeof window !== 'undefined') {
-    posthog.capture(name, properties)
+    import('posthog-js').then(({ default: posthog }) => {
+      posthog.capture(name, properties)
+    })
   }
 }
 

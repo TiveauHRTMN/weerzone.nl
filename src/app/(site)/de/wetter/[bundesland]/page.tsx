@@ -4,6 +4,7 @@ import { fetchWeatherData } from "@/lib/weather";
 import { placesByProvince, placeSlug } from "@/lib/places-data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { schemaBreadcrumb, schemaCityDataset, schemaLd, schemaWebPage } from "@/lib/schema";
 import {
   DE_BUNDESLAND_TO_PROVINCE,
   DE_BUNDESLAND_LABELS,
@@ -26,7 +27,7 @@ export async function generateMetadata({
   if (!label) return {};
 
   return {
-    title: `Wetter ${label} — Aktuelle Wettervorhersage pro Stadt | WEERZONE`,
+    title: `Wetter ${label} — Aktuelle Wettervorhersage pro Stadt`,
     description: `Aktuelles Wetter in ${label}. Genaue 48-Stunden-Prognose für alle Städte und Gemeinden. Temperatur, Niederschlag und Wind pro Stunde.`,
     alternates: {
       canonical: `https://weerzone.nl/de/wetter/${bundesland}`,
@@ -55,16 +56,23 @@ export default async function BundeslandPage({
 
   const seenSlugs = new Set<string>();
   const rawPlaces = placesByProvince()[province] ?? [];
-  const places = rawPlaces
+  const allPlacesDeduped = rawPlaces
     .filter((p) => {
       const s = placeSlug(p.name);
       if (seenSlugs.has(s)) return false;
       seenSlugs.add(s);
       return true;
-    })
+    });
+
+  // Beperk de zichtbare "Alle Orte"-lijst tot plaatsen met >= 1000 inwoners,
+  // anders streamt Next.js voor grote Bundesländer (Bayern, NRW) duizenden
+  // <a>-tags + serialized RSC payload in de initiële HTML. De kleinere
+  // plaatsen blijven indexeerbaar via sitemap-de.xml.
+  const places = allPlacesDeduped
+    .filter((p) => (p.population ?? 0) >= 1000)
     .sort((a, b) => a.name.localeCompare(b.name, "de"));
 
-  const mainCities = [...places]
+  const mainCities = [...allPlacesDeduped]
     .filter((p) => p.population && p.population >= 5000)
     .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
     .slice(0, 12);
@@ -77,6 +85,7 @@ export default async function BundeslandPage({
   const temp = weather ? Math.round(weather.current.temperature) : null;
   const rain = weather?.daily[0]?.precipitationSum ?? 0;
   const wind = weather ? Math.round(weather.current.windSpeed) : 0;
+  const pageUrl = `https://weerzone.nl/de/wetter/${bundesland}`;
 
   const karlUrteil = !weather || temp === null ? null : (() => {
     if (bundesland === "nordrhein-westfalen")
@@ -115,19 +124,29 @@ export default async function BundeslandPage({
   })();
 
   const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "WEERZONE", item: "https://weerzone.nl" },
-        { "@type": "ListItem", position: 2, name: "Wetter", item: "https://weerzone.nl/de/wetter" },
-        { "@type": "ListItem", position: 3, name: label, item: `https://weerzone.nl/de/wetter/${bundesland}` },
-      ],
-    },
+    schemaBreadcrumb([
+      { name: "WEERZONE", item: "https://weerzone.nl" },
+      { name: "Wetter", item: "https://weerzone.nl/de/wetter" },
+      { name: label, item: pageUrl },
+    ]),
+    schemaWebPage({
+      name: `Wetter ${label} - WEERZONE`,
+      url: pageUrl,
+      description: `Aktuelles Wetter in ${label}. Genaue 48-Stunden-Prognose fuer alle Staedte und Gemeinden.`,
+      inLanguage: "de-DE",
+      speakableSelectors: ["h1", "[data-speakable]", ".card"],
+    }),
+    schemaCityDataset({
+      placeName: refCity.name,
+      url: `${pageUrl}/${placeSlug(refCity.name)}`,
+      inLanguage: "de-DE",
+      name: `Hyperlokale Wetterdaten ${refCity.name}`,
+      description: `Lokale Vorhersage fuer ${refCity.name} in ${label}, mit Temperatur, Regen, Wind und 48-Stunden-Horizont.`,
+    }),
     {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      name: `Städte in ${label}`,
+      name: `Staedte in ${label}`,
       itemListElement: mainCities.map((place, i) => ({
         "@type": "ListItem",
         position: i + 1,
@@ -142,6 +161,7 @@ export default async function BundeslandPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <h1 className="sr-only">Wetter {label} — Aktuelle Wettervorhersage pro Stadt</h1>
       <WeatherDashboard
         initialCity={refCity}
         initialWeather={weather ?? undefined}
@@ -162,7 +182,7 @@ export default async function BundeslandPage({
                     <h3 className="text-lg font-black text-text-primary uppercase tracking-tighter mb-1">
                       Karls Regionales Urteil
                     </h3>
-                    <p className="text-text-secondary italic leading-relaxed">
+                    <p className="text-text-secondary italic leading-relaxed" data-speakable>
                       &ldquo;{karlUrteil}&rdquo;
                     </p>
                   </div>
@@ -191,39 +211,44 @@ export default async function BundeslandPage({
               </div>
             )}
 
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-6">
-              Alle Orte in {label}
-            </h2>
-            {Object.entries(
-              places.reduce(
-                (acc, place) => {
-                  const letter = place.name.charAt(0).toUpperCase();
-                  if (!acc[letter]) acc[letter] = [];
-                  acc[letter].push(place);
-                  return acc;
-                },
-                {} as Record<string, typeof places>,
-              ),
-            )
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(([letter, letterPlaces]) => (
-                <div key={letter} className="mb-10">
-                  <h3 className="text-xl font-black text-white/20 mb-4 border-b border-white/5 pb-2">
-                    {letter}
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-1">
-                    {letterPlaces.map((place) => (
-                      <Link
-                        key={place.name}
-                        href={`/de/wetter/${bundesland}/${placeSlug(place.name)}`}
-                        className="text-sm py-1 text-white/40 hover:text-[#22c55e] transition-colors truncate"
-                      >
-                        {place.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            <details className="mb-10 group">
+              <summary className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-6 cursor-pointer hover:text-[#22c55e] transition-colors list-none flex items-center gap-2">
+                <span className="text-[10px] group-open:rotate-90 transition-transform">▶</span>
+                Alle {places.length} Orte in {label}
+              </summary>
+              <div className="mt-6">
+                {Object.entries(
+                  places.reduce(
+                    (acc, place) => {
+                      const letter = place.name.charAt(0).toUpperCase();
+                      if (!acc[letter]) acc[letter] = [];
+                      acc[letter].push(place);
+                      return acc;
+                    },
+                    {} as Record<string, typeof places>,
+                  ),
+                )
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([letter, letterPlaces]) => (
+                    <div key={letter} className="mb-10">
+                      <h3 className="text-xl font-black text-white/20 mb-4 border-b border-white/5 pb-2">
+                        {letter}
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-1">
+                        {letterPlaces.map((place) => (
+                          <a
+                            key={place.name}
+                            href={`/de/wetter/${bundesland}/${placeSlug(place.name)}`}
+                            className="text-sm py-1 text-white/40 hover:text-[#22c55e] transition-colors truncate"
+                          >
+                            {place.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </details>
           </div>
         }
       />

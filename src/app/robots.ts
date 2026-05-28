@@ -21,15 +21,6 @@ export default function robots(): MetadataRoute.Robots {
       // Training-only crawler — geblokkeerd
       { userAgent: "CCBot", disallow: "/" },
     ],
-    sitemap: [
-      "https://weerzone.nl/sitemap.xml",
-      "https://weerzone.nl/sitemap-static.xml",
-      "https://weerzone.nl/sitemap-nl.xml",
-      "https://weerzone.nl/sitemap-be.xml",
-      "https://weerzone.nl/sitemap-de.xml",
-      "https://weerzone.nl/sitemap-fr.xml",
-      "https://weerzone.nl/sitemap-lu.xml",
-      "https://weerzone.nl/sitemap-es.xml",
-    ],
+    sitemap: "https://weerzone.nl/sitemap.xml",
   };
 }

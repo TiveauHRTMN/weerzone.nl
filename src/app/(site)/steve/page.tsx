@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import WeerzoneBackground from "@/components/WeerzoneBackground";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "Steve — je zakelijke heads-up | Weerzone",
+  title: "Steve — je zakelijke heads-up",
   description:
     "Steve vertaalt weer, timing en locatie naar zakelijke kansen. Binnenkort beschikbaar.",
-  alternates: { canonical: "https://weerzone.nl/steve" },
+  alternates: {
+    canonical: "https://weerzone.nl/steve",
+    languages: hreflangSelf("nl", "/steve"),
+  },
 };
 
 export default function StevePage() {

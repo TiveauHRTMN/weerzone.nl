@@ -7,6 +7,7 @@ import { externalAiPointForTime, fetchExternalAiWeatherForecast } from "./extern
 
 const OPEN_METEO_BASE = "https://api.open-meteo.com/v1/forecast";
 const DWD_ICON_BASE = "https://api.open-meteo.com/v1/dwd-icon";
+const ECMWF_BASE = "https://api.open-meteo.com/v1/ecmwf";
 
 const HOURLY_PARAMS = [
   "temperature_2m",
@@ -98,8 +99,8 @@ async function fetchModel(
     longitude: lon.toString(),
     hourly: HOURLY_PARAMS + ",apparent_temperature",
     timezone: "Europe/Amsterdam",
-    forecast_days: "2",
-    forecast_hours: "48",
+    forecast_days: "4",
+    forecast_hours: "96",
     ...extraParams,
   });
 
@@ -168,8 +169,8 @@ export async function fetchWeatherData(
       minutely_15: "precipitation",
       forecast_minutely_15: "96",
       timezone,
-      forecast_days: "2",
-      forecast_hours: "48",
+      forecast_days: "4",
+      forecast_hours: "96",
     })}`;
     try {
       const res = await fetch(url, { 
@@ -203,7 +204,8 @@ export async function fetchWeatherData(
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: SECONDARY_MODEL_BY_LOCALE[locale] }).catch(() => null),
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome_france_hd" }).catch(() => null),
         fetchModel(OPEN_METEO_BASE, lat, lon, { models: "ecmwf_ifs0p25" }).catch(() => null),
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "gfs_seamless" }).catch(() => null)
+        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "gfs_seamless" }).catch(() => null),
+        fetchModel(ECMWF_BASE, lat, lon, { models: "ecmwf_aifs025_single" }).catch(() => null)
       );
       if (shouldFetchExternalAi) {
         fetchPromises.push(
@@ -211,8 +213,8 @@ export async function fetchWeatherData(
             lat,
             lon,
             timezone,
-            hours: 48,
-            validTimes: Array.isArray(leadRes?.hourly?.time) ? leadRes.hourly.time.slice(0, 48) : undefined,
+            hours: 96,
+            validTimes: Array.isArray(leadRes?.hourly?.time) ? leadRes.hourly.time.slice(0, 96) : undefined,
           }).catch(() => null)
         );
       }
@@ -234,7 +236,8 @@ export async function fetchWeatherData(
       : ((!isBot && forceHighRes ? results[2] : null) || null);
     const ecmwfData = (!isBot && forceHighRes ? results[3] : null) || null;
     const gfsData = (!isBot && forceHighRes ? results[4] : null) || null;
-    const externalAiData = shouldFetchExternalAi ? results[5] ?? null : null;
+    const aifsData = (!isBot && forceHighRes ? results[5] : null) || null;
+    const externalAiData = shouldFetchExternalAi ? results[6] ?? null : null;
 
     const harmonieData = locale === "nl" ? coreHourly : secondaryData;
     const iconData = locale === "de" ? coreHourly : (locale === "fr" ? secondaryData : null);
@@ -251,39 +254,46 @@ export async function fetchWeatherData(
     // 1. BLEND HOURLY DATA WITH MULTIPLE MODELS
     const times = data.hourly.time ?? [];
     const hourly: HourlyForecast[] = times.map((time: string, i: number) => {
-      const harmonie = (harmonieData && Array.isArray(harmonieData.temperature_2m)) ? {
-        temperature: Math.round(harmonieData.temperature_2m[i] ?? 0),
+      const harmonie = (harmonieData && Array.isArray(harmonieData.temperature_2m) && harmonieData.temperature_2m[i] !== undefined) ? {
+        temperature: Math.round(harmonieData.temperature_2m[i]),
         precipitation: harmonieData.precipitation?.[i] ?? 0,
         weatherCode: harmonieData.weather_code?.[i] ?? 0,
         windSpeed: Math.round(harmonieData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
-      const icon = (iconData && Array.isArray(iconData.temperature_2m)) ? {
-        temperature: Math.round(iconData.temperature_2m[i] ?? 0),
+      const icon = (iconData && Array.isArray(iconData.temperature_2m) && iconData.temperature_2m[i] !== undefined) ? {
+        temperature: Math.round(iconData.temperature_2m[i]),
         precipitation: iconData.precipitation?.[i] ?? 0,
         weatherCode: iconData.weather_code?.[i] ?? 0,
         windSpeed: Math.round(iconData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
-      const arome = (aromeData && Array.isArray(aromeData.temperature_2m)) ? {
-        temperature: Math.round(aromeData.temperature_2m[i] ?? 0),
+      const arome = (aromeData && Array.isArray(aromeData.temperature_2m) && aromeData.temperature_2m[i] !== undefined) ? {
+        temperature: Math.round(aromeData.temperature_2m[i]),
         precipitation: aromeData.precipitation?.[i] ?? 0,
         weatherCode: aromeData.weather_code?.[i] ?? 0,
         windSpeed: Math.round(aromeData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
-      const ecmwf = (ecmwfData && Array.isArray(ecmwfData.temperature_2m)) ? {
-        temperature: Math.round(ecmwfData.temperature_2m[i] ?? 0),
+      const ecmwf = (ecmwfData && Array.isArray(ecmwfData.temperature_2m) && ecmwfData.temperature_2m[i] !== undefined) ? {
+        temperature: Math.round(ecmwfData.temperature_2m[i]),
         precipitation: ecmwfData.precipitation?.[i] ?? 0,
         weatherCode: ecmwfData.weather_code?.[i] ?? 0,
         windSpeed: Math.round(ecmwfData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
-      const gfs = (gfsData && Array.isArray(gfsData.temperature_2m)) ? {
-        temperature: Math.round(gfsData.temperature_2m[i] ?? 0),
+      const gfs = (gfsData && Array.isArray(gfsData.temperature_2m) && gfsData.temperature_2m[i] !== undefined) ? {
+        temperature: Math.round(gfsData.temperature_2m[i]),
         precipitation: gfsData.precipitation?.[i] ?? 0,
         weatherCode: gfsData.weather_code?.[i] ?? 0,
         windSpeed: Math.round(gfsData.wind_speed_10m?.[i] ?? 0)
+      } : undefined;
+
+      const aifs = (aifsData && Array.isArray(aifsData.temperature_2m) && aifsData.temperature_2m[i] !== undefined) ? {
+        temperature: Math.round(aifsData.temperature_2m[i]),
+        precipitation: aifsData.precipitation?.[i] ?? 0,
+        weatherCode: aifsData.weather_code?.[i] ?? 0,
+        windSpeed: Math.round(aifsData.wind_speed_10m?.[i] ?? 0)
       } : undefined;
 
       const google = googleData ? {
@@ -321,7 +331,7 @@ export async function fetchWeatherData(
         windSpeed,
         cape: Math.round(data.hourly.cape?.[i] ?? 0),
         confidence: leadModelEntry ? "high" : "medium",
-        models: { harmonie, icon, arome, ecmwf, gfs, google, ...externalAiModels }
+        models: { harmonie, icon, arome, ecmwf, gfs, aifs, google, ...externalAiModels }
       };
     });
 
@@ -425,16 +435,29 @@ export async function fetchWeatherData(
     };
 
     try {
-      const [{ applyMarianaArbitration }, { toMarianaLocation }, { loadMarianaMemory }] = await Promise.all([
+      const [
+        { applyMarianaArbitration },
+        { applyOracleArbitration },
+        { toMarianaLocation },
+        { loadMarianaMemory }
+      ] = await Promise.all([
         import("@/lib/mariana/arbitration"),
+        import("@/lib/oracle/arbitration"),
         import("@/lib/mariana/location"),
         import("@/lib/mariana/storage"),
       ]);
       const location = toMarianaLocation(marianaLocation ?? { lat, lon });
       const memory = await loadMarianaMemory(location.locationId).catch(() => null);
-      return applyMarianaArbitration({ location, weather, memory });
+      
+      let finalWeather = applyMarianaArbitration({ location, weather, memory });
+      try {
+        finalWeather = applyOracleArbitration({ location, weather: finalWeather, memory });
+      } catch (err) {
+        console.error("Oracle arbitration failed:", err);
+      }
+      return finalWeather;
     } catch (error) {
-      console.error("Mariana arbitration skipped:", error instanceof Error ? error.message : String(error));
+      console.error("Mariana/Oracle arbitration skipped:", error instanceof Error ? error.message : String(error));
       return weather;
     }
   } catch (error) {

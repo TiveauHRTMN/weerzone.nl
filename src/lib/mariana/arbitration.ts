@@ -19,15 +19,20 @@ const DEFAULT_WEIGHTS: Record<string, number> = {
   HARMONIE: 0.6,
   AROME: 0.56,
   ICON: 0.5,
+  ICON_D2: 0.54,
   ECMWF: 0.52,
   GFS: 0.42,
+  ECMWF_AIFS_SET_X: 0.5,
   GOOGLE: 0.38,
 };
 
 const MODEL_KEY_MAP: Record<string, MarianaModelName> = {
   harmonie: "HARMONIE",
   arome: "AROME",
-  icon: "ICON",
+  icon: "ICON_D2",
+  ecmwf: "ECMWF",
+  gfs: "GFS",
+  aifs: "ECMWF_AIFS_SET_X",
   google: "GOOGLE",
 };
 
@@ -269,11 +274,11 @@ export function applyMarianaArbitration(args: {
       ...args.weather.models,
       agreement: Math.round(confidence.score * 100),
       label: confidence.label === "high"
-        ? "Hoge Mariana-consensus"
+        ? "Sterke verwachting"
         : confidence.label === "medium"
-          ? "Gemiddelde Mariana-consensus"
-          : "Lage Mariana-consensus",
-      sources: [...new Set([...args.weather.models.sources, "Mariana arbitration"])],
+          ? "Redelijk zekere verwachting"
+          : "Onzekere verwachting",
+      sources: [...new Set([...args.weather.models.sources, "weercontrole"])],
     },
     mariana: {
       locationId: args.location.locationId,

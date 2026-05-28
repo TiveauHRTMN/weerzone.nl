@@ -3,7 +3,7 @@ import Link from "next/link";
 import { FR_REGION_LABELS, FR_REGION_SLUGS } from "@/config/locales";
 
 export const metadata: Metadata = {
-  title: "Météo France | Régions | WEERZONE",
+  title: "Météo France | Régions",
   description:
     "Météo actuelle pour les régions de France et de Belgique francophone. Choisissez votre région pour des prévisions précises à 48 heures.",
   alternates: {

@@ -1,12 +1,3 @@
-// Centrale config voor Piet · Karl · Reed · Steve tiers.
-// Eén bron van waarheid voor prijs, kleur, kopij, founder-lock.
-// Gebruikt door: /prijzen, /de/preise, PersonaModal, FounderBanner, signup-flow.
-//
-// Locale-mapping:
-//   NL entry-tier → "piet"
-//   DE entry-tier → "karl"
-//   Reed + Steve zijn locale-onafhankelijk
-
 export type PersonaTier = "piet" | "karl" | "reed" | "steve";
 
 export interface PersonaConfig {
@@ -17,114 +8,90 @@ export interface PersonaConfig {
   colorVar: string;
   tagline: string;
   description: string;
-  priceCents?: number;
-  founderPriceCents?: number;
   features: string[];
   audience: string;
   includes?: PersonaTier[];
 }
 
 export const PERSONAS: Record<PersonaTier, PersonaConfig> = {
-  // ─── Karl — DE entry-tier ───────────────────────────────────────────────────
   karl: {
     tier: "karl",
     name: "Karl",
-    label: "Basis",
+    label: "Dagelijkse heads-up",
     color: "#22c55e",
     colorVar: "--persona-karl",
-    tagline: "Dein lokaler Wetterassistent für Deutschland.",
+    tagline: "Dein lokaler Wetter-Heads-up fuer Deutschland.",
     description:
-      "Karl schickt dir jeden Morgen vor 7 Uhr eine kurze Mail: Was das Wetter heute und morgen an deiner genauen Adresse macht.",
-    priceCents: 399,
-    founderPriceCents: 199,
+      "Karl sagt dir jeden Morgen, was heute und morgen fuer deinen Ort wichtig ist.",
     features: [
-      "Jeden Morgen vor 7 Uhr in deinem Posteingang",
-      "Für deine genaue Adresse (hyperlokal, 1 km Auflösung)",
-      "Du bestimmst, was Karl berücksichtigt: Fahrrad, Garten, Kinder, Hund",
-      "Dashboard mit stündlichem Verlauf",
-      "Keine Werbung, kein Tracking, keine Cookie-Banner",
+      "Jeden Morgen ein klarer 48-Stunden-Heads-up",
+      "Fuer deinen Ort",
+      "Kontext fuer Fahrrad, Garten, Kinder oder Hund",
+      "Stundenverlauf ohne Werberauschen",
+      "Keine Anzeigen, keine Partnerdeals, keine Paywall",
     ],
-    audience: "Für alle, die morgens in einer Minute wissen wollen, was der Tag meteorologisch bringt.",
+    audience: "Fuer alle, die morgens schnell wissen wollen, was mit dem Wetter klug ist.",
   },
-
-  // ─── Piet — NL entry-tier ───────────────────────────────────────────────────
   piet: {
     tier: "piet",
     name: "Piet",
-    label: "Basis",
+    label: "Dagelijkse heads-up",
     color: "#22c55e",
     colorVar: "--persona-piet",
-    tagline: "Elke ochtend een weermail, op jouw postcode.",
+    tagline: "Je dagelijkse weer-heads-up.",
     description:
-      "Piet stuurt je elke ochtend voor 7:00 een korte mail: wat het weer vandaag en morgen doet op jouw adres.",
-    priceCents: 399,
-    founderPriceCents: 199,
+      "Piet vertelt je wat vandaag en morgen slim is: ga nu, wacht even of plan later.",
     features: [
-      "Elke ochtend vóór 7:00 in je mail",
-      "Op jouw postcode (KNMI HARMONIE, 2,5 km)",
-      "Jij kiest wat Piet meeneemt: fiets, tuin, kinderen, hond",
-      "Dashboard met uur-voor-uur verloop",
-      "Geen reclame, geen tracking, geen cookiemuren",
+      "Elke ochtend een heldere 48-uurs heads-up",
+      "Voor jouw plek",
+      "Context voor fiets, tuin, kinderen, hond of sport",
+      "Uur-voor-uur verloop zonder ruis",
+      "Geen advertenties, geen partnerdeals, geen betaalmuur",
     ],
-    audience: "Voor wie 's ochtends in één minuut wil weten hoe de dag eruitziet.",
+    audience: "Voor wie in een minuut wil weten wat het weer met de dag doet.",
   },
-
-  // ─── Reed — locale-onafhankelijk (NL + DE) ─────────────────────────────────
   reed: {
     tier: "reed",
     name: "Reed",
-    label: "Waarschuwing",
+    label: "Buien, wind en onweer",
     color: "#ef4444",
     colorVar: "--persona-reed",
-    tagline: "Waarschuwing als het over jouw grens gaat.",
+    tagline: "Reed let op wanneer het riskant wordt.",
     description:
-      "Reed stuurt alleen een bericht als het weer door jouw drempel heen gaat. Bij al het andere laat hij je met rust.",
-    priceCents: 699,
+      "Reed komt in beeld bij buien, wind, onweer en scherpe omslagmomenten.",
     features: [
-      "Alles wat Piet ook stuurt",
-      "Waarschuwing op jouw drempel (wind, regen, vorst, onweer)",
-      "Jij vult in wat kwetsbaar is: kelder, plat dak, dieren buiten",
-      "Mail én push — jij kiest per categorie",
-      "Achteraf: klopte de waarschuwing? Per alert te zien",
+      "Buien-, wind- en onweerrisico",
+      "Timing en onzekerheid in normale taal",
+      "Alleen melden wanneer het ertoe doet",
+      "Officiele waarschuwingen met lokale context",
+      "Geen betaalmuur of commerciele CTA",
     ],
-    audience: "Voor gezinnen en huiseigenaren die niet over elk buitje gebeld willen worden.",
+    audience: "Voor iedereen die niet elk buitje hoeft te horen, maar wel de echte risico's.",
     includes: ["piet"],
   },
-
-  // ─── Steve — locale-onafhankelijk (NL + DE) ────────────────────────────────
   steve: {
     tier: "steve",
     name: "Steve",
-    label: "Zakelijk",
+    label: "Zakelijke heads-up",
     color: "#3b82f6",
     colorVar: "--persona-steve",
-    tagline: "Weer vertaald naar een bedrijfsbeslissing.",
+    tagline: "Weer vertaald naar een zakelijke heads-up.",
     description:
-      "Steve leest het weer voor 48 uur vooruit en vertaalt het naar wat het voor je zaak betekent: openen, sluiten, inkopen of annuleren.",
-    priceCents: 49900,
+      "Steve komt later en vertaalt weer, timing en locatie naar zakelijke beslissingen.",
     features: [
-      "Dagelijkse zakelijke mail + live dashboard",
-      "48 uur vooruit in blokken van 2 uur, per locatie",
-      "Drempels per vestiging: wind, regen, temperatuur, onweer",
-      "Inkoop- en roostersuggestie per dag",
-      "Hoe vaak klopte het? Meetbaar per locatie",
-      "Meerdere adressen en vestigingen tegelijk",
+      "48 uur vooruit per locatie",
+      "Weerimpact voor planning en operatie",
+      "Drempels voor wind, regen, temperatuur en onweer",
+      "Rustige zakelijke heads-up",
+      "Coming soon",
     ],
-    audience: "Strandtent, horeca, dakdekker, hovenier, bouw, evenementen.",
+    audience: "Voor events, media, buitenwerk en weergevoelige beslissingen.",
   },
 };
 
-// NL persona-volgorde (voor /prijzen)
 export const PERSONA_ORDER: PersonaTier[] = ["piet", "reed", "steve"];
-// DE persona-volgorde (voor /de/preise)
 export const PERSONA_ORDER_DE: PersonaTier[] = ["karl", "reed", "steve"];
 
-export function formatPrice(cents: number): string {
-  const euros = cents / 100;
-  return `€${euros.toFixed(2).replace(".", ",")}`;
-}
-
-// Alles gratis tot augustus 2026. Daarna bepalen we pas welke betaalde laag zinvol is.
 export const TRIAL_END = new Date("2026-08-01T00:00:00+02:00");
 export const FOUNDER_SLOTS = 25;
 

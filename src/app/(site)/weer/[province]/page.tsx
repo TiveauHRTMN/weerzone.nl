@@ -5,6 +5,7 @@ import { fetchWeatherData } from "@/lib/weather";
 import { PROVINCE_LABELS, type Province, placesByProvince, placeSlug } from "@/lib/places-data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export async function generateStaticParams() {
   return Object.keys(PROVINCE_LABELS).map((province) => ({ province }));
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ province:
     description: `Bekijk het actuele weer in ${label}. Nauwkeurige 48-uurs voorspelling voor alle steden en dorpen in ${label}. Data direct van KNMI — temperatuur, neerslag en wind per uur.`,
     alternates: {
       canonical: `https://weerzone.nl/weer/${province}`,
+      languages: hreflangSelf("nl", `/weer/${province}`),
     },
     openGraph: {
       title: `Weer in provincie ${label} — Live Updates`,
@@ -122,11 +124,12 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
 
   return (
     <>
-      <script 
-        type="application/ld+json" 
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <WeatherDashboard 
+      <h1 className="sr-only">Weer {label} — Actuele weersverwachting per stad</h1>
+      <WeatherDashboard
         initialCity={refCity} 
         initialWeather={weather} 
         titleOverride={`Weer in ${label}`}
@@ -167,34 +170,37 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
               </div>
             )}
 
-            <div className="flex justify-between items-end mb-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white/40">
-                Alle plaatsen in {label}
-              </h2>
-            </div>
-            {Object.entries(
-              places.reduce((acc, place) => {
-                const firstLetter = place.name.charAt(0).toUpperCase();
-                if (!acc[firstLetter]) acc[firstLetter] = [];
-                acc[firstLetter].push(place);
-                return acc;
-              }, {} as Record<string, typeof places>)
-            ).sort(([a], [b]) => a.localeCompare(b)).map(([letter, letterPlaces]) => (
-              <div key={letter} className="mb-10">
-                <h3 className="text-xl font-black text-white/20 mb-4 border-b border-white/5 pb-2">{letter}</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-1">
-                  {letterPlaces.map((place) => (
-                    <Link
-                      key={place.name}
-                      href={`/weer/${province}/${placeSlug(place.name)}`}
-                      className="text-sm py-1 text-white/40 hover:text-accent-orange transition-colors truncate"
-                    >
-                      {place.name}
-                    </Link>
-                  ))}
-                </div>
+            <details className="mb-10 group">
+              <summary className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-6 cursor-pointer hover:text-accent-orange transition-colors list-none flex items-center gap-2">
+                <span className="text-[10px] group-open:rotate-90 transition-transform">▶</span>
+                Alle {places.length} plaatsen in {label}
+              </summary>
+              <div className="mt-6">
+                {Object.entries(
+                  places.reduce((acc, place) => {
+                    const firstLetter = place.name.charAt(0).toUpperCase();
+                    if (!acc[firstLetter]) acc[firstLetter] = [];
+                    acc[firstLetter].push(place);
+                    return acc;
+                  }, {} as Record<string, typeof places>)
+                ).sort(([a], [b]) => a.localeCompare(b)).map(([letter, letterPlaces]) => (
+                  <div key={letter} className="mb-10">
+                    <h3 className="text-xl font-black text-white/20 mb-4 border-b border-white/5 pb-2">{letter}</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-1">
+                      {letterPlaces.map((place) => (
+                        <a
+                          key={place.name}
+                          href={`/weer/${province}/${placeSlug(place.name)}`}
+                          className="text-sm py-1 text-white/40 hover:text-accent-orange transition-colors truncate"
+                        >
+                          {place.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </details>
           </div>
         }
       />

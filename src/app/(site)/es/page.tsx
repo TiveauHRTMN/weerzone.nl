@@ -88,6 +88,7 @@ export default async function EspanaHomepage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main>
+        <h1 className="sr-only">Tiempo España hoy — Previsión local a 48 horas</h1>
         <WeatherDashboard
           initialCity={madrid}
           initialWeather={initialWeather}
@@ -173,7 +174,7 @@ export default async function EspanaHomepage() {
                   {[
                     { title: "Juan", href: "/es/mi-tiempo", text: "Tu parte del tiempo cada manana, escrito por alguien que conoce tu calle y tu costa." },
                     { title: "Reed", href: "/es/alertas", text: "Alertas cuando el tiempo cruza tus limites: lluvia, viento, tormenta o calor." },
-                    { title: "Steve", href: "/es/precios", text: "La prevision traducida a una decision comercial para las proximas 48 horas." },
+                    { title: "Steve", href: "/steve", text: "La prevision traducida a una decision operativa para las proximas 48 horas." },
                   ].map((item) => (
                     <Link key={item.title} href={item.href} className="card group p-6 sm:p-8">
                       <h3 className="text-2xl font-black text-text-primary mb-2">{item.title}</h3>

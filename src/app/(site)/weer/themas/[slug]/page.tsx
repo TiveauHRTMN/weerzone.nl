@@ -5,6 +5,7 @@ import { fetchWeatherData } from "@/lib/weather";
 import { notFound } from "next/navigation";
 import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 import Link from "next/link";
+import { hreflangSelf } from "@/lib/hreflang";
 
 interface Theme {
   slug: string;
@@ -22,8 +23,8 @@ const THEMES: Record<string, Theme> = {
     slug: "bbq-weer",
     title: "BBQ Weer | Kunnen we vanavond barbecueën?",
     description: "De WeerZone BBQ-index: Wind, temperatuur en neerslag perfect geanalyseerd voor de ultieme grill-avond.",
-    metaDescription: "Ontdek of het vandaag BBQ weer is in jouw regio. Wij checken de windkracht, neerslagkans en temperatuur van het KNMI Harmonie model.",
-    intro: "Barbecueën vereist meer dan alleen geen regen. WeerZone analyseert drie factoren tegelijk: windkracht (boven 4 Bft waait je kolen uit), neerslagkans per uur (zelfs 10% kans om 19:00 is genoeg om je avond te verpesten) en de gevoelstemperatuur na zonsondergang. Het KNMI Harmonie model werkt op 1×1 kilometer — de tuin van je buurman kan ander weer hebben dan jij denkt.",
+    metaDescription: "Ontdek of het vandaag BBQ weer is in jouw regio. Wij checken wind, regenkans en temperatuur voor jouw avond.",
+    intro: "Barbecueën vereist meer dan alleen geen regen. WeerZone kijkt tegelijk naar windkracht (boven 4 Bft waait je kolen uit), regenkans per uur en de gevoelstemperatuur na zonsondergang. Het kan in de tuin van je buurman anders aanvoelen dan bij jou.",
     thresholds: [
       { label: "Temperatuur", value: "≥18°C gevoelstemperatuur om 19:00", good: true },
       { label: "Neerslag", value: "<5% kans per uur tijdens avonduren", good: true },
@@ -77,7 +78,7 @@ const THEMES: Record<string, Theme> = {
     title: "Hardloopweer | Ideale Loopcondities per Uur",
     description: "Niet te warm, niet te koud. Wij checken de luchtvochtigheid en wind voor jouw perfecte run.",
     metaDescription: "Is het goed hardloopweer vandaag? Check de hardloop-index op WeerZone: wind, vochtigheid en temperatuur.",
-    intro: "Het ideale hardloopweer bestaat: 8–13°C, relatieve luchtvochtigheid onder 60%, weinig wind en geen neerslag. Bij hogere temperaturen stijgt je hartslag bij dezelfde inspanning doordat je lichaam warmte moet afvoeren. WeerZone berekent de 'voelbare belasting' per uur op basis van het KNMI Harmonie model — zodat je weet of je vroeg moet gaan, of beter 's avonds kunt lopen.",
+    intro: "Het ideale hardloopweer bestaat: 8–13°C, relatieve luchtvochtigheid onder 60%, weinig wind en geen neerslag. Bij hogere temperaturen stijgt je hartslag bij dezelfde inspanning doordat je lichaam warmte moet afvoeren. WeerZone zet die belasting per uur klaar, zodat je weet of je vroeg moet gaan of beter 's avonds kunt lopen.",
     thresholds: [
       { label: "Temperatuur", value: "8–13°C optimaal. Boven 20°C: tempo verlagen of 's morgens lopen", good: true },
       { label: "Luchtvochtigheid", value: "<60% ideaal. Boven 80% zweet je lichaam minder effectief af", good: true },
@@ -159,6 +160,9 @@ export async function generateStaticParams() {
   return Object.keys(THEMES).map((slug) => ({ slug }));
 }
 
+// Revalidate hourly zodat dateModified actueel blijft (anders blijft 'ie staan op de build-time).
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const theme = THEMES[slug];
@@ -169,6 +173,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description: theme.metaDescription,
     alternates: {
       canonical: `https://weerzone.nl/weer/themas/${theme.slug}`,
+      languages: hreflangSelf("nl", `/weer/themas/${theme.slug}`),
     },
   };
 }
@@ -186,6 +191,11 @@ export default async function ThemePage({ params }: { params: Promise<{ slug: st
     return <div>Data tijdelijk niet beschikbaar...</div>;
   }
 
+  // Freshness signal: ronde af op uur zodat AI/Google ziet dat de pagina recent is.
+  const now = new Date();
+  now.setMinutes(0, 0, 0);
+  const dateModified = now.toISOString();
+
   return (
     <>
       <script {...schemaLd([
@@ -193,7 +203,7 @@ export default async function ThemePage({ params }: { params: Promise<{ slug: st
           name: theme.title.split("|")[0].trim(),
           url: `https://weerzone.nl/weer/themas/${slug}`,
           description: theme.metaDescription,
-          dateModified: "2025-05-01T00:00:00.000Z",
+          dateModified,
         }),
         schemaBreadcrumb([
           { name: "WEERZONE", item: "https://weerzone.nl" },

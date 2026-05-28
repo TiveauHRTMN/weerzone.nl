@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact | WEERZONE France",
+  title: "Contact",
   description: "Contactez l'équipe WEERZONE pour toute question ou retour.",
   alternates: { canonical: "https://weerzone.nl/fr/contact" },
 };

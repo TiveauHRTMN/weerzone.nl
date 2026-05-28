@@ -19,15 +19,16 @@ export default function PrivacyPage() {
           </div>
 
           <p className="text-sm text-gray-700 leading-relaxed">
-            WEERZONE is de brutale weerdienst van Nederland. Maar met je gegevens
-            zijn we niet brutaal — daar zijn we juist heel voorzichtig mee.
+            Weerzone is je persoonlijke weeragent voor de komende 48 uur. Met je
+            gegevens zijn we zuinig: we verzamelen alleen wat de dienst nodig
+            heeft en delen niets met adverteerders of marketingpartners.
           </p>
 
           <section className="space-y-2">
             <h2 className="text-lg font-bold text-gray-900">Wat we verzamelen</h2>
             <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
               <li>
-                <strong>E-mailadres:</strong> alleen als je je aanmeldt voor een van onze briefings (Piet, Reed of Steve). We gebruiken dit uitsluitend om je de weerrapporten te sturen waarvoor je hebt gekozen.
+                <strong>E-mailadres:</strong> alleen als je je aanmeldt voor onze weerberichten of waarschuwingen. We gebruiken dit uitsluitend om je de weerrapporten te sturen waarvoor je hebt gekozen.
               </li>
               <li>
                 <strong>Locatie (optioneel):</strong> alleen als je op de locatieknop
@@ -48,16 +49,28 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-bold text-gray-900">Cookies</h2>
             <div className="text-sm text-gray-700 space-y-2">
               <p>
-                <strong>Noodzakelijk:</strong> je voorkeuren onthouden en je sessie veilig houden als je ingelogd bent. Geen tracking.
+                <strong>Functioneel:</strong> we onthouden je gekozen plek
+                (wz_lat / wz_lon / wz_name) zodat je niet bij elk bezoek
+                opnieuw hoeft te zoeken. Als je ingelogd bent in Mijn
+                Weerzone houden Supabase-sessiecookies je sessie veilig.
               </p>
               <p>
-                <strong>Affiliate-cookies:</strong> als je doorklikt naar Bol.com,
-                Booking.com of Amazon, plaatsen zij cookies om te meten dat
-                je via WEERZONE komt. Hier verdienen wij een kleine commissie mee.
-                Dit gebeurt alleen als je actief doorklikt.
+                <strong>Analytics:</strong> PostHog en Vercel Analytics
+                geven ons geanonimiseerd inzicht in welke pagina&apos;s
+                bezocht worden en hoe snel ze laden. Er wordt geen profiel
+                van jou opgebouwd voor advertenties.
               </p>
               <p>
-                <strong>Analytics:</strong> we gebruiken anonieme analytics (PostHog) om de site te verbeteren. Geen persoonlijke data wordt gekoppeld aan je browser-gedrag tenzij je bent ingelogd.
+                <strong>Geen advertentie- of affiliate-cookies.</strong>{" "}
+                Weerzone werkt niet met Amazon, Bol, Booking of Expedia, en
+                heeft geen AdSense. Voor de volledige uitleg zie het{" "}
+                <a
+                  href="/over#cookiebeleid"
+                  className="text-accent-orange hover:underline font-medium"
+                >
+                  cookiebeleid
+                </a>
+                .
               </p>
             </div>
           </section>
@@ -74,7 +87,7 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-bold text-gray-900">Weer-data</h2>
             <p className="text-sm text-gray-700">
-              Weerdata komt van Open-Meteo (KNMI HARMONIE model).
+              Weergegevens komen van externe weerbronnen.
               De API-calls bevatten alleen coördinaten, geen identificerende informatie.
             </p>
           </section>

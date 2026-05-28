@@ -182,6 +182,15 @@ function characterLabel(character?: LocationCharacter): string {
   }
 }
 
+function microTagKey(character?: LocationCharacter): keyof typeof MICRO_TAGS {
+  if (character === "coastal" || character === "urban" || character === "highland" || character === "inland") {
+    return character;
+  }
+  if (character === "mountain") return "highland";
+  if (character === "mediterranean coastal" || character === "atlantic coastal") return "coastal";
+  return "inland";
+}
+
 function inferSpecialContext(place: Place): { label?: string; summary?: string; factors: string[] } {
   const name = normalizeName(place.name);
   const override = PLACE_OVERRIDES[name];
@@ -221,7 +230,7 @@ function inferSpecialContext(place: Place): { label?: string; summary?: string; 
 
   const hash = hashString(`${name}|${place.province}|${place.lat.toFixed(3)}|${place.lon.toFixed(3)}`);
   const character = place.character ?? "inland";
-  const tag = pickFrom(MICRO_TAGS[character], hash);
+  const tag = pickFrom(MICRO_TAGS[microTagKey(character)], hash);
   const orientation = pickFrom([
     "windvang",
     "vochtzone",

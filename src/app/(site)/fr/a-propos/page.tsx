@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
+import { hreflangCluster } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "À propos | WEERZONE France",
+  title: "À propos",
   description: "En savoir plus sur WEERZONE et notre mission de fournir la meilleure météo locale.",
-  alternates: { canonical: "https://weerzone.nl/fr/a-propos" },
+  alternates: {
+    canonical: "https://weerzone.nl/fr/a-propos",
+    languages: hreflangCluster({
+      nl: "/over",
+      de: "/de/uber-uns",
+      fr: "/fr/a-propos",
+      es: "/es/sobre-nosotros",
+    }),
+  },
 };
 
 export default function AProposPage() {

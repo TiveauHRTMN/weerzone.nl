@@ -3,6 +3,7 @@ import Link from "next/link";
 import WeerzoneBackground from "@/components/WeerzoneBackground";
 import ContactForm from "@/components/ContactForm";
 import { schemaContactPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
+import { hreflangCluster } from "@/lib/hreflang";
 
 const CONTACT_EMAIL = "contact@weerzone.nl";
 
@@ -10,7 +11,15 @@ export const metadata: Metadata = {
   title: "Contact",
   description:
     "Neem contact op met Weerzone. Voor vragen, pers of technische meldingen.",
-  alternates: { canonical: "https://weerzone.nl/contact" },
+  alternates: {
+    canonical: "https://weerzone.nl/contact",
+    languages: hreflangCluster({
+      nl: "/contact",
+      de: "/de/kontakt",
+      fr: "/fr/contact",
+      es: "/es/contacto",
+    }),
+  },
   openGraph: {
     title: "Contact Weerzone",
     description:

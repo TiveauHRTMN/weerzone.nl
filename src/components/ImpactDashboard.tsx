@@ -24,7 +24,7 @@ export default function ImpactDashboard({ data }: { data: ImpactData }) {
           </div>
           <div className="mt-6 flex items-center gap-2 text-xs font-bold text-slate-400">
             <ShieldAlert size={14} />
-            Dominante stof: {data.airQuality.dominantPollutant}
+            Belangrijkste oorzaak: {data.airQuality.dominantPollutant}
           </div>
         </div>
       </div>
@@ -42,14 +42,14 @@ export default function ImpactDashboard({ data }: { data: ImpactData }) {
             <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
               data.solar.solarPotential === 'high' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700'
             }`}>
-              {data.solar.solarPotential} potentieel
+              {data.solar.solarPotential === "high" ? "veel zon" : "beperkte zon"}
             </div>
             <div className="text-xs font-bold text-amber-900/60">
               {data.solar.panelCount} panelen max.
             </div>
           </div>
           <div className="wz-body text-sm">
-            Fysieke gebouw-data geanalyseerd via 3D LIDAR tiles.
+            Inschatting op basis van zonuren en de ligging van het dak.
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function ImpactDashboard({ data }: { data: ImpactData }) {
       <div className="wz-card wz-card-pad-lg group overflow-hidden relative bg-slate-900 text-white border-none shadow-2xl">
         <div className="absolute inset-0 bg-gradient-to-br from-sky-500/20 to-transparent" />
         <div className="relative z-10">
-          <div className="wz-micro mb-2 text-white/50">Impact Engine Score</div>
+          <div className="wz-micro mb-2 text-white/50">Dagscore</div>
           <div className="flex items-end gap-3 mb-2">
             <h3 className="text-6xl font-black text-white">{data.combinedScore}</h3>
             <div className="text-2xl font-bold text-white/40 mb-2">/100</div>
@@ -78,10 +78,10 @@ export default function ImpactDashboard({ data }: { data: ImpactData }) {
               </div>
             </div>
             <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-              <div className="text-[10px] text-white/40 font-bold uppercase mb-1">Model</div>
+              <div className="text-[10px] text-white/40 font-bold uppercase mb-1">Bron</div>
               <div className="text-sm font-bold flex items-center gap-1.5">
                 <ThermometerSun size={14} className="text-amber-400" />
-                MetNet-3
+                Weergegevens
               </div>
             </div>
           </div>

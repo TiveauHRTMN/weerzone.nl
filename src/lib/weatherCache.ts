@@ -88,9 +88,10 @@ async function fetchAndCache(
   onSummary?: (v: string) => void,
   onNeural?: (n: WeatherData["neuralData"]) => void,
   forceHighRes = false,
-  locale: Locale = "nl"
+  locale: Locale = "nl",
+  includeExternalAi = false
 ): Promise<WeatherData> {
-  const weather = await fetchServer(lat, lon, forceHighRes, locale);
+  const weather = await fetchServer(lat, lon, forceHighRes, locale, includeExternalAi);
   if (!weather) throw new Error("fetchServer returned null");
   writeCache(lat, lon, weather, locale);
   
@@ -121,7 +122,8 @@ export async function loadWeather(
   onFresh?: (weather: WeatherData) => void,
   onNeural?: (neural: WeatherData["neuralData"]) => void,
   forceHighRes = false,
-  locale: Locale = "nl"
+  locale: Locale = "nl",
+  includeExternalAi = false
 ): Promise<WeatherData> {
   const k = key(lat, lon, locale);
   const cached = readCache(lat, lon, locale);
@@ -147,7 +149,7 @@ export async function loadWeather(
   if (cached && now - cached.ts < STALE_MS && (!forceHighRes || cachedHasModels)) {
     if (!revalidating.has(k)) {
       revalidating.add(k);
-      fetchAndCache(lat, lon, onSummary, onNeural, false, locale)
+      fetchAndCache(lat, lon, onSummary, onNeural, false, locale, includeExternalAi)
         .then((fresh) => onFresh?.(fresh))
         .catch(() => {})
         .finally(() => revalidating.delete(k));
@@ -172,7 +174,7 @@ export async function loadWeather(
   // EMERGENCY cache: stale data > 60min maar < 4uur — toon direct bij API-uitval
   const emergencyCached = cached && now - cached.ts < EMERGENCY_MS ? cached : null;
 
-  const promise = fetchAndCache(lat, lon, onSummary, onNeural, forceHighRes, locale).catch((err) => {
+  const promise = fetchAndCache(lat, lon, onSummary, onNeural, forceHighRes, locale, includeExternalAi).catch((err) => {
     if (emergencyCached) {
       console.warn("fetchAndCache failed, using emergency cache:", err?.message);
       return emergencyCached.weather;

@@ -2,20 +2,15 @@ import { ALL_PLACES, placeSlug } from "@/lib/places-data";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "Onweer vandaag in Nederland — live kans op bliksem per uur",
   description:
-    "Onweer vandaag in Nederland? Bekijk live de kans op bliksem per uur per stad. De enige site die je echt vertelt óf en wanneer het gaat onweren.",
-  keywords: [
-    "onweer vandaag",
-    "onweer nederland",
-    "onweer morgen",
-    "onweers-energie",
-    "onweersradar",
-    "bliksem vandaag",
-  ],
-  alternates: { canonical: "https://weerzone.nl/weer/onweer" },
+    "Onweer vandaag in Nederland? Bekijk live de kans op bliksem per uur per stad. De enige site die je echt vertelt óf en wanneer het gaat onweren.",  alternates: {
+    canonical: "https://weerzone.nl/weer/onweer",
+    languages: hreflangSelf("nl", "/weer/onweer"),
+  },
 };
 
 export default function OnweerPage() {

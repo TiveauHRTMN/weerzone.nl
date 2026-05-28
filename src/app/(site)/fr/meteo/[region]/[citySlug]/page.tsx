@@ -10,6 +10,8 @@ import { hreflangLuxembourg } from "@/lib/hreflang";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
 import { buildCityGeoBlock } from "@/lib/geo-blocks";
 import CityGeoBlock from "@/components/CityGeoBlock";
+import MarianaSeoUpdate from "@/components/MarianaSeoUpdate";
+import OracleSeoUpdate from "@/components/OracleSeoUpdate";
 
 export function generateStaticParams() {
   return [];
@@ -56,7 +58,7 @@ export async function generateMetadata({
         };
 
   return {
-    title: `Météo ${city.name} — Prévisions à 48 heures | WEERZONE`,
+    title: `Météo ${city.name} — Prévisions à 48 heures`,
     description: `Météo hyperlocales pour ${city.name}. Prévisions heure par heure de la température, pluie, vent et alertes.`,
     alternates: {
       canonical: frPath,
@@ -84,7 +86,7 @@ export default async function RegionCityPage({
   const city = places.find((p) => placeSlug(p.name) === citySlug);
   if (!city) notFound();
 
-  const weather = await fetchWeatherData(city.lat, city.lon, false, false, undefined, "fr");
+  const weather = await fetchWeatherData(city.lat, city.lon, false, true, city, "fr", true);
 
   // Mariana 'Character Intelligence' Layer
   // We determine the unique properties of the location to drive AI content
@@ -144,6 +146,7 @@ export default async function RegionCityPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <h1 className="sr-only">Météo {city.name} — Prévisions à 48 heures en {label}</h1>
       <WeatherDashboard
         initialCity={city}
         initialWeather={weather ?? undefined}
@@ -153,6 +156,8 @@ export default async function RegionCityPage({
         beforeFooter={
           <div className="mt-12 mb-20 px-6 max-w-4xl mx-auto space-y-10">
             <CityGeoBlock block={geoBlock} inLanguage="fr-FR" />
+            <MarianaSeoUpdate weather={weather} placeName={city.name} locale="fr" />
+            <OracleSeoUpdate weather={weather} placeName={city.name} locale="fr" />
 
             {lucUrteil && (
               <div className="card p-6 bg-[#22c55e]/5 border border-[#22c55e]/20 overflow-hidden relative group">

@@ -5,7 +5,9 @@ export type MarianaKnownModelName =
   | "AROME"
   | "ECMWF"
   | "GFS"
-  | "ICON";
+  | "ICON"
+  | "ICON_D2"
+  | "ECMWF_AIFS_SET_X";
 
 export type MarianaModelName = MarianaKnownModelName | (string & {});
 

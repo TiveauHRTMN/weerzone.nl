@@ -15,6 +15,8 @@ export interface RiskPeriod {
   narrative: string;
 }
 
+const RISK_WINDOW_HOURS = 48;
+
 /**
  * Unieke rekenfunctie die de kans op onweer en regen voor een specifiek uur berekent.
  * Voorkomt tegenstrijdigheden (zoals onweerskans > regenkans of hoge onweerskans op een kurkdroge dag).
@@ -154,7 +156,15 @@ export function getRainChance(h: HourlyForecast, activeWarnings?: KNMIWarning[])
  * Groepeert de komende 48 uur in opeenvolgende periodes met verhoogd weer-risico.
  */
 export function groupRiskPeriods(hourly: HourlyForecast[], activeWarnings?: KNMIWarning[]): RiskPeriod[] {
-  const risks = hourly.map(h => ({
+  const now = Date.now();
+  const windowEnd = now + RISK_WINDOW_HOURS * 60 * 60 * 1000;
+  const upcoming48 = hourly.filter((h) => {
+    const hourTime = new Date(h.time).getTime();
+    return Number.isFinite(hourTime) && hourTime >= now - 60 * 60 * 1000 && hourTime <= windowEnd;
+  });
+  const scopedHours = upcoming48.length > 0 ? upcoming48 : hourly.slice(0, RISK_WINDOW_HOURS);
+
+  const risks = scopedHours.map(h => ({
     hour: h,
     thunderChance: getThunderstormChance(h, activeWarnings),
     rainChance: getRainChance(h, activeWarnings),
@@ -165,7 +175,7 @@ export function groupRiskPeriods(hourly: HourlyForecast[], activeWarnings?: KNMI
   let gapCounter = 0;
 
   for (const r of risks) {
-    const isRiskHour = r.thunderChance >= 15 || r.rainChance >= 40 || (r.hour.precipitation || 0) > 0;
+    const isRiskHour = r.thunderChance >= 20 || r.rainChance >= 60 || (r.hour.precipitation || 0) >= 0.2;
 
     if (isRiskHour) {
       currentGroup.push(r);
@@ -198,7 +208,7 @@ export function groupRiskPeriods(hourly: HourlyForecast[], activeWarnings?: KNMI
   }
 
   // Filter uitgesproken lage risicoblokken eruit om ruis te voorkomen
-  return periods.filter(p => p.maxThunderstormChance >= 20 || p.maxRainChance >= 50 || p.maxPrecipitation > 0.2);
+  return periods.filter(p => p.maxThunderstormChance >= 20 || p.maxRainChance >= 60 || p.maxPrecipitation >= 0.2);
 }
 
 function buildRiskPeriod(group: { hour: HourlyForecast; thunderChance: number; rainChance: number }[]): RiskPeriod {
@@ -240,24 +250,28 @@ function buildRiskPeriod(group: { hour: HourlyForecast; thunderChance: number; r
   // Genereer narratief
   let narrative = "";
   if (maxThunder >= 30) {
-    narrative += `**Onweersdreiging:** Met een maximale energie (CAPE) van ${Math.round(maxCape)} J/kg en een atmosferische stabiliteit (Lifted Index) van ${minLiftedIndexResolved}°C is de lucht erg onstabiel. `;
+    const instability =
+      maxCape >= 1000 || minLiftedIndexResolved <= -4 ? "duidelijk onstabiel" :
+      maxCape >= 500 || minLiftedIndexResolved < -1 ? "matig onstabiel" :
+      "marginaal onstabiel";
+    narrative += `**Onweersdreiging:** De lucht is ${instability} met energie tot ${Math.round(maxCape)} J/kg en een Lifted Index van ${minLiftedIndexResolved}°C. `;
     
     // CIN / Deksel invloed
     if (maxCin > 85) {
-      narrative += "Er is echter sprake van een **zeer stevige deksel (CIN)**. Dit houdt de buien in eerste instantie tegen. Mocht de grondtemperatuur voldoende oplopen of passeert er een front, dan breekt de deksel door en kan er direct zwaar onweer ontstaan. ";
+      narrative += "Een **stevige CIN-rem** houdt buien eerst tegen; er is een duidelijke trigger nodig voordat cellen kunnen ontstaan. ";
     } else if (maxCin > 30) {
-      narrative += "De **deksel (CIN) is matig sterk**, wat betekent dat buien een duidelijke trigger nodig hebben (zoals windvlagen of botsende luchtstromen) om los te breken. ";
+      narrative += "De **CIN-rem is matig**, dus buien hebben hulp nodig van een front, convergentielijn of lokale opwarming. ";
     } else {
-      narrative += "De **deksel (CIN) is nagenoeg afwezig**. Buien kunnen ongehinderd en snel naar grote hoogte schieten zodra de zon de grond verwarmt. ";
+      narrative += "De **CIN-rem is zwak**, waardoor een bui makkelijker kan starten als er genoeg vocht en stijgbeweging aanwezig is. ";
     }
 
     // Shear / Organisatie invloed
     if (avgShear >= 35) {
-      narrative += `De windschering is fors (${avgShear} km/h). Dit helpt buien te organiseren in grotere complexen of buienlijnen, wat de kans op **hagel en zware windstoten** vergroot.`;
+      narrative += `Windschering is fors (${avgShear} km/h), waardoor buien beter kunnen organiseren en lokaal hagel of zware windstoten kunnen geven.`;
     } else if (avgShear < 15) {
-      narrative += `De windschering is erg zwak (${avgShear} km/h). Eventuele buien zijn losstaand (pulse storms). Ze verplaatsen zich traag, waardoor er **lokaal erg veel regen** in korte tijd kan vallen, waarna de bui door zijn eigen gewicht snel ineenstort.`;
+      narrative += `Windschering is zwak (${avgShear} km/h), dus eventuele buien blijven meestal losstaand en kortlevend; bij trage verplaatsing kan lokaal wel tijdelijk veel regen vallen.`;
     } else {
-      narrative += "De buien kunnen zich matig organiseren, met lokaal kans op hagel en onweersklappen.";
+      narrative += "Buien kunnen zich beperkt organiseren, met lokaal kans op stevige regen en enkele ontladingen.";
     }
   } else {
     // Regen focus
@@ -266,7 +280,7 @@ function buildRiskPeriod(group: { hour: HourlyForecast; thunderChance: number; r
     } else if (maxPrecip > 1.5) {
       narrative += `**Stevige regen:** Er valt gedurende deze periode geregeld regen, met pieken tot ${maxPrecip.toFixed(1)} mm per uur. Houd rekening met matig zicht in het verkeer.`;
     } else {
-      narrative += `**Lichte regen/buien:** Er passeren enkele lichtere buien of regenzones met in totaal beperkte neerslag. Geen extreme weersituaties verwacht.`;
+      narrative += `**Lichte regen/buien:** Er passeren enkele lichtere buien of regenzones. De neerslaghoeveelheden blijven beperkt en er is geen signaal voor extreem weer.`;
     }
   }
 

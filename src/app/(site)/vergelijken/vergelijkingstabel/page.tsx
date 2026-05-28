@@ -5,19 +5,12 @@ import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 
 export const metadata: Metadata = {
-  title: "Weerapps Vergelijkingstabel — Features, Prijzen & Scores (2026)",
+  title: "Weerapps Vergelijkingstabel — Features & Scores (2026)",
   description:
-    "Complete vergelijkingstabel van 8 weerapps. Vergelijk WEERZONE, Buienradar, Weerplaza, Weeronline, KNMI, Windy, Meteoblue en YR.no op features, prijzen, radar en meer.",
-  keywords: [
-    "weerapps vergelijking",
-    "vergelijkingstabel weer",
-    "weerzone vs buienradar vs weerplaza",
-    "beste weerapp 2026 vergelijking",
-    "feature matrix weerapps",
-  ],
+    "Complete vergelijkingstabel van 8 weerapps. Vergelijk WEERZONE, Buienradar, Weerplaza, Weeronline, KNMI, Windy, Meteoblue en YR.no op features, radar en meer.",
   alternates: { canonical: "https://weerzone.nl/vergelijken/vergelijkingstabel" },
   openGraph: {
-    title: "Weerapps Vergelijkingstabel — Features, Prijzen & Scores (2026)",
+    title: "Weerapps Vergelijkingstabel — Features & Scores (2026)",
     description:
       "Complete feature-matrix van 8 weerapps. Vergelijk WEERZONE, Buienradar, Weerplaza, Weeronline, KNMI, Windy, Meteoblue en YR.no in één oogopslag.",
     type: "website",
@@ -42,8 +35,8 @@ interface Cell {
 const HEADERS = ["Feature", "WEERZONE", "Buienradar", "Weerplaza", "Weeronline", "KNMI", "Windy", "Meteoblue", "YR.no"];
 const ROWS: [string, ...Cell[]][] = [
   [
-    "Hyperlokaal (resolutie)",
-    { value: "✅ 1x1 km", highlight: true },
+    "Weer voor jouw plek",
+    { value: "✅", highlight: true },
     { value: "⚠️ 2,5 km" },
     { value: "⚠️ 2,5 km" },
     { value: "⚠️ 2,5 km" },
@@ -86,7 +79,7 @@ const ROWS: [string, ...Cell[]][] = [
     { value: "❌" },
   ],
   [
-    "Meerdere weermodellen",
+    "Meerdere bronnen",
     { value: "✅ (3)", highlight: true },
     { value: "⚠️ 1" },
     { value: "⚠️ 1" },
@@ -185,9 +178,9 @@ const ROWS: [string, ...Cell[]][] = [
     { value: "✅", highlight: true },
   ],
   [
-    "Premium prijs (vanaf)",
-    { value: "€3,99/mnd", highlight: true },
-    { value: "€3,99/mnd" },
+    "Reclamevrije ervaring",
+    { value: "Standaard", highlight: true },
+    { value: "Betaalde variant" },
     { value: "N.v.t." },
     { value: "N.v.t." },
     { value: "N.v.t." },
@@ -252,7 +245,7 @@ export default async function VergelijkingstabelPage() {
               </h1>
               <p className="text-sm text-slate-600 leading-relaxed">
                 Alle features van 8 weerapps en -websites in één oogopslag. Van hyperlokale
-                resolutie tot prijzen — sorteer en vergelijk welke dienst het beste past bij
+                resolutie tot waarschuwingen — sorteer en vergelijk welke dienst het beste past bij
                 jouw wensen.
               </p>
             </div>
@@ -322,7 +315,7 @@ export default async function VergelijkingstabelPage() {
                 </thead>
                 <tbody>
                   {[
-                    ["Hyperlokaal dagelijks weerbericht", "WEERZONE"],
+                    ["Dagelijks weerbericht zonder ruis", "WEERZONE"],
                     ["Snelle neerslagradar check", "Buienradar"],
                     ["Lange termijn met video", "Weerplaza"],
                     ["Recreatieweer (strand, surf)", "Weeronline"],
@@ -357,7 +350,7 @@ export default async function VergelijkingstabelPage() {
                   Gratis proberen
                 </Link>
                 <Link
-                  href="/prijzen"
+                  href="/mijn-weerzone"
                   className="px-6 py-3 rounded-2xl text-text-primary font-black text-sm transition-all hover:brightness-95"
                   style={{
                     background: "rgba(255,255,255,0.6)",
@@ -365,7 +358,7 @@ export default async function VergelijkingstabelPage() {
                     boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                   }}
                 >
-                  Bekijk prijzen
+                  Open Mijn Weerzone
                 </Link>
               </div>
             </div>

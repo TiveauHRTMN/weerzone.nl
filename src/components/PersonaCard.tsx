@@ -8,7 +8,7 @@ interface Props {
   onSelect?: (tier: PersonaTier) => void;
   compact?: boolean;
   highlighted?: boolean;
-  locale?: "nl" | "de";
+  locale?: "nl" | "de" | "fr" | "es";
 }
 
 export default function PersonaCard({ tier, onSelect, compact = false, highlighted = false, locale = "nl" }: Props) {

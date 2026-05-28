@@ -5,6 +5,7 @@ import ContactForm from "@/components/ContactForm";
 import { ALL_PLACES } from "@/lib/places-data";
 import { fetchWeatherData } from "@/lib/weather";
 import { getSavedLocationServer } from "@/lib/location-cookies";
+import { hreflangCluster } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "Kontakt",
@@ -12,11 +13,12 @@ export const metadata: Metadata = {
     "Kontakt mit WEERZONE aufnehmen? Schreib an info@weerzone.nl oder sende direkt eine Nachricht. Wir antworten an Werktagen in der Regel innerhalb von 24 Stunden.",
   alternates: {
     canonical: "https://weerzone.nl/de/kontakt",
-    languages: {
-      "nl-NL": "https://weerzone.nl/contact",
-      "de-DE": "https://weerzone.nl/de/kontakt",
-      "x-default": "https://weerzone.nl/contact",
-    },
+    languages: hreflangCluster({
+      nl: "/contact",
+      de: "/de/kontakt",
+      fr: "/fr/contact",
+      es: "/es/contacto",
+    }),
   },
   openGraph: {
     title: "Kontakt mit WEERZONE aufnehmen",

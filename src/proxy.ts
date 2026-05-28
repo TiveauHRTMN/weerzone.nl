@@ -8,7 +8,7 @@ function isAssetPath(pathname: string) {
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
     pathname === "/manifest.webmanifest" ||
-    /\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map)$/.test(pathname)
+    /\.(?:xml|png|jpg|jpeg|gif|svg|webp|ico|css|js|map)$/.test(pathname)
   );
 }
 

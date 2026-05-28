@@ -384,11 +384,11 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity, 
   const risks = useMemo(() => (weather ? computeRisks(weather) : []), [weather]);
   const nextRain = useMemo(() => (weather ? NextRain({ weather }) : null), [weather]);
 
-  if (loading || !weather) return <div className="card p-6 text-center"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-text-secondary" /><p className="text-sm text-text-secondary">Piet laadt jouw locatie…</p></div>;
+  if (loading || !weather) return <div className="card p-6 text-center"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-text-secondary" /><p className="text-sm text-text-secondary">We laden jouw locatie...</p></div>;
 
   const narrative = aiNarrative || wws?.piet_update?.content || pietAnalysis || getMainCommentary(weather);
-  const narrativeTitle = wws?.piet_update?.title || `Piet's weerbericht voor ${city.name}`;
-  const narrativeClosing = wws?.piet_update?.closing || "— Piet van Weerzone";
+  const narrativeTitle = wws?.piet_update?.title || `Weerbericht voor ${city.name}`;
+  const narrativeClosing = wws?.piet_update?.closing || "Weerzone";
 
   const _pad = (n: number) => String(n).padStart(2, "0");
   const _now = new Date();
@@ -437,7 +437,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity, 
         </div>
       )}
 
-      {/* 2. PIET'S WEERVERHAAL */}
+      {/* 2. WEERVERHAAL */}
       <div className="card p-7 sm:p-9 border-l-4 border-l-blue-500">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl">💬</div>
@@ -454,7 +454,7 @@ export default function PietExtended({ initialWWS, initialWeather, initialCity, 
         ) : (
           <div className="space-y-3 animate-pulse">
             <div className="h-4 bg-slate-200 rounded-full w-full" /><div className="h-4 bg-slate-200 rounded-full w-5/6" /><div className="h-4 bg-slate-200 rounded-full w-full" />
-            <p className="text-xs text-slate-400 pt-2">Piet schrijft jouw verhaal…</p>
+            <p className="text-xs text-slate-400 pt-2">We schrijven jouw weerbericht...</p>
           </div>
         )}
       </div>

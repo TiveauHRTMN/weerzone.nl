@@ -2,20 +2,15 @@ import { ALL_PLACES, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/pla
 import Link from "next/link";
 import type { Metadata } from "next";
 import { schemaWebPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "Regen vandaag in Nederland — wanneer wordt het droog?",
   description:
-    "Regen vandaag in Nederland? Bekijk per uur, per stad, wanneer de bui stopt en wanneer het weer droog is. Messcherpe 48-uurs voorspelling met KNMI data.",
-  keywords: [
-    "regen vandaag",
-    "regen nederland",
-    "wanneer stopt de regen",
-    "regenverwachting",
-    "buienradar alternatief",
-    "neerslag per uur",
-  ],
-  alternates: { canonical: "https://weerzone.nl/weer/regen" },
+    "Regen vandaag in Nederland? Bekijk per uur, per stad, wanneer de bui stopt en wanneer het weer droog is. Messcherpe 48-uurs voorspelling met KNMI data.",  alternates: {
+    canonical: "https://weerzone.nl/weer/regen",
+    languages: hreflangSelf("nl", "/weer/regen"),
+  },
 };
 
 export default function RegenPage() {

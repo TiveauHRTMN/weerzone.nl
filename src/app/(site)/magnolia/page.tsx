@@ -210,7 +210,7 @@ export default function MagnoliaDashboard() {
                 <span className="font-semibold text-white">09:00 daily gate</span>
               </div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
-                <span className="text-zinc-500">Hermes model</span>
+                <span className="text-zinc-500">Hermes runtime</span>
                 <span className="font-semibold text-white">Hermes 4 / fallback Pro</span>
               </div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-3">

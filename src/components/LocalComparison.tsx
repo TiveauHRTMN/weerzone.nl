@@ -35,7 +35,7 @@ export default async function LocalComparison({ cityName, province, localTemp }:
         Lokaal Vergelijk
       </div>
       <p className="text-sm text-white/60 leading-relaxed font-medium">
-        {comparisonText} Onze 1x1km grid-technologie analyseert deze micro-verschillen continu om de meest nauwkeurige voorspelling voor jouw straat te garanderen.
+        {comparisonText} Daarom vergelijken we meerdere bronnen en laten we duidelijk zien wat je in jouw omgeving kunt verwachten.
       </p>
     </div>
   );

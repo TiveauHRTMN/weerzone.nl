@@ -13,26 +13,35 @@ import PollenWidget from "@/components/PollenWidget";
 import MarineWidget from "@/components/MarineWidget";
 import PietDailyBriefingLoader from "@/components/PietDailyBriefingLoader";
 import PietDailyBriefingSkeleton from "@/components/PietDailyBriefingSkeleton";
+import { hreflangCluster } from "@/lib/hreflang";
 
 export async function generateMetadata(): Promise<Metadata> {
   const loc = await getSavedLocationServer().catch(() => null);
   const place = loc?.name || "jouw locatie";
   const title = loc?.name
-    ? `Mijn Weer voor ${place} - 48 uur vooruit`
-    : "Mijn Weer - jouw weerbericht";
+    ? `Piet voor ${place} - 48 uur vooruit`
+    : "Piet - jouw dagelijkse heads-up";
   const description = loc?.name
     ? `Persoonlijk weerbericht voor ${place}. Je ziet wat de komende 48 uur betekenen voor regen, wind en planning.`
     : "Persoonlijk weerbericht voor de komende 48 uur op jouw locatie. In gewone taal, zonder reclame en zonder gokwerk over twee weken vooruit.";
 
   return {
     title,
-    description,    alternates: { canonical: "https://weerzone.nl/mijnweer" },
+    description,    alternates: {
+      canonical: "https://weerzone.nl/piet",
+      languages: hreflangCluster({
+        nl: "/piet",
+        de: "/de/mein-wetter",
+        fr: "/fr/mon-meteo",
+        es: "/es/mi-tiempo",
+      }),
+    },
     openGraph: {
       title,
       description,
       type: "website",
       locale: "nl_NL",
-      url: "https://weerzone.nl/mijnweer",
+      url: "https://weerzone.nl/piet",
       siteName: "WEERZONE",
     },
     twitter: {
@@ -46,12 +55,12 @@ export async function generateMetadata(): Promise<Metadata> {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Mijn Weer",
-  headline: "Mijn Weer - 48 uur vooruit",
+  name: "Piet",
+  headline: "Piet - 48 uur vooruit",
   description:
     "Een duidelijk weerbericht voor jouw locatie. Geen 14-daagse gok, gewoon de komende 48 uur in gewone taal.",
   author: { "@type": "Organization", name: "WEERZONE" },
-  url: "https://weerzone.nl/mijnweer",
+  url: "https://weerzone.nl/piet",
   inLanguage: "nl-NL",
   about: {
     "@type": "Thing",
@@ -85,7 +94,7 @@ function timeGreeting(): string {
   return "Hoi";
 }
 
-export default async function MijnWeerPage() {
+export default async function PietPage() {
   const loc = await getSavedLocationServer().catch(() => null);
   const activeLoc = loc || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0];
   const lat = activeLoc.lat;

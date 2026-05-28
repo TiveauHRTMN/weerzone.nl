@@ -2,7 +2,8 @@
 // B2B outreach email templates per branche
 // ============================================================
 
-import { amazonProductUrl, amazonUrl } from "./affiliates";
+const amazonProductUrl = () => "#";
+const amazonUrl = () => "#";
 
 type GearItem = { emoji: string; title: string; desc: string; href: string };
 

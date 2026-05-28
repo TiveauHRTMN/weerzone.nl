@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export default function WzFooter() {
   return (
@@ -8,14 +8,11 @@ export default function WzFooter() {
           WEERZONE
         </Link>
         <nav className="flex flex-wrap gap-4">
-          <Link href="/mijnweer" className="hover:text-slate-900">
+          <Link href="/piet" className="hover:text-slate-900">
             Mijn Weer
           </Link>
-          <Link href="/waarschuwingen" className="hover:text-slate-900">
+          <Link href="/reed" className="hover:text-slate-900">
             Waarschuwingen
-          </Link>
-          <Link href="/prijzen" className="hover:text-slate-900">
-            Prijzen
           </Link>
           <Link href="/contact" className="hover:text-slate-900">
             Contact

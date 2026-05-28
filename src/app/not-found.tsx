@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { PROVINCE_LABELS, placeSlug } from "@/lib/places-data";
 
+// 404 mag dynamic blijven — anders moet de hele tree (incl. client components
+// als WzLogo die useSearchParams gebruiken) tijdens prerender een Suspense
+// CSR-bailout doen, wat in Next 16 een build error geeft. Raakt alleen deze
+// route, niet de 88k city pages.
+export const dynamic = "force-dynamic";
+
 export default function NotFound() {
   const topCities = [
     { name: "Amsterdam", prov: "noord-holland" },
