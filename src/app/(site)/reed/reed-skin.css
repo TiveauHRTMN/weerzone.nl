@@ -1,0 +1,410 @@
+/* ============================================================
+   Reed · Waarschuwingen — scoped design skin
+   Recreated from design_handoff_reed_piet (hifi).
+   Everything is scoped under `.reed-skin` so it can't leak into
+   the rest of the site, and colliding base names from globals.css
+   (.card / .chip / .t-micro / .btn-primary / .btn-ghost) are
+   re-namespaced (rcard / rchip / rmicro / rbtn-*) to avoid the
+   global `!important` rules.
+   ============================================================ */
+
+.reed-skin {
+  color: #0f172a;
+  font-feature-settings: "ss01", "cv11";
+}
+.reed-skin .num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.01em;
+}
+
+/* Background is dynamic (weer-gestuurd) via <WeatherBackground/>; the page
+   itself stays transparent so that fixed backdrop shows through. */
+
+/* Cards ------------------------------------------------------- */
+.reed-skin .rcard {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border-radius: 26px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 0 0 1px rgba(15, 23, 42, 0.045),
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 24px -14px rgba(15, 23, 42, 0.18),
+    0 30px 60px -25px rgba(30, 58, 138, 0.3);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+.reed-skin .rcard::before {
+  /* top-edge sheen — the premium tell */
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.reed-skin .rmicro {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #64748b;
+}
+
+/* Status pill (CODE …) --------------------------------------- */
+.reed-skin .codepill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 9999px;
+  padding: 7px 13px 7px 11px;
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.reed-skin .codepill .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+}
+
+/* Location pill ---------------------------------------------- */
+.reed-skin .locpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 9px 14px;
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.reed-skin .locpill:hover {
+  background: #f8fafc;
+}
+
+/* Metric chip ------------------------------------------------- */
+.reed-skin .rchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.reed-skin .rchip .label {
+  opacity: 0.78;
+  font-weight: 600;
+}
+.reed-skin .rchip .val {
+  font-weight: 800;
+}
+.reed-skin .rchip-orange { background: #ffedd5; color: #9a3412; }
+.reed-skin .rchip-blue   { background: #dbeafe; color: #1d4ed8; }
+.reed-skin .rchip-red    { background: #fee2e2; color: #b91c1c; }
+.reed-skin .rchip-cyan   { background: #cffafe; color: #155e75; }
+.reed-skin .rchip-purple { background: #f3e8ff; color: #7e22ce; }
+.reed-skin .rchip-green  { background: #dcfce7; color: #15803d; }
+.reed-skin .rchip-amber  { background: #fef3c7; color: #92400e; }
+.reed-skin .rchip-slate  { background: #f1f5f9; color: #334155; }
+.reed-skin .rchip-onorange {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.reed-skin .rchip-onorange .label {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Live chip --------------------------------------------------- */
+.reed-skin .livechip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 9999px;
+  padding: 6px 12px 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.reed-skin .livechip i {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #1e40af;
+  animation: reedLive 1.6s ease-out infinite;
+}
+
+/* Progress bars ---------------------------------------------- */
+.reed-skin .bar {
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+.reed-skin .bar > i {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  border-radius: inherit;
+}
+
+/* Param card (4-grid) ---------------------------------------- */
+.reed-skin .pcard {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 16px;
+  padding: 14px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s, border-color 0.25s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(15, 23, 42, 0.03);
+}
+.reed-skin .pcard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 55% at 100% 0%, var(--pcard-glow, transparent) 0%, transparent 70%);
+  opacity: 0.55;
+  transition: opacity 0.35s;
+}
+.reed-skin .pcard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 23, 42, 0.09);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 14px 30px -16px rgba(15, 23, 42, 0.2);
+}
+.reed-skin .pcard:hover::before {
+  opacity: 1;
+}
+
+/* Inner widgets ---------------------------------------------- */
+.reed-skin .swidget {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+/* Stagger fade-in -------------------------------------------- */
+@keyframes reedLiftIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reed-skin .reed-stagger > * {
+  animation: reedLiftIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.reed-skin .reed-stagger > *:nth-child(1) { animation-delay: 0s; }
+.reed-skin .reed-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.reed-skin .reed-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.reed-skin .reed-stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.reed-skin .reed-stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.reed-skin .reed-stagger > *:nth-child(6) { animation-delay: 0.4s; }
+.reed-skin .reed-stagger > *:nth-child(7) { animation-delay: 0.48s; }
+.reed-skin .reed-stagger > *:nth-child(8) { animation-delay: 0.56s; }
+
+@keyframes reedLive {
+  0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+/* Gauge ------------------------------------------------------- */
+.reed-skin .gauge-arc {
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Misc -------------------------------------------------------- */
+.reed-skin .divider {
+  height: 1px;
+  background: #e2e8f0;
+  width: 100%;
+}
+.reed-skin .icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* CTA buttons ------------------------------------------------- */
+.reed-skin .rbtn-primary {
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 6px 16px -6px rgba(249, 115, 22, 0.45);
+  border: 1px solid rgba(154, 52, 18, 0.2);
+}
+.reed-skin .rbtn-primary:hover { filter: brightness(1.05); }
+.reed-skin .rbtn-primary:active { transform: translateY(1px); }
+.reed-skin .rbtn-ghost {
+  background: #ffffff;
+  color: #0f172a;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.reed-skin .rbtn-ghost:hover { background: #f8fafc; }
+
+/* Hover lift -------------------------------------------------- */
+.reed-skin .lift { transition: transform 0.25s ease; }
+.reed-skin .lift:hover { transform: translateY(-1px); }
+
+/* Day toggle -------------------------------------------------- */
+.reed-skin .day-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  padding: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+.reed-skin .day-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.reed-skin .day-tab .date {
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.32);
+  margin-left: 4px;
+}
+.reed-skin .day-tab[data-active="true"] {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 4px 10px -6px rgba(15, 23, 42, 0.18);
+}
+.reed-skin .day-tab[data-active="true"] .date { color: #f97316; }
+.reed-skin .day-nav {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  transition: background-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.reed-skin .day-nav:hover { background: #f8fafc; box-shadow: 0 4px 10px -6px rgba(15, 23, 42, 0.18); }
+.reed-skin .day-nav:active { transform: translateY(1px); }
+.reed-skin .day-nav[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+/* Expert-mode toggle ----------------------------------------- */
+.reed-skin .expert-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(249, 115, 22, 0.45);
+  border-radius: 999px;
+  padding: 6px 12px 6px 8px;
+  color: #9a3412;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(249, 115, 22, 0.12);
+}
+.reed-skin .expert-toggle:hover { box-shadow: 0 2px 0 rgba(249, 115, 22, 0.18); }
+.reed-skin .expert-toggle[data-on="false"] {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: #64748b;
+  box-shadow: none;
+}
+.reed-skin .expert-toggle .pip {
+  width: 30px;
+  height: 18px;
+  border-radius: 9999px;
+  background: rgba(249, 115, 22, 0.18);
+  border: 1px solid rgba(249, 115, 22, 0.55);
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.reed-skin .expert-toggle .pip::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 13px;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #f97316;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.55);
+  transition: left 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), background-color 0.25s;
+}
+.reed-skin .expert-toggle[data-on="false"] .pip {
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.14);
+}
+.reed-skin .expert-toggle[data-on="false"] .pip::after {
+  left: 1px;
+  background: #94a3b8;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reed-skin .reed-stagger > *,
+  .reed-skin .livechip i,
+  .reed-skin .gauge-arc {
+    animation: none !important;
+    transition: none !important;
+  }
+}

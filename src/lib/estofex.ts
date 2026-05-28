@@ -42,6 +42,15 @@ export interface EstofexBeneluxSummary {
   /** Of het bulletin Benelux/NL noemt. */
   mentionsBenelux: boolean;
   sourceUrl: string;
+  /** Bestandsnaam van de gekozen forecast (hoogste level). */
+  fileName: string;
+  /** Directe URL naar de grafische Estofex-outlook-kaart (PNG). */
+  imageUrl: string;
+}
+
+/** Bouw de URL naar de grafische Estofex-forecast-kaart voor een fcstfile. */
+export function estofexImageUrl(fileName: string): string {
+  return `https://www.estofex.org/cgi-bin/polygon/showforecast.cgi?lightningmap=yes&fcstfile=${encodeURIComponent(fileName)}`;
 }
 
 function parseValidPeriod(html: string): { from: string | null; until: string | null } {
@@ -319,5 +328,7 @@ export async function fetchEstofexBeneluxSummary(
     beneluxText,
     mentionsBenelux,
     sourceUrl: top.detailUrl,
+    fileName: top.fileName,
+    imageUrl: estofexImageUrl(top.fileName),
   };
 }

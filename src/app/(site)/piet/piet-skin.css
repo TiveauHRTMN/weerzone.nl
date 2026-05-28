@@ -1,0 +1,353 @@
+/* ============================================================
+   Piet · Mijn Weer — scoped design skin
+   Recreated from design_handoff_reed_piet (Piet page, hifi).
+   Scoped under `.piet-skin`; colliding base names from globals.css
+   (.card / .chip / .t-micro) are re-namespaced (rcard / rchip / rmicro).
+   ============================================================ */
+
+.piet-skin {
+  color: #0f172a;
+  font-feature-settings: "ss01", "cv11";
+}
+.piet-skin .num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.01em;
+}
+
+/* Background is dynamic (weer-gestuurd) via <WeatherBackground/>. */
+
+/* Cards ------------------------------------------------------- */
+.piet-skin .rcard {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border-radius: 26px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 0 0 1px rgba(15, 23, 42, 0.045),
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 24px -14px rgba(15, 23, 42, 0.18),
+    0 30px 60px -25px rgba(30, 58, 138, 0.3);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+.piet-skin .rcard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.piet-skin .swidget {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 1px 2px rgba(15, 23, 42, 0.03);
+}
+.piet-skin .divider {
+  height: 1px;
+  background: rgba(15, 23, 42, 0.06);
+  width: 100%;
+}
+.piet-skin .icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.piet-skin .lift {
+  transition: transform 0.25s ease;
+}
+.piet-skin .lift:hover {
+  transform: translateY(-1px);
+}
+
+.piet-skin .rmicro {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #64748b;
+}
+
+/* Chips ------------------------------------------------------- */
+.piet-skin .rchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.piet-skin .rchip .num {
+  font-weight: 800;
+}
+.piet-skin .rchip-yellow { background: #fef3c7; color: #92400e; }
+.piet-skin .rchip-orange { background: #ffedd5; color: #9a3412; }
+.piet-skin .rchip-blue   { background: #dbeafe; color: #1d4ed8; }
+.piet-skin .rchip-red    { background: #fee2e2; color: #b91c1c; }
+.piet-skin .rchip-cyan   { background: #cffafe; color: #155e75; }
+.piet-skin .rchip-purple { background: #f3e8ff; color: #7e22ce; }
+.piet-skin .rchip-green  { background: #dcfce7; color: #15803d; }
+.piet-skin .rchip-lime   { background: #ecfccb; color: #3f6212; }
+.piet-skin .rchip-slate  { background: #f1f5f9; color: #334155; }
+
+/* Live chip (green) ------------------------------------------- */
+.piet-skin .livechip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 9999px;
+  padding: 6px 12px 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.piet-skin .livechip i {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #15803d;
+  animation: pietLive 1.8s ease-out infinite;
+}
+@keyframes pietLive {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Location pill ---------------------------------------------- */
+.piet-skin .locpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 9px 14px;
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  transition: background-color 0.2s;
+}
+.piet-skin .locpill:hover {
+  background: #f8fafc;
+}
+
+/* Day tabs ---------------------------------------------------- */
+.piet-skin .day-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  padding: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+.piet-skin .day-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.piet-skin .day-tab[data-active="true"] {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 4px 10px -6px rgba(15, 23, 42, 0.18);
+}
+
+/* Hourly strip ------------------------------------------------ */
+.piet-skin .hourly {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+.piet-skin .hourly::-webkit-scrollbar {
+  height: 5px;
+}
+.piet-skin .hourly::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.12);
+  border-radius: 999px;
+}
+.piet-skin .hourly-cell {
+  flex: 0 0 auto;
+  min-width: 56px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border-radius: 12px;
+  transition: background-color 0.2s;
+}
+.piet-skin .hourly-cell.peak {
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 4px 12px -6px rgba(245, 158, 11, 0.35);
+}
+
+/* Score dots -------------------------------------------------- */
+.piet-skin .dots {
+  display: inline-flex;
+  gap: 4px;
+}
+.piet-skin .dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  transition: background-color 0.2s;
+}
+.piet-skin .dots i.on {
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* Regenradar slot --------------------------------------------- */
+.piet-skin .radar-slot {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(125, 211, 252, 0.18), transparent 60%),
+    linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+/* UV gauge ---------------------------------------------------- */
+.piet-skin .uv-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.piet-skin .uv-bar span {
+  flex: 1;
+}
+
+/* Compare row ------------------------------------------------- */
+.piet-skin .cmp-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 24px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.piet-skin .cmp-row + .cmp-row {
+  border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
+.piet-skin .cmp-row .lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.piet-skin .cmp-row .v {
+  font-weight: 800;
+}
+.piet-skin .cmp-row .arrow {
+  text-align: center;
+  color: #94a3b8;
+}
+.piet-skin .cmp-row .v.today {
+  color: #0f172a;
+}
+.piet-skin .cmp-row .v.tomorrow {
+  color: #1d4ed8;
+}
+@media (max-width: 480px) {
+  .piet-skin .cmp-row {
+    grid-template-columns: 92px 1fr 20px 1fr;
+    gap: 8px;
+  }
+}
+
+/* Dagdelen grid ----------------------------------------------- */
+.piet-skin .dagdelen {
+  display: grid;
+  grid-template-columns: 88px repeat(3, 1fr);
+  gap: 6px;
+  align-items: stretch;
+}
+.piet-skin .dd-head {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  text-align: center;
+  padding: 6px 0;
+}
+.piet-skin .dd-day {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+.piet-skin .dd-cell {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 12px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Stagger fade-in --------------------------------------------- */
+@keyframes pietLiftIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.piet-skin .piet-stagger > * {
+  animation: pietLiftIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.piet-skin .piet-stagger > *:nth-child(1) { animation-delay: 0s; }
+.piet-skin .piet-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.piet-skin .piet-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.piet-skin .piet-stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.piet-skin .piet-stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.piet-skin .piet-stagger > *:nth-child(6) { animation-delay: 0.4s; }
+.piet-skin .piet-stagger > *:nth-child(7) { animation-delay: 0.48s; }
+.piet-skin .piet-stagger > *:nth-child(8) { animation-delay: 0.56s; }
+.piet-skin .piet-stagger > *:nth-child(9) { animation-delay: 0.64s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .piet-skin .piet-stagger > *,
+  .piet-skin .livechip i {
+    animation: none !important;
+  }
+}
