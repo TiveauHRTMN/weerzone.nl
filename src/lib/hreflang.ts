@@ -34,6 +34,31 @@ export function hreflangSelf(
 }
 
 /**
+ * Cluster voor pagina's met per-locale verschillende paden:
+ * /over ↔ /de/uber-uns ↔ /fr/a-propos ↔ /es/sobre-nosotros. Geef alleen de
+ * locales mee die echt een eigen pagina hebben — anders gaat Google ze als
+ * duplicaten van elkaar zien.
+ */
+export function hreflangCluster(paths: {
+  nl: string;
+  de?: string;
+  fr?: string;
+  es?: string;
+  xDefault?: "nl" | "de" | "fr" | "es";
+}): Record<string, string> {
+  const result: Record<string, string> = {
+    [LOCALES.nl.hreflang]: `${BASE_URL}${paths.nl}`,
+  };
+  if (paths.de) result[LOCALES.de.hreflang] = `${BASE_URL}${paths.de}`;
+  if (paths.fr) result[LOCALES.fr.hreflang] = `${BASE_URL}${paths.fr}`;
+  if (paths.es) result[LOCALES.es.hreflang] = `${BASE_URL}${paths.es}`;
+  const defaultLocale = paths.xDefault ?? "nl";
+  const defaultPath = paths[defaultLocale] ?? paths.nl;
+  result["x-default"] = `${BASE_URL}${defaultPath}`;
+  return result;
+}
+
+/**
  * Luxembourg-stadpagina's bestaan in zowel DE als FR — sitemap-lu.xml verwijst
  * naar beide. Hreflang clustert ze met elkaar zodat de variant in de juiste
  * taal in de SERP verschijnt.
