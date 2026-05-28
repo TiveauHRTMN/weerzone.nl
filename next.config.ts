@@ -58,14 +58,19 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    cpus: 1,
-  },
   async redirects() {
     return [
       { source: "/homepage",        destination: "/",               permanent: true },
-      { source: "/piet",            destination: "/mijnweer",       permanent: true },
-      { source: "/reed",            destination: "/waarschuwingen", permanent: true },
+      { source: "/about",           destination: "/over",            permanent: true },
+      { source: "/mijnweer",        destination: "/piet",           permanent: true },
+      { source: "/mijn-weer",       destination: "/piet",           permanent: true },
+      { source: "/jouwweer",        destination: "/piet",           permanent: true },
+      { source: "/waarschuwingen",  destination: "/reed",           permanent: true },
+      { source: "/prijzen",         destination: "/",               permanent: true },
+      { source: "/de/preise",       destination: "/de",             permanent: true },
+      { source: "/fr/tarifs",       destination: "/fr",             permanent: true },
+      { source: "/es/precios",      destination: "/es",             permanent: true },
+      { source: "/app/checkout/:path*", destination: "/mijn-weerzone", permanent: true },
       // Reiszone is verwijderd in v2 (agent-first relaunch). Alle Reiszone-URLs
       // worden hard naar de homepage gestuurd; voor crawlers is dat een 308.
       { source: "/reisweer",        destination: "/",               permanent: true },
@@ -73,9 +78,6 @@ const nextConfig: NextConfig = {
       { source: "/reiszone",        destination: "/",               permanent: true },
       { source: "/reiszone/:path*", destination: "/",               permanent: true },
     ];
-  },
-  webpack(config) {
-    return config;
   },
   async headers() {
     return [
