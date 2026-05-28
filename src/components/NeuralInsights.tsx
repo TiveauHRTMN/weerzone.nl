@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Zap, Shield, Target, Activity, Sun, Wind, Cloud, AlertOctagon } from "lucide-react";
@@ -34,7 +34,7 @@ export default function NeuralInsights({ weather, tier }: NeuralInsightsProps) {
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-accent-cyan" />
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">Analyse</span>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">Extra weerinformatie</span>
         </div>
       </div>
 
@@ -48,9 +48,9 @@ export default function NeuralInsights({ weather, tier }: NeuralInsightsProps) {
           <div className="homecard-top mb-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h4 className="homecard-kicker !mb-0">Neerslag Radar</h4>
+                <h4 className="homecard-kicker !mb-0">Regen de komende uren</h4>
               </div>
-              <p className="text-xl font-black text-white leading-tight">{metNetNowcast || "Data wordt geladen..."}</p>
+              <p className="text-xl font-black text-white leading-tight">{metNetNowcast || "We halen de laatste gegevens op..."}</p>
             </div>
             <Zap className="w-6 h-6 text-accent-cyan homecard-sun" />
           </div>
@@ -71,23 +71,23 @@ export default function NeuralInsights({ weather, tier }: NeuralInsightsProps) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="card p-3 bg-white/5 border-white/5 flex flex-col items-center text-center">
             <Cloud className="w-4 h-4 text-text-muted mb-2" />
-            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Optische Diepte</span>
+            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Bewolking</span>
             <span className="text-sm font-black text-white">{opticalDepth || "—"}%</span>
           </div>
           <div className="card p-3 bg-white/5 border-white/5 flex flex-col items-center text-center">
             <Sun className="w-4 h-4 text-accent-orange mb-2" />
-            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Straling</span>
+            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Zonkracht</span>
             <span className="text-sm font-black text-white">{solarRadiation || "—"} W/m²</span>
           </div>
           <div className="card p-3 bg-white/5 border-white/5 flex flex-col items-center text-center">
             <Wind className="w-4 h-4 text-accent-blue mb-2" />
-            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Turbulentie</span>
-            <span className="text-[10px] font-black text-white truncate w-full uppercase">{windTurbulence || "Stable"}</span>
+            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Wind</span>
+            <span className="text-[10px] font-black text-white truncate w-full uppercase">{windTurbulence || "Rustig"}</span>
           </div>
           <div className="card p-3 bg-white/5 border-white/5 flex flex-col items-center text-center">
             <Target className="w-4 h-4 text-accent-green mb-2" />
-            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Grid Resolutie</span>
-            <span className="text-sm font-black text-white">1.0 km</span>
+            <span className="text-[10px] font-black text-text-secondary uppercase mb-1">Plaatselijk</span>
+            <span className="text-sm font-black text-white">Ja</span>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export default function NeuralInsights({ weather, tier }: NeuralInsightsProps) {
           <div className="card p-5 bg-white/5 border-white/10">
             <div className="flex items-center gap-2 mb-4">
               <Shield className="w-4 h-4 text-accent-orange" />
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Ensemble Model</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Hoe zeker is dit?</h4>
             </div>
             <div className="flex justify-between items-end mb-2">
               <span className="text-3xl font-black text-white">{confidence}%</span>
@@ -115,11 +115,11 @@ export default function NeuralInsights({ weather, tier }: NeuralInsightsProps) {
           <div className="card p-5 bg-white/5 border-white/10">
             <div className="flex items-center gap-2 mb-4">
               <Activity className="w-4 h-4 text-accent-blue" />
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Omgevings-Impact</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary">Wat merk je buiten?</h4>
             </div>
             <p className="text-sm font-bold text-white mb-3">{neuralGcmImpact}</p>
             <div className="flex gap-2">
-              <div className="px-2 py-1 rounded bg-accent-blue/10 border border-accent-blue/20 text-[9px] font-black text-accent-blue uppercase tracking-tighter">Geo-Aware</div>
+              <div className="px-2 py-1 rounded bg-accent-blue/10 border border-accent-blue/20 text-[9px] font-black text-accent-blue uppercase tracking-tighter">Plaatselijk bekeken</div>
             </div>
           </div>
         </div>
@@ -133,25 +133,25 @@ export default function NeuralInsights({ weather, tier }: NeuralInsightsProps) {
               <AlertOctagon className="w-7 h-7 text-white" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-black text-accent-red uppercase tracking-widest">Extreme Atmosfeer</h4>
+              <h4 className="text-sm font-black text-accent-red uppercase tracking-widest">Let op zwaar weer</h4>
               <p className="text-xs font-bold text-white/80 mt-1">
                 {isReed 
-                  ? "Snoeiharde waarschuwing: Neurale sensoren slaan uit op storm/onweer." 
-                  : "Detail-data voor deze extreme condities is vergrendeld voor Piet-abonnees."}
+                  ? "Er zijn duidelijke aanwijzingen voor storm of onweer in de buurt." 
+                  : "Meer uitleg over dit risico staat klaar bij de waarschuwingen."}
               </p>
             </div>
             {!isReed && (
               <Link 
-                href="/waarschuwingen"
+                href="/reed"
                 className="px-5 py-2.5 bg-accent-red text-white text-[11px] font-black uppercase rounded-xl hover:scale-105 transition-transform"
               >
-                Reed Alerts →
+                Waarschuwingen
               </Link>
             )}
           </div>
           {!isReed && (
             <div className="h-10 bg-accent-red flex items-center justify-center gap-2">
-               <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">Upgrade naar Reed</span>
+               <span className="text-[9px] font-black text-white uppercase tracking-[0.2em]">Bekijk de waarschuwingen</span>
             </div>
           )}
         </div>

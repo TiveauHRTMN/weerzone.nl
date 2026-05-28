@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import RainMap from "@/components/RainMap";
@@ -26,11 +26,11 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: "https://weerzone.nl/es/mi-tiempo",
       languages: {
-        "nl-NL": "https://weerzone.nl/mijnweer",
+        "nl-NL": "https://weerzone.nl/piet",
         "de-DE": "https://weerzone.nl/de/mein-wetter",
         "fr-FR": "https://weerzone.nl/fr/mon-meteo",
         "es-ES": "https://weerzone.nl/es/mi-tiempo",
-        "x-default": "https://weerzone.nl/mijnweer",
+        "x-default": "https://weerzone.nl/piet",
       },
     },
     openGraph: {
@@ -329,8 +329,8 @@ export default async function MiTiempoPage() {
                   <Link href="/es/alertas" className="btn btn-primary btn-sm">
                     Configurar mis alertas
                   </Link>
-                  <Link href="/es/precios" className="btn btn-ghost btn-sm">
-                    Ver precios
+                  <Link href="/app/signup?lang=es" className="btn btn-ghost btn-sm">
+                    Crear mi Weerzone
                   </Link>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { fetchWeatherData, getWeatherDescription } from "@/lib/weather";
 import type { WeatherData } from "@/lib/types";
@@ -10,6 +10,7 @@ import { getWelcomeEmailHtml } from "@/lib/welcome-email";
 import { getBrandedMagicLinkHtml } from "@/lib/magic-link-email";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { BASE_URL } from "@/lib/sitemap-data";
 import type { PersonaTier } from "@/lib/personas";
 import type { Locale } from "@/config/locales";
 
@@ -760,7 +761,7 @@ export async function registerUser(args: {
 
   const admin = createSupabaseAdminClient();
   // Zonder tier blijft chosen_tier weg uit metadata zodat de DB-trigger nog
-  // geen subscription maakt — die komt pas na /prijzen + /checkout.
+  // geen agent-toegang aanmaakt; Mijn Weerzone handelt de persoonlijke laag af.
   const metadata: Record<string, unknown> = { full_name: fullName };
   if (tier) metadata.chosen_tier = tier;
   const { error } = await admin.auth.admin.createUser({
@@ -782,7 +783,7 @@ export async function registerUser(args: {
   }
 
   // Optioneel: welkomstmail. Alleen als er al een tier bekend is; anders
-  // wachten we tot na checkout. Bouwen we niet in het kritieke pad.
+  // bewaren we in Mijn Weerzone.
   try {
     const apiKey = process.env.RESEND_API_KEY;
     if (apiKey && tier) {
@@ -914,37 +915,22 @@ export async function getProvinceVerdict(provinceLabel: string): Promise<string>
 }
 
 /**
- * Informeert Google dat de sitemap is bijgewerkt. 
- * Cruciaal voor programmatic SEO om nieuwe pagina's snel te laten indexeren.
+ * Best-effort ping voor de sitemap-index. De index verwijst naar alle child-sitemaps.
  */
 export async function pingSearchConsole() {
-  const sitemapUrls = [
-    "https://weerzone.nl/sitemap.xml",
-    "https://weerzone.nl/sitemap-static.xml",
-    "https://weerzone.nl/sitemap-nl.xml",
-    "https://weerzone.nl/sitemap-be.xml",
-    "https://weerzone.nl/sitemap-de.xml",
-    "https://weerzone.nl/sitemap-fr.xml",
-    "https://weerzone.nl/sitemap-lu.xml",
-    "https://weerzone.nl/sitemap-es.xml",
-  ];
-  
-  try {
-    const results = await Promise.all(
-      sitemapUrls.map(async (sitemapUrl) => {
-        const googlePing = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-        const res = await fetch(googlePing);
-        return { sitemapUrl, ok: res.ok };
-      }),
-    );
+  const sitemapUrl = `${BASE_URL}/sitemap.xml`;
 
-    if (results.every((result) => result.ok)) {
-      console.log("✅ Google gepind voor sitemap update.");
+  try {
+    const googlePing = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+    const res = await fetch(googlePing);
+
+    if (res.ok) {
+      console.log("Google gepind voor sitemap update.");
       return { success: true };
     }
-    throw new Error("Ping failed");
+    throw new Error(`Ping failed with status ${res.status}`);
   } catch (error) {
-    console.error("❌ Google ping mislukt:", error);
+    console.error("Google ping mislukt:", error);
     return { success: false };
   }
 }

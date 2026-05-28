@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import RainMap from "@/components/RainMap";
 import PollenWidget from "@/components/PollenWidget";
@@ -10,6 +10,7 @@ import { ALL_PLACES } from "@/lib/places-data";
 import { fetchWeatherData, fetchAirQuality, fetchMarineData } from "@/lib/weather";
 import { fetchDWDWarnings, warningsForBundesland, nearestBundeslandSlug } from "@/lib/dwd-warnings";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { hreflangCluster } from "@/lib/hreflang";
 
 export async function generateMetadata(): Promise<Metadata> {
   const loc = await getSavedLocationServer().catch(() => null);
@@ -23,13 +24,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title,
-    description,    alternates: {
+    description,
+    alternates: {
       canonical: "https://weerzone.nl/de/mein-wetter",
-      languages: {
-        "nl-NL": "https://weerzone.nl/mijnweer",
-        "de-DE": "https://weerzone.nl/de/mein-wetter",
-        "x-default": "https://weerzone.nl/mijnweer",
-      },
+      languages: hreflangCluster({
+        nl: "/piet",
+        de: "/de/mein-wetter",
+        fr: "/fr/mon-meteo",
+        es: "/es/mi-tiempo",
+      }),
     },
     openGraph: {
       title,

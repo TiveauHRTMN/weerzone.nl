@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -124,12 +124,12 @@ const DASHBOARD_COPY: Record<Locale, {
     currentWeather: "Actueel weer",
     feelsLike: "Voelt als",
     narrativeLabel: "Kort weerbericht voor vandaag",
-    ctaHref: "/mijnweer",
+    ctaHref: "/piet",
     ctaKicker: "Mijn Weer",
     ctaTitle: "Jouw persoonlijke weerbericht",
     ctaBody: "Kledingadvies, terras- en fietsscore, dagdelen, pollen, UV-index en vandaag vs. morgen - precies wat je moet weten.",
     ctaAction: "Bekijk Mijn Weer",
-    warningsHref: "/waarschuwingen",
+    warningsHref: "/reed",
     warningsKicker: "Waarschuwingen",
     warningsTitle: "Geen verrassingen bij extreem weer",
     warningsBody: "We houden de horizon 24/7 voor je in de gaten. Van zware windstoten tot naderend onweer - je ziet het direct voor jouw locatie.",

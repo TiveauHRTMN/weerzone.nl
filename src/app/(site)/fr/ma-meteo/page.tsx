@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import RainMap from "@/components/RainMap";
 import PollenWidget from "@/components/PollenWidget";
@@ -36,10 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: "https://weerzone.nl/fr/ma-meteo",
       languages: {
-        "nl-NL": "https://weerzone.nl/mijnweer",
+        "nl-NL": "https://weerzone.nl/piet",
         "de-DE": "https://weerzone.nl/de/mein-wetter",
         "fr-FR": "https://weerzone.nl/fr/ma-meteo",
-        "x-default": "https://weerzone.nl/mijnweer",
+        "x-default": "https://weerzone.nl/piet",
       },
     },
     openGraph: {

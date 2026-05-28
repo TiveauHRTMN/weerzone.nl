@@ -1,12 +1,21 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import WeerzoneBackground from "@/components/WeerzoneBackground";
+import { hreflangCluster } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "About",
   description:
     "Weerzone is je persoonlijke weeragent voor de komende 48 uur. Piet geeft je dagelijkse heads-up, Reed helpt bij buien, wind en onweer, Koos helpt als je eropuit wilt.",
-  alternates: { canonical: "https://weerzone.nl/over" },
+  alternates: {
+    canonical: "https://weerzone.nl/over",
+    languages: hreflangCluster({
+      nl: "/over",
+      de: "/de/uber-uns",
+      fr: "/fr/a-propos",
+      es: "/es/sobre-nosotros",
+    }),
+  },
   openGraph: {
     title: "About Weerzone",
     description:
@@ -28,7 +37,7 @@ const AGENTS = [
     key: "piet",
     name: "Piet",
     role: "Je dagelijkse heads-up",
-    href: "/mijnweer",
+    href: "/piet",
     color: "#10b981",
     text:
       "Piet helpt je elke dag snel begrijpen wat slim is. Naar buiten, wachten of later beter. Met aandacht voor weekend, schooldag en de plekken die voor jou tellen.",
@@ -37,7 +46,7 @@ const AGENTS = [
     key: "reed",
     name: "Reed",
     role: "Voor buien, wind en onweer",
-    href: "/waarschuwingen",
+    href: "/reed",
     color: "#ef4444",
     text:
       "Reed is de scherpe laag boven Piet. Buienkans, wind, onweer en omslagmomenten — met timing en onzekerheid als die nog meespeelt.",
@@ -72,7 +81,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is Weerzone gratis?",
-    a: "Tot augustus 2026 is Weerzone volledig gratis te gebruiken. We bepalen daarna welke functies in een betaald abonnement passen, op basis van wat mensen écht waardevol vinden.",
+    a: "Weerzone is gebouwd als persoonlijke 48-uurs weeragent zonder advertenties, partnerdeals of betaalmuur. We meten wat mensen echt gebruiken om het product scherper te maken.",
   },
   {
     q: "Hoe zit het met advertenties of partners?",

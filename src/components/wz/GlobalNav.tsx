@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -192,23 +192,22 @@ export default function GlobalNav() {
     : isFR ? "/app/login?lang=fr"
     : isDE ? "/app/login?lang=de"
     : "/app/login";
-  const signupHref = isES ? "/es/precios"
-    : isFR ? "/fr/tarifs"
-    : isDE ? "/de/preise"
+  const signupHref = isES ? "/app/signup?lang=es"
+    : isFR ? "/app/signup?lang=fr"
+    : isDE ? "/app/signup?lang=de"
     : isLU ? "/app/signup?lang=lu"
     : isBE ? "/app/signup?lang=be"
     : "/app/signup";
 
   function isActive(linkHref: string, key: string) {
     if (key === "mijnweer" || key === "piet" || key === "mein-wetter" || key === "ma-meteo" || key === "mi-tiempo") {
-      const myWeatherPath = isES ? "/es/mi-tiempo" : isFR ? "/fr/mon-meteo" : isDE ? "/de/mein-wetter" : "/mijnweer";
+      const myWeatherPath = isES ? "/es/mi-tiempo" : isFR ? "/fr/mon-meteo" : isDE ? "/de/mein-wetter" : "/piet";
       const weatherPath = isES ? "/es/tiempo" : isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer";
       return pathname.startsWith(myWeatherPath) || pathname.startsWith(weatherPath) || pathname.startsWith("/jouwweer");
     }
     if (key === "reed" || key === "warnungen" || key === "waarschuwingen" || key === "alertes" || key === "alertas") {
-      return pathname.startsWith(isES ? "/es/alertas" : isFR ? "/fr/alertes" : isDE ? "/de/warnungen" : "/waarschuwingen");
+      return pathname.startsWith(isES ? "/es/alertas" : isFR ? "/fr/alertes" : isDE ? "/de/warnungen" : "/reed");
     }
-    if (key === "preise" || key === "prijzen" || key === "tarifs" || key === "precios") return pathname.startsWith(isES ? "/es/precios" : isFR ? "/fr/tarifs" : isDE ? "/de/preise" : "/prijzen");
     if (key === "uber-uns" || key === "over" || key === "a-propos" || key === "sobre-nosotros") return pathname.startsWith(isES ? "/es/sobre-nosotros" : isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over");
     if (key === "kontakt" || key === "contact" || key === "contacto") return pathname.startsWith(isES ? "/es/contacto" : isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact");
     return pathname === linkHref || pathname.startsWith(linkHref + "/");

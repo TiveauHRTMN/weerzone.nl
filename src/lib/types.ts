@@ -1,4 +1,5 @@
 import type { MarianaForecastIntelligence, MarianaHourlyIntelligence } from "@/lib/mariana/types";
+import type { OracleForecastIntelligence, OracleHourlyIntelligence } from "@/lib/oracle/types";
 
 export interface MinutelyPrecipitation {
   time: string;
@@ -26,6 +27,7 @@ export interface WeatherData {
   uvIndex: number;
   models: ModelComparison;
   mariana?: MarianaForecastIntelligence;
+  oracle?: OracleForecastIntelligence;
   summaryVerdict?: string; // Korte teaser voor Homepage
   deepAnalysis?: string;   // Uitgebreid dossier voor /piet
   neuralData?: {
@@ -48,14 +50,19 @@ export interface HourlyForecast {
   weatherCode: number;
   precipitation: number;
   windSpeed: number;
-  cape: number; // Convective Available Potential Energy (J/kg) â€” onweersrisico
+  cape: number; // Convective Available Potential Energy (J/kg) — onweersrisico
   confidence: "high" | "medium" | "low";
   mariana?: MarianaHourlyIntelligence;
+  oracle?: OracleHourlyIntelligence;
   models?: {
     harmonie?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
     icon?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
     arome?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
+    ecmwf?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
+    gfs?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
+    aifs?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
     google?: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number };
+    [key: string]: { temperature: number; precipitation: number; weatherCode: number; windSpeed: number } | undefined;
   };
 }
 
@@ -162,10 +169,10 @@ export interface City {
 // ============================================================
 
 export const DUTCH_CITIES: City[] = [
-  // â”€â”€ Het Meteorologische Hart (Default) â”€â”€
+  // ── Het Meteorologische Hart (Default) ──
   { name: "De Bilt", lat: 52.1011, lon: 5.1775 },
 
-  // â”€â”€ Top 10 grootste steden â”€â”€
+  // ── Top 10 grootste steden ──
   { name: "Amsterdam", lat: 52.3676, lon: 4.9041 },
   { name: "Rotterdam", lat: 51.9244, lon: 4.4777 },
   { name: "Den Haag", lat: 52.0705, lon: 4.3007 },
@@ -177,7 +184,7 @@ export const DUTCH_CITIES: City[] = [
   { name: "Breda", lat: 51.5719, lon: 4.7683 },
   { name: "Nijmegen", lat: 51.8126, lon: 5.8372 },
 
-  // â”€â”€ KNMI weerstations (officieel meetnetwerk) â”€â”€
+  // ── KNMI weerstations (officieel meetnetwerk) ──
   // Waddeneilanden & Noord
   { name: "Vlieland", lat: 53.2417, lon: 5.0000 },
   { name: "Terschelling", lat: 53.3917, lon: 5.3458 },
@@ -232,7 +239,7 @@ export const DUTCH_CITIES: City[] = [
 ];
 
 /**
- * Lijst van officiÃ«le KNMI-weerstations op land.
+ * Lijst van officiële KNMI-weerstations op land.
  * Gebruikt voor de landelijke "Pulse" ticker.
  */
 export const KNMI_STATIONS = DUTCH_CITIES.filter((c, i) => 
@@ -340,7 +347,7 @@ export const FR_STATIONS = FRENCH_CITIES;
 /**
  * Reverse geocode via OpenStreetMap Nominatim: geeft de werkelijke
  * plaatsnaam voor de opgegeven GPS-coördinaten. Gebruikt de exacte
- * locatie van de gebruiker â€” geen snapping naar KNMI-stations.
+ * locatie van de gebruiker — geen snapping naar KNMI-stations.
  * Valt terug op findNearestCity als de API geen resultaat geeft.
  */
 export async function reverseGeocode(lat: number, lon: number, locale = "nl"): Promise<City> {
@@ -365,7 +372,7 @@ export async function reverseGeocode(lat: number, lon: number, locale = "nl"): P
 }
 
 /**
- * Zoek het dichtstbijzijnde station/stad op basis van coÃ¶rdinaten.
+ * Zoek het dichtstbijzijnde station/stad op basis van coördinaten.
  * Gebruikt Haversine-afstand.
  */
 export function findNearestCity(lat: number, lon: number): City {
@@ -390,7 +397,7 @@ export function findNearestCity(lat: number, lon: number): City {
 }
 
 /**
- * Afstand in km tussen twee coÃ¶rdinaten (voor chat "dichtstbijzijnde station")
+ * Afstand in km tussen twee coördinaten (voor chat "dichtstbijzijnde station")
  */
 export function distanceBetween(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const dLat = (lat2 - lat1) * Math.PI / 180;

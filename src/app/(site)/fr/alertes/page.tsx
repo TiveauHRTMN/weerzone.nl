@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import ReedExtended from "@/components/ReedExtended";
 import PremiumGate from "@/components/PremiumGate";
@@ -17,20 +17,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://weerzone.nl/fr/alertes",
     languages: {
-      "nl-NL": "https://weerzone.nl/waarschuwingen",
+      "nl-NL": "https://weerzone.nl/reed",
       "de-DE": "https://weerzone.nl/de/warnungen",
       "fr-FR": "https://weerzone.nl/fr/alertes",
-      "x-default": "https://weerzone.nl/waarschuwingen",
+      "x-default": "https://weerzone.nl/reed",
     },
   },
-  keywords: [
-    "alertes meteo",
-    "meteo france alertes",
-    "alerte tempete",
-    "alerte orage",
-    "canicule",
-    "vigilance meteo",
-  ],
   openGraph: {
     title: "Alertes conditions extrêmes | WEERZONE",
     description:
@@ -56,7 +48,7 @@ export default async function AlertesPage() {
   const lon = activeLoc.lon;
 
   const [initialWeather, estofex] = await Promise.all([
-    fetchWeatherData(lat, lon, false, false, undefined, "fr").catch(() => undefined),
+    fetchWeatherData(lat, lon, false, true, undefined, "fr").catch(() => undefined),
     fetchEstofexBeneluxSummary(2).catch(() => null),
   ]);
 

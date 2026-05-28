@@ -1,13 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const SWIPE_ROUTES = [
   "/",
-  "/mijnweer",
-  "/waarschuwingen",
-  "/prijzen",
+  "/piet",
+  "/reed",
   "/over",
   "/contact",
 ];

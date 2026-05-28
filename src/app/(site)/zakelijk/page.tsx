@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { Building2, Clock, TrendingUp, Shield, Zap, BarChart3, Mail } from "lucide-react";
 import B2BSignupForm from "@/components/B2BSignupForm";
@@ -7,12 +7,16 @@ import { schemaService, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 import { getSavedLocationServer } from "@/lib/location-cookies";
+import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: "Zakelijk weerbericht voor buitenwerk",
   description:
     "Werkt u buiten? Dan kost onverwacht weer u geld. WEERZONE levert de nauwkeurigste 48-uurs voorspelling van Nederland — op 1 bij 1 kilometer, voor uw bedrijfsadres.",
-  alternates: { canonical: "https://weerzone.nl/zakelijk" },
+  alternates: {
+    canonical: "https://weerzone.nl/zakelijk",
+    languages: hreflangSelf("nl", "/zakelijk"),
+  },
   openGraph: {
     title: "WEERZONE Zakelijk — Het weer, maar dan echt",
     description:
@@ -118,7 +122,7 @@ export default async function ZakelijkPage() {
               >
                 <Building2 className="w-4 h-4 text-accent-orange" />
                 <span className="text-xs font-black text-accent-orange uppercase tracking-wider">
-                  Steve · WEERZONE Zakelijk
+                  WEERZONE Zakelijk
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-text-primary leading-tight mb-4">
@@ -241,7 +245,7 @@ export default async function ZakelijkPage() {
                 </div>
                 <h2 className="text-2xl font-black text-text-primary mb-2">Meld u aan voor de bèta</h2>
                 <p className="text-text-secondary text-sm leading-relaxed max-w-sm mx-auto">
-                  Steve is momenteel in actieve ontwikkeling. Laat uw gegevens achter —
+                  WEERZONE Zakelijk is momenteel in actieve ontwikkeling. Laat uw gegevens achter —
                   wij nodigen u uit zodra uw branche aan de beurt is.
                 </p>
               </div>
@@ -251,25 +255,25 @@ export default async function ZakelijkPage() {
             {/* Meet Steve + triade */}
             <div className="card p-6">
               <p className="text-[10px] font-black text-accent-orange uppercase tracking-wider mb-2">
-                Wie schrijft je?
+                Wat ontvangt u?
               </p>
               <h3 className="text-lg font-black text-text-primary mb-2">
-                Steve. Kort. Zakelijk. Geen ruis.
+                Kort. Zakelijk. Geen ruis.
               </h3>
               <p className="text-text-secondary text-sm leading-relaxed mb-3">
-                Steve is de stem achter WEERZONE Zakelijk. Eén mail als het telt, stilte als
+                WEERZONE Zakelijk stuurt één mail als het telt, stilte als
                 het niet telt. Reply werkt — hij leest mee zodra we live zijn.
               </p>
               <p className="text-text-muted text-xs mb-3">
-                Niet zakelijk? WEERZONE heeft er nog twee die wél al live zijn:
+                Niet zakelijk? WEERZONE heeft ook opties voor dagelijks weer en waarschuwingen:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Link href="/mijnweer" className="card p-4 block transition-transform hover:scale-[1.01]">
-                  <p className="text-text-primary font-black text-sm mb-1">Piet · 48 uur</p>
+                <Link href="/piet" className="card p-4 block transition-transform hover:scale-[1.01]">
+                  <p className="text-text-primary font-black text-sm mb-1">Dagelijks weer</p>
                   <p className="text-text-muted text-xs">Dagelijks weerbericht voor thuis. Nuchter, kort, zonder drama.</p>
                 </Link>
-                <Link href="/waarschuwingen" className="card p-4 block transition-transform hover:scale-[1.01]">
-                  <p className="text-text-primary font-black text-sm mb-1">Reed · Waarschuwing</p>
+                <Link href="/reed" className="card p-4 block transition-transform hover:scale-[1.01]">
+                  <p className="text-text-primary font-black text-sm mb-1">Waarschuwingen</p>
                   <p className="text-text-muted text-xs">Alleen een mail als het weer écht gevaarlijk wordt. Code geel, oranje, rood.</p>
                 </Link>
               </div>

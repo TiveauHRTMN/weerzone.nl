@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import ReedExtended from "@/components/ReedExtended";
 import PremiumGate from "@/components/PremiumGate";
@@ -27,20 +27,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://weerzone.nl/de/warnungen",
     languages: {
-      "nl-NL": "https://weerzone.nl/waarschuwingen",
+      "nl-NL": "https://weerzone.nl/reed",
       "de-DE": "https://weerzone.nl/de/warnungen",
-      "x-default": "https://weerzone.nl/waarschuwingen",
+      "x-default": "https://weerzone.nl/reed",
     },
   },
-  keywords: [
-    "wetterwarnungen",
-    "DWD warnungen",
-    "unwetterwarnung",
-    "sturmwarnung",
-    "gewitterwarnung",
-    "hitzewarnung",
-    "frostwarnung",
-  ],
   openGraph: {
     title: "Warnungen vor Extremwetter | WEERZONE",
     description:
@@ -74,7 +65,7 @@ export default async function WarnungenPage() {
   const lon = activeLoc.lon;
 
   const [initialWeather, allWarnings, bundeslandSlug, estofex] = await Promise.all([
-    fetchWeatherData(lat, lon, false, false, undefined, "de").catch(() => undefined),
+    fetchWeatherData(lat, lon, false, true, undefined, "de").catch(() => undefined),
     fetchDWDWarnings().catch(() => []),
     nearestBundeslandSlug(lat, lon).catch(() => null),
     fetchEstofexBeneluxSummary(2).catch(() => null),
