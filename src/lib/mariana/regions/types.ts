@@ -1,22 +1,52 @@
 /**
- * Mariana NL — types + output-contract (0-48u operationele orchestrator, NL).
+ * Mariana Regions — types + output-contract (0-48u LLM-duiding PER REGIO, NL).
  *
- * Mariana is de centrale beslislaag. Twee INTERNE banen die elkaar nooit middelen:
+ * Mariana Regions is de LLM-duidingslaag van de cascade:
+ *   Oracle + Tesla -> Regions (LLM, per regio, 1x/dag) -> Mariana Local (wiskunde,
+ *   per locatie, per request) -> 10.000 paginas / Piet / Koos / Reed.
  *
- *  - Operationele baan (Oracle + hi-res WeatherData): blendt/verzacht -> voedt
- *    Piet, Koos en de locatie-basis. Hier mag genuanceerd/afgevlakt worden.
- *  - Convectieve baan (Tesla, alleen bij Oracle-gate ACTIVATE): draagt Tesla's
- *    harde waarheid DOOR zonder te middelen -> voedt Reed (rauw) en de
- *    onweerlaag van locatiepagina's.
+ * Regions redeneert over de 11 Tesla-mesoschaalregio's — niet per locatie. De
+ * duiding (regime/gevaar/verhaal) is regionaal gedeeld; de lokale GETALLEN doet
+ * Mariana Local per coordinaat. Twee interne banen die elkaar nooit middelen:
+ *  - Operationele baan (Oracle + hi-res WeatherData): regime/blend -> Piet/Koos.
+ *  - Convectieve baan (Tesla, alleen bij Oracle-gate ACTIVATE): Tesla RAUW -> Reed.
  *
- * Verbindingsstuk: Mariana kan Piet de OPDRACHT geven door te verwijzen naar
- * /reed voor de waarschuwingen (refer_to_reed) — een gestuurde pointer, geen
- * data-dump. Zo blijft Piet praktisch en draagt Reed de convectieve diepte.
+ * Verbindingsstuk: Regions kan Piet de OPDRACHT geven door te verwijzen naar
+ * /reed (refer_to_reed). En via MarianaLocalFeed voedt Regions de wiskunde van
+ * Mariana Local: regime + per-dag modelgewichten + confidence-priors + gevaar.
  *
  * Geen frontend, geen route. Scope NL 0-48u; oude Mariana buiten NL blijft intact.
  */
 
 import type { TeslaSignal } from "@/lib/mariana/tesla/types";
+
+/**
+ * Het voederkanaal Regions -> Local. Dit is wat de LLM-duiding doorgeeft aan de
+ * (gratis, per-request) wiskunde van Mariana Local, zodat die niet meer op
+ * statische defaults draait maar op de dag-duiding van de cascade.
+ *
+ * - modelWeights: per-dag modelgewichten (welk model wint vandaag in deze regio),
+ *   sleutels = MarianaModelName-strings (HARMONIE/AROME/ICON_D2/ECMWF/GFS/...).
+ * - confidencePrior: hoe zeker is het regime-beeld (0..1) — Local gebruikt dit als
+ *   prior op z'n confidence-score.
+ * - regimeCode/regimeLabel: de duiding (uit Oracle/Regions).
+ * - hazardFlags: actieve gevaren ("thunder","wind","heavy_rain",...) voor Local's
+ *   risks-laag; convectiveActive markeert of Tesla actief was (Reed-doorverwijzing).
+ */
+export interface MarianaLocalFeed {
+  regionSlug: string;
+  regionName: string;
+  regimeCode: string;
+  regimeLabel: string;
+  confidencePrior: number;
+  modelWeights: Record<string, number>;
+  hazardFlags: string[];
+  convectiveActive: boolean;
+  /** Korte reden voor Piet's doorverwijzing naar /reed (leeg als niet actief). */
+  referralReason: string;
+  /** ISO van de Regions-run die dit voortbracht (versheid-check door Local). */
+  generatedAt: string;
+}
 
 export type MarianaConfidenceBand = "high" | "medium" | "low";
 
@@ -105,18 +135,26 @@ export interface MarianaSignal {
   mariana_summary: string;
 }
 
-/** Trigger-bron voor een Mariana-run. */
+/** Trigger-bron voor een Mariana Regions-run. */
 export type MarianaTrigger = "scheduled_daily" | "on_demand" | "manual";
 
-/** Een Mariana-besluit voor een specifieke locatie + uitvoeringscontext. */
+/**
+ * Een Mariana Regions-besluit voor één mesoschaal-REGIO + uitvoeringscontext.
+ * De duiding geldt voor de hele regio; Mariana Local verfijnt per locatie binnen
+ * de regio met de gratis modeldata + de meegegeven MarianaLocalFeed.
+ */
 export interface MarianaRun {
-  locationName: string;
+  regionSlug: string;
+  regionName: string;
+  /** Representatief analysepunt van de regio (lat/lon uit regions.ts). */
   lat: number;
   lon: number;
   runAt: string;
   trigger: MarianaTrigger;
   model: string;
   signal: MarianaSignal;
+  /** Het voederkanaal naar Mariana Local (regime + gewichten + confidence + gevaar). */
+  local_feed: MarianaLocalFeed;
 }
 
 /** ---- Normalizer voor de LLM-output van de operationele baan ---- */

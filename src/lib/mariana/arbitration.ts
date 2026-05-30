@@ -2,6 +2,7 @@ import type { HourlyForecast, WeatherData } from "@/lib/types";
 import { scoreModelConfidence } from "./confidence";
 import { selectMarianaReasoningModels } from "./llm-architecture";
 import { classifyWeatherRegime } from "./regime";
+import { NEUTRAL_TUNING, type LocalTuning } from "./local/feed";
 import type {
   MarianaCorrectionDelta,
   MarianaForecastInput,
@@ -25,6 +26,16 @@ const DEFAULT_WEIGHTS: Record<string, number> = {
   ECMWF_AIFS_SET_X: 0.5,
   GOOGLE: 0.38,
 };
+
+/**
+ * Effectief basisgewicht voor een model: Regions-tuning (per-dag, via feed) gaat
+ * vóór de statische DEFAULT_WEIGHTS. Zonder tuning (niet-NL) = ongewijzigd gedrag.
+ */
+function baseWeightFor(modelName: MarianaModelName, tuning: LocalTuning): number {
+  const tuned = tuning.weights[String(modelName)];
+  if (typeof tuned === "number" && Number.isFinite(tuned)) return tuned;
+  return DEFAULT_WEIGHTS[String(modelName)] ?? 0.45;
+}
 
 const MODEL_KEY_MAP: Record<string, MarianaModelName> = {
   harmonie: "HARMONIE",
@@ -57,9 +68,13 @@ function confidenceToHourlyLabel(score: number): HourlyForecast["confidence"] {
   return "low";
 }
 
-function memoryWeight(modelName: MarianaModelName, memory?: MarianaLocationMemory | null): number {
+function memoryWeight(
+  modelName: MarianaModelName,
+  memory?: MarianaLocationMemory | null,
+  tuning: LocalTuning = NEUTRAL_TUNING
+): number {
   const stats = memory?.modelStats?.[modelName];
-  const base = DEFAULT_WEIGHTS[String(modelName)] ?? 0.45;
+  const base = baseWeightFor(modelName, tuning);
   if (!stats?.samples) return base;
   const sampleTrust = clamp(stats.samples / 30, 0.2, 1);
   return clamp(base * (1 - sampleTrust) + stats.weightHint * sampleTrust, 0.05, 0.95);
@@ -79,7 +94,8 @@ function biasCorrection(
 function variableBlend(
   forecasts: MarianaForecastInput[],
   variable: keyof MarianaForecastVariables,
-  memory?: MarianaLocationMemory | null
+  memory?: MarianaLocationMemory | null,
+  tuning: LocalTuning = NEUTRAL_TUNING
 ): number | undefined {
   let weighted = 0;
   let totalWeight = 0;
@@ -90,7 +106,7 @@ function variableBlend(
 
     const stats = memory?.modelStats?.[forecast.modelName];
     const corrected = value - biasCorrection(stats, variable);
-    const weight = memoryWeight(forecast.modelName, memory);
+    const weight = memoryWeight(forecast.modelName, memory, tuning);
     weighted += corrected * weight;
     totalWeight += weight;
   }
@@ -134,33 +150,51 @@ function forecastsForHour(location: MarianaLocationRef, hour: HourlyForecast): M
   return [base, ...modelForecasts];
 }
 
-function dominantModels(forecasts: MarianaForecastInput[], memory?: MarianaLocationMemory | null): MarianaModelName[] {
+function dominantModels(
+  forecasts: MarianaForecastInput[],
+  memory?: MarianaLocationMemory | null,
+  tuning: LocalTuning = NEUTRAL_TUNING
+): MarianaModelName[] {
   return [...new Set(forecasts.map((forecast) => forecast.modelName))]
-    .sort((a, b) => memoryWeight(b, memory) - memoryWeight(a, memory))
+    .sort((a, b) => memoryWeight(b, memory, tuning) - memoryWeight(a, memory, tuning))
     .slice(0, 3);
 }
 
-function risksFor(hour: HourlyForecast, confidenceScore: number, regimeSignals: string[]): string[] {
+function risksFor(
+  hour: HourlyForecast,
+  confidenceScore: number,
+  regimeSignals: string[],
+  tuning: LocalTuning = NEUTRAL_TUNING
+): string[] {
   const risks: string[] = [];
   if (hour.precipitation >= 3 || regimeSignals.includes("heavy_precipitation")) risks.push("neerslagintensiteit");
   if (hour.windSpeed >= 45 || regimeSignals.includes("windy")) risks.push("windgevoelig");
   if (hour.cape >= 500) risks.push("convectieve onzekerheid");
   if (confidenceScore < 0.55) risks.push("modeldivergentie");
+  // Regions-gevaarvlaggen forceren risks die de lokale meting alleen kan missen.
+  if (tuning.hazardFlags.includes("thunder") || tuning.hazardFlags.includes("severe_convection")) {
+    if (!risks.includes("convectieve onzekerheid")) risks.push("convectieve onzekerheid");
+  }
+  if (tuning.hazardFlags.includes("wind") && !risks.includes("windgevoelig")) risks.push("windgevoelig");
+  if (tuning.hazardFlags.includes("heavy_rain") && !risks.includes("neerslagintensiteit")) {
+    risks.push("neerslagintensiteit");
+  }
   return risks;
 }
 
 function applyHourlyCorrection(
   hour: HourlyForecast,
   forecasts: MarianaForecastInput[],
-  memory?: MarianaLocationMemory | null
+  memory?: MarianaLocationMemory | null,
+  tuning: LocalTuning = NEUTRAL_TUNING
 ): { hour: HourlyForecast; delta: MarianaCorrectionDelta; applied: boolean } {
   if (!memory || memory.sampleCount < 3) {
     return { hour, delta: {}, applied: false };
   }
 
-  const temperature = variableBlend(forecasts, "temperature", memory);
-  const precipitation = variableBlend(forecasts, "precipitation", memory);
-  const windSpeed = variableBlend(forecasts, "windSpeed", memory);
+  const temperature = variableBlend(forecasts, "temperature", memory, tuning);
+  const precipitation = variableBlend(forecasts, "precipitation", memory, tuning);
+  const windSpeed = variableBlend(forecasts, "windSpeed", memory, tuning);
 
   const next: HourlyForecast = { ...hour };
   const delta: MarianaCorrectionDelta = {};
@@ -210,7 +244,14 @@ export function applyMarianaArbitration(args: {
   location: MarianaLocationRef;
   weather: WeatherData;
   memory?: MarianaLocationMemory | null;
+  /**
+   * Mariana Local-tuning uit de dagelijkse Regions-feed. Optioneel: zonder tuning
+   * (bv. niet-NL locales) draait de wiskunde op haar eigen statische defaults —
+   * identiek aan het gedrag van vóór de cascade.
+   */
+  tuning?: LocalTuning;
 }): WeatherData {
+  const tuning = args.tuning ?? NEUTRAL_TUNING;
   const hourlyIntelligence: MarianaHourlyIntelligence[] = [];
   let correctionApplied = false;
 
@@ -223,9 +264,9 @@ export function applyMarianaArbitration(args: {
       windSpeed: hour.windSpeed,
       weatherCode: hour.weatherCode,
     });
-    const corrected = applyHourlyCorrection(hour, forecasts, args.memory);
+    const corrected = applyHourlyCorrection(hour, forecasts, args.memory, tuning);
     correctionApplied ||= corrected.applied;
-    const risks = risksFor(corrected.hour, confidence.score, regime.signals);
+    const risks = risksFor(corrected.hour, confidence.score, regime.signals, tuning);
 
     const intelligence: MarianaHourlyIntelligence = {
       time: hour.time,
@@ -233,7 +274,7 @@ export function applyMarianaArbitration(args: {
       weatherRegime: regime,
       correctionApplied: corrected.applied,
       correctionDelta: corrected.delta,
-      dominantModels: dominantModels(forecasts, args.memory),
+      dominantModels: dominantModels(forecasts, args.memory, tuning),
       risks,
       notes: confidence.notes,
     };
@@ -258,7 +299,7 @@ export function applyMarianaArbitration(args: {
     weatherCode: args.weather.current.weatherCode,
   });
   const risks = [...new Set(first12.flatMap((hour) => hour.risks))].slice(0, 4);
-  const models = dominantModels(aggregateForecasts, args.memory);
+  const models = dominantModels(aggregateForecasts, args.memory, tuning);
   const reasoningModels = selectMarianaReasoningModels({
     newModelRunAvailable: true,
     confidenceScore: confidence.score,

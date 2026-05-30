@@ -17,6 +17,10 @@
       "schedule": "*/30 * * * *"
     },
     {
+      "path": "/api/cron/mariana-nl",
+      "schedule": "30 4 * * *"
+    },
+    {
       "path": "/api/magnolia/cron",
       "schedule": "0 14 * * 1,3,5"
     },

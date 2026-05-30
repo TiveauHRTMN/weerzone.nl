@@ -86,16 +86,47 @@ VERBODEN:
 Lever alleen de tekst. Niets eromheen.
 `.trim();
 
-async function _generate(w: WeatherData, city: string): Promise<string | null> {
-  // Haal KNMI-bulletin en weerdata parallel op
-  const [knmiText, weatherContext] = await Promise.all([
+/**
+ * Mariana Local-context voor de KNMI-briefing: de dag-duiding (regime + gevaar +
+ * Reed-doorverwijzing) uit de dagelijkse Regions-feed van de dichtstbijzijnde
+ * regio. Zo krijgt de 30-min live-overlay het dagfundament van de cascade mee,
+ * zonder zelf een LLM-redenering te draaien. Best-effort; faalt zacht.
+ */
+async function marianaLocalContext(lat: number, lon: number): Promise<string | null> {
+  try {
+    const { nearestRegionFeed } = await import("@/lib/mariana/regions/storage");
+    const feed = await nearestRegionFeed(lat, lon).catch(() => null);
+    if (!feed) return null;
+    const lines = [`Regime vandaag: ${feed.regimeLabel || feed.regimeCode}.`];
+    if (feed.hazardFlags.length) lines.push(`Aandachtspunten: ${feed.hazardFlags.join(", ")}.`);
+    if (feed.convectiveActive && feed.referralReason) {
+      lines.push(`Onweer/convectie speelt — verwijs voor de waarschuwingen kort naar Reed: "${feed.referralReason}"`);
+    }
+    return lines.join(" ");
+  } catch {
+    return null;
+  }
+}
+
+async function _generate(
+  w: WeatherData,
+  city: string,
+  point?: { lat: number; lon: number }
+): Promise<string | null> {
+  // Haal KNMI-bulletin, weerdata en de Mariana Local-dagduiding parallel op
+  const [knmiText, weatherContext, marianaContext] = await Promise.all([
     fetchKNMIShortForecast().catch(() => null),
     Promise.resolve(weatherToContext(w, city)),
+    point ? marianaLocalContext(point.lat, point.lon) : Promise.resolve(null),
   ]);
 
+  const marianaBlock = marianaContext
+    ? `\n\nMARIANA DAGDUIDING (context — schrijf in Piet's stijl, geen jargon overnemen):\n${marianaContext}`
+    : "";
+
   const userPrompt = knmiText
-    ? `OFFICIËLE KNMI-VERWACHTING (gebruik als feitelijke basis, schrijf om in jouw stijl):\n"${knmiText}"\n\nHYPERLOKALE DATA voor ${city}:\n${weatherContext}`
-    : `HYPERLOCALE DATA voor ${city}:\n${weatherContext}`;
+    ? `OFFICIËLE KNMI-VERWACHTING (gebruik als feitelijke basis, schrijf om in jouw stijl):\n"${knmiText}"\n\nHYPERLOKALE DATA voor ${city}:\n${weatherContext}${marianaBlock}`
+    : `HYPERLOCALE DATA voor ${city}:\n${weatherContext}${marianaBlock}`;
 
   try {
     const text = await hermesChat(
@@ -126,7 +157,7 @@ export function fetchPietWeerbericht(
   const dateKey = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
 
   return unstable_cache(
-    () => _generate(weather, city),
+    () => _generate(weather, city, { lat, lon }),
     ["piet-weerbericht", latKey, lonKey, dateKey],
     { revalidate: 1800, tags: ["piet-weerbericht"] }
   )();

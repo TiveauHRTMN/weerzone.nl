@@ -448,8 +448,26 @@ export async function fetchWeatherData(
       ]);
       const location = toMarianaLocation(marianaLocation ?? { lat, lon });
       const memory = await loadMarianaMemory(location.locationId).catch(() => null);
-      
-      let finalWeather = applyMarianaArbitration({ location, weather, memory });
+
+      // NL: Mariana Local wordt gevoed door de dagelijkse Regions-feed (regime +
+      // per-dag modelgewichten + confidence + gevaar) i.p.v. statische defaults.
+      // Buiten NL: geen Regions-laag -> ongewijzigd gedrag (tuning blijft undefined).
+      // De wiskunde blijft per-request en gratis; we lezen alleen de opgeslagen feed.
+      let tuning;
+      if (locale === "nl") {
+        try {
+          const [{ nearestRegionFeed }, { tuningFromFeed }] = await Promise.all([
+            import("@/lib/mariana/regions/storage"),
+            import("@/lib/mariana/local/feed"),
+          ]);
+          const feed = await nearestRegionFeed(lat, lon).catch(() => null);
+          if (feed) tuning = tuningFromFeed(feed);
+        } catch (err) {
+          console.error("Mariana Local feed skipped:", err instanceof Error ? err.message : String(err));
+        }
+      }
+
+      let finalWeather = applyMarianaArbitration({ location, weather, memory, tuning });
       try {
         finalWeather = applyOracleArbitration({ location, weather: finalWeather, memory });
       } catch (err) {
