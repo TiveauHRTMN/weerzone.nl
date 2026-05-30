@@ -41,7 +41,7 @@ function getClient(): OpenAI {
     maxRetries: 2,
     defaultHeaders: {
       "HTTP-Referer": "https://weerzone.nl",
-      "X-Title": "Weerzone — Mariana Oracle",
+      "X-Title": "Weerzone - Mariana Oracle",
     },
   });
   return cachedClient;
