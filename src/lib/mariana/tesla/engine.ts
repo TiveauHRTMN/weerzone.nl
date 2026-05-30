@@ -17,6 +17,8 @@ export interface RunTeslaOptions {
   trigger?: TeslaTrigger;
   window?: AnalysisWindow;
   founderNotes?: string[];
+  /** Oracle's regimecontext als tekst (zie buildSituationPacket). Optioneel. */
+  oracleContext?: string;
   model?: string;
   effort?: "low" | "medium" | "high" | "xhigh" | "max";
 }
@@ -26,13 +28,15 @@ export async function runTeslaForRegion(
   region: TeslaRegion,
   opts: RunTeslaOptions = {}
 ): Promise<TeslaRun> {
-  const trigger: TeslaTrigger = opts.trigger ?? "manual";
+  // Tesla draait alleen via een gate; default = founder (handmatige/observatie-run).
+  const trigger: TeslaTrigger = opts.trigger ?? "founder_observation";
 
   const packet = await buildSituationPacket({
     region,
     trigger,
     window: opts.window,
     founderNotes: opts.founderNotes,
+    oracleContext: opts.oracleContext,
   });
 
   const result = await runTeslaReasoning(packet.text, {

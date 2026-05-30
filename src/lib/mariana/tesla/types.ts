@@ -1,17 +1,34 @@
 /**
  * Mariana Tesla — types + output-schema.
  *
- * Tesla's output is een gestructureerd convectief signaal (zie sectie 16 van de
- * systeemprompt). We typen het exact, leveren een JSON-Schema voor Anthropic
- * structured outputs (output_config.format), en een lichte runtime-validator/
+ * Tesla's output is een gestructureerd convectief signaal (zie sectie 7 van de
+ * systeemprompt). We typen het exact volgens het founder-contract, leveren een
+ * JSON-Schema voor Anthropic structured outputs, en een lichte runtime-
  * normalizer (geen externe dep — zod zit niet in de repo).
  */
 
-export type TeslaSignalLevel = "GREEN" | "AMBER" | "RED";
+/**
+ * Tesla's ernst-signaal aan Mariana, op de ESTOFEX-lijn (ernst van het
+ * severe-potentieel). 1 = low-end, 2 = enhanced, 3 = high-end outbreak.
+ *
+ * NB: dit is NIET de gate. De gate (wel/niet draaien) is Oracle's werk en is
+ * binair (OFF/ACTIVATE) — zie Fase 2 (Oracle). Tesla draait pas ná ACTIVATE en
+ * geeft dan altijd één van deze drie ernst-niveaus terug.
+ */
+export type TeslaSignalLevel = 1 | 2 | 3;
 
 export type TeslaReedAction = "HOLD" | "OBSERVE" | "SHIFT" | "COMMIT" | "ABORT";
 
-/** Confidence-blok, alle scores 0.00-1.00 (zie sectie 14). */
+export type TeslaConflictLevel = "low" | "medium" | "high";
+
+/** Modelconflict-blok (structured): mate, soort(en), korte duiding. */
+export interface TeslaModelConflict {
+  level: TeslaConflictLevel;
+  type: string[];
+  summary: string;
+}
+
+/** Confidence-blok, alle scores 0.00-1.00 (zie sectie 14 oud / contract). */
 export interface TeslaConfidence {
   initiation: number;
   thunder: number;
@@ -25,11 +42,13 @@ export interface TeslaConfidence {
 
 /** Het volledige Tesla-signaal zoals teruggegeven aan Mariana. */
 export interface TeslaSignal {
+  module: "mariana_tesla";
+  model: "opus_4_8";
   tesla_signal: TeslaSignalLevel;
   convective_regime: string;
   synoptic_setup: string;
   model_consensus: string;
-  model_conflict: string;
+  model_conflict: TeslaModelConflict;
   cape_assessment: string;
   cin_status: string;
   effective_cin_assessment: string;
@@ -54,7 +73,7 @@ export interface TeslaSignal {
 
 /**
  * Een opgeslagen Tesla-run: het signaal plus de uitvoeringscontext (welke regio,
- * welk valid-window, welk model, welke trigger). Dit is wat Mariana/Reed leest.
+ * welk valid-window, welk model, welke trigger). Dit is wat Mariana leest.
  */
 export interface TeslaRun {
   /** Stabiele id van de mesoschaal-regio (zie regions.ts). */
@@ -75,19 +94,15 @@ export interface TeslaRun {
 }
 
 /**
- * Waarom Tesla draaide. Primair: Oracle (48-96u) signaleert onstabiele lucht in
- * de pijplijn. Tot Oracle bestaat gebruiken we directe proxies.
+ * Waarom Tesla draaide. Tesla draait ALLEEN wanneer Oracle of founder-input een
+ * convectieve gate activeert — er is geen schema en geen losse trigger.
  */
 export type TeslaTrigger =
-  | "oracle_instability_pipeline" // primair: Oracle 48-96u meldt onstabiele lucht
-  | "estofex_threat" // proxy: ESTOFEX level >= drempel
-  | "model_cape_threshold" // proxy: model-CAPE/instabiliteit boven drempel
-  | "scheduled_season" // vaste seizoensmomenten
-  | "manual" // handmatig/admin
-  | "founder_observation"; // founder injecteerde live observatie
+  | "oracle_convective_gate" // primair: Oracle's convective_gate (ACTIVE/PRIORITY) + run_tesla
+  | "founder_observation"; // founder injecteerde live observatie/gate
 
 /** Geldige enum-waarden, herbruikbaar voor validatie. */
-export const TESLA_SIGNAL_LEVELS: readonly TeslaSignalLevel[] = ["GREEN", "AMBER", "RED"];
+export const TESLA_SIGNAL_LEVELS: readonly TeslaSignalLevel[] = [1, 2, 3];
 export const TESLA_REED_ACTIONS: readonly TeslaReedAction[] = [
   "HOLD",
   "OBSERVE",
@@ -95,12 +110,11 @@ export const TESLA_REED_ACTIONS: readonly TeslaReedAction[] = [
   "COMMIT",
   "ABORT",
 ];
+export const TESLA_CONFLICT_LEVELS: readonly TeslaConflictLevel[] = ["low", "medium", "high"];
 
 /**
  * JSON-Schema voor Anthropic structured outputs (output_config.format).
- * Alle objecten hebben additionalProperties:false + volledige required-lijst
- * (vereist door structured outputs). Numerieke constraints (min/max) laten we
- * weg — die worden niet ondersteund; we clampen confidence runtime.
+ * Alle objecten hebben additionalProperties:false + volledige required-lijst.
  *
  * NB: bewust GEEN `as const` — dat maakt de required/enum-arrays unions van
  * losse string-literals, en subtype-reductie daarover (O(n^2)) liet de
@@ -111,11 +125,22 @@ export const TESLA_OUTPUT_JSON_SCHEMA: Record<string, unknown> = {
   type: "object",
   additionalProperties: false,
   properties: {
-    tesla_signal: { type: "string", enum: ["GREEN", "AMBER", "RED"] },
+    module: { type: "string", enum: ["mariana_tesla"] },
+    model: { type: "string", enum: ["opus_4_8"] },
+    tesla_signal: { type: "integer", enum: [1, 2, 3] },
     convective_regime: { type: "string" },
     synoptic_setup: { type: "string" },
     model_consensus: { type: "string" },
-    model_conflict: { type: "string" },
+    model_conflict: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        level: { type: "string", enum: ["low", "medium", "high"] },
+        type: { type: "array", items: { type: "string" } },
+        summary: { type: "string" },
+      },
+      required: ["level", "type", "summary"],
+    },
     cape_assessment: { type: "string" },
     cin_status: { type: "string" },
     effective_cin_assessment: { type: "string" },
@@ -159,6 +184,8 @@ export const TESLA_OUTPUT_JSON_SCHEMA: Record<string, unknown> = {
     reasoning_chain: { type: "array", items: { type: "string" } },
   },
   required: [
+    "module",
+    "model",
     "tesla_signal",
     "convective_regime",
     "synoptic_setup",
@@ -203,6 +230,18 @@ function asStringArray(value: unknown): string[] {
   return [];
 }
 
+function normalizeConflict(value: unknown): TeslaModelConflict {
+  const c = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
+  const level = TESLA_CONFLICT_LEVELS.includes(c.level as TeslaConflictLevel)
+    ? (c.level as TeslaConflictLevel)
+    : "medium";
+  return {
+    level,
+    type: asStringArray(c.type),
+    summary: asString(c.summary),
+  };
+}
+
 /**
  * Normaliseert ruwe (geparste) LLM-output naar een gevalideerd TeslaSignal.
  * Defensief: structured outputs garandeert de vorm meestal al, maar we clampen
@@ -215,19 +254,25 @@ export function normalizeTeslaSignal(raw: unknown): TeslaSignal {
     unknown
   >;
 
-  const level = TESLA_SIGNAL_LEVELS.includes(r.tesla_signal as TeslaSignalLevel)
-    ? (r.tesla_signal as TeslaSignalLevel)
-    : "RED";
+  // tesla_signal is een integer 1|2|3. Accepteer ook "2" (string) defensief.
+  // Default 1 = de bodem van de ESTOFEX-schaal: Tesla draaide (Oracle activeerde),
+  // dus er is altijd minstens een low-end kans te rapporteren.
+  const rawLevel = typeof r.tesla_signal === "string" ? Number(r.tesla_signal) : r.tesla_signal;
+  const level = TESLA_SIGNAL_LEVELS.includes(rawLevel as TeslaSignalLevel)
+    ? (rawLevel as TeslaSignalLevel)
+    : 1;
   const action = TESLA_REED_ACTIONS.includes(r.reed_action as TeslaReedAction)
     ? (r.reed_action as TeslaReedAction)
     : "OBSERVE";
 
   return {
+    module: "mariana_tesla",
+    model: "opus_4_8",
     tesla_signal: level,
     convective_regime: asString(r.convective_regime),
     synoptic_setup: asString(r.synoptic_setup),
     model_consensus: asString(r.model_consensus),
-    model_conflict: asString(r.model_conflict),
+    model_conflict: normalizeConflict(r.model_conflict),
     cape_assessment: asString(r.cape_assessment),
     cin_status: asString(r.cin_status),
     effective_cin_assessment: asString(r.effective_cin_assessment),

@@ -18,8 +18,9 @@ create table if not exists public.mariana_tesla (
   valid_until text not null,
   trigger text not null,
   model text not null,
-  -- Gedenormaliseerd voor snelle filtering/sortering:
-  tesla_signal text not null check (tesla_signal in ('GREEN','AMBER','RED')),
+  -- Gedenormaliseerd voor snelle filtering/sortering.
+  -- tesla_signal = ESTOFEX-ernst 1|2|3 (1 low-end, 2 enhanced, 3 high-end).
+  tesla_signal integer not null check (tesla_signal in (1,2,3)),
   reed_action text not null check (reed_action in ('HOLD','OBSERVE','SHIFT','COMMIT','ABORT')),
   confidence jsonb not null default '{}'::jsonb,
   -- Het volledige TeslaSignal-object (zie src/lib/mariana/tesla/types.ts):

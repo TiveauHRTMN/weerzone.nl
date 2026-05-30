@@ -97,6 +97,12 @@ export interface BuildPacketArgs {
   window?: AnalysisWindow;
   /** Founder-observaties (mesoscale modifier, geen absolute waarheid). */
   founderNotes?: string[];
+  /**
+   * Oracle's 48-96u regimecontext als platte tekst (regime, gate-reden,
+   * scenario's). Tesla gebruikt dit als context, niet als waarheid. Optioneel:
+   * Tesla kan ook draaien op directe founder-observatie zonder Oracle.
+   */
+  oracleContext?: string;
 }
 
 export interface BuiltPacket {
@@ -117,11 +123,19 @@ export async function buildSituationPacket(args: BuildPacketArgs): Promise<Built
       ? args.founderNotes.map((n) => `- ${n}`).join("\n")
       : "- geen";
 
+  const oracleBlock =
+    args.oracleContext && args.oracleContext.trim()
+      ? args.oracleContext.trim()
+      : "Geen Oracle-context aangeleverd (Tesla draait op directe gate/observatie).";
+
   const text = `=== MARIANA TESLA - SITUATIE-PACKET ===
 Regio: ${region.name} (${region.lat}, ${region.lon})
 Mesoscale rol: ${region.role}
 Analysevenster (lokaal): ${window.fromIso} t/m ${window.untilIso}
 Trigger: ${trigger}
+
+--- ORACLE-CONTEXT (48-96u regime; context, geen waarheid) ---
+${oracleBlock}
 
 --- MODELVELDEN (per model, extrema binnen venster) ---
 ${digests.map(digestLine).join("\n")}

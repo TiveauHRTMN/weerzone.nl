@@ -39,7 +39,7 @@ interface TeslaRow {
   valid_until: string;
   trigger: string;
   model: string;
-  tesla_signal: string;
+  tesla_signal: number;
   reed_action: string;
   confidence: Record<string, unknown>;
   signal: Record<string, unknown>;
