@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { hermesChat } from "@/lib/hermes";
 import { fetchKNMIShortForecast } from "@/lib/knmi-edr";
 import type { WeatherData } from "@/lib/types";
+import { buildMarianaContext } from "@/lib/mariana/piet-context";
 
 const WC_LABEL: Record<number, string> = {
   0: "stralend", 1: "zonnig", 2: "half bewolkt", 3: "bewolkt",
@@ -87,22 +88,22 @@ Lever alleen de tekst. Niets eromheen.
 `.trim();
 
 /**
- * Mariana Local-context voor de KNMI-briefing: de dag-duiding (regime + gevaar +
- * Reed-doorverwijzing) uit de dagelijkse Regions-feed van de dichtstbijzijnde
- * regio. Zo krijgt de 30-min live-overlay het dagfundament van de cascade mee,
- * zonder zelf een LLM-redenering te draaien. Best-effort; faalt zacht.
+ * Mariana-dagduiding voor de KNMI-briefing. Combineert de RIJKE signaal-duiding
+ * (agent_outputs.piet.text + risk_summary + mariana_summary + regime) met de
+ * compacte local_feed (regime/gevaar/Reed-verwijzing) van de dichtstbijzijnde
+ * regio. Zo krijgt de 30-min live-overlay het volledige dagfundament van de
+ * cascade mee, zonder zelf een LLM-redenering te draaien. Best-effort; faalt zacht.
  */
 async function marianaLocalContext(lat: number, lon: number): Promise<string | null> {
   try {
-    const { nearestRegionFeed } = await import("@/lib/mariana/regions/storage");
-    const feed = await nearestRegionFeed(lat, lon).catch(() => null);
-    if (!feed) return null;
-    const lines = [`Regime vandaag: ${feed.regimeLabel || feed.regimeCode}.`];
-    if (feed.hazardFlags.length) lines.push(`Aandachtspunten: ${feed.hazardFlags.join(", ")}.`);
-    if (feed.convectiveActive && feed.referralReason) {
-      lines.push(`Onweer/convectie speelt — verwijs voor de waarschuwingen kort naar Reed: "${feed.referralReason}"`);
-    }
-    return lines.join(" ");
+    const { nearestRegionFeed, nearestRegionSignal } = await import(
+      "@/lib/mariana/regions/storage"
+    );
+    const [feed, signal] = await Promise.all([
+      nearestRegionFeed(lat, lon).catch(() => null),
+      nearestRegionSignal(lat, lon).catch(() => null),
+    ]);
+    return buildMarianaContext(signal, feed);
   } catch {
     return null;
   }
