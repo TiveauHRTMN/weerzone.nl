@@ -48,9 +48,9 @@ export function buildMarianaContext(
   if (signal?.mariana_summary) lines.push(`Samenvatting: ${signal.mariana_summary}`);
 
   const reedReason =
-    (feed?.convectiveActive && feed.referralReason) ||
     (signal?.agent_outputs?.piet?.refer_to_reed &&
       signal.agent_outputs.piet.referral_reason) ||
+    (feed?.convectiveActive && feed.referralReason) ||
     "";
   if (reedReason) {
     lines.push(

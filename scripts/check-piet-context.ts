@@ -41,9 +41,24 @@ const ctx2 = buildMarianaContext(null, {
 });
 assert.ok(ctx2 && ctx2.includes("zonnig en droog"), "feed-regime fallback ontbreekt");
 assert.ok(ctx2.includes("heat"), "hazardFlags fallback ontbreekt");
-assert.ok(ctx2.includes("Reed"), "Reed-verwijzing ontbreekt");
+assert.ok(ctx2.includes('Reed: "onweer vanmiddag"'), "Reed-verwijzing of reden ontbreekt");
 
 // 3. Lege input -> null.
 assert.equal(buildMarianaContext(null, null), null, "lege input moet null geven");
+
+// 4. Feed zonder regimeLabel -> val terug op regimeCode.
+const ctx3 = buildMarianaContext(null, {
+  regionSlug: "y",
+  regionName: "Y",
+  regimeCode: "ZW_FLOW",
+  regimeLabel: "",
+  confidencePrior: 0.5,
+  modelWeights: {},
+  hazardFlags: [],
+  convectiveActive: false,
+  referralReason: "",
+  generatedAt: new Date().toISOString(),
+});
+assert.ok(ctx3 && ctx3.includes("Regime vandaag: ZW_FLOW"), "regimeCode fallback ontbreekt");
 
 console.log("OK - buildMarianaContext gedraagt zich correct");
