@@ -13,7 +13,7 @@
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { nearestTeslaRegion } from "./nearest-region";
-import type { MarianaRun, MarianaLocalFeed } from "./types";
+import type { MarianaRun, MarianaLocalFeed, MarianaSignal } from "./types";
 
 const TABLE = "mariana_regions";
 
@@ -104,4 +104,40 @@ export async function loadRegionFeed(regionSlug: string): Promise<MarianaLocalFe
 export async function nearestRegionFeed(lat: number, lon: number): Promise<MarianaLocalFeed | null> {
   const region = nearestTeslaRegion(lat, lon);
   return loadRegionFeed(region.slug);
+}
+
+/**
+ * Laatste volledige MarianaSignal voor een regio-slug (meest recente run).
+ * Leest de rijke `signal`-kolom — de duiding die Piet/Koos/Reed nodig hebben,
+ * naast de compacte local_feed. Best-effort: faalt zacht zonder service-role.
+ */
+export async function loadRegionSignal(regionSlug: string): Promise<MarianaSignal | null> {
+  if (!hasServiceRole()) return null;
+  try {
+    const { data, error } = await adminDb()
+      .from(TABLE)
+      .select("signal, run_at")
+      .eq("region_slug", regionSlug)
+      .order("run_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return null;
+    const signal = (data as { signal?: unknown }).signal;
+    return signal ? (signal as MarianaSignal) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Volledig MarianaSignal voor een locatie: mapt naar de dichtstbijzijnde
+ * mesoschaal-regio en geeft die rijke duiding terug. Leespunt voor de
+ * persoonlijke surfaces (Piet/Koos) — niet voor de 10K-pagina's in het hete pad.
+ */
+export async function nearestRegionSignal(
+  lat: number,
+  lon: number,
+): Promise<MarianaSignal | null> {
+  const region = nearestTeslaRegion(lat, lon);
+  return loadRegionSignal(region.slug);
 }
