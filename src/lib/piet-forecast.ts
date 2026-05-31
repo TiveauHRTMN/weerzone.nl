@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { hermesChat } from "@/lib/hermes";
 import { fetchKNMIShortForecast } from "@/lib/knmi-edr";
 import type { WeatherData } from "@/lib/types";
-import { buildMarianaContext } from "@/lib/mariana/piet-context";
+import { buildMarianaContext, isMarianaRunStale } from "@/lib/mariana/piet-context";
 
 const WC_LABEL: Record<number, string> = {
   0: "stralend", 1: "zonnig", 2: "half bewolkt", 3: "bewolkt",
@@ -96,14 +96,11 @@ Lever alleen de tekst. Niets eromheen.
  */
 async function marianaLocalContext(lat: number, lon: number): Promise<string | null> {
   try {
-    const { nearestRegionFeed, nearestRegionSignal } = await import(
-      "@/lib/mariana/regions/storage"
-    );
-    const [feed, signal] = await Promise.all([
-      nearestRegionFeed(lat, lon).catch(() => null),
-      nearestRegionSignal(lat, lon).catch(() => null),
-    ]);
-    return buildMarianaContext(signal, feed);
+    const { nearestRegionData } = await import("@/lib/mariana/regions/storage");
+    const data = await nearestRegionData(lat, lon).catch(() => null);
+    if (!data) return null;
+    if (isMarianaRunStale(data.runAt)) return null;
+    return buildMarianaContext(data.signal, data.feed);
   } catch {
     return null;
   }

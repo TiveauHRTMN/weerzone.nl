@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildMarianaContext } from "../src/lib/mariana/piet-context";
+import { buildMarianaContext, isMarianaRunStale } from "../src/lib/mariana/piet-context";
 
 // 1. Volledig signaal -> rijke context met dagbeeld + aandachtspunten.
 const ctx = buildMarianaContext(
@@ -60,5 +60,12 @@ const ctx3 = buildMarianaContext(null, {
   generatedAt: new Date().toISOString(),
 });
 assert.ok(ctx3 && ctx3.includes("Regime vandaag: ZW_FLOW"), "regimeCode fallback ontbreekt");
+
+
+// 5. Versheid-guard: verse run = niet stale; oude run = stale; ontbrekend = niet stale.
+const nu = new Date("2026-05-31T12:00:00Z");
+assert.equal(isMarianaRunStale("2026-05-31T06:00:00Z", nu), false, "verse run mag niet stale zijn");
+assert.equal(isMarianaRunStale("2026-05-29T06:00:00Z", nu), true, "oude run (>36u) moet stale zijn");
+assert.equal(isMarianaRunStale(null, nu), false, "ontbrekende timestamp = niet stale");
 
 console.log("OK - buildMarianaContext gedraagt zich correct");

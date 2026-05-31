@@ -61,3 +61,23 @@ export function buildMarianaContext(
   if (!lines.length) return null;
   return lines.join(" ");
 }
+
+const DEFAULT_MAX_AGE_HOURS = 36;
+
+/**
+ * Is de cascade-run te oud om Piet nog te voeden? De cascade draait 1×/dag; een
+ * run ouder dan ~36u betekent dat de cron minstens één keer is overgeslagen — dan
+ * tonen we liever niets dan de duiding van eergisteren. Ontbrekende/ongeldige
+ * timestamp -> behandelen als NIET stale (we kunnen niets beoordelen, en de data
+ * bestaat wel).
+ */
+export function isMarianaRunStale(
+  runAt: string | null | undefined,
+  now: Date = new Date(),
+  maxAgeHours: number = DEFAULT_MAX_AGE_HOURS,
+): boolean {
+  if (!runAt) return false;
+  const ts = new Date(runAt).getTime();
+  if (!Number.isFinite(ts)) return false;
+  return now.getTime() - ts > maxAgeHours * 3_600_000;
+}

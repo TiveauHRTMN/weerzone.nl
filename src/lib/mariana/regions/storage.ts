@@ -107,37 +107,45 @@ export async function nearestRegionFeed(lat: number, lon: number): Promise<Maria
 }
 
 /**
- * Laatste volledige MarianaSignal voor een regio-slug (meest recente run).
- * Leest de rijke `signal`-kolom — de duiding die Piet/Koos/Reed nodig hebben,
- * naast de compacte local_feed. Best-effort: faalt zacht zonder service-role.
+ * Eén rij — rijke `signal` + compacte `local_feed` + run-timestamp — voor een
+ * regio-slug in ÉÉN query. Voorkomt twee aparte round-trips wanneer een caller
+ * beide nodig heeft (bv. Piet). Best-effort: faalt zacht zonder service-role.
  */
-export async function loadRegionSignal(regionSlug: string): Promise<MarianaSignal | null> {
+export async function loadRegionRow(regionSlug: string): Promise<{
+  signal: MarianaSignal | null;
+  feed: MarianaLocalFeed | null;
+  runAt: string | null;
+} | null> {
   if (!hasServiceRole()) return null;
   try {
     const { data, error } = await adminDb()
       .from(TABLE)
-      .select("signal, run_at")
+      .select("signal, local_feed, run_at")
       .eq("region_slug", regionSlug)
       .order("run_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (error || !data) return null;
-    const signal = (data as { signal?: unknown }).signal;
-    return signal ? (signal as MarianaSignal) : null;
+    const row = data as { signal?: unknown; local_feed?: unknown; run_at?: unknown };
+    return {
+      signal: row.signal ? (row.signal as MarianaSignal) : null,
+      feed: row.local_feed ? (row.local_feed as MarianaLocalFeed) : null,
+      runAt: row.run_at ? String(row.run_at) : null,
+    };
   } catch {
     return null;
   }
 }
 
 /**
- * Volledig MarianaSignal voor een locatie: mapt naar de dichtstbijzijnde
- * mesoschaal-regio en geeft die rijke duiding terug. Leespunt voor de
- * persoonlijke surfaces (Piet/Koos) — niet voor de 10K-pagina's in het hete pad.
+ * Combineert de rijke signal + compacte feed + run-timestamp voor een locatie via
+ * de dichtstbijzijnde mesoschaal-regio — in één query en één regio-lookup.
  */
-export async function nearestRegionSignal(
-  lat: number,
-  lon: number,
-): Promise<MarianaSignal | null> {
+export async function nearestRegionData(lat: number, lon: number): Promise<{
+  signal: MarianaSignal | null;
+  feed: MarianaLocalFeed | null;
+  runAt: string | null;
+} | null> {
   const region = nearestTeslaRegion(lat, lon);
-  return loadRegionSignal(region.slug);
+  return loadRegionRow(region.slug);
 }
