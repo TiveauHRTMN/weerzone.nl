@@ -3,6 +3,7 @@ import WeerzoneBackground from "@/components/WeerzoneBackground";
 import { hreflangSelf } from "@/lib/hreflang";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { findGetaways, koosTemplateLine } from "@/lib/koos-getaway";
+import { koosVoice } from "@/lib/koos-voice";
 
 export const metadata: Metadata = {
   title: "Koos — als je eropuit wilt",
@@ -20,6 +21,7 @@ export default async function KoosPage() {
   const saved = await getSavedLocationServer();
   const origin = saved ?? DEFAULT_ORIGIN;
   const getaways = await findGetaways(origin);
+  const intro = getaways.length > 0 ? await koosVoice(origin, getaways) : null;
 
   return (
     <>
@@ -29,6 +31,12 @@ export default async function KoosPage() {
           Koos
         </h1>
         <p className="mt-3 text-lg text-white/85">Als je eropuit wilt.</p>
+
+        {intro ? (
+          <p className="mt-8 max-w-md text-base leading-relaxed text-white/90">
+            {intro}
+          </p>
+        ) : null}
 
         {getaways.length === 0 ? (
           <p className="mt-10 max-w-sm text-base text-white/80">
