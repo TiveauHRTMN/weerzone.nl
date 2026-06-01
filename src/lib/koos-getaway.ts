@@ -105,21 +105,34 @@ function buildReason(origin: DailyOutlook, c: DailyOutlook): string {
 }
 
 /**
- * Rangschik kansen. Binnenlands: alleen als merkbaar beter dan thuis.
- * Internationaal: alleen als het thuis grauw/koud is én daar écht zon.
+ * Eén kans, verrijkt met de ruwe weerdata zodat een UI de plek volledig kan
+ * renderen (temp/zon/regen/code) zonder de DailyOutlook opnieuw op te halen.
+ */
+export interface KoosPick {
+  opportunity: WeatherOpportunity;
+  kind: GetawayKind;
+  tempMax: number;
+  sunshineHours: number;
+  precipProbMax: number;
+  weatherCode: number;
+}
+
+/**
+ * Rangschik kansen mét weerdata. Binnenlands: alleen als merkbaar beter dan
+ * thuis. Internationaal: alleen als het thuis grauw/koud is én daar écht zon.
  * Lege array = niets beters → Koos zwijgt.
  */
-export function scoreGetaways(
+export function scoreGetawayPicks(
   origin: DailyOutlook,
   candidates: readonly DailyOutlook[],
   opts: { limit?: number } = {},
-): WeatherOpportunity[] {
+): KoosPick[] {
   const limit = opts.limit ?? 3;
   const originScore = comfortScore(origin);
   const homeIsGrey =
     origin.precipProbMax >= HOME_GREY_PRECIP || origin.tempMax <= HOME_COLD_TEMP;
 
-  const ops: WeatherOpportunity[] = [];
+  const picks: KoosPick[] = [];
   for (const c of candidates) {
     if (c.kind === "sunset") {
       if (!homeIsGrey) continue;
@@ -129,16 +142,37 @@ export function scoreGetaways(
     }
     const delta = comfortScore(c) - originScore;
     if (delta <= 0) continue;
-    ops.push({
-      originLocationId: origin.locationId,
-      targetLocationId: c.locationId,
-      targetName: c.name,
-      score: Math.round(delta * 100),
-      reason: buildReason(origin, c),
-      distanceKm: c.distanceKm,
+    picks.push({
+      opportunity: {
+        originLocationId: origin.locationId,
+        targetLocationId: c.locationId,
+        targetName: c.name,
+        score: Math.round(delta * 100),
+        reason: buildReason(origin, c),
+        distanceKm: c.distanceKm,
+      },
+      kind: c.kind,
+      tempMax: c.tempMax,
+      sunshineHours: c.sunshineHours,
+      precipProbMax: c.precipProbMax,
+      weatherCode: c.weatherCode,
     });
   }
-  return ops.sort((a, b) => b.score - a.score).slice(0, limit);
+  return picks
+    .sort((a, b) => b.opportunity.score - a.opportunity.score)
+    .slice(0, limit);
+}
+
+/**
+ * Rangschik kansen (alleen de WeatherOpportunity-laag). Dunne wrapper over
+ * scoreGetawayPicks zodat surfaces die geen weerdata nodig hebben simpel blijven.
+ */
+export function scoreGetaways(
+  origin: DailyOutlook,
+  candidates: readonly DailyOutlook[],
+  opts: { limit?: number } = {},
+): WeatherOpportunity[] {
+  return scoreGetawayPicks(origin, candidates, opts).map((p) => p.opportunity);
 }
 
 /** Sjabloon-stem (gratis, schaalt naar 10K). Geen LLM. */
@@ -220,14 +254,14 @@ export async function fetchDailyOutlook(
 }
 
 /**
- * Vind getaways voor een herkomst-locatie. Vergelijkt thuis met nabije NL-plekken
- * + de internationale zon-set. Lege array = niets beters (Koos zwijgt) of geen
- * data.
+ * Vind getaways mét weerdata + het thuis-outlook. Vergelijkt thuis met nabije
+ * NL-plekken + de internationale zon-set. `origin` is null bij geen data;
+ * `picks` is leeg als niets beter is (Koos zwijgt).
  */
-export async function findGetaways(
+export async function findGetawayPicks(
   origin: GetawayOrigin,
   opts: { dayIndex?: number; limit?: number } = {},
-): Promise<WeatherOpportunity[]> {
+): Promise<{ origin: DailyOutlook | null; picks: KoosPick[] }> {
   const dayIndex = opts.dayIndex ?? 0;
   const originLoc: CandidateLoc = {
     name: origin.name,
@@ -249,9 +283,26 @@ export async function findGetaways(
     fetchDailyOutlook(originLoc, dayIndex),
     ...candidates.map((c) => fetchDailyOutlook(c, dayIndex)),
   ]);
-  if (!originOutlook || Number.isNaN(originOutlook.tempMax)) return [];
+  if (!originOutlook || Number.isNaN(originOutlook.tempMax)) {
+    return { origin: null, picks: [] };
+  }
   const valid = rest.filter(
     (o): o is DailyOutlook => o !== null && !Number.isNaN(o.tempMax),
   );
-  return scoreGetaways(originOutlook, valid, { limit: opts.limit });
+  return {
+    origin: originOutlook,
+    picks: scoreGetawayPicks(originOutlook, valid, { limit: opts.limit }),
+  };
+}
+
+/**
+ * Vind getaways (alleen WeatherOpportunity[]). Dunne wrapper over
+ * findGetawayPicks voor surfaces die geen weerdata nodig hebben.
+ */
+export async function findGetaways(
+  origin: GetawayOrigin,
+  opts: { dayIndex?: number; limit?: number } = {},
+): Promise<WeatherOpportunity[]> {
+  const { picks } = await findGetawayPicks(origin, opts);
+  return picks.map((p) => p.opportunity);
 }

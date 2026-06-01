@@ -3,6 +3,7 @@ import {
   comfortScore,
   haversineKm,
   scoreGetaways,
+  scoreGetawayPicks,
   koosTemplateLine,
   INTERNATIONAL_SUNSET,
   type DailyOutlook,
@@ -63,5 +64,14 @@ assert.ok(line.length > 0 && line.includes("Maastricht"), "sjabloon-zin moet bes
 // 8. INTERNATIONAL_SUNSET bevat de 5 default-bestemmingen.
 assert.equal(INTERNATIONAL_SUNSET.length, 5, "verwacht 5 zon-bestemmingen");
 assert.ok(INTERNATIONAL_SUNSET.every((d) => d.lat && d.lon && d.name && d.locationId), "elke bestemming compleet");
+
+// 9. scoreGetawayPicks draagt de weerdata mee en mapt 1-op-1 op scoreGetaways.
+const picks = scoreGetawayPicks(origin, [better]);
+assert.equal(picks.length, 1, "pick moet verschijnen");
+assert.equal(picks[0].tempMax, 21, "pick draagt tempMax mee");
+assert.equal(picks[0].sunshineHours, 9, "pick draagt zon mee");
+assert.equal(picks[0].precipProbMax, 10, "pick draagt regen mee");
+assert.equal(picks[0].kind, "domestic", "pick draagt kind mee");
+assert.equal(picks[0].opportunity.targetName, "Maastricht", "pick.opportunity koppelt aan dezelfde plek");
 
 console.log("OK - koos-getaway pure logica gedraagt zich correct");

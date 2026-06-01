@@ -1,0 +1,265 @@
+/* ============================================================
+   Koos · Beter weer elders — scoped design skin
+   Recreated from design_handoff_koos (hifi).
+   Scoped under `.koos-skin`; colliding base names from globals.css
+   (.card / .chip / .t-micro / .btn-primary / .btn-ghost) are
+   re-namespaced (rcard / rchip / rmicro / rbtn-*).
+   ============================================================ */
+
+.koos-skin {
+  color: #0f172a;
+  font-feature-settings: "ss01", "cv11";
+}
+.koos-skin .num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.01em;
+}
+
+/* Background is dynamic (weer-gestuurd) via <WeatherBackground/>. */
+
+/* Cards ------------------------------------------------------- */
+.koos-skin .rcard {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border-radius: 26px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 0 0 1px rgba(15, 23, 42, 0.045),
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 24px -14px rgba(15, 23, 42, 0.18),
+    0 30px 60px -25px rgba(30, 58, 138, 0.3);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+.koos-skin .rcard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+.koos-skin .divider {
+  height: 1px;
+  background: rgba(15, 23, 42, 0.06);
+  width: 100%;
+}
+.koos-skin .icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.koos-skin .rmicro {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #64748b;
+}
+
+/* Chips ------------------------------------------------------- */
+.koos-skin .rchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.koos-skin .rchip .num {
+  font-weight: 800;
+}
+.koos-skin .rchip-yellow { background: #fef3c7; color: #92400e; }
+.koos-skin .rchip-orange { background: #ffedd5; color: #9a3412; }
+.koos-skin .rchip-blue   { background: #dbeafe; color: #1d4ed8; }
+.koos-skin .rchip-red    { background: #fee2e2; color: #b91c1c; }
+.koos-skin .rchip-cyan   { background: #cffafe; color: #155e75; }
+.koos-skin .rchip-purple { background: #f3e8ff; color: #7e22ce; }
+.koos-skin .rchip-green  { background: #dcfce7; color: #15803d; }
+.koos-skin .rchip-lime   { background: #ecfccb; color: #3f6212; }
+.koos-skin .rchip-slate  { background: #f1f5f9; color: #334155; }
+
+/* Live chip (blue) -------------------------------------------- */
+.koos-skin .livechip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 9999px;
+  padding: 6px 12px 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.koos-skin .livechip i {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #1e40af;
+  animation: koosLive 1.6s ease-out infinite;
+}
+@keyframes koosLive {
+  0%   { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(30, 64, 175, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0); }
+}
+
+/* Location pill ---------------------------------------------- */
+.koos-skin .locpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 9px 14px;
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.koos-skin .locpill:hover {
+  background: #f8fafc;
+}
+.koos-skin .lift {
+  transition: transform 0.25s ease, box-shadow 0.25s;
+}
+.koos-skin .lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Mode tabs (Auto / Trein / Vliegtuig) ------------------------ */
+.koos-skin .mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  padding: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  width: 100%;
+}
+.koos-skin .mode-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.koos-skin .mode-tab[data-active="true"] {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 4px 10px -6px rgba(15, 23, 42, 0.18);
+}
+
+/* Destination card -------------------------------------------- */
+.koos-skin .dest-card {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 18px;
+  padding: 16px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s, border-color 0.25s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(15, 23, 42, 0.03);
+}
+.koos-skin .dest-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 55% at 100% 0%, var(--dest-glow, transparent) 0%, transparent 70%);
+  opacity: 0.65;
+  transition: opacity 0.35s;
+}
+.koos-skin .dest-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 23, 42, 0.09);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 14px 30px -16px rgba(15, 23, 42, 0.2);
+}
+.koos-skin .dest-card:hover::before {
+  opacity: 1;
+}
+
+/* CTAs -------------------------------------------------------- */
+.koos-skin .rbtn-primary {
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 6px 16px -6px rgba(249, 115, 22, 0.45);
+  border: 1px solid rgba(154, 52, 18, 0.2);
+}
+.koos-skin .rbtn-primary:hover { filter: brightness(1.05); }
+.koos-skin .rbtn-primary:active { transform: translateY(1px); }
+.koos-skin .rbtn-ghost {
+  background: #ffffff;
+  color: #0f172a;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.koos-skin .rbtn-ghost:hover { background: #f8fafc; }
+
+/* Stagger fade-in --------------------------------------------- */
+@keyframes koosLiftIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.koos-skin .koos-stagger > * {
+  animation: koosLiftIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.koos-skin .koos-stagger > *:nth-child(1) { animation-delay: 0s; }
+.koos-skin .koos-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.koos-skin .koos-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.koos-skin .koos-stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.koos-skin .koos-stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.koos-skin .koos-stagger > *:nth-child(6) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .koos-skin .koos-stagger > *,
+  .koos-skin .livechip i,
+  .koos-skin .dest-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
