@@ -13,6 +13,7 @@
  */
 
 import type { WeatherOpportunity } from "@/lib/agents/types";
+import { NL_PLACES, placeRouteSlug } from "@/lib/places-data";
 
 export type GetawayKind = "domestic" | "sunset";
 
@@ -144,4 +145,113 @@ export function scoreGetaways(
 export function koosTemplateLine(op: WeatherOpportunity): string {
   const dist = op.distanceKm ? ` — ${op.distanceKm} km` : "";
   return `${op.reason}${dist}`;
+}
+
+const OPEN_METEO_DAILY = "https://api.open-meteo.com/v1/forecast";
+
+// Reisband voor binnenlandse kandidaten: ver genoeg om te verschillen,
+// dichtbij genoeg om er heen te gaan.
+const TRAVEL_MIN_KM = 25;
+const TRAVEL_MAX_KM = 160;
+const DOMESTIC_CANDIDATES = 8;
+
+interface CandidateLoc {
+  name: string;
+  locationId: string;
+  lat: number;
+  lon: number;
+  kind: GetawayKind;
+  distanceKm: number;
+}
+
+function domesticCandidates(origin: GetawayOrigin): CandidateLoc[] {
+  return NL_PLACES
+    .map((p) => ({ p, km: haversineKm(origin, p) }))
+    .filter(({ km }) => km >= TRAVEL_MIN_KM && km <= TRAVEL_MAX_KM)
+    .sort((a, b) => a.km - b.km)
+    .slice(0, DOMESTIC_CANDIDATES)
+    .map(({ p, km }) => ({
+      name: p.name,
+      locationId: `${p.province}/${placeRouteSlug(p)}`,
+      lat: p.lat,
+      lon: p.lon,
+      kind: "domestic" as const,
+      distanceKm: km,
+    }));
+}
+
+/** Haal de daily-outlook voor één locatie. Null bij build-tijd of fout. */
+export async function fetchDailyOutlook(
+  loc: CandidateLoc,
+  dayIndex = 0,
+): Promise<DailyOutlook | null> {
+  if (process.env.NEXT_PHASE === "phase-production-build") return null;
+  const url = `${OPEN_METEO_DAILY}?${new URLSearchParams({
+    latitude: loc.lat.toString(),
+    longitude: loc.lon.toString(),
+    daily: "temperature_2m_max,precipitation_probability_max,sunshine_duration,weathercode",
+    forecast_days: "3",
+    timezone: "auto",
+  })}`;
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(3500),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const d = data?.daily;
+    if (!d || !Array.isArray(d.time) || d.time.length <= dayIndex) return null;
+    return {
+      name: loc.name,
+      locationId: loc.locationId,
+      lat: loc.lat,
+      lon: loc.lon,
+      kind: loc.kind,
+      tempMax: Number(d.temperature_2m_max?.[dayIndex] ?? NaN),
+      precipProbMax: Number(d.precipitation_probability_max?.[dayIndex] ?? 0),
+      sunshineHours: Number(d.sunshine_duration?.[dayIndex] ?? 0) / 3600,
+      weatherCode: Number(d.weathercode?.[dayIndex] ?? 0),
+      distanceKm: loc.distanceKm,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Vind getaways voor een herkomst-locatie. Vergelijkt thuis met nabije NL-plekken
+ * + de internationale zon-set. Lege array = niets beters (Koos zwijgt) of geen
+ * data.
+ */
+export async function findGetaways(
+  origin: GetawayOrigin,
+  opts: { dayIndex?: number; limit?: number } = {},
+): Promise<WeatherOpportunity[]> {
+  const dayIndex = opts.dayIndex ?? 0;
+  const originLoc: CandidateLoc = {
+    name: origin.name,
+    locationId: origin.locationId ?? "origin",
+    lat: origin.lat,
+    lon: origin.lon,
+    kind: "domestic",
+    distanceKm: 0,
+  };
+  const candidates: CandidateLoc[] = [
+    ...domesticCandidates(origin),
+    ...INTERNATIONAL_SUNSET.map((s) => ({
+      ...s,
+      kind: "sunset" as const,
+      distanceKm: haversineKm(origin, s),
+    })),
+  ];
+  const [originOutlook, ...rest] = await Promise.all([
+    fetchDailyOutlook(originLoc, dayIndex),
+    ...candidates.map((c) => fetchDailyOutlook(c, dayIndex)),
+  ]);
+  if (!originOutlook || Number.isNaN(originOutlook.tempMax)) return [];
+  const valid = rest.filter(
+    (o): o is DailyOutlook => o !== null && !Number.isNaN(o.tempMax),
+  );
+  return scoreGetaways(originOutlook, valid, { limit: opts.limit });
 }
