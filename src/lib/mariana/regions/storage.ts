@@ -5,8 +5,11 @@
  * zacht zonder service-role (lokaal/dev). Gedenormaliseerde kolommen + het
  * volledige signaal + het voederkanaal (local_feed) als jsonb.
  *
- * Mariana Local leest hieruit: loadRegionFeed(slug) / nearestRegionFeed(lat,lon)
- * geeft de MarianaLocalFeed van de meest recente run terug.
+ * Lees-paden:
+ *  - 10K-pagina's / Mariana Local (hot path): loadRegionFeed(slug) /
+ *    nearestRegionFeed(lat,lon) -> compacte MarianaLocalFeed.
+ *  - Persoonlijke surfaces (Piet/Koos): loadRegionRow(slug) /
+ *    nearestRegionData(lat,lon) -> rijke signal + feed + run-timestamp in 1 query.
  *
  * Schema: supabase/migrations/20260530_mariana_regions.sql
  */
