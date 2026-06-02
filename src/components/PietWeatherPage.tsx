@@ -282,6 +282,64 @@ function PietHero({ view }: { view: PietView }) {
   );
 }
 
+function PietWeerberichtCard({ view, lat, lon }: { view: PietView; lat: number; lon: number }) {
+  const fallback = [
+    view.days.vd.story,
+    view.days.mo.story && view.days.mo.story !== view.days.vd.story
+      ? `${view.days.mo.weekday}: ${view.days.mo.story}`
+      : "",
+  ].filter(Boolean).join("\n\n");
+  const [forecast, setForecast] = useState(fallback);
+  const [enhanced, setEnhanced] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 6500);
+
+    fetch(`/api/piet-weerbericht?lat=${lat}&lon=${lon}&city=${encodeURIComponent(view.locationName)}`, {
+      signal: controller.signal,
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (typeof d === "string" && d.trim()) {
+          setForecast(d.trim());
+          setEnhanced(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => window.clearTimeout(timeout));
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [lat, lon, view.locationName]);
+
+  const paragraphs = forecast.split(/\n+/).map((p) => p.trim()).filter(Boolean);
+
+  return (
+    <div className="mt-6 rcard p-5 sm:p-7">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <Micro>Piet Weerbericht · KNMI + Mariana</Micro>
+        <span className="livechip">
+          <i />
+          {enhanced ? "DeepSeek V4 Flash" : "Snelle versie"}
+        </span>
+      </div>
+      <div className="mt-4 space-y-3">
+        {paragraphs.map((paragraph, index) => (
+          <p key={index} className="text-[15px] leading-relaxed text-slate-700 max-w-[62ch]">
+            {paragraph}
+          </p>
+        ))}
+      </div>
+      <div className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+        Elke 30 minuten bijgewerkt
+      </div>
+    </div>
+  );
+}
+
 /* ---------- 2. 48-uurs briefing ---------- */
 function Briefing48h({ days }: { days: { vd: PietDay; mo: PietDay } }) {
   const [day, setDay] = useState<"vd" | "mo">("vd");
@@ -290,7 +348,7 @@ function Briefing48h({ days }: { days: { vd: PietDay; mo: PietDay } }) {
     <div className="mt-6 rcard overflow-hidden">
       <div className="px-5 sm:px-7 pt-6 pb-5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <Micro>KNMI-briefing · 48 uur</Micro>
+          <Micro>48 uur · dagkaart</Micro>
           <div className="day-tabs">
             <button className="day-tab" data-active={day === "vd"} onClick={() => setDay("vd")}>
               <span>Vandaag</span>
@@ -733,6 +791,7 @@ export default function PietWeatherPage({
       </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 piet-stagger">
         <PietHero view={view} />
+        <PietWeerberichtCard view={view} lat={lat} lon={lon} />
         <RegenradarSlot lat={lat} lon={lon} locationName={view.locationName} />
         <Briefing48h days={view.days} />
         <DagscoresGrid scores={view.scores} />

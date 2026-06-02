@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
+import KNMIForecastCard from "@/components/KNMIForecastCard";
 import HomePitch from "@/components/HomePitch";
 import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
@@ -65,6 +66,15 @@ export default async function Home() {
           lightweightBackground
           showSupportBanner={false}
           staticWeatherFallback
+          afterWeatherContent={initialWeather ? (
+            <KNMIForecastCard
+              lat={activeLoc.lat}
+              lon={activeLoc.lon}
+              city={activeLoc.name}
+              initialWeather={initialWeather}
+              variant="compact"
+            />
+          ) : null}
           beforeFooter={
             <>
               <TrustSection />

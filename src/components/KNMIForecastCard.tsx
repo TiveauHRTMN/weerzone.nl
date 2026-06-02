@@ -8,6 +8,7 @@ interface Props {
   lon: number;
   city: string;
   initialWeather?: WeatherData;
+  variant?: "compact" | "full";
 }
 
 const WC_LABEL: Record<number, string> = {
@@ -82,7 +83,15 @@ function quickForecast(weather: WeatherData | undefined, city: string) {
   return `${todayName.charAt(0).toUpperCase() + todayName.slice(1)}${part} is het in ${city} ${weatherText} en ongeveer ${temp} graden, ${windText}. ${rainText} De windvlagen lopen op tot rond ${gusts} km/u, dus het voelt soms frisser dan de thermometer doet vermoeden.${tomorrowText}`;
 }
 
-export default function KNMIForecastCard({ lat, lon, city, initialWeather }: Props) {
+function compactForecast(text: string): string {
+  const firstParagraph = text.split(/\n+/).map(p => p.trim()).find(Boolean) ?? text.trim();
+  if (firstParagraph.length <= 360) return firstParagraph;
+  const clipped = firstParagraph.slice(0, 360);
+  const sentenceEnd = Math.max(clipped.lastIndexOf(". "), clipped.lastIndexOf("! "), clipped.lastIndexOf("? "));
+  return `${(sentenceEnd > 180 ? clipped.slice(0, sentenceEnd + 1) : clipped).trim()}...`;
+}
+
+export default function KNMIForecastCard({ lat, lon, city, initialWeather, variant = "full" }: Props) {
   const initialForecast = quickForecast(initialWeather, city);
   const [forecast, setForecast] = useState<string | null>(initialForecast);
   const [loading, setLoading] = useState(!initialForecast);
@@ -125,14 +134,16 @@ export default function KNMIForecastCard({ lat, lon, city, initialWeather }: Pro
 
   if (!forecast) return null;
 
-  const paragraphs = forecast.split(/\n+/).map(p => p.trim()).filter(Boolean);
+  const paragraphs = variant === "compact"
+    ? [compactForecast(forecast)]
+    : forecast.split(/\n+/).map(p => p.trim()).filter(Boolean);
 
   return (
     <div className="card p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">
-          Weerbericht
+          Piet Weerbericht
         </span>
       </div>
       <div className="space-y-3">
@@ -141,7 +152,7 @@ export default function KNMIForecastCard({ lat, lon, city, initialWeather }: Pro
         ))}
       </div>
       <p className="text-[9px] text-slate-400 mt-4">
-        Gebaseerd op actuele gegevens · {enhanced ? "uitgebreide versie" : "snelle versie"} · elke 30 minuten bijgewerkt
+        Gebaseerd op KNMI, Mariana en lokale data · {enhanced ? (variant === "compact" ? "beknopte versie" : "uitgebreide versie") : "snelle versie"} · elke 30 minuten bijgewerkt
       </p>
     </div>
   );
