@@ -66,6 +66,7 @@ export default async function Home() {
           lightweightBackground
           showSupportBanner={false}
           staticWeatherFallback
+          showNarrative={false}
           afterWeatherContent={initialWeather ? (
             <KNMIForecastCard
               lat={activeLoc.lat}

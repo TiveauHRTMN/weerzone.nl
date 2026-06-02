@@ -50,6 +50,7 @@ interface DashboardProps {
   lightweightBackground?: boolean;
   showSupportBanner?: boolean;
   staticWeatherFallback?: boolean;
+  showNarrative?: boolean;
 }
 
 
@@ -251,6 +252,7 @@ export default function WeatherDashboard({
   lightweightBackground = false,
   showSupportBanner = true,
   staticWeatherFallback = false,
+  showNarrative = true,
 }: DashboardProps) {
   const needsWeatherData = !hideWeatherInfo || !!showRainRadar;
   const [city, setCity] = useState<City>(initialCity || DUTCH_CITIES.find(c => c.name === "De Bilt") || DUTCH_CITIES[0]);
@@ -543,7 +545,7 @@ export default function WeatherDashboard({
           </div>
 
           {/* Narrative teaser */}
-          {narrative && (
+          {showNarrative && narrative && (
             <div className="card px-6 py-5">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

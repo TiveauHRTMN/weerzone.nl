@@ -5,6 +5,8 @@ import { getSavedLocationServer } from "@/lib/location-cookies";
 import { findGetawayPicks } from "@/lib/koos-getaway";
 import { koosVoice } from "@/lib/koos-voice";
 import { buildKoosView } from "@/lib/koos-view";
+import { marianaKoosText } from "@/lib/mariana/agent-context";
+import { nearestRegionData } from "@/lib/mariana/regions/storage";
 import { fetchWeatherData } from "@/lib/weather";
 import KoosTravelPage from "@/components/KoosTravelPage";
 import "./koos-skin.css";
@@ -27,17 +29,31 @@ export const metadata: Metadata = {
 
 const DEFAULT_ORIGIN = { name: "De Bilt", lat: 52.1, lon: 5.18 };
 
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => {
+      setTimeout(() => resolve(fallback), ms);
+    }),
+  ]);
+}
+
 export default async function KoosPage() {
   const saved = await getSavedLocationServer();
   const origin = saved ?? DEFAULT_ORIGIN;
 
   // Achtergrond volgt het lokale weer (dag/nacht), net als /piet en /reed.
-  const [{ origin: originOutlook, picks }, currentWeather] = await Promise.all([
+  const [{ origin: originOutlook, picks }, currentWeather, marianaData] = await Promise.all([
     findGetawayPicks(origin),
     fetchWeatherData(origin.lat, origin.lon).catch(() => undefined),
+    nearestRegionData(origin.lat, origin.lon).catch(() => null),
   ]);
+  const marianaText = marianaKoosText(marianaData);
+  const opportunities = picks.map((p) => p.opportunity);
   const intro =
-    picks.length > 0 ? await koosVoice(origin, picks.map((p) => p.opportunity)) : null;
+    picks.length > 0
+      ? (await withTimeout(koosVoice(origin, opportunities, { marianaText }), 1200, null)) ?? marianaText
+      : null;
   const view = buildKoosView(origin.name, originOutlook, picks, intro);
 
   return (

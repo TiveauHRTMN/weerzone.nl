@@ -9,6 +9,7 @@
 
 import { Suspense, useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import type { ReedView, ReedRiskDay, ReedActiveWarning, ReedChip as ReedChipData } from "@/lib/reed-view";
 
 // Dynamische, weer-gestuurde achtergrond — zelfde component als /weer.
 const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
@@ -255,13 +256,71 @@ const Bar = ({
   );
 };
 
+function codeToneFor(view: ReedView): CodeTone {
+  if (view.active) return view.active.tone === "blue" ? "green" : view.active.tone;
+  return "green";
+}
+
+function chipToneFor(tone: ReedChipData["tone"]): ChipTone {
+  return tone;
+}
+
 /* ---------- 1. Status header ---------- */
-function StatusHeader({ expert, onChange }: { expert: boolean; onChange: (v: boolean) => void }) {
+function StatusHeader({
+  view,
+  expert,
+  onChange,
+}: {
+  view: ReedView;
+  expert: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  const label = view.active?.levelLabel ?? "Rustig";
+  const summary = view.active
+    ? view.active.summary
+    : "Niks aan het handje in Nederland. Saai he?";
+  const placeLabel = view.provinceLabel ?? view.locationName;
+  if (!view.active) {
+    return (
+      <div className="rcard p-8 sm:p-10 relative overflow-hidden text-center">
+        <div
+          className="absolute inset-x-8 top-0 h-px pointer-events-none"
+          style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent)" }}
+        />
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <CodePill tone="green">Rustig</CodePill>
+          <div className="livechip">
+            <i />
+            Tesla houdt wacht
+          </div>
+        </div>
+        <h1
+          className="mt-6 text-[42px] sm:text-[58px] leading-[0.98] font-extrabold"
+          style={{
+            letterSpacing: "-0.02em",
+            background: "linear-gradient(135deg, #ff5400 0%, #ffd200 50%, #ff5400 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          Niks aan het handje in Nederland.
+        </h1>
+        <p className="mt-4 text-[21px] sm:text-[25px] font-extrabold text-slate-900">
+          Saai he?
+        </p>
+        <p className="mt-3 mx-auto text-[14.5px] leading-relaxed text-slate-600 max-w-[52ch]">
+          Reed kijkt mee voor {placeLabel}. Alleen als Mariana Tesla onweer of storm ziet, gaat deze pagina open met waarschuwingen.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rcard p-7 sm:p-9 relative">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <CodePill tone="amber">Code geel</CodePill>
+          <CodePill tone={codeToneFor(view)}>{label}</CodePill>
           <div className="livechip">
             <i />
             Live kansberekening
@@ -282,14 +341,11 @@ function StatusHeader({ expert, onChange }: { expert: boolean; onChange: (v: boo
         className="mt-5 text-[34px] sm:text-[44px] leading-[1.02] font-extrabold text-slate-900"
         style={{ letterSpacing: "-0.028em" }}
       >
-        Waarschuwingen voor Noord-Holland
+        Waarschuwingen voor {placeLabel}
       </h1>
 
       <p className="mt-3 text-[15.5px] leading-relaxed text-slate-600 max-w-[58ch]">
-        Eén actieve waarschuwing in de komende 48 uur. Reed verwacht{" "}
-        <b className="text-slate-800 font-semibold">vrijdagmiddag</b> een korte periode met
-        <span className="text-slate-800 font-semibold"> kans op zware onweersbuien</span>, windstoten en
-        lokaal hagel. Zaterdag blijft het rustig. We melden alleen wat ertoe doet — geen ruis.
+        {summary} We melden alleen wat ertoe doet — geen ruis.
       </p>
 
       <div className="mt-6 flex items-center gap-3 flex-wrap">
@@ -297,7 +353,7 @@ function StatusHeader({ expert, onChange }: { expert: boolean; onChange: (v: boo
           <IcGps size={14} /> <span>Andere provincie? Gebruik GPS</span>
         </button>
         <span className="text-[13.5px] text-slate-500">
-          Locatie: <b className="text-slate-900">Noord-Holland</b>
+          Locatie: <b className="text-slate-900">{placeLabel}</b>
         </span>
       </div>
     </div>
@@ -305,12 +361,19 @@ function StatusHeader({ expert, onChange }: { expert: boolean; onChange: (v: boo
 }
 
 /* ---------- 2. Active warning callout ---------- */
-function ActiveWarning() {
+const ACTIVE_GRADIENT: Record<ReedActiveWarning["tone"], string> = {
+  red: "linear-gradient(160deg, #F87171 0%, #EF4444 45%, #B91C1C 100%)",
+  orange: "linear-gradient(160deg, #FB923C 0%, #F97316 45%, #EA580C 100%)",
+  amber: "linear-gradient(160deg, #FBBF24 0%, #F59E0B 45%, #B45309 100%)",
+  blue: "linear-gradient(160deg, #60A5FA 0%, #3B82F6 45%, #1D4ED8 100%)",
+};
+function ActiveWarning({ data }: { data: ReedActiveWarning }) {
+  const chipTone = "onorange" as const;
   return (
     <div
       className="mt-5 p-6 sm:p-7 relative overflow-hidden"
       style={{
-        background: "linear-gradient(160deg, #FB923C 0%, #F97316 45%, #EA580C 100%)",
+        background: ACTIVE_GRADIENT[data.tone],
         border: "1px solid rgba(154,52,18,.35)",
         borderRadius: 26,
         color: "#fff",
@@ -349,22 +412,44 @@ function ActiveWarning() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-[19px] sm:text-[22px] font-extrabold text-white" style={{ letterSpacing: "-0.02em" }}>
-              Actieve waarschuwing — Onweer &amp; windstoten
+              {data.title}
             </h2>
-            <span className="rchip rchip-onorange">Niveau 2/4</span>
+            <span className={`rchip rchip-${chipTone}`}>{data.levelLabel}</span>
           </div>
           <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: "rgba(255,255,255,.92)" }}>
-            Vrijdag tussen <b className="text-white">14:00 en 20:00</b> bouwt zich onstabiele lucht op boven
-            Midden-Nederland. Tussen 17:00 en 18:30 is de kans op zware onweersbuien het grootst. Verwacht
-            windstoten tot <b className="text-white">75 km/u</b>, regen <b className="text-white">20–35 mm/u</b> en
-            kortstondig hagel <b className="text-white">1–2 cm</b>.
+            {data.summary}
           </p>
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <Chip tone="onorange" label="Wind" value="60–75 km/u" />
-            <Chip tone="onorange" label="Regen" value="20–35 mm/u" />
-            <Chip tone="onorange" label="Hagel" value="1–2 cm" />
-            <Chip tone="onorange" label="Onweer" value="frequent" />
+          {data.chips.length > 0 && (
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              {data.chips.map((c, i) => (
+                <Chip key={i} tone={chipTone} label={c.label} value={c.value} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- 2b. Rustige staat (Reed zwijgt) ---------- */
+function CalmHeader({ locationName }: { locationName: string }) {
+  return (
+    <div className="mt-5 rcard p-6 sm:p-7">
+      <div className="flex items-start gap-4">
+        <span className="icon-tile" style={{ background: "linear-gradient(180deg,#fff,#DCFCE7)", color: "#15803D", width: 40, height: 40, borderRadius: 13, border: "1px solid #DCFCE7" }}>
+          <IcShield size={20} stroke={2.2} />
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-[19px] sm:text-[22px] font-extrabold text-slate-900" style={{ letterSpacing: "-0.02em" }}>
+              Niks aan het handje in Nederland
+            </h2>
+            <span className="rchip rchip-green">Rustig</span>
           </div>
+          <p className="mt-2 text-[14.5px] leading-relaxed text-slate-600">
+            Saai he? Reed kijkt mee voor {locationName} en omgeving. Zodra er onweer, storm of zware regen opduikt, zie je het hier als eerste.
+          </p>
         </div>
       </div>
     </div>
@@ -372,13 +457,13 @@ function ActiveWarning() {
 }
 
 /* ---------- 3. Section header ---------- */
-function SectionHeader() {
+function SectionHeader({ windowLabel }: { windowLabel: string }) {
   return (
     <div className="mt-9 mb-3 flex items-center justify-between gap-3">
-      <Micro>Model-synthese &amp; risico-analyse</Micro>
+      <Micro>Risico-analyse · 48 uur</Micro>
       <div className="livechip">
         <i />
-        48 u vooruitzicht · vr + za
+        {windowLabel}
       </div>
     </div>
   );
@@ -752,6 +837,183 @@ function Gauge({ value = 75 }: { value?: number }) {
         </div>
         <div className="mt-1.5 text-[11px] text-slate-500 font-bold uppercase tracking-[.16em]">komende 6 uur</div>
       </div>
+    </div>
+  );
+}
+
+function LiveRiskDay({
+  day,
+  sibling,
+  expert,
+  onEnableExpert,
+}: {
+  day: ReedRiskDay;
+  sibling: ReedRiskDay;
+  expert: boolean;
+  onEnableExpert: () => void;
+}) {
+  return (
+    <>
+      <div className="px-5 sm:px-7 pt-6 pb-5">
+        <div className="flex items-center justify-between gap-3">
+          <Micro>{day.hasRisk ? "Risicoperiode" : "Reed houdt wacht"}</Micro>
+          <span className={`rchip ${day.hasRisk ? "rchip-orange" : "rchip-cyan"}`}>
+            {day.hasRisk ? (
+              <>
+                <IcBolt size={11} stroke={2.4} /> {day.badge}
+              </>
+            ) : (
+              "Rustig"
+            )}
+          </span>
+        </div>
+        <h3 className="mt-2 text-[22px] sm:text-[26px] leading-[1.15] font-extrabold tracking-tight text-slate-900">
+          {day.hasRisk
+            ? `${day.weekday}${day.windowLabel ? ` ${day.windowLabel}` : ""}`
+            : `Geen actieve risicoperiode op ${day.weekday.toLowerCase()}`}
+        </h3>
+        <div className="mt-1.5 flex items-center gap-2 text-[13.5px] text-slate-500 flex-wrap">
+          <IcClock size={13} />
+          {day.peakLabel ? (
+            <span>
+              Piek rond <b className="text-slate-900 num">{day.peakLabel}</b>
+            </span>
+          ) : (
+            <span>{day.dateLabel}</span>
+          )}
+          <span className="text-slate-300">·</span>
+          <span>{day.durationH > 0 ? `duur ~ ${day.durationH} uur` : "geen waarschuwing"}</span>
+        </div>
+        {day.chips.length > 0 ? (
+          <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+            {day.chips.map((c, i) => (
+              <Chip key={i} tone={chipToneFor(c.tone)} label={c.label} value={c.value} />
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="divider" />
+
+      <div className="p-5 sm:p-7 space-y-6">
+        <section>
+          <div className="flex items-center justify-between mb-2">
+            <Micro>Risico-indicator</Micro>
+            <span className={`rchip ${day.hasRisk ? "rchip-amber" : "rchip-cyan"}`}>
+              {day.gaugePct}% komende 24 u
+            </span>
+          </div>
+          <div className="swidget flex flex-col items-center pt-5 pb-4">
+            <Gauge value={day.gaugePct} />
+            <div className="mt-3 grid grid-cols-2 gap-2 w-full text-center">
+              <MiniStat
+                label={day.label}
+                value={`${day.gaugePct}%`}
+                tone={day.hasRisk ? "amber" : "blue"}
+                emph
+              />
+              <MiniStat
+                label={sibling.label}
+                value={`${sibling.gaugePct}%`}
+                tone={sibling.hasRisk ? "amber" : "blue"}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <Micro className="mb-2">Kans per type</Micro>
+          <div className="swidget">
+            <Probabilities onweer={day.prob.onweer} regen={day.prob.regen} />
+          </div>
+        </section>
+
+        <section
+          className="p-5 rounded-2xl"
+          style={{
+            background: day.hasRisk ? "#FFFBEB" : "#F0F9FF",
+            border: day.hasRisk ? "1px solid #FDE68A" : "1px solid rgba(14,165,233,.18)",
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <span
+              className="icon-tile"
+              style={{
+                background: "#fff",
+                border: "1px solid rgba(15,23,42,.08)",
+                color: day.hasRisk ? "#92400E" : "#0369A1",
+                width: 32,
+                height: 32,
+                borderRadius: 10,
+              }}
+            >
+              <IcInfo size={14} stroke={2.2} />
+            </span>
+            <div className="flex-1">
+              <div className="rmicro mb-1">{day.hasRisk ? "Waarom Reed oplet" : "Waarom rustig"}</div>
+              <p className="text-[14px] leading-relaxed text-slate-700">
+                {day.hasRisk
+                  ? `${day.badge} krijgt vandaag een verhoogde score. Reed let vooral op timing, regen en windstoten rond het aangegeven venster.`
+                  : day.calmReason}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {!expert ? (
+          <button
+            className="w-full swidget flex items-center justify-between p-4 lift"
+            style={{ cursor: "pointer" }}
+            onClick={onEnableExpert}
+          >
+            <span className="flex items-center gap-2.5">
+              <IcInfo size={15} stroke={2.2} style={{ color: "#0F172A" }} />
+              <span className="text-[13.5px] font-bold text-slate-900">Toon expertlaag</span>
+            </span>
+            <IcArrow size={14} stroke={2.2} style={{ color: "#64748B" }} />
+          </button>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
+function LiveRisicoperiode({
+  view,
+  expert,
+  onEnableExpert,
+}: {
+  view: ReedView;
+  expert: boolean;
+  onEnableExpert: () => void;
+}) {
+  const [day, setDay] = useState<"vd" | "mo">("vd");
+  const current = view.days[day];
+  const sibling = day === "vd" ? view.days.mo : view.days.vd;
+  return (
+    <div className="rcard overflow-hidden">
+      <div
+        className="px-5 sm:px-7 pt-4 pb-3 flex items-center justify-between gap-3"
+        style={{ borderBottom: "1px solid rgba(15,23,42,.05)" }}
+      >
+        <button className="day-nav" onClick={() => setDay("vd")} disabled={day === "vd"} aria-label="Vorige dag">
+          <IcChevL size={16} stroke={2.4} />
+        </button>
+        <div className="day-tabs">
+          <button className="day-tab" data-active={day === "vd"} onClick={() => setDay("vd")}>
+            <span>{view.days.vd.weekday}</span>
+            <span className="date num">{view.days.vd.dateLabel}</span>
+          </button>
+          <button className="day-tab" data-active={day === "mo"} onClick={() => setDay("mo")}>
+            <span>{view.days.mo.weekday}</span>
+            <span className="date num">{view.days.mo.dateLabel}</span>
+          </button>
+        </div>
+        <button className="day-nav" onClick={() => setDay("mo")} disabled={day === "mo"} aria-label="Volgende dag">
+          <IcChevR size={16} stroke={2.4} />
+        </button>
+      </div>
+      <LiveRiskDay day={current} sibling={sibling} expert={expert} onEnableExpert={onEnableExpert} />
     </div>
   );
 }
@@ -1271,9 +1533,8 @@ function ChaserTools() {
           Model-overeenstemming &amp; diepere tools
         </h3>
         <p className="mt-1 text-[13.5px] text-slate-500 max-w-[58ch]">
-          Reed combineert vier modellen via <b className="text-slate-700">Mariana</b> &amp;{" "}
-          <b className="text-slate-700">Oracle</b>. Hier zie je waar ze het over eens zijn — en waar de echte
-          onzekerheid zit.
+          Reed combineert officiële waarschuwingen, buienparameters en modelruns. Hier zie je waar ze het over eens
+          zijn — en waar de echte onzekerheid zit.
         </p>
       </div>
 
@@ -1387,6 +1648,55 @@ function LightningRadar({ lat, lon }: { lat: number; lon: number }) {
   );
 }
 
+function TeslaExpertPanel({ signal }: { signal: NonNullable<ReedView["tesla"]> }) {
+  const confidence = Math.round(signal.confidence.model_agreement * 100);
+  return (
+    <div className="mt-6 rcard overflow-hidden">
+      <div className="px-5 sm:px-7 pt-6 pb-5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <Micro>Expertlaag</Micro>
+          <span className="rchip rchip-purple">Diepgang</span>
+        </div>
+        <h3 className="mt-2 text-[20px] sm:text-[24px] font-extrabold tracking-tight text-slate-900" style={{ letterSpacing: "-0.02em" }}>
+          Convectieve duiding
+        </h3>
+        <p className="mt-2 text-[13.5px] leading-relaxed text-slate-600 max-w-[58ch]">
+          {signal.mariana_summary || signal.reasoning_chain[0] || "Er is een actieve expertduiding voor deze regio."}
+        </p>
+      </div>
+
+      <div className="divider" />
+
+      <div className="p-5 sm:p-7 space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <MetaCard icon={<IcClock size={14} stroke={2.2} />} value={signal.timing_window || "Onbekend"} label="Venster" tone="amber" />
+          <MetaCard icon={<IcLayers size={14} stroke={2.2} />} value={signal.expected_mode || "Onbekend"} label="Modus" tone="blue" />
+        </div>
+        <section className="swidget p-4">
+          <div className="flex items-center justify-between mb-2">
+            <Micro>Model-overeenstemming</Micro>
+            <span className="rchip rchip-green">{confidence}%</span>
+          </div>
+          <Bar value={confidence} gradient="linear-gradient(90deg,#22C55E,#F97316)" glow="rgba(34,197,94,.25)" />
+          <p className="mt-3 text-[12.5px] leading-relaxed text-slate-600">
+            {signal.model_conflict.summary || signal.model_consensus}
+          </p>
+        </section>
+        {signal.failure_modes.length > 0 ? (
+          <section className="p-4 rounded-2xl" style={{ background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+            <Micro className="mb-2">Waar Reed nog op let</Micro>
+            <ul className="space-y-1.5 text-[13px] leading-relaxed text-slate-700">
+              {signal.failure_modes.slice(0, 3).map((item, i) => (
+                <li key={i}>- {item}</li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- 8. Footer trust strip ---------- */
 function FooterTrust() {
   return (
@@ -1394,8 +1704,7 @@ function FooterTrust() {
       <div className="flex items-center gap-2">
         <IcCheck size={14} stroke={2.4} style={{ color: "#15803D" }} />
         <span>
-          Weerzone draait op <b className="text-slate-900">Mariana</b> &amp; <b className="text-slate-900">Oracle</b> —
-          gevoed door KNMI, ECMWF, GPS, HARMONIE, AROME en ICON-D2.
+          Reed opent op Mariana Tesla. KNMI, ESTOFEX, radar en bliksemdata blijven context zodra er echt iets speelt.
         </span>
       </div>
       <a href="/over" className="font-bold text-slate-900 inline-flex items-center gap-1">
@@ -1407,35 +1716,40 @@ function FooterTrust() {
 
 /* ---------- Page ---------- */
 export default function ReedWarningsPage({
+  view,
   fontClassName = "",
   weatherCode = 2,
   isDay = true,
   lat = 52.1,
   lon = 5.18,
-  estofex = null,
 }: {
+  view: ReedView;
   fontClassName?: string;
   weatherCode?: number;
   isDay?: boolean;
   lat?: number;
   lon?: number;
-  estofex?: EstofexInfo;
 }) {
   const [expert, setExpert] = useState(true);
+  const hasWarning = !!view.active;
   return (
     <main className={`reed-skin relative min-h-screen ${fontClassName}`}>
       <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />}>
         <WeatherBackground weatherCode={weatherCode} isDay={isDay} />
       </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 reed-stagger">
-        <StatusHeader expert={expert} onChange={setExpert} />
-        <ActiveWarning />
-        <LightningRadar lat={lat} lon={lon} />
-        <SectionHeader />
-        <Risicoperiode expert={expert} onEnableExpert={() => setExpert(true)} />
-        <EstofexOutlook data={estofex} />
-        <ChaserTools />
-        <FooterTrust />
+        <StatusHeader view={view} expert={expert} onChange={setExpert} />
+        {hasWarning ? (
+          <>
+            <ActiveWarning data={view.active!} />
+            <LightningRadar lat={lat} lon={lon} />
+            <SectionHeader windowLabel={view.windowLabel} />
+            <LiveRisicoperiode view={view} expert={expert} onEnableExpert={() => setExpert(true)} />
+            <EstofexOutlook data={view.estofex} />
+            {view.tesla ? <TeslaExpertPanel signal={view.tesla} /> : null}
+            <FooterTrust />
+          </>
+        ) : null}
       </div>
     </main>
   );

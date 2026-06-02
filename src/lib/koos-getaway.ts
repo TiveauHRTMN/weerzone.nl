@@ -14,7 +14,7 @@
 
 import type { WeatherOpportunity } from "@/lib/agents/types";
 import type { Place } from "@/lib/places-data";
-import { KOOS_GETAWAY_PLACES, placeRouteSlug } from "@/lib/places-data";
+import { KOOS_GETAWAY_PLACES_LIGHT, koosPlaceRouteSlug } from "@/lib/koos-places";
 
 type PlaceCharacter = NonNullable<Place["character"]>;
 
@@ -99,7 +99,9 @@ export const INTERNATIONAL_SUNSET: readonly {
 
 // Drempels: hoeveel beter een plek moet zijn voor Koos iets zegt.
 const DOMESTIC_THRESHOLD = 0.12; // binnenlandse plek moet merkbaar beter zijn dan thuis
+const DOMESTIC_FALLBACK_THRESHOLD = 0.04; // NL-first: lichte verbetering is genoeg om buitenland te onderdrukken
 const GOOD_ABS = 0.6; // ...én absoluut een mooie dag (anders is het geen uitje)
+const NL_REALLY_POOR = 0.46; // buitenland pas als de beste NL-optie ook echt matig blijft
 const SUNSET_MIN_TEMP = 20; // zon-bestemming moet écht warm zijn
 const SUNSET_MAX_PRECIP = 25; // ...en droog
 
@@ -175,43 +177,56 @@ export function scoreGetawayPicks(
   const limit = opts.limit ?? DEFAULT_LIMIT;
   const originScore = comfortScore(origin);
   const homeIsNice = originScore >= GOOD_ABS;
+  const domesticCandidates = candidates.filter((c) => c.kind === "domestic");
 
   // "Heel NL nat": geen enkele binnenlandse getaway haalt de mooi-lat.
-  const bestDomestic = candidates
-    .filter((c) => c.kind === "domestic")
-    .reduce((m, c) => Math.max(m, comfortScore(c)), 0);
-  const allNLPoor = bestDomestic < GOOD_ABS;
+  const bestDomestic = domesticCandidates.reduce((m, c) => Math.max(m, comfortScore(c)), 0);
+  const allNLPoor = bestDomestic < NL_REALLY_POOR;
   // Buitenland pas als thuis niet mooi is ÉN heel NL niets beters biedt.
   const enableSunset = !homeIsNice && allNLPoor;
 
-  const picks: KoosPick[] = [];
-  for (const c of candidates) {
+  const toPick = (c: DailyOutlook, cScore: number): KoosPick => ({
+    opportunity: {
+      originLocationId: origin.locationId,
+      targetLocationId: c.locationId,
+      targetName: c.name,
+      score: Math.round((cScore - originScore) * 100),
+      reason: buildReason(origin, c),
+      distanceKm: c.distanceKm,
+    },
+    kind: c.kind,
+    tempMax: c.tempMax,
+    sunshineHours: c.sunshineHours,
+    precipProbMax: c.precipProbMax,
+    weatherCode: c.weatherCode,
+  });
+
+  const domesticPicks: KoosPick[] = [];
+  const domesticFallbackPicks: KoosPick[] = [];
+  for (const c of domesticCandidates) {
     const cScore = comfortScore(c);
-    if (c.kind === "sunset") {
-      if (!enableSunset) continue;
-      if (c.tempMax < SUNSET_MIN_TEMP || c.precipProbMax > SUNSET_MAX_PRECIP) continue;
-    } else {
-      // Binnenlands: moet absoluut een mooie dag zijn ÉN merkbaar beter dan thuis.
-      if (cScore < GOOD_ABS) continue;
-      if (cScore - originScore < DOMESTIC_THRESHOLD) continue;
-    }
     const delta = cScore - originScore;
     if (delta <= 0) continue;
-    picks.push({
-      opportunity: {
-        originLocationId: origin.locationId,
-        targetLocationId: c.locationId,
-        targetName: c.name,
-        score: Math.round(delta * 100),
-        reason: buildReason(origin, c),
-        distanceKm: c.distanceKm,
-      },
-      kind: c.kind,
-      tempMax: c.tempMax,
-      sunshineHours: c.sunshineHours,
-      precipProbMax: c.precipProbMax,
-      weatherCode: c.weatherCode,
-    });
+    if (cScore >= GOOD_ABS && delta >= DOMESTIC_THRESHOLD) {
+      domesticPicks.push(toPick(c, cScore));
+    } else if (delta >= DOMESTIC_FALLBACK_THRESHOLD && bestDomestic >= NL_REALLY_POOR) {
+      domesticFallbackPicks.push(toPick(c, cScore));
+    }
+  }
+
+  const domesticResult = (domesticPicks.length > 0 ? domesticPicks : domesticFallbackPicks)
+    .sort((a, b) => b.opportunity.score - a.opportunity.score)
+    .slice(0, limit);
+  if (domesticResult.length > 0) return domesticResult;
+
+  const picks: KoosPick[] = [];
+  for (const c of candidates.filter((candidate) => candidate.kind === "sunset")) {
+    const cScore = comfortScore(c);
+    if (!enableSunset) continue;
+    if (c.tempMax < SUNSET_MIN_TEMP || c.precipProbMax > SUNSET_MAX_PRECIP) continue;
+    const delta = cScore - originScore;
+    if (delta <= 0) continue;
+    picks.push(toPick(c, cScore));
   }
   return picks
     .sort((a, b) => b.opportunity.score - a.opportunity.score)
@@ -243,7 +258,8 @@ const OPEN_METEO_DAILY = "https://api.open-meteo.com/v1/forecast";
 // en Zeeland vanuit het midden binnen bereik vallen.
 const TRAVEL_MIN_KM = 25;
 const TRAVEL_MAX_KM = 220;
-const DOMESTIC_CANDIDATES = 12;
+const DOMESTIC_NEAREST_CANDIDATES = 8;
+const DOMESTIC_MAX_CANDIDATES = 18;
 
 interface CandidateLoc {
   name: string;
@@ -256,14 +272,38 @@ interface CandidateLoc {
 }
 
 function domesticCandidates(origin: GetawayOrigin): CandidateLoc[] {
-  return KOOS_GETAWAY_PLACES
+  const eligible = KOOS_GETAWAY_PLACES_LIGHT
     .map((p) => ({ p, km: haversineKm(origin, p) }))
     .filter(({ km }) => km >= TRAVEL_MIN_KM && km <= TRAVEL_MAX_KM)
-    .sort((a, b) => a.km - b.km)
-    .slice(0, DOMESTIC_CANDIDATES)
+    .sort((a, b) => a.km - b.km);
+
+  const selected = new Map<string, { p: Place; km: number }>();
+  const add = (item: { p: Place; km: number } | undefined) => {
+    if (!item || selected.size >= DOMESTIC_MAX_CANDIDATES) return;
+    selected.set(`${item.p.province}/${koosPlaceRouteSlug(item.p)}`, item);
+  };
+
+  eligible.slice(0, DOMESTIC_NEAREST_CANDIDATES).forEach(add);
+
+  // Daarna landelijke spreiding: pak per provincie nog de dichtstbijzijnde optie.
+  // Zo kan Koos campings/kust/natuur elders in NL vinden zonder 3000 plekken op te halen.
+  const byProvince = new Map<string, { p: Place; km: number }>();
+  for (const item of eligible) {
+    if (!byProvince.has(item.p.province)) byProvince.set(item.p.province, item);
+  }
+  [...byProvince.values()].sort((a, b) => a.km - b.km).forEach(add);
+
+  // Tot slot wat karakter-spreiding binnen de reisband, zodat campings/kust/natuur
+  // elkaar niet volledig wegdrukken door alleen afstand.
+  for (const character of ["coastal", "highland", "inland"] satisfies PlaceCharacter[]) {
+    eligible.filter(({ p }) => p.character === character).slice(0, 3).forEach(add);
+  }
+
+  return [...selected.values()]
+    .slice(0, DOMESTIC_MAX_CANDIDATES)
     .map(({ p, km }) => ({
       name: p.name,
-      locationId: `${p.province}/${placeRouteSlug(p)}`,
+      locationId: `${p.province}/${koosPlaceRouteSlug(p)}`,
       lat: p.lat,
       lon: p.lon,
       kind: "domestic" as const,
@@ -330,27 +370,42 @@ export async function findGetawayPicks(
     kind: "domestic",
     distanceKm: 0,
   };
-  const candidates: CandidateLoc[] = [
-    ...domesticCandidates(origin),
-    ...INTERNATIONAL_SUNSET.map((s) => ({
-      ...s,
-      kind: "sunset" as const,
-      distanceKm: haversineKm(origin, s),
-    })),
-  ];
-  const [originOutlook, ...rest] = await Promise.all([
+  const domestic = domesticCandidates(origin);
+  const [originOutlook, ...domesticRest] = await Promise.all([
     fetchDailyOutlook(originLoc, dayIndex),
-    ...candidates.map((c) => fetchDailyOutlook(c, dayIndex)),
+    ...domestic.map((c) => fetchDailyOutlook(c, dayIndex)),
   ]);
   if (!originOutlook || Number.isNaN(originOutlook.tempMax)) {
     return { origin: null, picks: [] };
   }
-  const valid = rest.filter(
+  const validDomestic = domesticRest.filter(
+    (o): o is DailyOutlook => o !== null && !Number.isNaN(o.tempMax),
+  );
+  const domesticPicks = scoreGetawayPicks(originOutlook, validDomestic, { limit: opts.limit });
+  if (domesticPicks.length > 0) {
+    return { origin: originOutlook, picks: domesticPicks };
+  }
+
+  // NL-first: pas als er binnen Nederland niets overtuigend beters is, kijken we
+  // naar de vaste buitenland-set. Daardoor laadt /koos meestal minder remote data.
+  if (comfortScore(originOutlook) >= GOOD_ABS) {
+    return { origin: originOutlook, picks: [] };
+  }
+
+  const international = INTERNATIONAL_SUNSET.map((s) => ({
+    ...s,
+    kind: "sunset" as const,
+    distanceKm: haversineKm(origin, s),
+  }));
+  const internationalOutlooks = await Promise.all(
+    international.map((c) => fetchDailyOutlook(c, dayIndex)),
+  );
+  const validInternational = internationalOutlooks.filter(
     (o): o is DailyOutlook => o !== null && !Number.isNaN(o.tempMax),
   );
   return {
     origin: originOutlook,
-    picks: scoreGetawayPicks(originOutlook, valid, { limit: opts.limit }),
+    picks: scoreGetawayPicks(originOutlook, validInternational, { limit: opts.limit }),
   };
 }
 

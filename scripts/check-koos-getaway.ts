@@ -91,4 +91,9 @@ assert.equal(scoreGetaways(origin, [meh]).length, 0, "marginaal-beter-maar-grauw
 const coastalPick = scoreGetawayPicks(origin, [niceNL])[0];
 assert.ok(/aan zee/i.test(coastalPick.opportunity.reason), `kust-reden verwacht 'aan zee': ${coastalPick.opportunity.reason}`);
 
+// 13. Campings worden als plek op de camping verwoord, niet als stad.
+const camping = outlook({ name: "Camping De Lakens", locationId: "noord-holland/camping-de-lakens", character: "coastal", tempMax: 22, precipProbMax: 5, sunshineHours: 9, distanceKm: 80 });
+const campingPick = scoreGetawayPicks(origin, [camping])[0];
+assert.ok(/op Camping De Lakens/i.test(campingPick.opportunity.reason), `camping-reden verwacht 'op Camping': ${campingPick.opportunity.reason}`);
+
 console.log("OK - koos-getaway pure logica gedraagt zich correct");
