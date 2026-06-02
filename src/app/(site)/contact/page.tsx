@@ -15,9 +15,6 @@ export const metadata: Metadata = {
     canonical: "https://weerzone.nl/contact",
     languages: hreflangCluster({
       nl: "/contact",
-      de: "/de/kontakt",
-      fr: "/fr/contact",
-      es: "/es/contacto",
     }),
   },
   openGraph: {

@@ -3,7 +3,7 @@ import type { GeoBlock } from "@/lib/geo-blocks";
 
 interface Props {
   block: GeoBlock;
-  /** Bijv. "nl-NL", "de-DE" — voor FAQPage @inLanguage */
+  /** Voor FAQPage @inLanguage */
   inLanguage?: string;
   /** Locale-aware kop voor de FAQ-sectie */
   faqHeading?: string;

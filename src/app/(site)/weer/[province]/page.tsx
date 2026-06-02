@@ -2,19 +2,29 @@ import { Metadata } from "next";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
-import { PROVINCE_LABELS, type Province, placesByProvince, placeSlug } from "@/lib/places-data";
+import {
+  NL_PROVINCE_SLUGS,
+  PROVINCE_LABELS,
+  isNLProvince,
+  nlPlacesByProvince,
+  placeSlug,
+  type NLProvince,
+} from "@/lib/places-data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { hreflangSelf } from "@/lib/hreflang";
 
+export const revalidate = 43200;
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
-  return Object.keys(PROVINCE_LABELS).map((province) => ({ province }));
+  return NL_PROVINCE_SLUGS.map((province) => ({ province }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ province: Province }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ province: string }> }): Promise<Metadata> {
   const { province } = await params;
+  if (!isNLProvince(province)) return {};
   const label = PROVINCE_LABELS[province];
-  if (!label) return {};
 
   return {
     title: `Weer ${label} — Actuele weersverwachting per stad`,
@@ -31,14 +41,14 @@ export async function generateMetadata({ params }: { params: Promise<{ province:
   };
 }
 
-export default async function ProvincePage({ params }: { params: Promise<{ province: Province }> }) {
+export default async function ProvincePage({ params }: { params: Promise<{ province: string }> }) {
   const { province } = await params;
+  if (!isNLProvince(province)) notFound();
   const label = PROVINCE_LABELS[province];
-  if (!label) notFound();
 
   // Deduplicatie op basis van slug om dubbele links te voorkomen
   const seenSlugs = new Set<string>();
-  const rawPlaces = placesByProvince()[province] || [];
+  const rawPlaces = nlPlacesByProvince()[province as NLProvince] || [];
   const places = rawPlaces
     .filter(p => {
       const slug = placeSlug(p.name);
@@ -102,23 +112,6 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
     if (province === "utrecht") return `Utrecht: ${temp}°C. ${temp > 22 ? "Urban heat island op zijn best." : "Drukste weerknooppunt van het land."}`;
     if (province === "noord-holland") return `Noord-Holland: ${temp}°C. ${wind > 30 ? "Stevige zeewind vandaag." : "IJ en kust gedragen zich."}`;
     if (province === "zuid-holland") return `Zuid-Holland: ${temp}°C. ${rain > 2 ? "Rivierwind maakt het kouder." : "Delta-klimaat in je voordeel."}`;
-    // Duitsland
-    if (province === "noordrijn-westfalen") return `NRW: ${temp}°C. ${wind > 25 ? `${wind} km/u en industrie-smog — fijne combinatie.` : "Ruhrgebied trekt vandaag nog net aan de kortste stok."}`;
-    if (province === "beieren") return `Beieren: ${temp}°C. ${temp > 28 ? "Biertuin-weer. Proost." : temp < 5 ? "Alpenwind bijt. Warm bierpak aan." : "Goed genoeg voor een Ausflug."}`;
-    if (province === "berlijn") return `Berlijn: ${temp}°C. ${rain > 3 ? "Regen in de hoofdstad — de techno gaat gewoon door." : "Berlin, du bist so wunderbar. Vandaag tenminste."}`;
-    if (province === "hamburg") return `Hamburg: ${temp}°C. ${wind > 30 ? `${wind} km/u Noordzeestorm — zelfs de Hafencity waaiert bijna weg.` : "Haven op rolletjes. Geniet van de rust."}`;
-    if (province === "hessen") return `Hessen: ${temp}°C. Frankfurt financieel hart, maar het weer trekt zich daar niks van aan. ${rain > 2 ? "Paraplu verplicht op de Zeil." : "Droog genoeg voor een wandeling langs de Main."}`;
-    if (province === "nedersaksen") return `Nedersaksen: ${temp}°C. ${wind > 20 ? `${wind} km/u — vlakke polder zonder schuilplek, net als thuis.` : "Rustig vandaag, wat de Fries van zijn buurman ook zou zeggen."}`;
-    if (province === "saksen") return `Saksen: ${temp}°C. Leipzig of Dresden — beide hebben ${rain > 2 ? "regen als enige bezienswaardigheid vandaag." : "mooi weer. Elbe-wandeling doen."}`;
-    if (province === "thuringen") return `Thüringen: ${temp}°C. ${temp < 8 ? "Thüringer Wald in mist gehuld. Bratwurst eten en binnen blijven." : "Groene heuvelrug in prima conditie vandaag."}`;
-    if (province === "saarland") return `Saarland: ${temp}°C. Kleinste Bundesland, grootste weerpretentie. ${wind > 25 ? "Wind van de Vogezen. Brutaal." : "Lekker rustig vandaag."}`;
-    if (province === "rijnland-palts") return `Rijnland-Palts: ${temp}°C. Moselwijn drinken bij ${rain > 2 ? "regen in de wijngaard — romantisch of deprimerend?" : "zonneschijn. Perfecte dag."}`;
-    if (province === "sleeswijk-holstein") return `Sleeswijk-Holstein: ${temp}°C. ${wind > 30 ? `${wind} km/u van de Oostzee. Je waait van Kiel naar Flensburg zonder fiets.` : "Rustig aan zee vandaag."}`;
-    if (province === "mecklenburg-voorpommeren") return `Mecklenburg: ${temp}°C. ${rain > 2 ? "Rügen in de regen — grijze Oostzee, grijze lucht, grijze stemming." : "Helder boven de meren. Perfecte kanodag."}`;
-    if (province === "brandenburg") return `Brandenburg: ${temp}°C. Potsdam-paleis of Brandenburg-polder — het maakt het weer niet uit.`;
-    if (province === "saksen-anhalt") return `Saksen-Anhalt: ${temp}°C. Halle of Magdeburg — ${wind > 20 ? "wind dwars door de Elbe-vlakte." : "windstil en merkwaardig aangenaam."}`;
-    if (province === "bremen") return `Bremen: ${temp}°C. Kleinste stadstaat, ${rain > 2 ? "maar vandaag de natste ook." : "maar vandaag verrassend droog."}`;
-    if (province === "baden-wurttemberg") return `Baden-Württemberg: ${temp}°C. ${temp > 30 ? "Zomer in het Zwarte Woud. Pas op voor onweer in de middag." : temp < 3 ? "Zwarte Woud onder sneeuw. Schaatsen op." : "Zwarte Woud toont zich van zijn beste kant."}`;
     return `${label}: ${temp}°C. Piet's oordeel? ${wind > 30 ? "Stormachtig kut." : "Matig."}`;
   })();
 

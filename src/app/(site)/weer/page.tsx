@@ -1,4 +1,4 @@
-import { PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
+import { NL_PROVINCE_SLUGS, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock3, MapPin, Navigation, Search } from "lucide-react";
@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://weerzone.nl/weer" },
 };
 
+export const revalidate = 43200;
+
 const breadcrumbLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -22,9 +24,9 @@ const breadcrumbLd = {
 };
 
 export default function WeerIndexPage() {
-  const provinces = Object.entries(PROVINCE_LABELS).map(([id, label]) => ({
+  const provinces = NL_PROVINCE_SLUGS.map((id) => ({
     id: id as Province,
-    label,
+    label: PROVINCE_LABELS[id],
   }));
 
   const quickLinks = [

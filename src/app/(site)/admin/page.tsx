@@ -5,7 +5,9 @@ import { useEffect } from "react";
 
 export default function AdminPortal() {
   useEffect(() => {
-    console.log("Admin Portal Loaded 🚀");
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Admin Portal Loaded");
+    }
   }, []);
 
   return (

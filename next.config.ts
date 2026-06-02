@@ -67,9 +67,6 @@ const nextConfig: NextConfig = {
       { source: "/jouwweer",        destination: "/piet",           permanent: true },
       { source: "/waarschuwingen",  destination: "/reed",           permanent: true },
       { source: "/prijzen",         destination: "/",               permanent: true },
-      { source: "/de/preise",       destination: "/de",             permanent: true },
-      { source: "/fr/tarifs",       destination: "/fr",             permanent: true },
-      { source: "/es/precios",      destination: "/es",             permanent: true },
       { source: "/app/checkout/:path*", destination: "/mijn-weerzone", permanent: true },
       // Reiszone is verwijderd in v2 (agent-first relaunch). Alle Reiszone-URLs
       // worden hard naar de homepage gestuurd; voor crawlers is dat een 308.

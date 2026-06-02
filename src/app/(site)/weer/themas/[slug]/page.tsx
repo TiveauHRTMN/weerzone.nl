@@ -105,7 +105,7 @@ const THEMES: Record<string, Theme> = {
     title: "Hooikoorts Radar | Pollenbelasting & Weersadvies",
     description: "Droge wind uit het oosten? Wij vertellen je precies wanneer je binnen moet blijven om die rode ogen te voorkomen.",
     metaDescription: "Actuele hooikoorts verwachting en pollenradar. WeerZone kijkt naar droogte en windrichting voor het beste advies.",
-    intro: "Pollenconcentratie is direct afhankelijk van het weer. Graspollen pieken tussen april en augustus; berken gaan al los in maart. De twee gevaarlijkste weertypen voor hooikoortspatiënten: droge oostenwind (pollen uit Duitsland meegevoerd) en zonnige dagen met weinig wind na een regenachtige ochtend — dan spat de pollen als een wolk omhoog. WeerZone combineert windrichting, luchtvochtigheid en neerslaginformatie voor een eerlijk pollenrisico-oordeel.",
+    intro: "Pollenconcentratie is direct afhankelijk van het weer. Graspollen pieken tussen april en augustus; berken gaan al los in maart. De twee gevaarlijkste weertypen voor hooikoortspatienten: droge oostenwind met veel continentale pollen en zonnige dagen met weinig wind na een regenachtige ochtend. Dan spat de pollen als een wolk omhoog. WeerZone combineert windrichting, luchtvochtigheid en neerslaginformatie voor een eerlijk pollenrisico-oordeel.",
     thresholds: [
       { label: "Windrichting", value: "Oost of Zuidoost = hoog risico (droog continent-pollen). West = lager", good: false },
       { label: "Luchtvochtigheid", value: ">70%: pollen klitten samen, minder in de lucht. <40%: maximale verspreiding", good: false },
@@ -115,7 +115,7 @@ const THEMES: Record<string, Theme> = {
     tips: [
       "Ventileer pas 's avonds laat na 22:00 — pollenconcentraties zijn dan het laagst.",
       "Na een regenbui is de lucht voor 2–4 uur aanzienlijk schoner. Gebruik die window.",
-      "Oost- of zuidoostwind = pollen waait over vanuit Duitsland en België. Check de windrichting, niet alleen de windkracht.",
+      "Oost- of zuidoostwind = droge continentale lucht met extra pollen. Check de windrichting, niet alleen de windkracht.",
       "Bewaar je antihistamine 's morgens: pollen pieken tussen 08:00 en 12:00 op warme, droge dagen.",
     ],
     relatedPlaces: [

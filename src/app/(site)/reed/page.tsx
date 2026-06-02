@@ -22,9 +22,6 @@ export const metadata: Metadata = {
     canonical: "https://weerzone.nl/reed",
     languages: hreflangCluster({
       nl: "/reed",
-      de: "/de/warnungen",
-      fr: "/fr/alertes",
-      es: "/es/alertas",
     }),
   },
   openGraph: {

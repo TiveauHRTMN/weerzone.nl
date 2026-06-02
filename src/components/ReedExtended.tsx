@@ -683,28 +683,28 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
                             <Zap className="h-3.5 w-3.5 text-orange-500" />
                             CAPE
                           </div>
-                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.capeMaxJkg ?? 0} J/kg</p>
+                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.capeMaxJkg == null ? "n/b" : `${warning.enriched.capeMaxJkg} J/kg`}</p>
                         </div>
                         <div className="rounded-lg border border-black/5 bg-white/45 p-3 dark:border-white/10 dark:bg-white/5">
                           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text-muted">
                             <ShieldAlert className="h-3.5 w-3.5 text-rose-500" />
                             Remming
                           </div>
-                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.cinMaxJkg ?? 0} J/kg</p>
+                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.cinMaxJkg == null ? "n/b" : `${warning.enriched.cinMaxJkg} J/kg`}</p>
                         </div>
                         <div className="rounded-lg border border-black/5 bg-white/45 p-3 dark:border-white/10 dark:bg-white/5">
                           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text-muted">
                             <Layers className="h-3.5 w-3.5 text-purple-500" />
                             Schering
                           </div>
-                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.windShearMaxKmh ?? 0} km/h</p>
+                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.windShearMaxKmh == null ? "n/b" : `${warning.enriched.windShearMaxKmh} km/h`}</p>
                         </div>
                         <div className="rounded-lg border border-black/5 bg-white/45 p-3 dark:border-white/10 dark:bg-white/5">
                           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text-muted">
                             <Thermometer className="h-3.5 w-3.5 text-blue-500" />
                             Lifted Index
                           </div>
-                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.liftedIndexMinC ?? 0}°C</p>
+                          <p className="mt-1 text-sm font-black text-text-primary">{warning.enriched.liftedIndexMinC == null ? "n/b" : `${warning.enriched.liftedIndexMinC}°C`}</p>
                         </div>
                       </div>
                     )}
@@ -827,8 +827,16 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
                                   value={period.maxCape >= 1000 ? "zeer hoog" : period.maxCape >= 500 ? "hoog" : period.maxCape >= 200 ? "matig" : "laag"}
                                   detail="Piekinstabiliteit"
                                 />
-                                <ExpertMetric label="Stabiliteit" value={`${expert.minLiftedIndex}°C`} detail={expert.minLiftedIndex < 0 ? "Instabiel" : "Marginaal/stabiel"} />
-                                <ExpertMetric label="Remming" value={`${expert.maxCin} J/kg`} detail={expert.maxCin > 30 ? "Rem aanwezig" : "Weinig rem"} />
+                                <ExpertMetric
+                                  label="Stabiliteit"
+                                  value={expert.minLiftedIndex === 0 ? "neutraal" : `${expert.minLiftedIndex}°C`}
+                                  detail={expert.minLiftedIndex < 0 ? "Instabiel" : "Marginaal/stabiel"}
+                                />
+                                <ExpertMetric
+                                  label="Remming"
+                                  value={expert.maxCin === 0 ? "open" : `${expert.maxCin} J/kg`}
+                                  detail={expert.maxCin > 30 ? "Rem aanwezig" : "Weinig rem"}
+                                />
                                 <ExpertMetric label="Dauwpunt" value={expert.maxDewPoint === null ? "n/b" : `${expert.maxDewPoint}°C`} detail="Vocht" />
                               </div>
                             </div>
@@ -842,8 +850,16 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
                               <div className="mt-4 grid grid-cols-2 gap-2">
                                 <ExpertMetric label="Onweerskans" value={`${period.maxThunderstormChance}%`} detail="Max periode" />
                                 <ExpertMetric label="WMO onweer" value={`${expert.thunderCodeHours} uur`} detail="95/96/99" />
-                                <ExpertMetric label="Trigger" value={expert.wetHours > 0 ? "Aanwezig" : "Zwak"} detail={`${expert.wetHours} actief uur`} />
-                                <ExpertMetric label="Remming" value={expert.maxCin > 30 ? "Geremd" : "Open"} detail={`CIN ${expert.maxCin}`} />
+                                <ExpertMetric
+                                  label="Trigger"
+                                  value={expert.wetHours > 0 ? "Aanwezig" : "Zwak"}
+                                  detail={expert.wetHours > 0 ? `${expert.wetHours} actief uur` : "geen actief uur"}
+                                />
+                                <ExpertMetric
+                                  label="Remming"
+                                  value={expert.maxCin > 30 ? "Geremd" : "Open"}
+                                  detail={expert.maxCin > 0 ? `CIN ${expert.maxCin}` : "geen rem"}
+                                />
                               </div>
                             </div>
 
@@ -915,11 +931,11 @@ export default function ReedExtended({ initialWeather, initialCity, locale = "nl
                                     {expert.timeline.map((hour) => (
                                       <tr key={`${period.startHour}-${hour.time}`}>
                                         <td className="px-4 py-3 font-black text-text-primary">{formatHourShort(hour.time, copy.dateLocale)}</td>
-                                        <td className="px-4 py-3 text-text-secondary">{(hour.precipitation || 0).toFixed(1)} mm</td>
-                                        <td className="px-4 py-3 text-text-secondary">{Math.round(hour.cape || 0)}</td>
-                                        <td className="px-4 py-3 text-text-secondary">{hour.liftedIndex ?? 0}</td>
-                                        <td className="px-4 py-3 text-text-secondary">{hour.cin ?? 0}</td>
-                                        <td className="px-4 py-3 text-text-secondary">{Math.round(hour.windSpeed || 0)} km/h</td>
+                                        <td className="px-4 py-3 text-text-secondary">{(hour.precipitation || 0) > 0 ? `${(hour.precipitation || 0).toFixed(1)} mm` : "—"}</td>
+                                        <td className="px-4 py-3 text-text-secondary">{(hour.cape || 0) > 0 ? Math.round(hour.cape || 0) : "—"}</td>
+                                        <td className="px-4 py-3 text-text-secondary">{hour.liftedIndex !== 0 && hour.liftedIndex !== null && hour.liftedIndex !== undefined ? hour.liftedIndex : "—"}</td>
+                                        <td className="px-4 py-3 text-text-secondary">{hour.cin !== 0 && hour.cin !== null && hour.cin !== undefined ? hour.cin : "—"}</td>
+                                        <td className="px-4 py-3 text-text-secondary">{Math.round(hour.windSpeed || 0) > 0 ? `${Math.round(hour.windSpeed || 0)} km/h` : "—"}</td>
                                         <td className="px-4 py-3 text-text-secondary">{hour.weatherCode}</td>
                                       </tr>
                                     ))}

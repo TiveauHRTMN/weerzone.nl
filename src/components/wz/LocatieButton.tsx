@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react";
 import { MapPin, Loader2, AlertCircle } from "lucide-react";
 import { persistCity } from "@/lib/persist-city";
-import { detectLocale } from "@/config/locales";
 
 interface Props {
   active?: boolean;
   compact?: boolean;
-  locale?: "nl" | "de";
+  locale?: "nl";
 }
 
 type State = "idle" | "loading" | "found" | "error";
@@ -17,8 +16,7 @@ export default function LocatieButton({ active = false, compact = false, locale 
   const [state, setState] = useState<State>("idle");
   const [found, setFound] = useState<string | null>(null);
   const [currentCity, setCurrentCity] = useState<string | null>(null);
-  const navLocale =
-    locale ?? (typeof window === "undefined" ? "nl" : detectLocale(window.location.pathname));
+  const navLocale = "nl";
 
   useEffect(() => {
     const saved = localStorage.getItem("wz_city");
@@ -47,16 +45,14 @@ export default function LocatieButton({ active = false, compact = false, locale 
   }, []);
 
   function goToWeather(province: string, slug: string) {
-    window.location.href = navLocale === "de"
-      ? `/de/wetter/${province}/${slug}`
-      : `/weer/${province}/${slug}`;
+    window.location.href = `/weer/${province}/${slug}`;
   }
 
   function handleClick() {
     if (state === "loading") return;
 
     if (!navigator.geolocation) {
-      window.location.href = navLocale === "de" ? "/de/wetter" : "/weer";
+      window.location.href = "/weer";
       return;
     }
 
@@ -79,13 +75,13 @@ export default function LocatieButton({ active = false, compact = false, locale 
             throw new Error("Geen plaats gevonden");
           }
         } catch (err) {
-          console.error("Locatie error:", err);
+          if (process.env.NODE_ENV !== "production") console.error("Locatie error:", err);
           setState("error");
           setTimeout(() => setState("idle"), 3000);
         }
       },
       (err) => {
-        console.warn("GPS fout:", err.code, err.message);
+        if (process.env.NODE_ENV !== "production") console.warn("GPS fout:", err.code, err.message);
         setState("error");
         setTimeout(() => setState("idle"), 4000);
       },
@@ -103,11 +99,11 @@ export default function LocatieButton({ active = false, compact = false, locale 
       : state === "found" ? (found ?? currentCity)
       : currentCity;
 
-  const idleLabel = navLocale === "de" ? "Dein Standort" : "Jouw locatie";
-  const loadingLabel = navLocale === "de" ? "Standort suchen…" : "Locatie zoeken…";
-  const foundLabel = navLocale === "de" ? "Gefunden!" : "Gevonden!";
-  const errorLabel = navLocale === "de" ? "Kein GPS-Zugriff" : "Geen GPS toegang";
-  const ariaLabel = navLocale === "de" ? "Zu deinem Standort" : "Spring naar jouw locatie";
+  const idleLabel = "Jouw locatie";
+  const loadingLabel = "Locatie zoeken...";
+  const foundLabel = "Gevonden!";
+  const errorLabel = "Geen GPS toegang";
+  const ariaLabel = "Spring naar jouw locatie";
 
   if (compact) {
     return (

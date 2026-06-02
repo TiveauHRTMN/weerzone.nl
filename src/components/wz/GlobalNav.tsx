@@ -6,11 +6,6 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Globe2, Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "@/components/NLPulse";
-import BEPulse from "@/components/BEPulse";
-import DEPulse from "@/components/DEPulse";
-import FRPulse from "@/components/FRPulse";
-import LuxPulse from "@/components/LuxPulse";
-import ESPulse from "@/components/ESPulse";
 import LocatieButton from "@/components/wz/LocatieButton";
 import { useSession } from "@/lib/session-context";
 import type { PersonaTier } from "@/lib/personas";
@@ -60,39 +55,13 @@ const HIDDEN_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", 
 
 const COUNTRIES = [
   { code: "nl", label: "NL", href: "/" },
-  { code: "be", label: "BE", href: "/be" },
-  { code: "de", label: "DE", href: "/de" },
-  { code: "fr", label: "FR", href: "/fr" },
-  { code: "lu", label: "LU", href: "/lu" },
-  { code: "es", label: "ES", href: "/es" },
-] as const;
-
-const BE_PROVINCES = [
-  "antwerpen",
-  "limburg-be",
-  "oost-vlaanderen",
-  "vlaams-brabant",
-  "west-vlaanderen",
-  "wallonie",
 ] as const;
 
 function activeCountry(pathname: string, locale: Locale) {
-  if (pathname === "/be" || pathname.startsWith("/be/")) return "be";
-  if (pathname === "/lu" || pathname.startsWith("/lu/")) return "lu";
-  if (pathname.includes("luxembourg")) return "lu";
-  if (BE_PROVINCES.some((province) => pathname.includes(`/${province}`))) return "be";
-  if (locale === "de") return "de";
-  if (locale === "fr") return "fr";
-  if (locale === "es") return "es";
   return "nl";
 }
 
 function CountryPulse({ country }: { country: string }) {
-  if (country === "be") return <BEPulse />;
-  if (country === "de") return <DEPulse />;
-  if (country === "fr") return <FRPulse />;
-  if (country === "lu") return <LuxPulse />;
-  if (country === "es") return <ESPulse />;
   return <NLPulse />;
 }
 
@@ -177,39 +146,21 @@ export default function GlobalNav() {
   const localeConfig = LOCALES[locale];
   const links = localeConfig.nav;
   const homeHref = localeConfig.routes.home;
-  const isDE = locale === "de";
-  const isFR = locale === "fr";
-  const isES = locale === "es";
   const country = activeCountry(pathname, locale);
-  // Overlay-regio's (België → NL-basis, Luxembourg → FR-basis). De auth-flow
-  // herkent deze via ?lang=be / ?lang=lu zodat home-link en regionale touches
-  // kloppen na inloggen.
-  const isBE = country === "be";
-  const isLU = country === "lu";
-  const loginHref = isBE ? "/app/login?lang=be"
-    : isLU ? "/app/login?lang=lu"
-    : isES ? "/app/login?lang=es"
-    : isFR ? "/app/login?lang=fr"
-    : isDE ? "/app/login?lang=de"
-    : "/app/login";
-  const signupHref = isES ? "/app/signup?lang=es"
-    : isFR ? "/app/signup?lang=fr"
-    : isDE ? "/app/signup?lang=de"
-    : isLU ? "/app/signup?lang=lu"
-    : isBE ? "/app/signup?lang=be"
-    : "/app/signup";
+  const loginHref = "/app/login";
+  const signupHref = "/app/signup";
 
   function isActive(linkHref: string, key: string) {
-    if (key === "mijnweer" || key === "piet" || key === "mein-wetter" || key === "ma-meteo" || key === "mi-tiempo") {
-      const myWeatherPath = isES ? "/es/mi-tiempo" : isFR ? "/fr/mon-meteo" : isDE ? "/de/mein-wetter" : "/piet";
-      const weatherPath = isES ? "/es/tiempo" : isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer";
+    if (key === "mijnweer" || key === "piet") {
+      const myWeatherPath = "/piet";
+      const weatherPath = "/weer";
       return pathname.startsWith(myWeatherPath) || pathname.startsWith(weatherPath) || pathname.startsWith("/jouwweer");
     }
-    if (key === "reed" || key === "warnungen" || key === "waarschuwingen" || key === "alertes" || key === "alertas") {
-      return pathname.startsWith(isES ? "/es/alertas" : isFR ? "/fr/alertes" : isDE ? "/de/warnungen" : "/reed");
+    if (key === "reed" || key === "waarschuwingen") {
+      return pathname.startsWith("/reed");
     }
-    if (key === "uber-uns" || key === "over" || key === "a-propos" || key === "sobre-nosotros") return pathname.startsWith(isES ? "/es/sobre-nosotros" : isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns" : "/over");
-    if (key === "kontakt" || key === "contact" || key === "contacto") return pathname.startsWith(isES ? "/es/contacto" : isFR ? "/fr/contact" : isDE ? "/de/kontakt" : "/contact");
+    if (key === "over") return pathname.startsWith("/over");
+    if (key === "contact") return pathname.startsWith("/contact");
     return pathname === linkHref || pathname.startsWith(linkHref + "/");
   }
 
@@ -261,7 +212,7 @@ export default function GlobalNav() {
         <div className="flex-1 min-w-0 flex justify-end lg:justify-start">
           <LocatieButton 
             locale={locale} 
-            active={pathname.startsWith(isES ? "/es/tiempo" : isFR ? "/fr/meteo" : isDE ? "/de/wetter" : "/weer")}
+            active={pathname.startsWith("/weer")}
             className="!h-[36px] !px-4 !rounded-xl !text-[10px] !font-black !uppercase !tracking-widest shadow-sm"
           />
         </div>
@@ -295,7 +246,7 @@ export default function GlobalNav() {
                   className={actionBtnClass}
                   style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}
                 >
-                  {isES ? "Cerrar sesion" : isFR ? "Deconnexion" : isDE ? "Abmelden" : "Log uit"}
+                  Log uit
                 </button>
               </>
             ) : (
@@ -311,10 +262,10 @@ export default function GlobalNav() {
                     color: "#0f1a2c",
                   }}
                 >
-                  {isES ? "Iniciar sesion" : isFR || isLU ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                  Inloggen
                 </Link>
                 <Link href={signupHref} className={actionBtnClass} style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}>
-                  {isES ? "Empezar" : isFR || isLU ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                  Aanmelden
                 </Link>
               </>
             )}
@@ -342,15 +293,15 @@ export default function GlobalNav() {
               <nav className="grid gap-1">
                 {(() => {
                   const composed: typeof links = [...links];
-                  const overHref    = isES ? "/es/sobre-nosotros" : isFR ? "/fr/a-propos" : isDE ? "/de/uber-uns"  : "/over";
-                  const contactHref = isES ? "/es/contacto"       : isFR ? "/fr/contact"  : isDE ? "/de/kontakt"   : "/contact";
-                  const overLabel    = isES ? "Sobre nosotros" : isFR ? "A propos" : isDE ? "Ueber uns" : "About";
-                  const contactLabel = isES ? "Contacto" : "Contact";
+                  const overHref = "/over";
+                  const contactHref = "/contact";
+                  const overLabel = "About";
+                  const contactLabel = "Contact";
                   if (!composed.some(l => l.href === overHref)) {
-                    composed.push({ key: isES ? "sobre-nosotros" : "a-propos", label: overLabel,    href: overHref,    weight: "muted" });
+                    composed.push({ key: "over", label: overLabel, href: overHref, weight: "muted" });
                   }
                   if (!composed.some(l => l.href === contactHref)) {
-                    composed.push({ key: isES ? "contacto" : "contact",        label: contactLabel, href: contactHref, weight: "muted" });
+                    composed.push({ key: "contact", label: contactLabel, href: contactHref, weight: "muted" });
                   }
                   return composed.map(l => {
                     const active = isActive(l.href, l.key);
@@ -418,7 +369,7 @@ export default function GlobalNav() {
             {/* Column 2: Account Actions (Shown in menu for mobile/tablet) */}
             <div className="lg:hidden">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">
-                {isES ? "Cuenta" : isFR ? "Compte" : "Account"}
+                Account
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {user ? (
@@ -435,16 +386,16 @@ export default function GlobalNav() {
                       }}
                       className="py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]"
                     >
-                      {isES ? "Cerrar sesion" : isFR ? "Deconnexion" : isDE ? "Abmelden" : "Log uit"}
+                      Log uit
                     </button>
                   </>
                 ) : (
                   <>
                     <Link href={loginHref} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest transition-all bg-black/5 border border-black/5" style={{ color: "#0f1a2c" }}>
-                      {isES ? "Iniciar sesion" : isFR || isLU ? "Se connecter" : isDE ? "Anmelden" : "Inloggen"}
+                      Inloggen
                     </Link>
                     <Link href={signupHref} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
-                      {isES ? "Empezar" : isFR || isLU ? "S'inscrire" : isDE ? "Jetzt starten" : "Aanmelden"}
+                      Aanmelden
                     </Link>
                   </>
                 )}
@@ -457,17 +408,7 @@ export default function GlobalNav() {
                <div className="space-y-4">
                   <div className="p-5 rounded-3xl bg-black/5 border border-black/5">
                      <p className="text-base font-black text-slate-900 leading-tight">
-                        {country === "be"
-                          ? "Lokaal weer voor Belgie. Vandaag en morgen."
-                          : country === "lu"
-                            ? "Meteo locale au Luxembourg. Aujourd'hui et demain."
-                            : isES
-                              ? "Tiempo local. Hoy y manana."
-                              : isFR
-                                ? "Meteo locale. Aujourd'hui et demain."
-                                : isDE
-                                  ? "Lokales Wetter. Heute und morgen."
-                                  : "Weer voor jouw plek. Vandaag en morgen."}
+                        Weer voor jouw plek. Vandaag en morgen.
                      </p>
                   </div>
                </div>

@@ -5,7 +5,9 @@ import ee from '@google/earthengine';
 // dat is toegevoegd aan je Google Cloud / Earth Engine project.
 export async function initializeEarthEngine(privateKey: string) {
   return new Promise((resolve, reject) => {
-    console.log("Authenticating Earth Engine...");
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Authenticating Earth Engine...");
+    }
     
     // Auth gebeurt meestal server-side via een Service Account token
     ee.data.authenticateViaPrivateKey(
@@ -15,7 +17,9 @@ export async function initializeEarthEngine(privateKey: string) {
           null, 
           null, 
           () => {
-            console.log("Google Earth Engine initialized successfully.");
+            if (process.env.NODE_ENV !== "production") {
+              console.log("Google Earth Engine initialized successfully.");
+            }
             resolve(true);
           }, 
           (err: any) => {

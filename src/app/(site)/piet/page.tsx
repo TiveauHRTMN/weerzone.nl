@@ -30,9 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: "https://weerzone.nl/piet",
       languages: hreflangCluster({
         nl: "/piet",
-        de: "/de/mein-wetter",
-        fr: "/fr/mon-meteo",
-        es: "/es/mi-tiempo",
       }),
     },
     openGraph: {

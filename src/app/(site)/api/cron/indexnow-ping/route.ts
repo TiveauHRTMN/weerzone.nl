@@ -14,19 +14,9 @@ const STATIC_URLS = [
   "https://weerzone.nl/weer",
   "https://weerzone.nl/piet",
   "https://weerzone.nl/reed",
+  "https://weerzone.nl/koos",
+  "https://weerzone.nl/steve",
   "https://weerzone.nl/over",
-  "https://weerzone.nl/de",
-  "https://weerzone.nl/de/wetter",
-  "https://weerzone.nl/de/mein-wetter",
-  "https://weerzone.nl/de/warnungen",
-  "https://weerzone.nl/fr",
-  "https://weerzone.nl/fr/meteo",
-  "https://weerzone.nl/fr/mon-meteo",
-  "https://weerzone.nl/fr/alertes",
-  "https://weerzone.nl/es",
-  "https://weerzone.nl/es/tiempo",
-  "https://weerzone.nl/es/mi-tiempo",
-  "https://weerzone.nl/es/alertas",
 ];
 
 export async function GET(req: Request) {

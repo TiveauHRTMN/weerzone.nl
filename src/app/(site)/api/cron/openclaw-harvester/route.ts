@@ -28,7 +28,9 @@ export async function GET(req: Request) {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
     const province = PROVINCES[dayOfYear % PROVINCES.length];
     
-    console.log(`🕵️‍♂️ OpenClaw: Patrolling ${province}...`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`OpenClaw: Patrolling ${province}...`);
+    }
 
     // 2. Search for common suffixes in this province to find micro-locaties
     const searchTerms = ["dorp", "buurt", "wijk", "straat", "park"];

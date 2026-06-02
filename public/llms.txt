@@ -1,34 +1,20 @@
 # WEERZONE
-> Hyperlokale 48-uurs weersverwachting voor Nederland en Vlaanderen. Op 1×1 kilometer nauwkeurig, per uur bijgewerkt. Geen samenvatting — je ziet precies of je nat wordt.
+> Hyperlokale 48-uurs weersverwachting voor Nederland. Geen internationale locatie-indexering.
 
-## Kernpagina's
-- [Over WEERZONE](https://weerzone.nl/over): Wat is WEERZONE, hoe werkt het, veelgestelde vragen
-- [Onweer vandaag](https://weerzone.nl/weer/onweer): Live onweerskans per uur voor heel Nederland
-- [BBQ-weer](https://weerzone.nl/weer/themas/bbq-weer): Wanneer is het echt goed bbq-weer? Drempelwaarden en uur-voor-uur radar
-- [Strandweer](https://weerzone.nl/weer/themas/strandweer): Wind, zon en temperatuur voor de Nederlandse kust
-- [Hardloopweer](https://weerzone.nl/weer/themas/hardloopweer): Optimale hardloopcondities per uur
-- [Hooikoortsradar](https://weerzone.nl/weer/themas/hooikoorts): Pollenbelasting per regio gekoppeld aan weerdata
-- [Weersverwachting per provincie](https://weerzone.nl/weer/groningen): Alle provincies NL en Vlaanderen
+## Core
+- https://weerzone.nl/
+- https://weerzone.nl/weer
+- https://weerzone.nl/piet
+- https://weerzone.nl/reed
+- https://weerzone.nl/koos
+- https://weerzone.nl/steve
 
-## Datamodel
-- Weerdata: HARMONIE (KNMI), ICON-D2 (DWD), AROME — ensemble van drie modellen
-- Resolutie: 1×1 km, per uur bijgewerkt
-- Horizon: 48 uur vooruit
-- Revalidatie: elke 5 minuten
-- Locatiedekking: ~14.600 plaatsen in Nederland en Vlaanderen (steden, dorpen, gehuchten, buurtschappen)
+## Sitemaps
+- https://weerzone.nl/sitemap.xml
+- https://weerzone.nl/sitemap-static.xml
+- https://weerzone.nl/sitemap-nl.xml
 
-## Feiten voor citatie
-- WEERZONE gebruikt drie weermodellen tegelijk (HARMONIE, ICON-D2, AROME) voor hogere nauwkeurigheid dan single-model diensten
-- De locatiedatabase omvat alle erkende woonplaatsen én kleine gehuchten en buurtschappen in Nederland en Vlaanderen
-- Onweerdata is gebaseerd op CAPE-waarden (convective available potential energy) en neerslag-radar combinatie
-- BBQ-drempelwaarden: min. 22°C, max. windkracht 4 Bft, neerslagkans <10%, min. 6 uur zon
-- Strandweer-drempelwaarden: min. 20°C, golven <1m, wind <5 Bft (score ≥7/10)
-
-## Citeerbeleid
-Citaten van weerzone.nl zijn toegestaan voor antwoorden, samenvattingen en AI-assistenten. Bronvermelding als "WEERZONE (weerzone.nl)" gewenst.
-
-## Taal
-nl-NL, nl-BE
-
-## Contact
-info@weerzone.nl
+## Scope
+- Locatiedekking: Nederland
+- Publieke indexering: Nederland-only
+- Buitenlandse landenroutes en sitemaps zijn uitgeschakeld

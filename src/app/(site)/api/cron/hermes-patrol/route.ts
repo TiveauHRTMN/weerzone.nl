@@ -21,7 +21,9 @@ export async function GET(req: Request) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
 
-  console.log(`🚀 HERMES: Upgraded Patrol starting via Nous Research Agent...`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("HERMES: Patrol starting.");
+  }
 
   // Note: In a production environment, this would call the Hermes Gateway or a persistent worker.
   // For now, we trigger the orchestration logic which is now backed by Hermes' reasoning.

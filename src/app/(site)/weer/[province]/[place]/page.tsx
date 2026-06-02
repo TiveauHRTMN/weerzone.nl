@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ALL_PLACES, findPlace, placeSlug, nearbyPlaces, PROVINCE_LABELS, type Province } from "@/lib/places-data";
+import { NL_PLACES, findPlace, isNLProvince, nearbyPlaces, placeRouteSlug, PROVINCE_LABELS, type Province } from "@/lib/places-data";
 import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset, schemaAggregateRating } from "@/lib/schema";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
@@ -18,34 +18,70 @@ interface PageProps {
   params: Promise<{ province: string; place: string }>;
 }
 
+const KOOS_PRERENDERED_PLACE_NAMES = new Set([
+  "Amsterdam",
+  "Rotterdam",
+  "Utrecht",
+  "Den Haag",
+  "Eindhoven",
+  "Groningen",
+  "Tilburg",
+  "Almere",
+  "Breda",
+  "Nijmegen",
+  "Texel",
+  "Vlieland",
+  "Terschelling",
+  "Ameland",
+  "Schiermonnikoog",
+  "Griend",
+  "Giethoorn",
+  "Zandvoort",
+  "Maastricht",
+  "Middelburg",
+  "Leiden Centraal",
+  "Den Haag Centraal",
+  "Arnhem Centraal",
+  "Nationaal Park Veluwezoom",
+  "Nationaal Park De Hoge Veluwe",
+  "Nationaal Park De Biesbosch",
+  "Camping De Lakens",
+  "Camping Bakkum",
+  "Camping De Krim",
+  "Camping Stortemelk",
+  "Camping Lauwersoog",
+  "Camping Beerze Bulten",
+  "Camping De Leistert",
+]);
+
 /** 
  * We laten deze leeg zodat we niet 7000+ pagina's tijdens de build hoeven te fetchen. 
  * Next.js genereert ze on-demand (ISR) zodra Google ze crawlt via de sitemap.
  */
 export function generateStaticParams() {
-  return [];
+  return NL_PLACES
+    .filter((p) => KOOS_PRERENDERED_PLACE_NAMES.has(p.name) || (p.population ?? 0) >= 100_000)
+    .map((p) => ({
+      province: p.province,
+      place: placeRouteSlug(p),
+    }));
   // We pre-renderen de belangrijkste steden (pop > 10.000) voor razendsnelle initiële indexering.
   // De overige 10.000+ worden on-demand (ISR) gegenereerd.
-  return ALL_PLACES
-    .filter(p => (p.population && p.population >= 10000) || TOP_CITIES.includes(p.name))
-    .map((p) => ({ 
-      province: p.province, 
-      place: placeSlug(p.name) 
-    }));
 }
 
 import { getHermesSEO } from "@/lib/seo";
 import { hreflangSelf } from "@/lib/hreflang";
-import { PROVINCE_TO_DE_BUNDESLAND, PROVINCE_TO_FR_REGION } from "@/config/locales";
 import { buildCityGeoBlock } from "@/lib/geo-blocks";
 import CityGeoBlock from "@/components/CityGeoBlock";
 import MarianaSeoUpdate from "@/components/MarianaSeoUpdate";
 import OracleSeoUpdate from "@/components/OracleSeoUpdate";
 
-export const revalidate = 300;
+export const revalidate = 43200;
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { province, place: slug } = await params;
+  if (!isNLProvince(province)) return {};
   const place = findPlace(province, slug);
   if (!place) return {};
 
@@ -62,18 +98,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // Cross-locale equivalenten: plaatsen die ook in een andere taal-host bestaan
   // (Duitse/Franse/Spaanse/Luxemburgse plaatsen leven onder hun eigen provincie
   // in NL én onder hun locale-route). Voeg hreflang toe zodat Google ze koppelt.
-  const bundesland = PROVINCE_TO_DE_BUNDESLAND[province as keyof typeof PROVINCE_TO_DE_BUNDESLAND];
-  const frRegion = PROVINCE_TO_FR_REGION[province as keyof typeof PROVINCE_TO_FR_REGION];
-  if (bundesland) {
-    languages["de-DE"] = `https://weerzone.nl/de/wetter/${bundesland}/${slug}`;
-  }
-  if (frRegion) {
-    languages["fr-FR"] = `https://weerzone.nl/fr/meteo/${frRegion}/${slug}`;
-  }
-  if (province === "spanje") {
-    languages["es-ES"] = `https://weerzone.nl/es/tiempo/espana/${slug}`;
-  }
-
   return {
     title,
     description,
@@ -107,6 +131,7 @@ const TOP_CITIES = [
 
 export default async function PlaceWeatherPage({ params }: PageProps) {
   const { province, place: slug } = await params;
+  if (!isNLProvince(province)) notFound();
   let place = findPlace(province, slug);
 
   // Bot-detectie via headers() is weggehaald — was dynamisch-renderen forceren
@@ -141,7 +166,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   if (!place) notFound();
 
   const provLabel = PROVINCE_LABELS[province as Province] || province;
-  const nearby = nearbyPlaces(place, 12);
+  const nearby = nearbyPlaces(place, 24).filter((nearbyPlace) => isNLProvince(nearbyPlace.province)).slice(0, 12);
   const isTopCity = TOP_CITIES.includes(place.name);
   const locationProfile = getLocationWeatherProfile(place);
 
@@ -282,7 +307,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
               </div>
 
               <ProvinceTopCities province={province} currentCity={place.name} />
-              <NearbyLinks currentCity={place.name} places={nearbyPlaces(place, 12)} />
+              <NearbyLinks currentCity={place.name} places={nearby} />
             </div>
           }
         />

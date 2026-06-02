@@ -6,6 +6,8 @@ export async function proxy(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const pathname = request.nextUrl.pathname;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-wz-locale", "nl");
   
   // 1. Skip middleware for static assets, public files, and non-app routes
   if (
@@ -14,7 +16,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api') || 
     !pathname.startsWith('/app')
   ) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // 2. Define Public App Routes (NO redirect to login)
@@ -24,7 +26,7 @@ export async function proxy(request: NextRequest) {
     pathname === "/app/reset" ||
     pathname === "/app/onboarding"; // Onboarding is public-ish but needs user data later
 
-  let response = NextResponse.next({ request });
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
 
   if (!url || !key) return response;
 
@@ -35,7 +37,7 @@ export async function proxy(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        response = NextResponse.next({ request: { headers: requestHeaders } });
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options),
         );
@@ -52,7 +54,9 @@ export async function proxy(request: NextRequest) {
 
   // 4. Protect private app routes
   if (!user) {
-    console.log(`[MIDDLEWARE] No user found for ${pathname}, redirecting to login`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[MIDDLEWARE] No user found for ${pathname}, redirecting to login`);
+    }
     const redirectUrl = new URL("/app/login", request.url);
     redirectUrl.searchParams.set("next", pathname);
     
@@ -70,5 +74,5 @@ export async function proxy(request: NextRequest) {
 export default proxy;
 
 export const config = {
-  matcher: ["/app/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

@@ -29,10 +29,6 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/karl-morning-email",
-      "schedule": "0 6 * * *"
-    },
-    {
       "path": "/api/cron/indexnow-ping",
       "schedule": "0 5 * * *"
     }

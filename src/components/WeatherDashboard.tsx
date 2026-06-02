@@ -31,7 +31,6 @@ const RainRadar = dynamic(() => import("./RainRadar"), {
 const EmailSubscribe = dynamic(() => import("./EmailSubscribe"), { ssr: false });
 const WeatherAdvice = dynamic(() => import("./WeatherAdvice"), { ssr: false });
 const SupportBanner = dynamic(() => import("./SupportBanner"), { ssr: false });
-const PersonaNarrativeLoader = dynamic(() => import("./PersonaNarrativeLoader"), { ssr: false });
 
 interface DashboardProps {
   initialCity?: City;
@@ -144,12 +143,12 @@ const DASHBOARD_COPY: Record<Locale, {
     currentWeather: "Aktuelles Wetter",
     feelsLike: "Fuehlt sich an wie",
     narrativeLabel: "Kurzer Wetterbericht fuer heute",
-    ctaHref: "/de/mein-wetter",
+    ctaHref: "/piet",
     ctaKicker: "Mein Wetter",
     ctaTitle: "Dein persoenlicher Wetterbericht",
     ctaBody: "Kleidungstipps, Tagesabschnitte, UV und heute versus morgen - direkt fuer deine Entscheidung.",
     ctaAction: "Mein Wetter ansehen",
-    warningsHref: "/de/warnungen",
+    warningsHref: "/reed",
     warningsKicker: "Warnungen",
     warningsTitle: "Keine Ueberraschungen bei Extremwetter",
     warningsBody: "Wir beobachten die Lage rund um die Uhr. Von starken Boeen bis zu nahendem Gewitter - du siehst es direkt fuer deinen Standort.",
@@ -164,12 +163,12 @@ const DASHBOARD_COPY: Record<Locale, {
     currentWeather: "Meteo actuelle",
     feelsLike: "Ressenti",
     narrativeLabel: "Le point météo du jour",
-    ctaHref: "/fr/mon-meteo",
+    ctaHref: "/piet",
     ctaKicker: "Ma Météo",
     ctaTitle: "Votre meteo personnelle",
     ctaBody: "Un bulletin clair pour ta ville: pluie, vent, soleil et le bon conseil pour les prochaines 48 heures.",
     ctaAction: "Voir Ma Meteo",
-    warningsHref: "/fr/alertes",
+    warningsHref: "/reed",
     warningsKicker: "Alertes",
     warningsTitle: "Pas de surprise en cas de temps violent",
     warningsBody: "Vent, pluie, orages ou chaleur: les seuils importants sont traduits en decisions simples pour votre lieu.",
@@ -184,12 +183,12 @@ const DASHBOARD_COPY: Record<Locale, {
     currentWeather: "Tiempo actual",
     feelsLike: "Sensacion",
     narrativeLabel: "Resumen del tiempo para hoy",
-    ctaHref: "/es/mi-tiempo",
+    ctaHref: "/piet",
     ctaKicker: "Mi tiempo",
     ctaTitle: "Tu parte personal del tiempo",
     ctaBody: "Las proximas 48 horas traducidas a decisiones concretas para tu calle, costa, isla, sierra o ciudad.",
     ctaAction: "Ver Mi tiempo",
-    warningsHref: "/es/alertas",
+    warningsHref: "/reed",
     warningsKicker: "Alertas",
     warningsTitle: "Sin sorpresas con tiempo extremo",
     warningsBody: "Lluvia, viento, tormenta, calor o frio: las alertas se explican para tu ubicacion y tus limites.",
@@ -248,7 +247,6 @@ export default function WeatherDashboard({
   hideWeatherInfo,
   slimMode,
   showRainRadar,
-  initialNarrative,
   deferBelowFold = false,
   lightweightBackground = false,
   showSupportBanner = true,
@@ -263,7 +261,6 @@ export default function WeatherDashboard({
   const [hourlyMetric, setHourlyMetric] = useState<"temp" | "rain" | "wind">("temp");
   const [isLocating, setIsLocating] = useState(false);
   const [activeActivity, setActiveActivity] = useState<string | null>(null);
-  const [personaNarrative, setPersonaNarrative] = useState<string | null>(initialNarrative ?? null);
   const [showDeferredContent, setShowDeferredContent] = useState(!deferBelowFold);
   const hourlyScrollRef = useRef<HTMLDivElement>(null);
   const copy = DASHBOARD_COPY[locale];
@@ -476,12 +473,9 @@ export default function WeatherDashboard({
 
   const summaryWords = weather?.summaryVerdict?.split(/\s+/).filter(Boolean).length ?? 0;
   const narrative = weather
-    ? (isNL
-      ? wws?.piet_update?.content
-        || (summaryWords >= 20 ? weather.summaryVerdict : null)
-        || getMainCommentary(weather)
-      : personaNarrative
-        || (summaryWords >= 20 ? weather.summaryVerdict : null))
+    ? (wws?.piet_update?.content
+      || (summaryWords >= 20 ? weather.summaryVerdict : null)
+      || getMainCommentary(weather))
     : null;
   const backgroundWeatherCode = weather?.current.weatherCode ?? initialWeatherCode ?? 2;
   const backgroundIsDay = weather?.current.isDay ?? initialIsDay ?? true;
@@ -495,16 +489,6 @@ export default function WeatherDashboard({
       <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
         {showSupportBanner && <SupportBanner locale={locale} />}
         {topContent}
-        {!isNL && weather && (
-          <PersonaNarrativeLoader
-            city={city}
-            weather={weather}
-            locale={locale}
-            initialNarrative={initialNarrative}
-            onNarrative={setPersonaNarrative}
-          />
-        )}
-
         <div className="flex flex-col gap-6 animate-fade-in">
           {!hideWeatherInfo && weather && (
             <>

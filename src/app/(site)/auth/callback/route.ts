@@ -13,13 +13,17 @@ export async function GET(request: NextRequest) {
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/app";
 
   if (code) {
-    console.log(`[AUTH-CALLBACK] Exchanging code for session...`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[AUTH-CALLBACK] Exchanging code for session...`);
+    }
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log(`[AUTH-CALLBACK] Success! User: ${user?.email}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[AUTH-CALLBACK] Success! User: ${user?.email}`);
+      }
 
       if (user && next.startsWith("/wkpoule")) {
         await ensureHartmanWkPouleMembership(user.id, {

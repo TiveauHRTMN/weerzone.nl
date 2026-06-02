@@ -31,7 +31,9 @@ export async function GET(req: Request) {
 
       // Als cache minder dan 15 min oud is: return direct
       if (cached && (Date.now() - new Date(cached.created_at).getTime() < 15 * 60 * 1000)) {
-        console.log(`[WWS API] Serving cached truth for ${lat},${lon}`);
+        if (process.env.NODE_ENV !== "production") {
+          console.log(`[WWS API] Serving cached truth for ${lat},${lon}`);
+        }
         return NextResponse.json(cached.payload);
       }
     } catch (err) {
@@ -40,7 +42,9 @@ export async function GET(req: Request) {
   }
 
   // 2. Fallback: Directe synthese (traag, maar gegarandeerd data)
-  console.log(`[WWS API] Cache miss or expired. Executing direct orchestrator for ${lat},${lon}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[WWS API] Cache miss or expired. Executing direct orchestrator for ${lat},${lon}`);
+  }
   const payload = await executeWWSOrchestrator(lat, lon);
 
   if (!payload) {

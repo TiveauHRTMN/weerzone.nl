@@ -1177,70 +1177,12 @@ airdrop_targets: geordende lijst van ["Jupiter", "Sanctum", "Kamino"] — zet va
 def execute_oracle_action(prediction):
     """
     Directe actie op basis van Oracle-oordeel.
-    Wordt alleen aangeroepen bij een verse voorspelling, niet vanuit cache.
+    DECOUPLED: Deze actie is gedeactiveerd. Oracle AI is nu ontkoppeld van Magnolia crypto
+    en functioneert als het 48-96 uur weer-arbitragemodel voor Weerzone.
     """
-    if not config.ORACLE_DIRECT_ACTIONS:
-        print("The Oracle: Directe acties staan uit. Hermes + policy engine nemen uitvoering over.", flush=True)
-        return
-
-    confidence = prediction.get("confidence", 0)
-    sentiment = prediction.get("macro_sentiment", "NEUTRAL")
-    risk = prediction.get("risk_level", "HIGH")
-
-    print(f"\nThe Oracle: Directe actie beoordelen...", flush=True)
-    print(f"  Confidence: {confidence}% | Sentiment: {sentiment} | Risico: {risk}", flush=True)
-
-    if confidence < config.ORACLE_CONFIDENCE_THRESHOLD:
-        print(
-            f"The Oracle: Confidence te laag ({confidence}% < {config.ORACLE_CONFIDENCE_THRESHOLD}%). "
-            f"Geen directe actie — Hermes neemt het over.",
-            flush=True,
-        )
-        return
-
-    # --- BULLISH SOL-positie — kleine openingszet ---
-    if sentiment == "BULLISH" and risk in ["LOW", "MEDIUM"]:
-        print("The Oracle: BULLISH signaal — kleine SOL-positie via Jupiter...", flush=True)
-        try:
-            import check_history
-            import jupiter_swap
-            import paperclip_optimizer
-
-            wallet = check_history.get_wallet_address()
-            if not wallet:
-                print("The Oracle: Geen wallet gevonden. Swap geannuleerd.", flush=True)
-                return
-
-            balance = check_history.check_balance(wallet)
-            sol_balance = balance.get("sol_balance", 0)
-
-            amount_sol = 0.02
-            amount_lamports = int(amount_sol * 1_000_000_000)
-
-            swap_params = {
-                "from": config.USDC_MINT,
-                "to": config.SOL_MINT,
-                "amount_lamports": amount_lamports,
-            }
-
-            is_approved, reason = paperclip_optimizer.evaluate_trade(swap_params, sol_balance)
-            if is_approved:
-                sig = jupiter_swap.swap(config.USDC_MINT, config.SOL_MINT, amount_lamports)
-                if sig:
-                    print(f"The Oracle: BULLISH swap uitgevoerd. Sig: {sig}", flush=True)
-                else:
-                    print("The Oracle: Swap gefaald — geen signature ontvangen.", flush=True)
-            else:
-                print(f"The Oracle: Paperclip blokkeert swap: {reason}", flush=True)
-        except Exception as e:
-            print(f"The Oracle: Swap fout: {e}", flush=True)
-
-    else:
-        print(
-            f"The Oracle: Geen directe actie (sentiment={sentiment}, risk={risk}). "
-            f"Hermes neemt het over in de reguliere cyclus.",
-            flush=True,
-        )
+    print("\n[DECOUPLED] The Oracle: Directe cryptohandel is gedeactiveerd.", flush=True)
+    print("Oracle AI is overgedragen aan de 48-96 uur meteorologische forecast-engine van Weerzone.", flush=True)
+    return
 
 
 if __name__ == "__main__":

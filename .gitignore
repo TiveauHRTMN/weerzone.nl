@@ -87,6 +87,15 @@ temp_extract/
 sitemap_output.xml
 .design-handoff-v2/
 
+# Lokale browser-dumps en GEO-analyses (root scratch)
+/wz-*.html
+/check-*.html
+/GEO-ANALYSIS.md
+
+# Python bytecode cache (magnolia)
+__pycache__/
+*.pyc
+
 # Playwright
 node_modules/
 /test-results/

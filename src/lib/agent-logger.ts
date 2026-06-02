@@ -12,7 +12,9 @@ export async function logAgentAction(
   const supabase = getSupabaseAdmin();
   if (!supabase) return;
 
-  console.log(`[AGENT ${agentName}] ${actionType}: ${description}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[AGENT ${agentName}] ${actionType}: ${description}`);
+  }
 
   try {
     const { error } = await supabase

@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap><loc>https://weerzone.nl/sitemap-static.xml</loc></sitemap>
-  <sitemap><loc>https://weerzone.nl/sitemap-nl.xml</loc></sitemap>
-  <sitemap><loc>https://weerzone.nl/sitemap-be.xml</loc></sitemap>
-  <sitemap><loc>https://weerzone.nl/sitemap-de.xml</loc></sitemap>
-  <sitemap><loc>https://weerzone.nl/sitemap-fr.xml</loc></sitemap>
-  <sitemap><loc>https://weerzone.nl/sitemap-lu.xml</loc></sitemap>
-  <sitemap><loc>https://weerzone.nl/sitemap-es.xml</loc></sitemap>
+  <sitemap><loc>https://weerzone.nl/sitemap-static.xml</loc><lastmod>2026-06-01</lastmod></sitemap>
+  <sitemap><loc>https://weerzone.nl/sitemap-nl.xml</loc><lastmod>2026-06-01</lastmod></sitemap>
 </sitemapindex>

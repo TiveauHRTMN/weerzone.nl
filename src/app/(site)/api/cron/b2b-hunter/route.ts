@@ -62,7 +62,9 @@ export async function GET(req: Request) {
           // AWS Bedrock Agent Simulation: "Market Awareness"
           // In 2026, we check for local events, festivals, or news that amplifies the weather impact
           const marketContext = `Local event check for ${city}: Possible outdoor activity spike.`;
-          console.log(`[Bedrock Agent Steve] ${marketContext}`);
+          if (process.env.NODE_ENV !== "production") {
+            console.log(`[Bedrock Agent Steve] ${marketContext}`);
+          }
 
           const foundLeads = await findLeadsInCity(city, tier.query);
           

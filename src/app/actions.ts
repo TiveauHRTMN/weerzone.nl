@@ -104,163 +104,24 @@ export async function getStationsWeather(): Promise<Array<{ name: string; temp: 
   }
 }
 
-/**
- * Haalt de actuele temperatuur op voor alle DWD-steden in één batch.
- * Gebruikt voor de DEPulse-Ticker in de GlobalNav.
- */
 export async function getDEStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
-  const { DWD_STATIONS } = await import("@/lib/types");
-
-  const lats = DWD_STATIONS.map(s => s.lat).join(",");
-  const lons = DWD_STATIONS.map(s => s.lon).join(",");
-
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/dwd-icon?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day&timezone=Europe/Berlin&models=icon_d2`,
-      { next: { revalidate: 600 } }
-    );
-
-    if (!res.ok) throw new Error("Open-Meteo DWD batch fetch failed");
-
-    const data = await res.json();
-    const results = Array.isArray(data) ? data : [data];
-
-    return DWD_STATIONS.map((s, i) => ({
-      name: s.name,
-      temp: Math.round(results[i].current.temperature_2m),
-      weatherCode: results[i].current.weather_code ?? 0,
-      isDay: results[i].current.is_day === 1,
-    }));
-  } catch (error) {
-    console.error("getDEStationsWeather error:", error);
-    return [];
-  }
-}
-
-/**
- * Haalt de actuele temperatuur op voor alle FR-steden in één batch.
- * Gebruikt voor de FRPulse-Ticker in de GlobalNav.
- */
-async function getOpenMeteoStationsWeather(
-  stations: Array<{ name: string; lat: number; lon: number }>,
-  timezone: string,
-): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
-  const lats = stations.map((station) => station.lat).join(",");
-  const lons = stations.map((station) => station.lon).join(",");
-
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day&timezone=${timezone}`,
-      { next: { revalidate: 600 } },
-    );
-
-    if (!res.ok) throw new Error("Open-Meteo station batch fetch failed");
-
-    const data = await res.json();
-    const results = Array.isArray(data) ? data : [data];
-
-    return stations.map((station, i) => ({
-      name: station.name,
-      temp: Math.round(results[i].current.temperature_2m),
-      weatherCode: results[i].current.weather_code ?? 0,
-      isDay: results[i].current.is_day === 1,
-    }));
-  } catch (error) {
-    console.error("getOpenMeteoStationsWeather error:", error);
-    return [];
-  }
+  return [];
 }
 
 export async function getBEStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
-  return getOpenMeteoStationsWeather([
-    { name: "Brussel", lat: 50.8503, lon: 4.3517 },
-    { name: "Antwerpen", lat: 51.2194, lon: 4.4025 },
-    { name: "Gent", lat: 51.0543, lon: 3.7174 },
-    { name: "Brugge", lat: 51.2093, lon: 3.2247 },
-    { name: "Hasselt", lat: 50.9307, lon: 5.3325 },
-    { name: "Luik", lat: 50.6326, lon: 5.5797 },
-    { name: "Namur", lat: 50.4674, lon: 4.8719 },
-  ], "Europe/Brussels");
+  return [];
 }
 
 export async function getLUStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
-  return getOpenMeteoStationsWeather([
-    { name: "Luxembourg", lat: 49.6116, lon: 6.1319 },
-    { name: "Esch", lat: 49.4958, lon: 5.9806 },
-    { name: "Diekirch", lat: 49.8678, lon: 6.1558 },
-    { name: "Ettelbruck", lat: 49.8475, lon: 6.1042 },
-    { name: "Grevenmacher", lat: 49.6808, lon: 6.4400 },
-  ], "Europe/Luxembourg");
+  return [];
 }
 
 export async function getFRStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
-  const { FR_STATIONS } = await import("@/lib/types");
-
-  const lats = FR_STATIONS.map(s => s.lat).join(",");
-  const lons = FR_STATIONS.map(s => s.lon).join(",");
-
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day&timezone=Europe/Paris&models=arome_france,best_match`,
-      { next: { revalidate: 600 } }
-    );
-
-    if (!res.ok) throw new Error("Open-Meteo FR batch fetch failed");
-
-    const data = await res.json();
-    const results = Array.isArray(data) ? data : [data];
-
-    return FR_STATIONS.map((s, i) => ({
-      name: s.name,
-      temp: Math.round(results[i].current.temperature_2m),
-      weatherCode: results[i].current.weather_code ?? 0,
-      isDay: results[i].current.is_day === 1,
-    }));
-  } catch (error) {
-    console.error("getFRStationsWeather error:", error);
-    return [];
-  }
+  return [];
 }
 
-/**
- * Haalt actuele temperatuur op voor belangrijke Spaanse steden.
- * Gebruikt voor de ESPulse ticker in de GlobalNav.
- */
 export async function getESStationsWeather(): Promise<Array<{ name: string; temp: number; weatherCode: number; isDay: boolean }>> {
-  const stations = [
-    { name: "Madrid", lat: 40.4165, lon: -3.7026 },
-    { name: "Barcelona", lat: 41.3888, lon: 2.1590 },
-    { name: "Valencia", lat: 39.4739, lon: -0.3797 },
-    { name: "Sevilla", lat: 37.3828, lon: -5.9732 },
-    { name: "Malaga", lat: 36.7202, lon: -4.4203 },
-    { name: "Bilbao", lat: 43.2627, lon: -2.9253 },
-    { name: "Palma", lat: 39.5694, lon: 2.6502 },
-    { name: "Las Palmas", lat: 28.1018, lon: -15.4157 },
-  ];
-
-  const lats = stations.map((s) => s.lat).join(",");
-  const lons = stations.map((s) => s.lon).join(",");
-
-  try {
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day&timezone=Europe/Madrid&models=best_match`,
-      { next: { revalidate: 600 } }
-    );
-    if (!res.ok) throw new Error("Open-Meteo ES batch fetch failed");
-
-    const data = await res.json();
-    const results = Array.isArray(data) ? data : [data];
-
-    return stations.map((s, i) => ({
-      name: s.name,
-      temp: Math.round(results[i].current.temperature_2m),
-      weatherCode: results[i].current.weather_code ?? 0,
-      isDay: results[i].current.is_day === 1,
-    }));
-  } catch (error) {
-    console.error("getESStationsWeather error:", error);
-    return [];
-  }
+  return [];
 }
 
 /**
@@ -447,154 +308,32 @@ KERNREGELS:
   return getMainCommentary(weather);
 }
 
-/**
- * Karl's Wetter-Urteil für Deutschland. Verwendet Mariana (hermesChat / Hermes 4 70b).
- */
 export async function getKarlWeatherVerdict(
-  weather: WeatherData,
-  cityName: string,
-  bundesland: string,
+  _weather: WeatherData,
+  _cityName: string,
+  _bundesland: string,
 ): Promise<string> {
-  let attempts = 0;
-  while (attempts < 3) {
-    try {
-      const tomorrow = weather.daily[1];
-      const maxToday = weather.daily[0]?.tempMax ?? weather.current.temperature;
-      const rainToday = weather.daily[0]?.precipitationSum ?? 0;
-      const sonnig = weather.current.weatherCode === 0 || weather.current.weatherCode === 1;
-      const stimmung =
-        sonnig && maxToday >= 15 ? "sonnig-warm" :
-        rainToday > 5 ? "nass" :
-        maxToday < 5 ? "kalt" : "wechselhaft";
-
-      const prompt = `WETTERDATEN für ${cityName} (${bundesland}):
-- Jetzt: ${getWeatherDescription(weather.current.weatherCode, "de")}, ${weather.current.temperature}°C, gefühlt ${weather.current.feelsLike}°C.
-- Wind: ${weather.current.windSpeed} km/h.
-- Nächste 6 Stunden: ${weather.hourly.slice(0, 6).map(h => `${new Date(h.time).getHours()}:00 ${h.temperature}°`).join(", ")}.
-- Morgen: max ${tomorrow?.tempMax ?? "?"}°C, ${getWeatherDescription(tomorrow?.weatherCode ?? 0, "de")}.
-STIMMUNG: ${stimmung}`;
-
-      const text = (await hermesChat([
-        {
-          role: "system",
-          content: `Du bist Karl — der Wettermann aus der Nachbarschaft. Du schreibst nicht an einen Abonnenten, du schreibst an jemanden, den du kennst. Warm, direkt, ohne Drumherum. Kurze Sätze, einfache Worte. Sag den Leuten konkret was sie tun sollen — Jacke mitnehmen, rausgehen, lieber drin bleiben. 3–4 Sätze. Kein Fachjargon, keine Modellnamen, keine Prozentzahlen, keine KI-Sprache. Keine Zitate bekannter Wettermoderatoren — Karl ist sein eigener Mann. Schließ warm ab.`,
-        },
-        { role: "user", content: prompt },
-      ], { model: "fast", temperature: 0.6, maxTokens: 350 })).trim().replace(/^"|"$/g, "");
-
-      const wordCount = text.split(/\s+/).filter(Boolean).length;
-      if (text && wordCount >= 15 && wordCount < 130) return text;
-      attempts++;
-    } catch (e) {
-      attempts++;
-      console.error(`Karl Wetter-Urteil attempt ${attempts}:`, e);
-    }
-  }
-  return `Aktuell ${weather.current.temperature}°C in ${cityName}. ${weather.daily[1] ? `Morgen bis ${weather.daily[1].tempMax}°C.` : ""} Bleib auf dem Laufenden mit Karl.`;
+  return "";
 }
 
-/**
- * Luc's Météo-Urteil pour la France. Verwendet Mariana (hermesChat / Hermes 4 70b).
- */
 export async function getLucWeatherVerdict(
-  weather: WeatherData,
-  cityName: string,
-  region: string,
-  character?: string,
+  _weather: WeatherData,
+  _cityName: string,
+  _region: string,
+  _character?: string,
 ): Promise<string> {
-  let attempts = 0;
-  while (attempts < 3) {
-    try {
-      const tomorrow = weather.daily[1];
-      const maxToday = weather.daily[0]?.tempMax ?? weather.current.temperature;
-      const rainToday = weather.daily[0]?.precipitationSum ?? 0;
-      const zonnig = weather.current.weatherCode === 0 || weather.current.weatherCode === 1;
-      const mood =
-        zonnig && maxToday >= 15 ? "ensoleillé-chaud" :
-        rainToday > 5 ? "humide" :
-        maxToday < 5 ? "froid" : "variable";
-
-      const prompt = `DONNÉES MÉTÉO pour ${cityName} (${region}):
-- Maintenant: ${getWeatherDescription(weather.current.weatherCode, "fr")}, ${weather.current.temperature}°C, ressenti ${weather.current.feelsLike}°C.
-- Vent: ${weather.current.windSpeed} km/h.
-- 6 prochaines heures: ${weather.hourly.slice(0, 6).map(h => `${new Date(h.time).getHours()}:00 ${h.temperature}°`).join(", ")}.
-- Demain: max ${tomorrow?.tempMax ?? "?"}°C, ${getWeatherDescription(tomorrow?.weatherCode ?? 0, "fr")}.
-AMBIANCE: ${mood}
-${character ? `CARACTÈRE GÉOGRAPHIQUE: ${character}` : ""}`;
-
-      const text = (await hermesChat([
-        {
-          role: "system",
-          content: `Tu es Luc — le météorologue du quartier. Tu n'écris pas à un abonné, tu écris à quelqu'un que tu connais. Chaleureux, direct, sans chichis. Phrases courtes, mots simples. Dis aux gens concrètement ce qu'ils doivent faire — prendre une veste, sortir, rester à l'abri. Tiens compte du caractère local (vent sur la côte, chaleur en ville, montagne). 3–4 phrases. Pas de jargon technique, pas de noms de modèles, pas de pourcentages, pas de langage IA. Pas de citations de présentateurs météo connus — Luc est lui-même. Termine chaleureusement.`,
-        },
-        { role: "user", content: prompt },
-      ], { model: "fast", temperature: 0.6, maxTokens: 350 })).trim().replace(/^"|"$/g, "");
-
-      const wordCount = text.split(/\s+/).filter(Boolean).length;
-      if (text && wordCount >= 15 && wordCount < 130) return text;
-      attempts++;
-    } catch (e) {
-      attempts++;
-      console.error(`Luc Météo-Urteil attempt ${attempts}:`, e);
-    }
-  }
-  return `Actuellement ${weather.current.temperature}°C à ${cityName}. ${weather.daily[1] ? `Demain jusqu'à ${weather.daily[1].tempMax}°C.` : ""} Restez informé avec Luc.`;
+  return "";
 }
 
-/**
- * Juan's tiempo verdict para Espana. Equivalente espanol de Piet/Karl/Luc.
- * Juan es el vecino-meteorologo: directo, calido, sin jerga. Sin imitar
- * presentadores famosos — Juan es su propia voz.
- */
 export async function getJuanWeatherVerdict(
-  weather: WeatherData,
-  cityName: string,
-  region: string,
-  character?: string,
+  _weather: WeatherData,
+  _cityName: string,
+  _region: string,
+  _character?: string,
 ): Promise<string> {
-  let attempts = 0;
-  while (attempts < 3) {
-    try {
-      const tomorrow = weather.daily[1];
-      const maxToday = weather.daily[0]?.tempMax ?? weather.current.temperature;
-      const rainToday = weather.daily[0]?.precipitationSum ?? 0;
-      const sunny = weather.current.weatherCode === 0 || weather.current.weatherCode === 1;
-      const mood =
-        sunny && maxToday >= 26 ? "calor de verdad" :
-        sunny && maxToday >= 20 ? "soleado y agradable" :
-        rainToday > 5 ? "lluvioso" :
-        maxToday < 8 ? "frio" : "variable";
-
-      const prompt = `DATOS DEL TIEMPO para ${cityName} (${region}):
-- Ahora: ${getWeatherDescription(weather.current.weatherCode, "es")}, ${weather.current.temperature}°C, sensacion ${weather.current.feelsLike}°C.
-- Viento: ${weather.current.windSpeed} km/h.
-- Proximas 6 horas: ${weather.hourly.slice(0, 6).map(h => `${new Date(h.time).getHours()}:00 ${h.temperature}°`).join(", ")}.
-- Manana: max ${tomorrow?.tempMax ?? "?"}°C, ${getWeatherDescription(tomorrow?.weatherCode ?? 0, "es")}.
-AMBIENTE: ${mood}
-${character ? `CARACTER LOCAL: ${character}` : ""}`;
-
-      const text = (await hermesChat([
-        {
-          role: "system",
-          content: `Eres Juan, el meteorologo del barrio de WEERZONE para Espana. Escribes como un vecino que conoce la calle: cercano, directo, sin floreos. Frases cortas. Dile a la gente que conviene hacer hoy: terraza, paseo, playa, chaqueta, sombrilla, mejor esperar, ojo con el viento o el bochorno. Ten en cuenta el caracter local — costa mediterranea, costa atlantica, interior, isla, ciudad, montana. 3-4 frases. Sin jerga tecnica, sin nombres de modelos, sin porcentajes, sin lenguaje IA. Juan tiene voz propia, no imita a presentadores conocidos. Cierra con calidez, sin cursileria.`,
-        },
-        { role: "user", content: prompt },
-      ], { model: "fast", temperature: 0.6, maxTokens: 350 })).trim().replace(/^"|"$/g, "");
-
-      const wordCount = text.split(/\s+/).filter(Boolean).length;
-      if (text && wordCount >= 15 && wordCount < 130) return text;
-      attempts++;
-    } catch (e) {
-      attempts++;
-      console.error(`Juan Tiempo verdict attempt ${attempts}:`, e);
-    }
-  }
-  return `Ahora hay ${weather.current.temperature}°C en ${cityName}. ${weather.daily[1] ? `Manana sube hasta ${weather.daily[1].tempMax}°C.` : ""} Juan seguira mirando el cielo por ti.`;
+  return "";
 }
 
-/**
- * @deprecated Usa getJuanWeatherVerdict. Alias para compatibilidad temporal.
- */
 export const getPabloWeatherVerdict = getJuanWeatherVerdict;
 
 export async function findBusinessLeads(query: string) {
@@ -661,7 +400,9 @@ export async function sendWelcomeEmail(email: string, tier: PersonaTier, city?: 
       subject: "BOEM! 🚀 Je bent nu officieel de baas over het weer bij WEERZONE!",
       html,
     });
-    console.log(`Welcome email sent to ${email} for tier ${tier}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Welcome email sent to ${email} for tier ${tier}`);
+    }
   } catch (err) {
     console.error("Failed to send welcome email:", err);
   }
@@ -729,7 +470,9 @@ export async function sendBrandedMagicLink(email: string, tier: PersonaTier, ful
     html,
   });
 
-  console.log(`Branded Magic Link sent (and Supabase silenced) for ${email}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`Branded Magic Link sent (and Supabase silenced) for ${email}`);
+  }
 }
 
 /**
@@ -816,15 +559,14 @@ export async function getImpactAnalysisAction(lat: number, lon: number) {
  * Gebruikt voor Programmatic SEO om 'thin content' te voorkomen.
  *
  * - BEVAT CACHING: Checkt eerst Supabase, schrijft na generatie terug.
- * - LOCALE-AWARE: locale='de' geeft Duitse SEO-tekst (Karl-DE market).
- *   Cache-keys zijn uniek per (placeName, province) — voor NL en DE worden
- *   verschillende `province`-labels meegegeven door de caller, dus geen botsing.
+ * - Nederland-only: niet-NL callers krijgen dezelfde NL prompt en veroorzaken
+ *   geen aparte internationale SEO-cache.
  */
 export async function getLocationSEOContent(
   placeName: string,
   province: string,
   character?: string,
-  locale: "nl" | "de" | "fr" | "es" = "nl",
+  _locale: "nl" | "de" | "fr" | "es" = "nl",
 ): Promise<string> {
   try {
     const supabase = createSupabaseAdminClient();
@@ -845,28 +587,7 @@ export async function getLocationSEOContent(
       console.error("SEO cache check failed:", err);
     }
 
-    const prompt = locale === "es"
-      ? `Eres el redactor SEO de WEERZONE para Espana. Escribe un texto espanol CORTO y unico (max 2-3 frases) sobre el caracter meteorologico de ${placeName} (${province}).
-${character ? `Ten en cuenta el caracter local: ${character}.` : ""}
-- Nada de frases tipo "Bienvenido a".
-- Conectalo con la situacion geografica concreta de ${placeName}.
-- Posibles aspectos: brisa marina, calor urbano, viento en la meseta, montana, valle, isla o costa atlantica/mediterranea.
-- Informativo y autoritativo para alguien que busca el tiempo local.`.trim()
-      : locale === "de"
-      ? `Du bist der SEO-Texter von WEERZONE. Schreib einen KURZEN, einzigartigen deutschen Text (max 2-3 Sätze) über die Wettercharakteristik von ${placeName} (${province}).
-${character ? `Berücksichtige den Charakter: ${character}.` : ""}
-- Keine Floskeln wie "Willkommen in".
-- Verknüpfe es konkret mit der geografischen Lage von ${placeName}.
-- Mögliche Aspekte: Küsteneinfluss (falls Küste), Wind über offener Ebene, Hitzeinsel in der Stadt, Höhenlage im Mittelgebirge, Flusstal-Klima, Nähe zu Wäldern oder Seen.
-- Informativ und autoritativ — für jemanden, der konkret das Wetter sucht.`.trim()
-      : locale === "fr"
-      ? `Vous êtes le rédacteur SEO de WEERZONE. Écrivez un texte français COURT et unique (max 2-3 phrases) sur les caractéristiques météorologiques de ${placeName} (${province}).
-${character ? `Tenez compte du caractère : ${character}.` : ""}
-- Pas de formules comme "Bienvenue à".
-- Liez-le concrètement à la situation géographique de ${placeName}.
-- Aspects possibles : influence côtière (si côte), vent sur plaine dégagée, îlot de chaleur urbain, altitude en moyenne montagne, climat de vallée fluviale, proximité de forêts ou de lacs.
-- Informatif et autoritaire — pour quelqu'un qui cherche spécifiquement la météo.`.trim()
-      : `Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
+    const prompt = `Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
 ${character ? `Houd rekening met het karakter: ${character}.` : ""}
 - Gebruik geen clichés als "Welkom in".
 - Link het naar de geografische ligging van ${placeName}.
@@ -893,9 +614,6 @@ ${character ? `Houd rekening met het karakter: ${character}.` : ""}
     return content;
   } catch (error) {
     console.error("getLocationSEOContent error:", error);
-    if (locale === "de") return `Das Wetter in ${placeName} (${province}) wird durch lokale geografische Faktoren geprägt. WEERZONE liefert die genaueste 48-Stunden-Vorhersage für deine Adresse.`;
-    if (locale === "fr") return `La météo à ${placeName} (${province}) est influencée par des facteurs géographiques locaux. WEERZONE fournit les prévisions les plus précises à 48 heures pour votre adresse.`;
-    if (locale === "es") return `El tiempo en ${placeName} (${province}) depende de factores locales como costa, relieve, viento y calor urbano. WEERZONE muestra una prevision de 48 horas ajustada a tu ubicacion.`;
     return `Het weer in ${placeName} (${province}) wordt beïnvloed door lokale geografische factoren. Wij tonen de nauwkeurigste actuele voorspelling voor uw locatie.`;
   }
 }
@@ -925,7 +643,9 @@ export async function pingSearchConsole() {
     const res = await fetch(googlePing);
 
     if (res.ok) {
-      console.log("Google gepind voor sitemap update.");
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Google gepind voor sitemap update.");
+      }
       return { success: true };
     }
     throw new Error(`Ping failed with status ${res.status}`);

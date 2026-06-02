@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/auth/", "/app/", "/reiszone/"],
+        disallow: ["/api/", "/admin/", "/auth/", "/app/"],
       },
       // Zoekmachines
       { userAgent: "Bingbot", crawlDelay: 1 },

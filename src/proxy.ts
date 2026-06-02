@@ -17,7 +17,6 @@ const PROVINCE_SLUGS = new Set([
   "groningen", "friesland", "drenthe", "overijssel", "flevoland",
   "gelderland", "utrecht", "noord-holland", "zuid-holland", "zeeland",
   "noord-brabant", "limburg",
-  "antwerpen", "limburg-be", "oost-vlaanderen", "vlaams-brabant", "west-vlaanderen",
   "48-uur", "onweer", "regen", "themas",
 ]);
 
@@ -77,15 +76,6 @@ const CITY_TO_PROVINCE: Record<string, string> = {
   veenendaal: "utrecht",
   middelburg: "zeeland",
   // BE — top 10
-  gent: "oost-vlaanderen",
-  brugge: "west-vlaanderen",
-  leuven: "vlaams-brabant",
-  mechelen: "antwerpen",
-  aalst: "oost-vlaanderen",
-  hasselt: "limburg-be",
-  kortrijk: "west-vlaanderen",
-  oostende: "west-vlaanderen",
-  genk: "limburg-be",
 };
 
 function cityRedirect(pathname: string, search: string, requestUrl: string): NextResponse | null {
