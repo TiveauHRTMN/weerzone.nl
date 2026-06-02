@@ -8,8 +8,10 @@
  * visitor's location. Styling: src/app/(site)/piet/piet-skin.css.
  */
 
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Fragment, Suspense, useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import { kindFromCode } from "@/lib/piet-view";
+import type { PietView, PietDay, PietScore, PietPollenRow } from "@/lib/piet-view";
 
 const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
   ssr: false,
@@ -203,7 +205,14 @@ const HourIcon = ({ k, size = 18 }: { k: HourKind; size?: number }) => {
 };
 
 /* ---------- 1. Piet hero ---------- */
-function PietHero({ locationName }: { locationName: string }) {
+function chipToneForKind(k: HourKind): ChipTone {
+  return k === "rain" ? "blue" : k === "sun" ? "yellow" : "slate";
+}
+function PietHero({ view }: { view: PietView }) {
+  const { now, days, locationName, headline } = view;
+  const k = kindFromCode(now.weatherCode);
+  const [lead, ...restParts] = headline.split(", ");
+  const rest = restParts.join(", ");
   return (
     <div className="rcard p-7 sm:p-9 relative overflow-hidden">
       <div
@@ -216,11 +225,11 @@ function PietHero({ locationName }: { locationName: string }) {
             <Micro>Piet&apos;s verhaal · {locationName}</Micro>
             <span className="livechip">
               <i />
-              Live · 11:42
+              Live · {now.updatedAt}
             </span>
           </div>
-          <Chip tone="yellow" icon={<IcSun size={11} stroke={2.6} />}>
-            Zonnig
+          <Chip tone={chipToneForKind(k)} icon={<HourIcon k={k} size={11} />}>
+            {now.conditionLabel}
           </Chip>
         </div>
 
@@ -228,31 +237,35 @@ function PietHero({ locationName }: { locationName: string }) {
           className="mt-5 text-[32px] sm:text-[42px] leading-[1.05] font-extrabold text-slate-900"
           style={{ letterSpacing: "-0.028em" }}
         >
-          Goedemorgen — vandaag knalt het,
-          <span
-            style={{
-              background: "linear-gradient(90deg,#F59E0B 0%, #F97316 100%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {" "}
-            morgen pak je de paraplu
-          </span>
-          .
+          {lead}
+          {rest && (
+            <>
+              {", "}
+              <span
+                style={{
+                  background: "linear-gradient(90deg,#F59E0B 0%, #F97316 100%)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                {rest.replace(/\.$/, "")}
+              </span>
+              .
+            </>
+          )}
         </h1>
 
         <div className="mt-6 flex items-end gap-6 flex-wrap">
           <div className="leading-none">
             <div className="num font-extrabold text-slate-900" style={{ fontSize: "76px", letterSpacing: "-0.045em", lineHeight: 1 }}>
-              23<span style={{ color: "#94A3B8" }}>°</span>
+              {now.temp}<span style={{ color: "#94A3B8" }}>°</span>
             </div>
           </div>
           <div className="text-[14px] text-slate-600 mb-1">
-            <div className="font-bold text-slate-900">Voelt als 23°</div>
-            <div className="mt-0.5">Onbewolkt · wind ZW 15 km/u</div>
-            <div className="mt-0.5">Vandaag max 24° · vannacht 14°</div>
+            <div className="font-bold text-slate-900">Voelt als {now.feelsLike}°</div>
+            <div className="mt-0.5">{now.conditionLabel} · wind {now.windDir} {now.windSpeed} km/u</div>
+            <div className="mt-0.5">Vandaag max {days.vd.max}° · vannacht {days.vd.min}°</div>
           </div>
         </div>
 
@@ -270,83 +283,9 @@ function PietHero({ locationName }: { locationName: string }) {
 }
 
 /* ---------- 2. 48-uurs briefing ---------- */
-type DayBriefing = {
-  label: string;
-  date: string;
-  tagline: string;
-  story: ReactNode;
-  max: number;
-  min: number;
-  regen: number;
-  wind: number;
-  zon: number;
-  hourly: { h: string; t: number; k: HourKind; peak?: boolean }[];
-};
-const BRIEFING: Record<"vd" | "mo", DayBriefing> = {
-  vd: {
-    label: "Vandaag",
-    date: "donderdag 28 mei",
-    tagline: "Onbewolkte zomerdag",
-    story: (
-      <>
-        De ochtend begint zacht en zonnig, rond <b>10:00</b> trekken de laatste wolkenslierten weg. Tussen{" "}
-        <b>13:00 en 17:00</b> klimt de thermometer naar <b>24°</b> met een lekker briesje uit het zuidwesten. Vanavond
-        blijft het lang licht en aangenaam — perfect voor het terras of een fietstocht. Vannacht koelt het rustig af naar{" "}
-        <b>14°</b>.
-      </>
-    ),
-    max: 24,
-    min: 14,
-    regen: 0,
-    wind: 15,
-    zon: 9,
-    hourly: [
-      { h: "08", t: 16, k: "sun" },
-      { h: "10", t: 18, k: "sun" },
-      { h: "12", t: 21, k: "sun" },
-      { h: "14", t: 23, k: "sun", peak: true },
-      { h: "16", t: 24, k: "sun", peak: true },
-      { h: "18", t: 23, k: "sun" },
-      { h: "20", t: 20, k: "sun" },
-      { h: "22", t: 17, k: "cloud" },
-    ],
-  },
-  mo: {
-    label: "Morgen",
-    date: "vrijdag 29 mei",
-    tagline: "Wisselvallig met regen in de middag",
-    story: (
-      <>
-        Begint nog vriendelijk, maar in de loop van de ochtend trekken er meer wolken binnen. Vanaf <b>13:00</b> kans op
-        een eerste bui, de zwaarste regen verwacht Piet tussen <b>15:00 en 18:00</b> — soms met onweer (
-        <a href="/reed" className="font-bold text-slate-900 underline underline-offset-2">
-          zie Reed
-        </a>
-        ). Wind draait naar zuid en wordt stevig, tot <b>30 km/u</b>. Geen terrasweer — neem een jas mee, en plan
-        binnen-dingen.
-      </>
-    ),
-    max: 19,
-    min: 12,
-    regen: 70,
-    wind: 30,
-    zon: 4,
-    hourly: [
-      { h: "08", t: 14, k: "cloudsun" },
-      { h: "10", t: 16, k: "cloud" },
-      { h: "12", t: 18, k: "cloud" },
-      { h: "14", t: 19, k: "rain" },
-      { h: "16", t: 18, k: "rain", peak: true },
-      { h: "18", t: 17, k: "rain", peak: true },
-      { h: "20", t: 15, k: "cloud" },
-      { h: "22", t: 13, k: "cloud" },
-    ],
-  },
-};
-
-function Briefing48h() {
+function Briefing48h({ days }: { days: { vd: PietDay; mo: PietDay } }) {
   const [day, setDay] = useState<"vd" | "mo">("vd");
-  const d = BRIEFING[day];
+  const d = days[day];
   return (
     <div className="mt-6 rcard overflow-hidden">
       <div className="px-5 sm:px-7 pt-6 pb-5">
@@ -388,7 +327,19 @@ function Briefing48h() {
           </Chip>
         </div>
 
-        <p className="mt-4 text-[14.5px] leading-relaxed text-slate-700 max-w-[58ch]">{d.story}</p>
+        <p className="mt-4 text-[14.5px] leading-relaxed text-slate-700 max-w-[58ch]">
+          {d.story}
+          {d.referToReed && (
+            <>
+              {" "}
+              Bij onweer kijk je verder bij{" "}
+              <a href="/reed" className="font-bold text-slate-900 underline underline-offset-2">
+                Reed
+              </a>
+              .
+            </>
+          )}
+        </p>
       </div>
 
       <div className="divider" />
@@ -508,7 +459,13 @@ function ScoreCard({
     </div>
   );
 }
-function DagscoresGrid() {
+const SCORE_META: Record<PietScore["key"], { icon: ReactNode; tone: ScoreTone }> = {
+  terras: { icon: <IcCoffee size={16} stroke={2.2} />, tone: "yellow" },
+  fiets: { icon: <IcBike size={16} stroke={2.2} />, tone: "lime" },
+  bbq: { icon: <IcFlame size={16} stroke={2.2} />, tone: "orange" },
+  kleding: { icon: <IcShirt size={16} stroke={2.2} />, tone: "cyan" },
+};
+function DagscoresGrid({ scores }: { scores: PietScore[] }) {
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between mb-3 px-1">
@@ -516,18 +473,24 @@ function DagscoresGrid() {
         <span className="text-[11.5px] font-semibold text-slate-500">van 0 tot 5</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <ScoreCard icon={<IcCoffee size={16} stroke={2.2} />} label="Terrasweer" score={5} tone="yellow" tip="Geen wolkje, lichte bries — pak een tafeltje rond 17:00." />
-        <ScoreCard icon={<IcBike size={16} stroke={2.2} />} label="Fietsdag" score={4} tone="lime" tip="Lekker fietsweer, wind in de rug richting NO." />
-        <ScoreCard icon={<IcFlame size={16} stroke={2.2} />} label="BBQ-avond" score={5} tone="orange" tip="Aansteken vanaf 18:00. Droog en mild tot na 22:00." />
-        <ScoreCard icon={<IcShirt size={16} stroke={2.2} />} label="Kledingadvies" score={3} tone="cyan" tip="T-shirt overdag, lichte trui voor 's avonds." />
+        {scores.map((s) => (
+          <ScoreCard
+            key={s.key}
+            icon={SCORE_META[s.key].icon}
+            tone={SCORE_META[s.key].tone}
+            label={s.label}
+            score={s.score}
+            tip={s.tip}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
 /* ---------- 5. UV-index ---------- */
-function UVIndex() {
-  const value = 7;
+function UVIndex({ uv }: { uv: NonNullable<PietView["uv"]> }) {
+  const labelColor = uv.value >= 8 ? "text-red-600" : uv.value >= 6 ? "text-orange-600" : "text-yellow-600";
   return (
     <div className="rcard p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -535,12 +498,12 @@ function UVIndex() {
           <Micro>UV-index</Micro>
           <div className="mt-1.5 flex items-baseline gap-2">
             <span className="num text-[44px] font-extrabold text-slate-900 leading-none" style={{ letterSpacing: "-0.04em" }}>
-              {value}
+              {uv.value}
             </span>
-            <span className="text-[14px] font-extrabold text-orange-600">Hoog</span>
+            <span className={`text-[14px] font-extrabold ${labelColor}`}>{uv.label}</span>
           </div>
         </div>
-        <Chip tone="orange">Piek 13:00</Chip>
+        {uv.peakHour && <Chip tone="orange">Piek {uv.peakHour}</Chip>}
       </div>
 
       <div className="mt-4 uv-bar">
@@ -559,8 +522,11 @@ function UVIndex() {
       </div>
 
       <div className="mt-4 text-[13.5px] text-slate-700 leading-relaxed">
-        Bescherming nodig tussen <b className="num">11:00 en 16:00</b>. SPF 30, pet en zonnebril doen wonderen. Vermijd de
-        zon rond <b className="num">13:00</b>.
+        {uv.value >= 6 ? (
+          <>Bescherming nodig in het midden van de dag. SPF 30, pet en zonnebril doen wonderen.</>
+        ) : (
+          <>Matige zonkracht — bij langdurig buiten zijn helpt wat bescherming.</>
+        )}
       </div>
     </div>
   );
@@ -585,24 +551,24 @@ function PollenRow({ name, level, advice }: { name: string; level: 1 | 2 | 3 | 4
     </div>
   );
 }
-function Hooikoorts() {
+function Hooikoorts({ pollen }: { pollen: NonNullable<PietView["pollen"]> }) {
+  const topTone: ChipTone = pollen.topLabel === "Zeer hoog" || pollen.topLabel === "Hoog" ? "red" : "orange";
   return (
     <div className="rcard p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <Micro>Hooikoorts · pollen vandaag</Micro>
           <div className="mt-1.5 text-[16.5px] font-extrabold text-slate-900" style={{ letterSpacing: "-0.01em" }}>
-            Berk piekt vandaag
+            {pollen.headline}
           </div>
         </div>
-        <Chip tone="red">Hoog</Chip>
+        <Chip tone={topTone}>{pollen.topLabel}</Chip>
       </div>
 
       <div className="mt-3 divide-y" style={{ borderColor: "rgba(15,23,42,.05)" }}>
-        <PollenRow name="Berk" level={5} advice="Hoogste sinds dagen — sluit ramen om 12:00–17:00." />
-        <PollenRow name="Gras" level={3} advice="Verhoogd. Niet maaien vanmiddag." />
-        <PollenRow name="Els" level={1} advice="Vrijwel uitgewerkt voor dit seizoen." />
-        <PollenRow name="Eik" level={2} advice="Matig. Wat klachten mogelijk 's middags." />
+        {pollen.rows.map((r) => (
+          <PollenRow key={r.name} name={r.name} level={r.level} advice={r.advice} />
+        ))}
       </div>
     </div>
   );
@@ -623,25 +589,30 @@ function CmpRow({ label, today, tomorrow, arrow }: { label: string; today: strin
     </div>
   );
 }
-function VandaagVsMorgen() {
+function cmpArrow(today: number, tomorrow: number): "up" | "down" | undefined {
+  if (tomorrow > today) return "up";
+  if (tomorrow < today) return "down";
+  return undefined;
+}
+function VandaagVsMorgen({ days }: { days: { vd: PietDay; mo: PietDay } }) {
+  const { vd, mo } = days;
   return (
     <div className="mt-6 rcard p-5 sm:p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <Micro>Vandaag vs. morgen</Micro>
         <div className="flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[.16em]">
-          <span className="text-slate-700">Donderdag</span>
+          <span className="text-slate-700">{vd.weekday}</span>
           <span className="text-slate-300">→</span>
-          <span className="text-blue-700">Vrijdag</span>
+          <span className="text-blue-700">{mo.weekday}</span>
         </div>
       </div>
 
       <div className="mt-3">
-        <CmpRow label="Max" today="24°" tomorrow="19°" arrow="down" />
-        <CmpRow label="Min" today="14°" tomorrow="12°" arrow="down" />
-        <CmpRow label="Regenkans" today="0%" tomorrow="70%" arrow="up" />
-        <CmpRow label="Wind" today="15 km/u" tomorrow="30 km/u" arrow="up" />
-        <CmpRow label="Zon" today="9 uur" tomorrow="4 uur" arrow="down" />
-        <CmpRow label="Voelt als" today="23°" tomorrow="17°" arrow="down" />
+        <CmpRow label="Max" today={`${vd.max}°`} tomorrow={`${mo.max}°`} arrow={cmpArrow(vd.max, mo.max)} />
+        <CmpRow label="Min" today={`${vd.min}°`} tomorrow={`${mo.min}°`} arrow={cmpArrow(vd.min, mo.min)} />
+        <CmpRow label="Regenkans" today={`${vd.regen}%`} tomorrow={`${mo.regen}%`} arrow={cmpArrow(vd.regen, mo.regen)} />
+        <CmpRow label="Wind" today={`${vd.wind} km/u`} tomorrow={`${mo.wind} km/u`} arrow={cmpArrow(vd.wind, mo.wind)} />
+        <CmpRow label="Zon" today={`${vd.zon} uur`} tomorrow={`${mo.zon} uur`} arrow={cmpArrow(vd.zon, mo.zon)} />
       </div>
     </div>
   );
@@ -657,7 +628,8 @@ function DDCell({ k, t, label }: { k: HourKind; t: number; label: string }) {
     </div>
   );
 }
-function Dagdelen() {
+function Dagdelen({ days }: { days: { vd: PietDay; mo: PietDay } }) {
+  const rows = [days.vd, days.mo];
   return (
     <div className="mt-6 rcard p-5 sm:p-6">
       <Micro className="mb-3">Per dagdeel</Micro>
@@ -667,22 +639,21 @@ function Dagdelen() {
         <div className="dd-head">Middag</div>
         <div className="dd-head">Avond</div>
 
-        <div className="dd-day">Donderdag</div>
-        <DDCell k="sun" t={17} label="Zonnig" />
-        <DDCell k="sun" t={23} label="Onbewolkt" />
-        <DDCell k="sun" t={19} label="Zonnig" />
-
-        <div className="dd-day">Vrijdag</div>
-        <DDCell k="cloudsun" t={15} label="Half bew." />
-        <DDCell k="rain" t={19} label="Buien" />
-        <DDCell k="rain" t={16} label="Onweer" />
+        {rows.map((d) => (
+          <Fragment key={d.key}>
+            <div className="dd-day">{d.weekday}</div>
+            <DDCell k={d.dagdelen.ochtend.k} t={d.dagdelen.ochtend.t} label={d.dagdelen.ochtend.label} />
+            <DDCell k={d.dagdelen.middag.k} t={d.dagdelen.middag.t} label={d.dagdelen.middag.label} />
+            <DDCell k={d.dagdelen.avond.k} t={d.dagdelen.avond.t} label={d.dagdelen.avond.label} />
+          </Fragment>
+        ))}
       </div>
     </div>
   );
 }
 
 /* ---------- 9. Zon-tijden ---------- */
-function ZonTijden() {
+function ZonTijden({ sun }: { sun: NonNullable<PietView["sun"]> }) {
   return (
     <div className="mt-6 rcard p-5 sm:p-6">
       <div className="grid grid-cols-3 gap-4">
@@ -692,7 +663,7 @@ function ZonTijden() {
           </span>
           <div>
             <div className="rmicro text-[10px]">Zonsop</div>
-            <div className="num text-[18px] font-extrabold text-slate-900 leading-none mt-0.5">05:27</div>
+            <div className="num text-[18px] font-extrabold text-slate-900 leading-none mt-0.5">{sun.sunrise}</div>
           </div>
         </div>
 
@@ -702,7 +673,7 @@ function ZonTijden() {
           </span>
           <div>
             <div className="rmicro text-[10px]">Zonsonder</div>
-            <div className="num text-[18px] font-extrabold text-slate-900 leading-none mt-0.5">21:43</div>
+            <div className="num text-[18px] font-extrabold text-slate-900 leading-none mt-0.5">{sun.sunset}</div>
           </div>
         </div>
 
@@ -712,7 +683,7 @@ function ZonTijden() {
           </span>
           <div>
             <div className="rmicro text-[10px]">Daglengte</div>
-            <div className="num text-[18px] font-extrabold text-slate-900 leading-none mt-0.5">16 u 16</div>
+            <div className="num text-[18px] font-extrabold text-slate-900 leading-none mt-0.5">{sun.dayLength}</div>
           </div>
         </div>
       </div>
@@ -740,37 +711,40 @@ function FooterTrust() {
 
 /* ---------- Page ---------- */
 export default function PietWeatherPage({
+  view,
   fontClassName = "",
   weatherCode = 0,
   isDay = true,
   lat = 52.1,
   lon = 5.18,
-  locationName = "De Bilt",
 }: {
+  view: PietView;
   fontClassName?: string;
   weatherCode?: number;
   isDay?: boolean;
   lat?: number;
   lon?: number;
-  locationName?: string;
 }) {
+  const { uv, pollen } = view;
   return (
     <main className={`piet-skin relative min-h-screen ${fontClassName}`}>
       <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />}>
         <WeatherBackground weatherCode={weatherCode} isDay={isDay} />
       </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 piet-stagger">
-        <PietHero locationName={locationName} />
-        <RegenradarSlot lat={lat} lon={lon} locationName={locationName} />
-        <Briefing48h />
-        <DagscoresGrid />
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <UVIndex />
-          <Hooikoorts />
-        </div>
-        <VandaagVsMorgen />
-        <Dagdelen />
-        <ZonTijden />
+        <PietHero view={view} />
+        <RegenradarSlot lat={lat} lon={lon} locationName={view.locationName} />
+        <Briefing48h days={view.days} />
+        <DagscoresGrid scores={view.scores} />
+        {(uv || pollen) && (
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {uv && <UVIndex uv={uv} />}
+            {pollen && <Hooikoorts pollen={pollen} />}
+          </div>
+        )}
+        <VandaagVsMorgen days={view.days} />
+        <Dagdelen days={view.days} />
+        {view.sun && <ZonTijden sun={view.sun} />}
         <FooterTrust />
       </div>
     </main>

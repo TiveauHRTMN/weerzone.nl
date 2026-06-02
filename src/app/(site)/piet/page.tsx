@@ -3,7 +3,8 @@ import { Manrope } from "next/font/google";
 import PietWeatherPage from "@/components/PietWeatherPage";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES } from "@/lib/types";
-import { fetchWeatherData } from "@/lib/weather";
+import { fetchWeatherData, fetchAirQuality } from "@/lib/weather";
+import { buildPietView } from "@/lib/piet-view";
 import { hreflangCluster } from "@/lib/hreflang";
 import "./piet-skin.css";
 
@@ -87,11 +88,29 @@ export default async function PietPage() {
   const activeLoc =
     loc || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0];
 
-  // Background + regenradar zijn dynamisch op basis van het lokale weer.
-  const initialWeather = await fetchWeatherData(
-    activeLoc.lat,
-    activeLoc.lon,
-  ).catch(() => undefined);
+  // Live data voedt zowel de UI-cijfers als de achtergrond/regenradar.
+  const [initialWeather, air] = await Promise.all([
+    fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => null),
+    fetchAirQuality(activeLoc.lat, activeLoc.lon).catch(() => null),
+  ]);
+
+  if (!initialWeather) {
+    // Zeldzame upstream-uitval: nette rust-staat i.p.v. een crash.
+    return (
+      <main className={`piet-skin relative min-h-screen ${manrope.className}`}>
+        <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-16 text-center">
+          <div className="rcard p-7 sm:p-9">
+            <h1 className="text-[22px] font-extrabold text-slate-900">Even geen verbinding met de weerdata</h1>
+            <p className="mt-2 text-[14px] text-slate-600">
+              Piet kan de gegevens voor {activeLoc.name} nu niet ophalen. Probeer het zo nog eens.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const view = buildPietView(initialWeather, activeLoc.name, air);
 
   return (
     <>
@@ -100,12 +119,12 @@ export default async function PietPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <PietWeatherPage
+        view={view}
         fontClassName={manrope.className}
-        weatherCode={initialWeather?.current.weatherCode ?? 0}
-        isDay={initialWeather?.current.isDay ?? true}
+        weatherCode={initialWeather.current.weatherCode}
+        isDay={initialWeather.current.isDay}
         lat={activeLoc.lat}
         lon={activeLoc.lon}
-        locationName={activeLoc.name}
       />
     </>
   );
