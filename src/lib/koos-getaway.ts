@@ -86,9 +86,15 @@ export const INTERNATIONAL_SUNSET: readonly {
 }[] = [
   { name: "Valencia", locationId: "sunset-valencia", lat: 39.47, lon: -0.38 },
   { name: "Barcelona", locationId: "sunset-barcelona", lat: 41.39, lon: 2.17 },
+  { name: "Málaga (Costa del Sol)", locationId: "sunset-malaga", lat: 36.72, lon: -4.42 },
+  { name: "Sevilla", locationId: "sunset-sevilla", lat: 37.39, lon: -5.99 },
   { name: "Algarve (Faro)", locationId: "sunset-algarve", lat: 37.02, lon: -7.93 },
+  { name: "Lissabon", locationId: "sunset-lissabon", lat: 38.72, lon: -9.14 },
   { name: "Canarische Eilanden", locationId: "sunset-canarias", lat: 28.29, lon: -16.63 },
   { name: "Malta", locationId: "sunset-malta", lat: 35.9, lon: 14.51 },
+  { name: "Nice (Côte d'Azur)", locationId: "sunset-nice", lat: 43.7, lon: 7.27 },
+  { name: "Athene", locationId: "sunset-athene", lat: 37.98, lon: 23.73 },
+  { name: "Cyprus (Larnaca)", locationId: "sunset-cyprus", lat: 34.92, lon: 33.62 },
 ];
 
 // Drempels: hoeveel beter een plek moet zijn voor Koos iets zegt.
@@ -113,16 +119,31 @@ function placePhrase(c: DailyOutlook): string {
   }
 }
 
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * Buurman-onderbouwing (sjabloon, geen LLM — schaalt naar 10K). Concreet: noemt
+ * graden, zon-uren en droog/nat tegenover thuis, in de "over het hek"-stem van
+ * Koos. De warme intro komt apart van koosVoice (Deepseek) als die er is.
+ */
 function buildReason(origin: DailyOutlook, c: DailyOutlook): string {
-  const there = `${Math.round(c.tempMax)}°`;
+  const temp = `${Math.round(c.tempMax)}°`;
+  const zonU = Math.round(c.sunshineHours);
   if (c.kind === "sunset") {
-    return `Heel Nederland blijft grauw; in ${c.name} is het ${there} en zonnig.`;
+    return `Hier komt de zon er voorlopig niet door; in ${c.name} is het ${temp} en strak weer. Als je er echt even tussenuit wilt.`;
   }
   const where = placePhrase(c);
-  if (origin.precipProbMax - c.precipProbMax >= 30) {
-    return `Hier kans op regen, ${where} blijft het droog (${there}).`;
+  const dRain = origin.precipProbMax - c.precipProbMax;
+  const dSun = c.sunshineHours - origin.sunshineHours;
+  if (dRain >= 30) {
+    return `Bij jou valt regen, ${where} houden ze het droog — ${temp} en zo'n ${zonU} uur zon.`;
   }
-  return `${where.charAt(0).toUpperCase()}${where.slice(1)} is het zonniger en ${there}.`;
+  if (dSun >= 3) {
+    return `${cap(where)} schijnt de zon een stuk vaker, een uur of ${zonU}, en met ${temp} zit je goed.`;
+  }
+  return `${cap(where)} is het ${temp} en een stuk rustiger weer dan bij jou — net even prettiger.`;
 }
 
 /**
@@ -143,12 +164,15 @@ export interface KoosPick {
  * thuis. Internationaal: alleen als het thuis grauw/koud is én daar écht zon.
  * Lege array = niets beters → Koos zwijgt.
  */
+/** Standaard aantal getaways dat Koos toont (meer dan v1's 3). */
+const DEFAULT_LIMIT = 8;
+
 export function scoreGetawayPicks(
   origin: DailyOutlook,
   candidates: readonly DailyOutlook[],
   opts: { limit?: number } = {},
 ): KoosPick[] {
-  const limit = opts.limit ?? 3;
+  const limit = opts.limit ?? DEFAULT_LIMIT;
   const originScore = comfortScore(origin);
   const homeIsNice = originScore >= GOOD_ABS;
 

@@ -41,9 +41,15 @@ export interface KoosView {
 const SUNSET_COUNTRY: Record<string, { country: string; flag: string }> = {
   "sunset-valencia": { country: "Spanje", flag: "ES" },
   "sunset-barcelona": { country: "Spanje", flag: "ES" },
+  "sunset-malaga": { country: "Spanje", flag: "ES" },
+  "sunset-sevilla": { country: "Spanje", flag: "ES" },
   "sunset-algarve": { country: "Portugal", flag: "PT" },
+  "sunset-lissabon": { country: "Portugal", flag: "PT" },
   "sunset-canarias": { country: "Spanje", flag: "ES" },
   "sunset-malta": { country: "Malta", flag: "MT" },
+  "sunset-nice": { country: "Frankrijk", flag: "FR" },
+  "sunset-athene": { country: "Griekenland", flag: "GR" },
+  "sunset-cyprus": { country: "Cyprus", flag: "CY" },
 };
 
 export function hourKind(weatherCode: number, sunshineHours: number, precipProbMax: number): KoosHourKind {

@@ -61,9 +61,10 @@ assert.equal(r2[0].targetName, "Valencia", "zon-bestemming moet kloppen");
 const line = koosTemplateLine(r1[0]);
 assert.ok(line.length > 0 && line.includes("Maastricht"), "sjabloon-zin moet bestemming noemen");
 
-// 8. INTERNATIONAL_SUNSET bevat de 5 default-bestemmingen.
-assert.equal(INTERNATIONAL_SUNSET.length, 5, "verwacht 5 zon-bestemmingen");
+// 8. INTERNATIONAL_SUNSET bevat de uitgebreide zon-set (meerdere opties).
+assert.ok(INTERNATIONAL_SUNSET.length >= 8, `verwacht >=8 zon-bestemmingen, kreeg ${INTERNATIONAL_SUNSET.length}`);
 assert.ok(INTERNATIONAL_SUNSET.every((d) => d.lat && d.lon && d.name && d.locationId), "elke bestemming compleet");
+assert.equal(new Set(INTERNATIONAL_SUNSET.map((d) => d.locationId)).size, INTERNATIONAL_SUNSET.length, "geen dubbele locationId's");
 
 // 9. scoreGetawayPicks draagt de weerdata mee en mapt 1-op-1 op scoreGetaways.
 const picks = scoreGetawayPicks(origin, [better]);

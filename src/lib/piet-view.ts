@@ -218,13 +218,21 @@ function buildDay(
   };
 }
 
+// Buurman-onderbouwing (sjabloon, geen LLM): concreet, nuchter, nooit dramatisch
+// — zelfde "over het hek"-stem als Koos en Piets Deepseek-pad.
 function storyFor(max: number, min: number, zon: number, regen: number, wind: number): string {
-  const parts: string[] = [`Overdag rond ${max}°, 's nachts naar ${min}°.`];
-  if (regen >= 60) parts.push(`Veel kans op regen (${regen}%) en wind tot ${wind} km/u — neem een jas mee.`);
-  else if (regen >= 30) parts.push(`Af en toe een bui mogelijk (${regen}% kans), wind tot ${wind} km/u.`);
-  else if (zon >= 7) parts.push(`Ruim ${zon} uur zon en grotendeels droog. Wind tot ${wind} km/u.`);
-  else parts.push(`Overwegend droog, ${zon} uur zon. Wind tot ${wind} km/u.`);
-  return parts.join(" ");
+  const open = `Overdag een graad of ${max}, 's nachts terug naar ${min}.`;
+  let rest: string;
+  if (regen >= 60) {
+    rest = `Het wordt een natte boel — ${regen}% kans op regen en wind tot ${wind} km/u. Jas mee, en de buitenklusjes kun je beter naar voren halen.`;
+  } else if (regen >= 30) {
+    rest = `Af en toe kan er een bui vallen (${regen}% kans), met wind tot ${wind} km/u. Hou er een beetje rekening mee.`;
+  } else if (zon >= 7) {
+    rest = `Ruim ${zon} uur zon en grotendeels droog — prima dag om buiten te zijn. Wind tot ${wind} km/u.`;
+  } else {
+    rest = `Overwegend droog met ${zon} uur zon en wind tot ${wind} km/u. Niks om je druk over te maken.`;
+  }
+  return `${open} ${rest}`;
 }
 
 function taglineFor(code: number, regen: number, tempMax: number): string {
