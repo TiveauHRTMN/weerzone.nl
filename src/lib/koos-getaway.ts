@@ -13,7 +13,10 @@
  */
 
 import type { WeatherOpportunity } from "@/lib/agents/types";
-import { NL_PLACES, placeRouteSlug } from "@/lib/places-data";
+import type { Place } from "@/lib/places-data";
+import { KOOS_GETAWAY_PLACES, placeRouteSlug } from "@/lib/places-data";
+
+type PlaceCharacter = NonNullable<Place["character"]>;
 
 export type GetawayKind = "domestic" | "sunset";
 
@@ -41,6 +44,8 @@ export interface DailyOutlook {
   weatherCode: number;
   /** Afstand vanaf de herkomst, km. */
   distanceKm: number;
+  /** Type bestemming (kust/natuur/camping), voor slimmere redenen. */
+  character?: PlaceCharacter;
 }
 
 const IDEAL_TEMP = 22;
@@ -87,21 +92,37 @@ export const INTERNATIONAL_SUNSET: readonly {
 ];
 
 // Drempels: hoeveel beter een plek moet zijn voor Koos iets zegt.
-const DOMESTIC_THRESHOLD = 0.18; // binnenlandse plek moet merkbaar beter zijn
+const DOMESTIC_THRESHOLD = 0.12; // binnenlandse plek moet merkbaar beter zijn dan thuis
+const GOOD_ABS = 0.6; // ...én absoluut een mooie dag (anders is het geen uitje)
 const SUNSET_MIN_TEMP = 20; // zon-bestemming moet écht warm zijn
 const SUNSET_MAX_PRECIP = 25; // ...en droog
-const HOME_GREY_PRECIP = 55; // thuis "grauw" vanaf deze neerslagkans
-const HOME_COLD_TEMP = 14; // ...of zo koud
+
+/** Korte plaatsaanduiding op basis van het karakter van de bestemming. */
+function placePhrase(c: DailyOutlook): string {
+  const isCamping = /^camping\b/i.test(c.name) || /vakantiepark/i.test(c.name);
+  if (isCamping) return `op ${c.name}`;
+  switch (c.character) {
+    case "coastal":
+      return `aan zee bij ${c.name}`;
+    case "highland":
+      return `op de hoge gronden bij ${c.name}`;
+    case "inland":
+      return `in de natuur bij ${c.name}`;
+    default:
+      return `in ${c.name}`;
+  }
+}
 
 function buildReason(origin: DailyOutlook, c: DailyOutlook): string {
   const there = `${Math.round(c.tempMax)}°`;
   if (c.kind === "sunset") {
-    return `Hier blijft het grauw; in ${c.name} is het ${there} en zonnig.`;
+    return `Heel Nederland blijft grauw; in ${c.name} is het ${there} en zonnig.`;
   }
+  const where = placePhrase(c);
   if (origin.precipProbMax - c.precipProbMax >= 30) {
-    return `Hier kans op regen, in ${c.name} blijft het droog (${there}).`;
+    return `Hier kans op regen, ${where} blijft het droog (${there}).`;
   }
-  return `In ${c.name} is het zonniger en ${there}.`;
+  return `${where.charAt(0).toUpperCase()}${where.slice(1)} is het zonniger en ${there}.`;
 }
 
 /**
@@ -129,18 +150,28 @@ export function scoreGetawayPicks(
 ): KoosPick[] {
   const limit = opts.limit ?? 3;
   const originScore = comfortScore(origin);
-  const homeIsGrey =
-    origin.precipProbMax >= HOME_GREY_PRECIP || origin.tempMax <= HOME_COLD_TEMP;
+  const homeIsNice = originScore >= GOOD_ABS;
+
+  // "Heel NL nat": geen enkele binnenlandse getaway haalt de mooi-lat.
+  const bestDomestic = candidates
+    .filter((c) => c.kind === "domestic")
+    .reduce((m, c) => Math.max(m, comfortScore(c)), 0);
+  const allNLPoor = bestDomestic < GOOD_ABS;
+  // Buitenland pas als thuis niet mooi is ÉN heel NL niets beters biedt.
+  const enableSunset = !homeIsNice && allNLPoor;
 
   const picks: KoosPick[] = [];
   for (const c of candidates) {
+    const cScore = comfortScore(c);
     if (c.kind === "sunset") {
-      if (!homeIsGrey) continue;
+      if (!enableSunset) continue;
       if (c.tempMax < SUNSET_MIN_TEMP || c.precipProbMax > SUNSET_MAX_PRECIP) continue;
-    } else if (comfortScore(c) - originScore < DOMESTIC_THRESHOLD) {
-      continue;
+    } else {
+      // Binnenlands: moet absoluut een mooie dag zijn ÉN merkbaar beter dan thuis.
+      if (cScore < GOOD_ABS) continue;
+      if (cScore - originScore < DOMESTIC_THRESHOLD) continue;
     }
-    const delta = comfortScore(c) - originScore;
+    const delta = cScore - originScore;
     if (delta <= 0) continue;
     picks.push({
       opportunity: {
@@ -183,11 +214,12 @@ export function koosTemplateLine(op: WeatherOpportunity): string {
 
 const OPEN_METEO_DAILY = "https://api.open-meteo.com/v1/forecast";
 
-// Reisband voor binnenlandse kandidaten: ver genoeg om te verschillen,
-// dichtbij genoeg om er heen te gaan.
+// Reisband voor binnenlandse getaways: ver genoeg om écht te verschillen,
+// dichtbij genoeg voor een (lang) weekend. Ruimer dan v1 (160km) zodat de Wadden
+// en Zeeland vanuit het midden binnen bereik vallen.
 const TRAVEL_MIN_KM = 25;
-const TRAVEL_MAX_KM = 160;
-const DOMESTIC_CANDIDATES = 8;
+const TRAVEL_MAX_KM = 220;
+const DOMESTIC_CANDIDATES = 12;
 
 interface CandidateLoc {
   name: string;
@@ -196,10 +228,11 @@ interface CandidateLoc {
   lon: number;
   kind: GetawayKind;
   distanceKm: number;
+  character?: PlaceCharacter;
 }
 
 function domesticCandidates(origin: GetawayOrigin): CandidateLoc[] {
-  return NL_PLACES
+  return KOOS_GETAWAY_PLACES
     .map((p) => ({ p, km: haversineKm(origin, p) }))
     .filter(({ km }) => km >= TRAVEL_MIN_KM && km <= TRAVEL_MAX_KM)
     .sort((a, b) => a.km - b.km)
@@ -211,6 +244,7 @@ function domesticCandidates(origin: GetawayOrigin): CandidateLoc[] {
       lon: p.lon,
       kind: "domestic" as const,
       distanceKm: km,
+      character: p.character,
     }));
 }
 
@@ -247,6 +281,7 @@ export async function fetchDailyOutlook(
       sunshineHours: Number(d.sunshine_duration?.[dayIndex] ?? 0) / 3600,
       weatherCode: Number(d.weathercode?.[dayIndex] ?? 0),
       distanceKm: loc.distanceKm,
+      character: loc.character,
     };
   } catch {
     return null;

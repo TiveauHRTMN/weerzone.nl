@@ -103,6 +103,17 @@ export const ALL_PLACES = mergePlaces(allPlacesRaw as Place[], [
 ]);
 export const PLACES_COUNT = ALL_PLACES.length;
 
+/**
+ * Koos' getaway-kandidaten: échte dagbestemmingen (Waddeneilanden, natuurgebieden,
+ * kust, campings/vakantieparken) — bewust ZONDER stadscentra, want "het is droog
+ * in Rotterdam" is geen uitje. Gevoed door de curated set + de OSM-campings.
+ * Dit is de pool waaruit /koos binnenlandse tips kiest (NL-first).
+ */
+export const KOOS_GETAWAY_PLACES: Place[] = mergePlaces(
+  [...KOOS_NL_PLACES, ...KOOS_NL_CAMPING_PLACES],
+  [],
+).filter((p) => p.character !== "urban");
+
 export type Province =
   | "groningen"
   | "friesland"

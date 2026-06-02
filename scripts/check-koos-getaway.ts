@@ -74,4 +74,20 @@ assert.equal(picks[0].precipProbMax, 10, "pick draagt regen mee");
 assert.equal(picks[0].kind, "domestic", "pick draagt kind mee");
 assert.equal(picks[0].opportunity.targetName, "Maastricht", "pick.opportunity koppelt aan dezelfde plek");
 
+// 10. NL-first: een mooie binnenlandse getaway onderdrukt de buitenland-tip,
+//     ook al is het thuis grauw (buitenland pas als heel NL niets moois biedt).
+const niceNL = outlook({ name: "Terschelling", locationId: "friesland/terschelling", character: "coastal", tempMax: 22, precipProbMax: 8, sunshineHours: 9, distanceKm: 120 });
+const r3 = scoreGetaways(origin, [niceNL, sunny]);
+assert.ok(r3.some((o) => o.targetName === "Terschelling"), "mooie NL-plek moet verschijnen");
+assert.ok(!r3.some((o) => o.targetName === "Valencia"), "buitenland onderdrukt zolang NL iets moois biedt");
+
+// 11. Absolute mooi-lat: een NL-plek die nét beter is maar absoluut niet mooi
+//     (grauw, weinig zon) is geen uitje -> Koos zwijgt erover.
+const meh = outlook({ name: "Iets-Beter", locationId: "x/meh", character: "inland", tempMax: 15, precipProbMax: 50, sunshineHours: 3, distanceKm: 60 });
+assert.equal(scoreGetaways(origin, [meh]).length, 0, "marginaal-beter-maar-grauw telt niet als getaway");
+
+// 12. Karakter-bewuste reden: kust -> 'aan zee'.
+const coastalPick = scoreGetawayPicks(origin, [niceNL])[0];
+assert.ok(/aan zee/i.test(coastalPick.opportunity.reason), `kust-reden verwacht 'aan zee': ${coastalPick.opportunity.reason}`);
+
 console.log("OK - koos-getaway pure logica gedraagt zich correct");
