@@ -415,41 +415,13 @@ function Destinations({ alts }: { alts: Dest[] }) {
   );
 }
 
-/* ---------- 5. WhyKoos ---------- */
-function WhyKoos() {
-  return (
-    <div className="mt-6 rcard p-5 sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="icon-tile" style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(180deg,#fff,#CFFAFE)", color: "#0369A1", border: "1px solid #CFFAFE" }}>
-          <IcSparkles size={16} stroke={2.2} />
-        </span>
-        <div className="flex-1">
-          <Micro>Hoe doet Koos dat?</Micro>
-          <p className="mt-1.5 text-[14px] leading-relaxed text-slate-700">
-            Koos kijkt naar het weer op plekken binnen je bereik en tipt je waar het <b>droger</b> en <b>zonniger</b> is
-            dan bij jou. Hij zegt alleen iets als het er écht beter is — en hij tipt alleen: jij regelt zelf wat je wilt.
-          </p>
-          <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-            <Chip tone="green">Droger dan thuis</Chip>
-            <Chip tone="yellow">Meer zon</Chip>
-            <Chip tone="cyan">Alleen als 't beter is</Chip>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- 6. Footer trust ---------- */
+/* ---------- 5. Footer trust ---------- */
 function FooterTrust() {
   return (
     <div className="mt-6 flex items-center justify-between gap-3 flex-wrap text-[12.5px] text-slate-700">
       <div className="flex items-center gap-2">
         <IcCheck size={14} stroke={2.4} style={{ color: "#15803D" }} />
-        <span>
-          Koos kijkt elke dag naar het weer in heel Nederland en net daarbuiten, en tipt je alleen als het ergens écht
-          beter is.
-        </span>
+        <span>Koos tipt alleen als het ergens écht beter is dan bij jou.</span>
       </div>
       <a href="/over" className="font-bold text-slate-900 inline-flex items-center gap-1">
         Over Koos <IcExt size={11} stroke={2.4} />
@@ -502,7 +474,6 @@ export default function KoosTravelPage({
         ) : (
           <KoosRust locationName={view.locationName} />
         )}
-        <WhyKoos />
         <FooterTrust />
       </div>
     </main>

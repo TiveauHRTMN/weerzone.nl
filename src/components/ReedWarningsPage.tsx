@@ -1398,7 +1398,7 @@ function FooterTrust() {
           gevoed door KNMI, ECMWF, GPS, HARMONIE, AROME en ICON-D2.
         </span>
       </div>
-      <a href="#" className="font-bold text-slate-900 inline-flex items-center gap-1">
+      <a href="/over" className="font-bold text-slate-900 inline-flex items-center gap-1">
         Over Reed <IcArrow size={11} stroke={2.4} />
       </a>
     </div>
