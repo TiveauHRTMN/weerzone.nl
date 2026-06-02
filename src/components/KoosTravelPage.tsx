@@ -245,7 +245,7 @@ function KoosHero({ view, count }: { view: KoosView; count: number }) {
 
         <p className="mt-4 text-[14.5px] leading-relaxed text-slate-600 max-w-[58ch]">
           {view.intro ??
-            `Verderop is het de komende dagen aangenamer dan in ${view.locationName}. Koos vergelijkt jouw plek met haalbare bestemmingen en zegt waar het droger en zonniger is — puur advies, je regelt zelf wat je wilt.`}
+            `Verderop is het de komende dagen een stuk prettiger dan in ${view.locationName}. Koos houdt het in de gaten en tipt je waar het droger en zonniger is — hij tipt alleen, jij regelt de rest.`}
         </p>
 
         <div className="mt-6 flex items-center gap-3 flex-wrap">
@@ -424,11 +424,10 @@ function WhyKoos() {
           <IcSparkles size={16} stroke={2.2} />
         </span>
         <div className="flex-1">
-          <Micro>Hoe kiest Koos?</Micro>
+          <Micro>Hoe doet Koos dat?</Micro>
           <p className="mt-1.5 text-[14px] leading-relaxed text-slate-700">
-            Koos vergelijkt het weer op haalbare bestemmingen en kiest de plekken waar het{" "}
-            <b>droger</b> en <b>zonniger</b> is dan bij jou. Koos zegt alleen iets als het er écht beter is — en
-            adviseert alleen: je regelt zelf wat je wilt.
+            Koos kijkt naar het weer op plekken binnen je bereik en tipt je waar het <b>droger</b> en <b>zonniger</b> is
+            dan bij jou. Hij zegt alleen iets als het er écht beter is — en hij tipt alleen: jij regelt zelf wat je wilt.
           </p>
           <div className="mt-3 flex items-center gap-1.5 flex-wrap">
             <Chip tone="green">Droger dan thuis</Chip>
@@ -448,8 +447,8 @@ function FooterTrust() {
       <div className="flex items-center gap-2">
         <IcCheck size={14} stroke={2.4} style={{ color: "#15803D" }} />
         <span>
-          Koos draait op <b className="text-slate-900">Mariana</b> &amp; <b className="text-slate-900">Oracle</b> — weerdata
-          via KNMI, ECMWF &amp; Open-Meteo.
+          Koos kijkt elke dag naar het weer in heel Nederland en net daarbuiten, en tipt je alleen als het ergens écht
+          beter is.
         </span>
       </div>
       <a href="/over" className="font-bold text-slate-900 inline-flex items-center gap-1">
