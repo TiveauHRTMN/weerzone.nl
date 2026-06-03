@@ -37,6 +37,17 @@ export interface KoosView {
   alternatives: KoosDestinationView[];
 }
 
+/** Land + korte vlagcode per dichtbij-buitenland-bestemming (op locationId). */
+const NEARBY_COUNTRY: Record<string, { country: string; flag: string }> = {
+  "nearby-antwerpen": { country: "België", flag: "BE" },
+  "nearby-gent": { country: "België", flag: "BE" },
+  "nearby-brugge": { country: "België", flag: "BE" },
+  "nearby-dusseldorf": { country: "Duitsland", flag: "DE" },
+  "nearby-keulen": { country: "Duitsland", flag: "DE" },
+  "nearby-munster": { country: "Duitsland", flag: "DE" },
+  "nearby-lille": { country: "Frankrijk", flag: "FR" },
+};
+
 /** Land + korte vlagcode per internationale zon-bestemming (op locationId). */
 const SUNSET_COUNTRY: Record<string, { country: string; flag: string }> = {
   "sunset-valencia": { country: "Spanje", flag: "ES" },
@@ -70,7 +81,9 @@ function pickToView(pick: KoosPick): KoosDestinationView {
   const meta =
     pick.kind === "sunset"
       ? SUNSET_COUNTRY[pick.opportunity.targetLocationId] ?? { country: "Zuid-Europa", flag: "EU" }
-      : { country: "Nederland", flag: "NL" };
+      : pick.kind === "nearby"
+        ? NEARBY_COUNTRY[pick.opportunity.targetLocationId] ?? { country: "Buurland", flag: "EU" }
+        : { country: "Nederland", flag: "NL" };
   return {
     city: pick.opportunity.targetName,
     country: meta.country,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ALL_PLACES, placeSlug } from "@/lib/places-data";
+import { SETTLEMENT_PLACES, placeSlug } from "@/lib/places-data";
 
 const NL_PROVINCES = new Set([
   "groningen","friesland","drenthe","overijssel","flevoland",
@@ -15,9 +15,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(null, { status: 400 });
   }
 
-  // GPS navigation always resolves to a Dutch place — Belgian pages exist for
-  // SEO indexing but are not stable enough to route live users to yet.
-  const pool = ALL_PLACES.filter(p => NL_PROVINCES.has(p.province));
+  // GPS navigation always resolves to a Dutch woonplaats — geen campings of
+  // natuurgebieden (die zitten in de Koos-set). Belgische pagina's bestaan voor
+  // SEO-indexing maar zijn nog niet stabiel genoeg voor live routing.
+  const pool = SETTLEMENT_PLACES.filter(p => NL_PROVINCES.has(p.province));
 
   let nearest = pool[0];
   let minDist = Infinity;

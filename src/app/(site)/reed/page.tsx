@@ -4,11 +4,7 @@ import ReedWarningsPage from "@/components/ReedWarningsPage";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES, type WeatherData } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
-import { fetchEstofexBeneluxSummary, summarizeEstofexNL } from "@/lib/estofex";
 import { nearestProvinceSlug, PROVINCE_SLUG_TO_KNMI } from "@/lib/knmi-warnings";
-import { nearestTeslaRegion } from "@/lib/mariana/regions/nearest-region";
-import { loadLatestTeslaRun } from "@/lib/mariana/tesla/storage";
-import type { TeslaRun } from "@/lib/mariana/tesla/types";
 import { buildReedView } from "@/lib/reed-view";
 import { hreflangCluster } from "@/lib/hreflang";
 import "./reed-skin.css";
@@ -66,17 +62,10 @@ function buildCalmFallbackWeather(now = new Date()): WeatherData {
   };
 }
 
-function isFreshTeslaRun(run: TeslaRun | null): run is TeslaRun {
-  if (!run?.runAt) return false;
-  const runAt = Date.parse(run.runAt);
-  if (!Number.isFinite(runAt)) return false;
-  return Date.now() - runAt <= 36 * 60 * 60 * 1000;
-}
-
 export const metadata: Metadata = {
   title: "Reed's Extremen - onweer en stormrisico",
   description:
-    "Reed volgt onweer, storm en officiële extremen met modelduiding, bliksemkaart en expertanalyse. Alleen als er echt iets op komst is.",
+    "Reed let op onweer, storm en zware regen voor jouw plek. Alleen als er echt iets op komst is.",
   alternates: {
     canonical: "https://weerzone.nl/reed",
     languages: hreflangCluster({
@@ -86,7 +75,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Reed's Extremen | WEERZONE",
     description:
-      "Bekijk onweers- en stormrisico met modelduiding, bliksemkaart en expertanalyse.",
+      "Onweer, storm en zware regen voor jouw plek, zonder ruis.",
     type: "website",
     locale: "nl_NL",
     url: "https://weerzone.nl/reed",
@@ -96,7 +85,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Reed's Extremen",
     description:
-      "Onweer, storm en officiële extremen voor jouw provincie, zonder ruis.",
+      "Onweer, storm en zware regen voor jouw plek, zonder ruis.",
   },
 };
 
@@ -105,37 +94,17 @@ export default async function ReedPage() {
   const activeLoc =
     loc || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0];
   const provinceSlug = await nearestProvinceSlug(activeLoc.lat, activeLoc.lon);
-  const teslaRegion = nearestTeslaRegion(activeLoc.lat, activeLoc.lon);
 
   // Background is dynamisch op basis van het lokale weer (zelfde bron als /weer).
-  const [liveWeather, teslaRun] = await Promise.all([
-    fetchWeatherData(activeLoc.lat, activeLoc.lon, false, true).catch(() => null),
-    loadLatestTeslaRun(teslaRegion.slug).catch(() => null),
-  ]);
+  const liveWeather = await fetchWeatherData(activeLoc.lat, activeLoc.lon, false, true).catch(
+    () => null,
+  );
   const weather = liveWeather ?? buildCalmFallbackWeather();
-  const freshTeslaRun = isFreshTeslaRun(teslaRun) ? teslaRun : null;
-  const estofex = freshTeslaRun
-    ? await fetchEstofexBeneluxSummary(2).catch(() => null)
-    : null;
 
-  const estofexInfo = estofex
-    ? {
-        level: estofex.maxLevel,
-        synopsis:
-          estofex.beneluxText?.slice(0, 320) ??
-          summarizeEstofexNL(estofex) ??
-          "Verhoogd risico op zwaar onweer in (een deel van) de regio. Bekijk de volledige outlook op estofex.org.",
-        imageUrl: estofex.imageUrl,
-        sourceUrl: estofex.sourceUrl,
-        validUntil: estofex.validUntil,
-      }
-    : null;
   const view = buildReedView({
     weather,
     locationName: activeLoc.name,
     provinceLabel: provinceSlug ? PROVINCE_SLUG_TO_KNMI[provinceSlug] : null,
-    estofex: estofexInfo,
-    tesla: freshTeslaRun?.signal ?? null,
     knmi: [],
   });
 

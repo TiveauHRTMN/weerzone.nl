@@ -82,18 +82,47 @@ const r3 = scoreGetaways(origin, [niceNL, sunny]);
 assert.ok(r3.some((o) => o.targetName === "Terschelling"), "mooie NL-plek moet verschijnen");
 assert.ok(!r3.some((o) => o.targetName === "Valencia"), "buitenland onderdrukt zolang NL iets moois biedt");
 
-// 11. Absolute mooi-lat: een NL-plek die nét beter is maar absoluut niet mooi
-//     (grauw, weinig zon) is geen uitje -> Koos zwijgt erover.
-const meh = outlook({ name: "Iets-Beter", locationId: "x/meh", character: "inland", tempMax: 15, precipProbMax: 50, sunshineHours: 3, distanceKm: 60 });
-assert.equal(scoreGetaways(origin, [meh]).length, 0, "marginaal-beter-maar-grauw telt niet als getaway");
+// 11. NL-first: een droge, redelijke NL-plek (geen topdag) mag verschijnen en
+//     onderdrukt buitenland.
+const dryMeh = outlook({ name: "Iets-Beter", locationId: "x/meh", character: "inland", tempMax: 17, precipProbMax: 30, sunshineHours: 5, weatherCode: 2, distanceKm: 60 });
+const mehResult = scoreGetaways(origin, [dryMeh]);
+assert.equal(mehResult.length, 1, "droge, merkbaar betere NL-plek verschijnt");
+assert.equal(mehResult[0].targetName, "Iets-Beter", "NL target moet kloppen");
 
-// 12. Karakter-bewuste reden: kust -> 'aan zee'.
+// 12. Droogte-eis: een NL-plek waar het ook regent wordt NIET getipt — dan mag
+//     buitenland juist wel (heel NL nat).
+const wetNL = outlook({ name: "De Veluwe", locationId: "gelderland/de-veluwe", character: "highland", tempMax: 18, precipProbMax: 70, sunshineHours: 5, weatherCode: 63, distanceKm: 70 });
+const r4 = scoreGetaways(origin, [wetNL, sunny]);
+assert.ok(!r4.some((o) => o.targetName === "De Veluwe"), "natte NL-plek wordt niet getipt");
+assert.ok(r4.some((o) => o.targetName === "Valencia"), "bij natte NL mag de verre zon-set verschijnen");
+
+// 13. Karakter-bewuste reden: kust -> 'aan zee'.
 const coastalPick = scoreGetawayPicks(origin, [niceNL])[0];
 assert.ok(/aan zee/i.test(coastalPick.opportunity.reason), `kust-reden verwacht 'aan zee': ${coastalPick.opportunity.reason}`);
 
-// 13. Campings worden als plek op de camping verwoord, niet als stad.
+// 14. Campings worden als plek op de camping verwoord, niet als stad.
 const camping = outlook({ name: "Camping De Lakens", locationId: "noord-holland/camping-de-lakens", character: "coastal", tempMax: 22, precipProbMax: 5, sunshineHours: 9, distanceKm: 80 });
 const campingPick = scoreGetawayPicks(origin, [camping])[0];
 assert.ok(/op Camping De Lakens/i.test(campingPick.opportunity.reason), `camping-reden verwacht 'op Camping': ${campingPick.opportunity.reason}`);
+
+// 15. Dichtbij-buitenland verschijnt naast een NL-pick (75% NL + 1-2 dichtbij).
+const goodNearby = outlook({ name: "Antwerpen", locationId: "nearby-antwerpen", kind: "nearby", tempMax: 21, precipProbMax: 15, sunshineHours: 8, weatherCode: 2, distanceKm: 120, country: "België", transport: "auto of trein" });
+const r5 = scoreGetaways(origin, [better, goodNearby]);
+assert.ok(r5.some((o) => o.targetName === "Maastricht"), "NL-pick aanwezig in de mix");
+assert.ok(r5.some((o) => o.targetName === "Antwerpen"), "dichtbij-buitenland verschijnt ernaast");
+
+// 16. Harde droogte-eis: warm maar nat wordt nooit getipt.
+const wetButWarm = outlook({ name: "NatMaarWarm", locationId: "x/nat", tempMax: 24, precipProbMax: 90, sunshineHours: 8, weatherCode: 61, distanceKm: 50 });
+assert.equal(scoreGetaways(origin, [wetButWarm]).length, 0, "natte plek wordt niet getipt, ook al is het warm");
+
+// 17. Heel NL nat → dichtbij-buitenland (droog) wordt getoond i.p.v. de natte NL-plek.
+const r6 = scoreGetaways(origin, [wetNL, goodNearby]);
+assert.ok(r6.some((o) => o.targetName === "Antwerpen"), "bij natte NL toont Koos dichtbij-buitenland");
+assert.ok(!r6.some((o) => o.targetName === "De Veluwe"), "natte NL-plek niet getipt");
+
+// 18. Stralende dag thuis → Koos zwijgt, ook al is elders nóg beter.
+const sunnyHome = outlook({ tempMax: 24, precipProbMax: 5, sunshineHours: 11, locationId: "thuis" });
+const evenBetter = outlook({ name: "Texel", locationId: "noord-holland/texel", character: "coastal", tempMax: 26, precipProbMax: 0, sunshineHours: 12, distanceKm: 90 });
+assert.equal(scoreGetaways(sunnyHome, [evenBetter]).length, 0, "mooie thuisdag -> Koos zwijgt");
 
 console.log("OK - koos-getaway pure logica gedraagt zich correct");

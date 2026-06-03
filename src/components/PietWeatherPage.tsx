@@ -12,6 +12,34 @@ import { Fragment, Suspense, useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { kindFromCode } from "@/lib/piet-view";
 import type { PietView, PietDay, PietScore, PietPollenRow } from "@/lib/piet-view";
+import { persistCity } from "@/lib/persist-city";
+
+/**
+ * Vraagt de GPS van de browser op, zet de exacte coördinaten via
+ * /api/resolve-location om naar de plek waar je écht bent (woonplaats of POI),
+ * en herlaadt de pagina.
+ */
+function locateAndReload(setBusy: (b: boolean) => void) {
+  if (typeof navigator === "undefined" || !("geolocation" in navigator)) return;
+  setBusy(true);
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        const res = await fetch(`/api/resolve-location?lat=${lat}&lon=${lon}`);
+        if (!res.ok) throw new Error("resolve failed");
+        const place = await res.json();
+        if (!place?.name) throw new Error("no place");
+        persistCity({ name: place.name, lat: place.lat ?? lat, lon: place.lon ?? lon });
+        window.location.reload();
+      } catch {
+        setBusy(false);
+      }
+    },
+    () => setBusy(false),
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+  );
+}
 
 const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
   ssr: false,
@@ -210,6 +238,7 @@ function chipToneForKind(k: HourKind): ChipTone {
 }
 function PietHero({ view }: { view: PietView }) {
   const { now, days, locationName, headline } = view;
+  const [busy, setBusy] = useState(false);
   const k = kindFromCode(now.weatherCode);
   const [lead, ...restParts] = headline.split(", ");
   const rest = restParts.join(", ");
@@ -270,8 +299,8 @@ function PietHero({ view }: { view: PietView }) {
         </div>
 
         <div className="mt-6 flex items-center gap-3 flex-wrap">
-          <button className="locpill lift">
-            <IcGps size={14} /> <span>Andere plek? Gebruik GPS</span>
+          <button className="locpill lift" onClick={() => locateAndReload(setBusy)} disabled={busy}>
+            <IcGps size={14} /> <span>{busy ? "Locatie bepalen…" : "Andere plek? Gebruik GPS"}</span>
           </button>
           <span className="text-[13.5px] text-slate-500">
             Locatie: <b className="text-slate-900">{locationName}</b>
@@ -290,7 +319,6 @@ function PietWeerberichtCard({ view, lat, lon }: { view: PietView; lat: number; 
       : "",
   ].filter(Boolean).join("\n\n");
   const [forecast, setForecast] = useState(fallback);
-  const [enhanced, setEnhanced] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -303,7 +331,6 @@ function PietWeerberichtCard({ view, lat, lon }: { view: PietView; lat: number; 
       .then((d) => {
         if (typeof d === "string" && d.trim()) {
           setForecast(d.trim());
-          setEnhanced(true);
         }
       })
       .catch(() => {})
@@ -320,10 +347,10 @@ function PietWeerberichtCard({ view, lat, lon }: { view: PietView; lat: number; 
   return (
     <div className="mt-6 rcard p-5 sm:p-7">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <Micro>Piet Weerbericht · KNMI + Mariana</Micro>
+        <Micro>Piet Weerbericht</Micro>
         <span className="livechip">
           <i />
-          {enhanced ? "DeepSeek V4 Flash" : "Snelle versie"}
+          Live
         </span>
       </div>
       <div className="mt-4 space-y-3">
@@ -755,10 +782,7 @@ function FooterTrust() {
     <div className="mt-6 flex items-center justify-between gap-3 flex-wrap text-[12.5px] text-slate-700">
       <div className="flex items-center gap-2">
         <IcCheck size={14} stroke={2.4} style={{ color: "#15803D" }} />
-        <span>
-          Piet draait op <b className="text-slate-900">Mariana</b> &amp; <b className="text-slate-900">Oracle</b> — KNMI,
-          ECMWF, HARMONIE, ICON-D2 &amp; pollen-meetnet.
-        </span>
+        <span>Piet kijkt 48 uur vooruit voor jouw plek — in gewone taal, zonder ruis.</span>
       </div>
       <a href="/over" className="font-bold text-slate-900 inline-flex items-center gap-1">
         Over Piet <IcExt size={11} stroke={2.4} />

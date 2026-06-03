@@ -48,50 +48,35 @@ function weatherWith(opts: { thunder?: boolean }): WeatherData {
   };
 }
 
+const now = new Date(`${today}T12:00:00+02:00`);
+
 // 1. Rustige dag, geen waarschuwingen -> state calm, geen active, vandaag geen risico.
-const calm = buildReedView({ weather: weatherWith({}), locationName: "De Bilt" });
+const calm = buildReedView({ weather: weatherWith({}), locationName: "De Bilt", now });
 assert.equal(calm.state, "calm", "rustige dag -> calm");
 assert.equal(calm.active, null, "rustig -> geen active warning");
 assert.equal(calm.days.vd.hasRisk, false, "rustig -> vandaag geen risico");
 assert.ok(calm.days.vd.calmReason && calm.days.vd.calmReason.length > 10, "rustig -> calmReason gevuld");
 
-// 2. Generieke onweersdata opent Reed niet meer: Tesla is de beslislaag.
-const storm = buildReedView({ weather: weatherWith({ thunder: true }), locationName: "De Bilt" });
-assert.equal(storm.state, "calm", "zonder Tesla blijft Reed calm");
-assert.equal(storm.active, null, "zonder Tesla geen active warning");
-assert.equal(storm.days.vd.hasRisk, false, "zonder Tesla geen risicodag");
+// 2. Onweersdata opent Reed in-depth: het lokale weer is de beslislaag.
+const storm = buildReedView({ weather: weatherWith({ thunder: true }), locationName: "De Bilt", now });
+assert.equal(storm.state, "warning", "onweersdata -> Reed opent in-depth");
+assert.ok(storm.active, "onweer -> active warning aanwezig");
+assert.equal(storm.days.vd.hasRisk, true, "onweer -> vandaag risicodag");
 assert.ok(storm.capeMax >= 1500, `capeMax hoog verwacht: ${storm.capeMax}`);
 
-// 3. KNMI-waarschuwing wordt alleen als context doorgegeven, niet als beslislaag.
+// 3. Officiële waarschuwing krijgt voorrang in de active-tekst.
 const knmi: KNMIWarning[] = [
   { province: "Utrecht", provinceSlug: "utrecht", type: "Onweersbuien", severity: "ORANGE", description: "x", validFrom: `${today}T13:00:00Z`, validUntil: `${today}T20:00:00Z`, issuedAt: null, key: "k1" },
 ];
-const official = buildReedView({ weather: weatherWith({ thunder: true }), locationName: "Utrecht", provinceLabel: "Utrecht", knmi });
-assert.equal(official.state, "calm", "KNMI-only opent Reed niet");
-assert.equal(official.active, null, "KNMI-only geeft geen active warning");
+const official = buildReedView({ weather: weatherWith({ thunder: true }), locationName: "Utrecht", provinceLabel: "Utrecht", knmi, now });
+assert.equal(official.state, "warning", "officiële waarschuwing opent Reed");
+assert.ok(official.active, "officiële waarschuwing -> active warning");
 assert.equal(official.knmi.severityLabel, "Code oranje", "knmi severityLabel gezet");
 assert.equal(official.knmi.items.length, 1, "1 knmi-item");
 
-// 4. Tesla wordt doorgegeven (expertlaag), null als afwezig.
-assert.equal(calm.tesla, null, "geen tesla -> null");
-
-const teslaWatch = buildReedView({
-  weather: weatherWith({}),
-  locationName: "De Bilt",
-  tesla: {
-    tesla_signal: 2,
-    timing_window: "late middag tot vroege avond",
-    expected_mode: "lijnvormige buien",
-    peak_corridor: "midden en oosten",
-    mariana_summary: "Tesla ziet genoeg dynamiek voor felle buien later op de dag.",
-  } as any,
-});
-assert.equal(teslaWatch.state, "warning", "directe Tesla-run -> warning als basisbronnen rustig zijn");
-assert.ok(teslaWatch.active, "directe Tesla-run -> active warning aanwezig");
-assert.ok(/felle buien/.test(teslaWatch.active!.summary), "Tesla-summary wordt gebruikt");
-assert.equal(teslaWatch.days.vd.hasRisk, true, "Tesla markeert vandaag als risicodag");
-assert.equal(teslaWatch.days.mo.hasRisk, false, "morgen blijft rustig zonder Tesla-window");
-assert.equal(teslaWatch.tesla?.tesla_signal, 2, "Tesla-signaal wordt doorgegeven");
+// 4. Tesla is geen frontend-begrip meer: view.tesla is altijd null.
+assert.equal(calm.tesla, null, "geen zichtbare tesla -> null");
+assert.equal(storm.tesla, null, "ook bij warning geen zichtbare tesla");
 
 // 5. Na middernacht schuift Reed naar de juiste Amsterdam-dagen.
 const midnightWeather = weatherWith({});

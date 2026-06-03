@@ -1,14 +1,14 @@
 /**
- * Reed view-adapter: mapt live weerdata + optionele KNMI/ESTOFEX-context +
- * een opgeslagen Mariana Tesla-run naar het presentatie-model dat
+ * Reed view-adapter: mapt live weerdata naar het presentatie-model dat
  * ReedWarningsPage rendert. Puur en testbaar (geen netwerk) — zie
  * scripts/check-reed-view.ts.
  *
- * Beslislaag: alleen Tesla opent Reed. KNMI, ESTOFEX en live weather mogen context
- * leveren als Tesla actief is, maar zetten de pagina niet zelfstandig op warning.
+ * Beslislaag: het lokale weer opent Reed. Zodra er ook maar een minimale kans is
+ * op onweer, storm of veel regen, gaat de pagina in-depth open. Pas als er écht
+ * niks speelt, blijft alleen de rust-tagline staan.
  *
  * Stem: Reed = nuchtere buurman die scherp let op gevaar — kalm, nooit paniek,
- * urgent als het moet. Sjabloontekst (geen LLM); schaalt naar de 10K-pagina's.
+ * urgent als het moet. Sjabloontekst; schaalt naar de 10K-pagina's.
  */
 
 import type { WeatherData } from "@/lib/types";
@@ -179,8 +179,15 @@ function buildRiskDay(
     .map((h) => hourNum(h.time));
   const win = contiguousWindow(riskHours);
 
-  // Risico op deze dag? Onweer/hoge CAPE, of (voor vandaag) ESTOFEX verhoogd.
-  const hasRisk = a.thunderHours.length > 0 || a.capeMax >= 800 || (key === "vd" && estofexLevelToday >= 2);
+  // Risico op deze dag? Al een minimale kans op onweer, storm of veel regen telt:
+  // onweer(suren) / energie in de lucht / stevige windstoten / flinke regen.
+  const hasRisk =
+    a.thunderHours.length > 0 ||
+    a.capeMax >= 500 ||
+    a.windMaxKmh >= 50 ||
+    a.rainSharePct >= 50 ||
+    a.precipPeakMm >= 4 ||
+    (key === "vd" && estofexLevelToday >= 2);
 
   const chips: ReedChip[] = [];
   if (hasRisk) {
@@ -251,7 +258,14 @@ function buildActive(
     return {
       state: heavy ? "warning" : "watch",
       active: {
-        title: today.badge === "Onweer" ? "Onweer en felle buien" : today.badge === "Wind" ? "Stevige wind" : "Buien op komst",
+        title:
+          today.badge === "Onweer"
+            ? "Onweer en felle buien"
+            : today.badge === "Wind"
+              ? "Stevige wind"
+              : today.badge === "Zware regen"
+                ? "Flinke regen op komst"
+                : "Buien op komst",
         levelLabel: heavy ? "Verhoogd risico" : "Iets in de gaten houden",
         tone: heavy ? "orange" : "amber",
         summary: convectiveSummary(today),
@@ -281,7 +295,7 @@ function knmiWarningSummary(w: KNMIWarning, today: ReedRiskDay): string {
       : w.severity === "ORANGE"
         ? "Code oranje: er kan flinke overlast zijn, pas je plannen aan."
         : "Code geel: hou er rekening mee, maar geen reden tot paniek.";
-  return `Het KNMI waarschuwt voor ${w.type.toLowerCase()} in ${w.province}.${when} ${sev}`;
+  return `Er is een officiële waarschuwing voor ${w.type.toLowerCase()} in ${w.province}.${when} ${sev}`;
 }
 
 function convectiveSummary(today: ReedRiskDay): string {
@@ -295,108 +309,33 @@ function convectiveSummary(today: ReedRiskDay): string {
   return `Er trekken buien over. Niks dramatisch, maar een droog moment uitkiezen scheelt.`;
 }
 
-function trimChipValue(value: string, max = 42): string {
-  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
-}
-
-function buildTeslaActive(tesla: TeslaSignal | null): { state: ReedState; active: ReedActiveWarning | null } | null {
-  if (!tesla) return null;
-
-  const level = tesla.tesla_signal;
-  const state: ReedState = level >= 2 ? "warning" : "watch";
-  const tone: ReedTone = level >= 3 ? "red" : level >= 2 ? "orange" : "amber";
-  const chips: ReedChip[] = [];
-
-  if (tesla.timing_window) chips.push({ label: "Venster", value: trimChipValue(tesla.timing_window), tone: "amber" });
-  if (tesla.expected_mode) chips.push({ label: "Modus", value: trimChipValue(tesla.expected_mode), tone: "orange" });
-  if (tesla.peak_corridor) chips.push({ label: "Regio", value: trimChipValue(tesla.peak_corridor), tone: "blue" });
-
-  return {
-    state,
-    active: {
-      title: level >= 2 ? "Tesla ziet convectief risico" : "Tesla houdt buien in de gaten",
-      levelLabel: level >= 2 ? "Verhoogd risico" : "Iets in de gaten houden",
-      tone,
-      summary:
-        tesla.mariana_summary ||
-        "Tesla ziet een convectieve setting die Reed actief blijft volgen, ook als de live waarschuwingen nog stil zijn.",
-      chips,
-    },
-  };
-}
-
-function applyTeslaRisk(day: ReedRiskDay, tesla: TeslaSignal | null, activeDay: boolean): ReedRiskDay {
-  if (!tesla || !activeDay) {
-    return {
-      ...day,
-      hasRisk: false,
-      badge: "Rustig",
-      windowLabel: null,
-      peakLabel: null,
-      durationH: 0,
-      chips: [],
-      gaugePct: 8,
-      prob: { onweer: 0, regen: 0 },
-      calmReason: "Mariana Tesla ziet nu geen actief onweer- of stormsignaal voor Nederland.",
-    };
-  }
-
-  const confidence = tesla.confidence ?? {
-    thunder: 0,
-    severe: 0,
-  };
-  const onweer = clampPct(Math.max(confidence.thunder * 100, tesla.tesla_signal * 25));
-  const gaugePct = clampPct(Math.max(onweer, confidence.severe * 100, 35));
-  const chips: ReedChip[] = [];
-  if (tesla.timing_window) chips.push({ label: "Venster", value: trimChipValue(tesla.timing_window), tone: "amber" });
-  if (tesla.expected_mode) chips.push({ label: "Modus", value: trimChipValue(tesla.expected_mode), tone: "orange" });
-  if (tesla.peak_corridor) chips.push({ label: "Regio", value: trimChipValue(tesla.peak_corridor), tone: "blue" });
-
-  return {
-    ...day,
-    hasRisk: true,
-    badge: tesla.tesla_signal >= 2 ? "Onweer" : "Buien",
-    windowLabel: tesla.timing_window || day.windowLabel,
-    peakLabel: null,
-    durationH: day.durationH,
-    chips,
-    gaugePct,
-    prob: { onweer, regen: clampPct(Math.max(day.prob.regen, onweer * 0.7)) },
-    calmReason: null,
-  };
-}
-
 /* ---------- hoofdadapter ---------- */
 export function buildReedView(input: {
   weather: WeatherData;
   locationName: string;
   provinceLabel?: string | null;
   estofex?: ReedEstofex | null;
-  tesla?: TeslaSignal | null;
   knmi?: KNMIWarning[];
   now?: Date;
 }): ReedView {
   const { weather, locationName, now = new Date() } = input;
   const estofex = input.estofex ?? null;
-  const tesla = input.tesla ?? null;
   const knmi = input.knmi ?? [];
 
   const todayIso = amsterdamIsoDate(now, 0);
   const tomorrowIso = amsterdamIsoDate(now, 1);
 
   const estLevelToday = estofex?.level ?? 0;
-  const baseVd = buildRiskDay(weather, "vd", todayIso, "Vandaag", estLevelToday);
-  const baseMo = buildRiskDay(weather, "mo", tomorrowIso, "Morgen", 0);
+  const vd = buildRiskDay(weather, "vd", todayIso, "Vandaag", estLevelToday);
+  const mo = buildRiskDay(weather, "mo", tomorrowIso, "Morgen", 0);
   const todayCapeMax = analyseDay(weather, todayIso).capeMax;
 
   const knmiSorted = [...knmi].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]);
   const knmiWorst = knmiSorted[0] && SEVERITY_RANK[knmiSorted[0].severity] >= 1 ? knmiSorted[0] : null;
 
-  const teslaActive = buildTeslaActive(tesla);
-  const state = teslaActive?.state ?? "calm";
-  const active = teslaActive?.active ?? null;
-  const vd = applyTeslaRisk(baseVd, tesla, !!active);
-  const mo = applyTeslaRisk(baseMo, null, false);
+  // Het lokale weer (plus optionele officiële waarschuwing / brede outlook)
+  // bepaalt of Reed opengaat. Minimale kans op onweer/storm/veel regen = open.
+  const { state, active } = buildActive(weather, vd, todayCapeMax, knmiWorst, estofex);
 
   const capeMax = Math.max(todayCapeMax, analyseDay(weather, tomorrowIso).capeMax);
   const nextUpdate = new Intl.DateTimeFormat("nl-NL", {
@@ -413,7 +352,7 @@ export function buildReedView(input: {
     active,
     days: { vd, mo },
     capeMax,
-    tesla,
+    tesla: null,
     estofex,
     knmi: {
       severityLabel: knmiWorst ? SEVERITY_LABEL[knmiWorst.severity] : null,

@@ -18,7 +18,7 @@ import { KOOS_GETAWAY_PLACES_LIGHT, koosPlaceRouteSlug } from "@/lib/koos-places
 
 type PlaceCharacter = NonNullable<Place["character"]>;
 
-export type GetawayKind = "domestic" | "sunset";
+export type GetawayKind = "domestic" | "nearby" | "sunset";
 
 export interface GetawayOrigin {
   name: string;
@@ -46,6 +46,10 @@ export interface DailyOutlook {
   distanceKm: number;
   /** Type bestemming (kust/natuur/camping), voor slimmere redenen. */
   character?: PlaceCharacter;
+  /** Land (alleen bij buitenland-bestemmingen). */
+  country?: string;
+  /** Hoe je er komt, bv. "auto of trein" / "vliegtuig". */
+  transport?: string;
 }
 
 const IDEAL_TEMP = 22;
@@ -77,6 +81,28 @@ export function haversineKm(
   return Math.round(2 * R * Math.asin(Math.sqrt(h)));
 }
 
+/**
+ * Dichtbij-buitenland (net over de grens), haalbaar met auto of trein. Koos toont
+ * hier standaard 1-2 van naast de NL-tips, zodat een dagje weg ook over de grens
+ * kan — zonder gelijk naar Zuid-Europa te springen.
+ */
+export const NEARBY_ABROAD: readonly {
+  name: string;
+  locationId: string;
+  lat: number;
+  lon: number;
+  country: string;
+  transport: string;
+}[] = [
+  { name: "Antwerpen", locationId: "nearby-antwerpen", lat: 51.2194, lon: 4.4025, country: "België", transport: "auto of trein" },
+  { name: "Gent", locationId: "nearby-gent", lat: 51.0543, lon: 3.7174, country: "België", transport: "auto of trein" },
+  { name: "Brugge", locationId: "nearby-brugge", lat: 51.2093, lon: 3.2247, country: "België", transport: "auto of trein" },
+  { name: "Düsseldorf", locationId: "nearby-dusseldorf", lat: 51.2277, lon: 6.7735, country: "Duitsland", transport: "auto of trein" },
+  { name: "Keulen", locationId: "nearby-keulen", lat: 50.9375, lon: 6.9603, country: "Duitsland", transport: "auto of trein" },
+  { name: "Münster", locationId: "nearby-munster", lat: 51.9607, lon: 7.6261, country: "Duitsland", transport: "auto of trein" },
+  { name: "Lille", locationId: "nearby-lille", lat: 50.6292, lon: 3.0573, country: "Frankrijk", transport: "auto of trein" },
+];
+
 /** Vaste internationale zon-set (v1). Pas hier aan om de set te wijzigen. */
 export const INTERNATIONAL_SUNSET: readonly {
   name: string;
@@ -98,12 +124,19 @@ export const INTERNATIONAL_SUNSET: readonly {
 ];
 
 // Drempels: hoeveel beter een plek moet zijn voor Koos iets zegt.
-const DOMESTIC_THRESHOLD = 0.12; // binnenlandse plek moet merkbaar beter zijn dan thuis
-const DOMESTIC_FALLBACK_THRESHOLD = 0.04; // NL-first: lichte verbetering is genoeg om buitenland te onderdrukken
-const GOOD_ABS = 0.6; // ...én absoluut een mooie dag (anders is het geen uitje)
-const NL_REALLY_POOR = 0.46; // buitenland pas als de beste NL-optie ook echt matig blijft
+const DRY_MAX_PRECIP = 40; // harde droogte-eis: Koos tipt geen natte plek
+const WET_CODE_MIN = 51; // WMO >= 51 = (mot)regen/buien → te nat om te tippen
+const MIN_DELTA = 0.06; // moet merkbaar beter zijn dan thuis
+const MIN_ABS = 0.5; // ...én op zichzelf een redelijke dag (anders is het geen uitje)
+const GOOD_ABS = 0.6; // thuis al zo mooi → Koos zwijgt
+const MAX_NEARBY = 2; // hoogstens 1-2 dichtbij-buitenland naast de NL-tips
 const SUNSET_MIN_TEMP = 20; // zon-bestemming moet écht warm zijn
 const SUNSET_MAX_PRECIP = 25; // ...en droog
+
+/** Droog genoeg om te tippen: lage regenkans én geen regen-weercode. */
+function isDry(o: { precipProbMax: number; weatherCode: number }): boolean {
+  return o.precipProbMax <= DRY_MAX_PRECIP && o.weatherCode < WET_CODE_MIN;
+}
 
 /** Korte plaatsaanduiding op basis van het karakter van de bestemming. */
 function placePhrase(c: DailyOutlook): string {
@@ -135,6 +168,11 @@ function buildReason(origin: DailyOutlook, c: DailyOutlook): string {
   const zonU = Math.round(c.sunshineHours);
   if (c.kind === "sunset") {
     return `Hier komt de zon er voorlopig niet door; in ${c.name} is het ${temp} en strak weer. Als je er echt even tussenuit wilt.`;
+  }
+  if (c.kind === "nearby") {
+    const land = c.country ? ` (${c.country})` : "";
+    const how = c.transport ? `, met de ${c.transport} te doen` : "";
+    return `Net over de grens in ${c.name}${land} is het ${temp} en droog — zo'n ${zonU} uur zon${how}.`;
   }
   const where = placePhrase(c);
   const dRain = origin.precipProbMax - c.precipProbMax;
@@ -176,14 +214,9 @@ export function scoreGetawayPicks(
 ): KoosPick[] {
   const limit = opts.limit ?? DEFAULT_LIMIT;
   const originScore = comfortScore(origin);
-  const homeIsNice = originScore >= GOOD_ABS;
-  const domesticCandidates = candidates.filter((c) => c.kind === "domestic");
 
-  // "Heel NL nat": geen enkele binnenlandse getaway haalt de mooi-lat.
-  const bestDomestic = domesticCandidates.reduce((m, c) => Math.max(m, comfortScore(c)), 0);
-  const allNLPoor = bestDomestic < NL_REALLY_POOR;
-  // Buitenland pas als thuis niet mooi is ÉN heel NL niets beters biedt.
-  const enableSunset = !homeIsNice && allNLPoor;
+  // Thuis is al zo mooi dat eropuit gaan weinig oplevert → Koos zwijgt.
+  if (originScore >= GOOD_ABS) return [];
 
   const toPick = (c: DailyOutlook, cScore: number): KoosPick => ({
     opportunity: {
@@ -201,36 +234,48 @@ export function scoreGetawayPicks(
     weatherCode: c.weatherCode,
   });
 
-  const domesticPicks: KoosPick[] = [];
-  const domesticFallbackPicks: KoosPick[] = [];
-  for (const c of domesticCandidates) {
+  const sortByScore = (a: KoosPick, b: KoosPick) => b.opportunity.score - a.opportunity.score;
+
+  // NL + dichtbij-buitenland: harde droogte-eis + merkbaar beter dan thuis.
+  const qualifyLocal = (c: DailyOutlook): KoosPick | null => {
     const cScore = comfortScore(c);
-    const delta = cScore - originScore;
-    if (delta <= 0) continue;
-    if (cScore >= GOOD_ABS && delta >= DOMESTIC_THRESHOLD) {
-      domesticPicks.push(toPick(c, cScore));
-    } else if (delta >= DOMESTIC_FALLBACK_THRESHOLD && bestDomestic >= NL_REALLY_POOR) {
-      domesticFallbackPicks.push(toPick(c, cScore));
-    }
+    if (!isDry(c)) return null;
+    if (cScore < MIN_ABS) return null;
+    if (cScore - originScore < MIN_DELTA) return null;
+    return toPick(c, cScore);
+  };
+
+  const domesticPicks = candidates
+    .filter((c) => c.kind === "domestic")
+    .map(qualifyLocal)
+    .filter((p): p is KoosPick => p !== null)
+    .sort(sortByScore);
+  const nearbyPicks = candidates
+    .filter((c) => c.kind === "nearby")
+    .map(qualifyLocal)
+    .filter((p): p is KoosPick => p !== null)
+    .sort(sortByScore);
+
+  // Verre zon-set: alleen warm + droog + beter dan thuis.
+  const sunsetPicks = candidates
+    .filter((c) => c.kind === "sunset")
+    .map((c) => {
+      if (c.tempMax < SUNSET_MIN_TEMP || c.precipProbMax > SUNSET_MAX_PRECIP) return null;
+      const cScore = comfortScore(c);
+      if (cScore - originScore <= 0) return null;
+      return toPick(c, cScore);
+    })
+    .filter((p): p is KoosPick => p !== null)
+    .sort(sortByScore);
+
+  if (domesticPicks.length > 0) {
+    // Normaal: NL voorop, hooguit 1-2 dichtbij-buitenland erbij (~75% NL).
+    const nNearby = Math.min(MAX_NEARBY, nearbyPicks.length);
+    return [...domesticPicks.slice(0, limit - nNearby), ...nearbyPicks.slice(0, nNearby)].slice(0, limit);
   }
 
-  const domesticResult = (domesticPicks.length > 0 ? domesticPicks : domesticFallbackPicks)
-    .sort((a, b) => b.opportunity.score - a.opportunity.score)
-    .slice(0, limit);
-  if (domesticResult.length > 0) return domesticResult;
-
-  const picks: KoosPick[] = [];
-  for (const c of candidates.filter((candidate) => candidate.kind === "sunset")) {
-    const cScore = comfortScore(c);
-    if (!enableSunset) continue;
-    if (c.tempMax < SUNSET_MIN_TEMP || c.precipProbMax > SUNSET_MAX_PRECIP) continue;
-    const delta = cScore - originScore;
-    if (delta <= 0) continue;
-    picks.push(toPick(c, cScore));
-  }
-  return picks
-    .sort((a, b) => b.opportunity.score - a.opportunity.score)
-    .slice(0, limit);
+  // Heel NL nat/niets beters → dichtbij-buitenland eerst, dan de verre zon-set.
+  return [...nearbyPicks, ...sunsetPicks].slice(0, limit);
 }
 
 /**
@@ -269,6 +314,8 @@ interface CandidateLoc {
   kind: GetawayKind;
   distanceKm: number;
   character?: PlaceCharacter;
+  country?: string;
+  transport?: string;
 }
 
 function domesticCandidates(origin: GetawayOrigin): CandidateLoc[] {
@@ -346,6 +393,8 @@ export async function fetchDailyOutlook(
       weatherCode: Number(d.weathercode?.[dayIndex] ?? 0),
       distanceKm: loc.distanceKm,
       character: loc.character,
+      country: loc.country,
+      transport: loc.transport,
     };
   } catch {
     return null;
@@ -371,23 +420,35 @@ export async function findGetawayPicks(
     distanceKm: 0,
   };
   const domestic = domesticCandidates(origin);
-  const [originOutlook, ...domesticRest] = await Promise.all([
+  const nearby: CandidateLoc[] = NEARBY_ABROAD.map((s) => ({
+    name: s.name,
+    locationId: s.locationId,
+    lat: s.lat,
+    lon: s.lon,
+    kind: "nearby" as const,
+    distanceKm: haversineKm(origin, s),
+    country: s.country,
+    transport: s.transport,
+  }));
+
+  // Thuis + NL-pool + dichtbij-buitenland in één keer; verre zon-set pas daarna.
+  const [originOutlook, ...rest] = await Promise.all([
     fetchDailyOutlook(originLoc, dayIndex),
     ...domestic.map((c) => fetchDailyOutlook(c, dayIndex)),
+    ...nearby.map((c) => fetchDailyOutlook(c, dayIndex)),
   ]);
   if (!originOutlook || Number.isNaN(originOutlook.tempMax)) {
     return { origin: null, picks: [] };
   }
-  const validDomestic = domesticRest.filter(
-    (o): o is DailyOutlook => o !== null && !Number.isNaN(o.tempMax),
-  );
-  const domesticPicks = scoreGetawayPicks(originOutlook, validDomestic, { limit: opts.limit });
-  if (domesticPicks.length > 0) {
-    return { origin: originOutlook, picks: domesticPicks };
+  const valid = rest.filter((o): o is DailyOutlook => o !== null && !Number.isNaN(o.tempMax));
+
+  const picks = scoreGetawayPicks(originOutlook, valid, { limit: opts.limit });
+  if (picks.length > 0) {
+    return { origin: originOutlook, picks };
   }
 
-  // NL-first: pas als er binnen Nederland niets overtuigend beters is, kijken we
-  // naar de vaste buitenland-set. Daardoor laadt /koos meestal minder remote data.
+  // Niets droog/beter binnen reach (NL + dichtbij). Thuis al mooi → Koos zwijgt;
+  // anders kijken we naar de verre zon-set (vliegtuig), met dichtbij ernaast.
   if (comfortScore(originOutlook) >= GOOD_ABS) {
     return { origin: originOutlook, picks: [] };
   }
@@ -396,6 +457,7 @@ export async function findGetawayPicks(
     ...s,
     kind: "sunset" as const,
     distanceKm: haversineKm(origin, s),
+    transport: "vliegtuig",
   }));
   const internationalOutlooks = await Promise.all(
     international.map((c) => fetchDailyOutlook(c, dayIndex)),
@@ -405,7 +467,7 @@ export async function findGetawayPicks(
   );
   return {
     origin: originOutlook,
-    picks: scoreGetawayPicks(originOutlook, validInternational, { limit: opts.limit }),
+    picks: scoreGetawayPicks(originOutlook, [...valid, ...validInternational], { limit: opts.limit }),
   };
 }
 

@@ -104,6 +104,13 @@ export const ALL_PLACES = mergePlaces(allPlacesRaw as Place[], [
 export const PLACES_COUNT = ALL_PLACES.length;
 
 /**
+ * Alléén echte woonplaatsen (places.json), zónder de Koos-bestemmingen,
+ * campings, vakantieparken en natuurgebieden. Gebruik dit voor "waar ben ik?"-
+ * GPS-resolutie: een gebruiker woont in een plaats, niet op een camping.
+ */
+export const SETTLEMENT_PLACES = allPlacesRaw as Place[];
+
+/**
  * Koos' getaway-kandidaten: échte dagbestemmingen (Waddeneilanden, natuurgebieden,
  * kust, campings/vakantieparken) — bewust ZONDER stadscentra, want "het is droog
  * in Rotterdam" is geen uitje. Gevoed door de curated set + de OSM-campings.

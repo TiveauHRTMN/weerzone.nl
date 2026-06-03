@@ -1,4 +1,5 @@
 import { KOOS_NL_CAMPING_PLACES } from "./koos-nl-camping-places.generated";
+import { NL_POI_PLACES } from "./nl-poi-places.generated";
 import type { Place } from "./places-data";
 
 export function koosPlaceRouteSlug(place: Pick<Place, "name" | "slug">): string {
@@ -73,11 +74,38 @@ const KOOS_CURATED_PLACES: Place[] = [
   { name: "Camping De Leistert", province: "limburg", lat: 51.255, lon: 5.926, slug: "camping-de-leistert", character: "inland" },
 ];
 
+// Geen "betere plek": camperplaatsen, parkings en losse plek-aanduidingen.
+const CAMPING_JUNK = /camperplaats|\bcamper\b|parking|parkeer|\bp\s*\+\s*r\b|aire\b/i;
+// Geen echt uitje: kinderboerderijen e.d. die in OSM als zoo getagd staan.
+const ZOO_JUNK = /kinderboerderij|stadsboerderij|\bboerderij\b|buurderij|\bhoeve\b|kinderparadijs/i;
+
+/** Echte campings/vakantieparken — camperplaatsen en parkings eruit. */
+const QUALITY_CAMPINGS: Place[] = KOOS_NL_CAMPING_PLACES.filter((p) => !CAMPING_JUNK.test(p.name));
+
 /**
- * Lichte Koos-pool zonder `places.json`. Dit houdt /koos snel, terwijl campings
- * uit de sitemap/generated OSM-set wel als NL-first tips kunnen meedoen.
+ * Leuke dag-POI's als getaway-bestemming: pretparken, dierentuinen, recreatie-
+ * zwembaden (zwempark) en stranden. Gewone buurtbadjes (category "zwembad")
+ * doen NIET mee — die zijn alleen voor GPS-herkenning. Kinderboerderijen eruit.
+ */
+const GETAWAY_POIS: Place[] = NL_POI_PLACES.filter((p) => {
+  if (p.category === "pretpark" || p.category === "zwempark" || p.category === "strand") return true;
+  if (p.category === "dierentuin") return !ZOO_JUNK.test(p.name);
+  return false;
+}).map((p) => ({
+  name: p.name,
+  province: p.province,
+  lat: p.lat,
+  lon: p.lon,
+  slug: p.slug,
+  // Strand = aan zee; pretpark/dierentuin/zwempark krijgen de neutrale "in …"-zin.
+  character: p.category === "strand" ? ("coastal" as const) : undefined,
+}));
+
+/**
+ * Lichte Koos-pool zonder `places.json`: curated dagbestemmingen + echte campings
+ * + leuke POI's (pretpark/dierentuin/zwempark/strand). Houdt /koos snel.
  */
 export const KOOS_GETAWAY_PLACES_LIGHT: Place[] = mergeKoosPlaces(
-  [...KOOS_CURATED_PLACES, ...KOOS_NL_CAMPING_PLACES],
+  [...KOOS_CURATED_PLACES, ...QUALITY_CAMPINGS, ...GETAWAY_POIS],
   [],
 ).filter((p) => p.character !== "urban");

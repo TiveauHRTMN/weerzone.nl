@@ -345,22 +345,39 @@ export const FRENCH_CITIES: City[] = [
 export const FR_STATIONS = FRENCH_CITIES;
 
 /**
- * Reverse geocode via OpenStreetMap Nominatim: geeft de werkelijke
- * plaatsnaam voor de opgegeven GPS-coördinaten. Gebruikt de exacte
- * locatie van de gebruiker — geen snapping naar KNMI-stations.
- * Valt terug op findNearestCity als de API geen resultaat geeft.
+ * Reverse geocode via OpenStreetMap Nominatim: geeft de naam voor de EXACTE
+ * GPS-coördinaten van de gebruiker terug — geen snapping naar een station of
+ * een dichtstbijzijnde plaats elders. De getoonde naam hoort dus altijd bij
+ * de plek waar je echt bent.
+ *
+ * Volgorde: als je punt door de kaartdata als POI is getagd (camping, attractie,
+ * park) tonen we díe naam; anders de woonplaats (dorp/stad). Nooit een straat-
+ * of gebouwnaam. Valt terug op findNearestCity als de API niets bruikbaars geeft.
  */
 export async function reverseGeocode(lat: number, lon: number, locale = "nl"): Promise<City> {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${locale}&zoom=10`,
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&accept-language=${locale}&zoom=14&addressdetails=1`,
       { headers: { "User-Agent": "WEERZONE/1.0 (weerzone.nl)" } }
     );
     if (res.ok) {
       const data = await res.json();
-      // Nominatim retourneert address.village, address.town, of address.city
-      const addr = data.address;
-      const name = addr?.village || addr?.town || addr?.city || addr?.municipality;
+      const addr = data.address ?? {};
+      const name =
+        // POI waar je fysiek bent (alleen als de kaartdata je punt zo tagt).
+        addr.attraction ||
+        addr.tourism ||
+        addr.leisure ||
+        addr.theme_park ||
+        // Anders de woonplaats op je coördinaten — van lokaal naar groter.
+        addr.village ||
+        addr.town ||
+        addr.city ||
+        addr.municipality ||
+        addr.suburb ||
+        addr.city_district ||
+        addr.hamlet ||
+        null;
       if (name) {
         return { name, lat, lon };
       }
