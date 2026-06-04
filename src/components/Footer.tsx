@@ -9,7 +9,7 @@ const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/weerzonenl" },
   { label: "YouTube", href: "https://youtube.com/@weerzone" },
   { label: "TikTok", href: "https://www.tiktok.com/@weerzonenl" },
-  { label: "Reddit", href: "https://www.reddit.com/user/No_Slip_3007/" },
+  { label: "Reddit", href: "https://www.reddit.com/r/weerzone" },
   { label: "Wikidata", href: "https://www.wikidata.org/wiki/Q139675943" },
 ];
 
@@ -23,6 +23,9 @@ const NAV_ITEMS = [
 export default function Footer() {
   const pathname = usePathname() ?? "/";
   const isHome = pathname === "/";
+
+  // Stand-alone routes met eigen chrome tonen de WEERZONE-footer niet.
+  if (pathname.startsWith("/hartmanwk2026")) return null;
 
   return (
     <footer className="w-full flex flex-col items-center pb-10 mt-12 relative z-10">

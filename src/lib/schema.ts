@@ -26,11 +26,16 @@ export function schemaLd(schema: object | readonly object[]) {
   };
 }
 
-export function schemaSearchAction() {
+export function schemaWebSite() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    name: "WEERZONE",
     url: "https://weerzone.nl",
+    inLanguage: "nl-NL",
+    description:
+      "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Helder, reclamevrij en tot 48 uur vooruit.",
+    publisher: ORG,
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -167,34 +172,6 @@ export function schemaService(opts: {
   };
 }
 
-export function schemaWeatherWarnings(
-  warnings: Array<{
-    name: string;
-    description: string;
-    url: string;
-    validFrom?: string | null;
-    validUntil?: string | null;
-    issuedAt?: string | null;
-    areaServed?: string;
-  }>,
-  inLanguage = "nl-NL",
-) {
-  return warnings.map((warning) => ({
-    "@context": "https://schema.org",
-    "@type": "SpecialAnnouncement",
-    name: warning.name,
-    text: warning.description,
-    url: warning.url,
-    category: "https://www.wikidata.org/wiki/Q81054",
-    inLanguage,
-    publisher: ORG,
-    ...(warning.areaServed ? { spatialCoverage: { "@type": "AdministrativeArea", name: warning.areaServed } } : {}),
-    ...(warning.validFrom ? { datePosted: warning.validFrom } : {}),
-    ...(warning.issuedAt ? { datePublished: warning.issuedAt } : {}),
-    ...(warning.validUntil ? { expires: warning.validUntil } : {}),
-  }));
-}
-
 export function schemaCityWeatherPage(opts: {
   placeName: string;
   lat: number;
@@ -255,21 +232,3 @@ export function schemaCityDataset(opts: {
   };
 }
 
-export function schemaAggregateRating(opts: {
-  itemName: string;
-  ratingValue: number;
-  ratingCount: number;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: opts.itemName,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: opts.ratingValue.toFixed(1),
-      reviewCount: opts.ratingCount,
-      bestRating: "5",
-      worstRating: "1",
-    },
-  };
-}

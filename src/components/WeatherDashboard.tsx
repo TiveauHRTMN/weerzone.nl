@@ -399,14 +399,14 @@ export default function WeatherDashboard({
         <DashboardBackground weatherCode={wCode} isDay={isD} lightweight={lightweightBackground} />
         <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
           <div className="text-center py-6 sm:py-10">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-3" style={{
+            <p className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-3" style={{
               background: "linear-gradient(135deg, #ff5400 0%, #ffd200 50%, #ff5400 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}>
               {copy.tagline}
-            </h2>
+            </p>
           </div>
           <div className="card p-8 sm:p-12">
             <span
@@ -419,7 +419,8 @@ export default function WeatherDashboard({
               {titleOverride ?? city.name}
             </h1>
             <p className="mt-4 max-w-md text-base font-bold leading-7 text-text-secondary">
-              We halen het actuele weer opnieuw op. De rest van WEERZONE blijft beschikbaar.
+              Het actuele weer voor {city.name} laadt automatisch. WEERZONE vertaalt de
+              verwachting voor vandaag en morgen naar heldere keuzes voor je dag.
             </p>
             <button
               onClick={() => loadData(city)}
@@ -429,7 +430,7 @@ export default function WeatherDashboard({
               {copy.retry}
             </button>
           </div>
-          {showDeferredContent && beforeFooter}
+          {beforeFooter}
         </div>
       </div>
     );
@@ -467,7 +468,7 @@ export default function WeatherDashboard({
         <DashboardBackground weatherCode={wCode} isDay={isD} lightweight={lightweightBackground} />
         <div className="relative z-10 max-w-2xl mx-auto p-4 pb-20 sm:p-6 space-y-6">
           {topContent}
-          {showDeferredContent && beforeFooter}
+          {beforeFooter}
         </div>
       </div>
     );
@@ -498,14 +499,14 @@ export default function WeatherDashboard({
 
               {/* TAGLINE */}
               <div className="text-center py-6 sm:py-10">
-                <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-3" style={{
+                <p className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.1] mb-3" style={{
                   background: "linear-gradient(135deg, #ff5400 0%, #ffd200 50%, #ff5400 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                 }}>
                   {copy.tagline}
-                </h2>
+                </p>
               </div>
 
               {/* ACTUEEL SECTION: HERO SIZE */}
@@ -618,7 +619,7 @@ export default function WeatherDashboard({
             <RainRadar data={weather.minutely} locale={locale} />
           </div>
         )}
-        {showDeferredContent && beforeFooter}
+        {beforeFooter}
       </div>
     </div>
   );

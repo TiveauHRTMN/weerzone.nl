@@ -41,7 +41,7 @@ const globalSchemasLd = [
     name: "WEERZONE",
     url: "https://weerzone.nl",
     applicationCategory: "WeatherApplication",
-    operatingSystem: "Web, iOS, Android",
+    operatingSystem: "Web",
     inLanguage: "nl-NL",
     description:
       "Hyperlokale 48-uur weersverwachting voor alle Nederlandse steden en provincies, vertaald naar praktische keuzes.",

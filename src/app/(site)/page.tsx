@@ -6,12 +6,12 @@ import TrustSection from "@/components/TrustSection";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 import { getSavedLocationServer } from "@/lib/location-cookies";
-import { schemaSearchAction, schemaLd } from "@/lib/schema";
+import { schemaWebSite, schemaLd } from "@/lib/schema";
 import { hreflangLanguages } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "WEERZONE - Weer voor vandaag en morgen",
+    absolute: "WEERZONE - Weersverwachting per locatie, vandaag en morgen",
   },
   description:
     "WEERZONE geeft je een helder 48-uurs weerbericht voor jouw locatie. Reclamevrij en gericht op keuzes voor vandaag en morgen.",
@@ -30,18 +30,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "WEERZONE - Weer voor jouw plek",
+    title: "WEERZONE - Weer voor vandaag en morgen",
     description:
       "Bekijk wat het weer vandaag en morgen betekent voor jouw locatie.",
   },
-};
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "WEERZONE",
-  url: "https://weerzone.nl",
-  description: "WEERZONE helpt je beslissen wat je vandaag en morgen met het weer doet. Helder, reclamevrij en tot 48 uur vooruit.",
 };
 
 export default async function Home() {
@@ -52,16 +44,13 @@ export default async function Home() {
   return (
     <>
       <script
-        {...schemaLd([
-          jsonLd,
-          schemaSearchAction()
-        ])}
+        {...schemaLd(schemaWebSite())}
       />
       <main>
         <WeatherDashboard
           initialCity={activeLoc}
           initialWeather={initialWeather}
-          titleOverride="WEERZONE - weer voor vandaag en morgen"
+          titleOverride={`Weer in ${activeLoc.name}`}
           deferBelowFold
           lightweightBackground
           showSupportBanner={false}
