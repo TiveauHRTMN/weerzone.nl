@@ -22,7 +22,7 @@ export default function StevePage() {
         </h1>
         <p className="mt-3 text-lg text-white/85">Je zakelijke heads-up.</p>
         <p className="mt-10 text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
-          Coming soon
+          Binnenkort
         </p>
       </main>
     </>

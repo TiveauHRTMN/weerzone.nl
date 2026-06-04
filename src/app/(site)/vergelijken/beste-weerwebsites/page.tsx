@@ -185,7 +185,7 @@ export default async function BesteWeerwebsitesPage() {
                 <li className="flex gap-2"><span className="text-sky-600 font-black">1.</span> Nauwkeurigheid van de verwachting en lokale scherpte</li>
                 <li className="flex gap-2"><span className="text-sky-600 font-black">2.</span> Gebruiksgemak en interface</li>
                 <li className="flex gap-2"><span className="text-sky-600 font-black">3.</span> Featureset (radar, waarschuwingen, personalisatie, API)</li>
-                <li className="flex gap-2"><span className="text-sky-600 font-black">4.</span> Nederlandsegerichtheid en taal</li>
+                <li className="flex gap-2"><span className="text-sky-600 font-black">4.</span> Gerichtheid op Nederland en taal</li>
                 <li className="flex gap-2"><span className="text-sky-600 font-black">5.</span> Rust, duidelijkheid en reclamevrije ervaring</li>
               </ul>
             </div>

@@ -148,16 +148,16 @@ export default async function VsBuienradarPage() {
                 </p>
                 <h2 className="font-black text-slate-900 text-lg mb-3">Voordelen</h2>
                 <ul className="space-y-2 text-sm text-slate-600">
-                  <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Bekend and vertrouwd — al 20+ jaar de standaard in Nederland</li>
+                  <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Bekend en vertrouwd — al 20+ jaar de standaard in Nederland</li>
                   <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Uitstekende neerslagradar met 5-minuten updates</li>
-                  <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Zeer hoge traffic and community</li>
+                  <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Zeer hoge traffic en community</li>
                   <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> 14-daagse verwachting beschikbaar</li>
-                  <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Speciale weerberichten voor wegverkeer and scheepvaart</li>
+                  <li className="flex gap-2"><span className="text-green-600 shrink-0">✅</span> Speciale weerberichten voor wegverkeer en scheepvaart</li>
                 </ul>
 
                 <h2 className="font-black text-slate-900 text-lg mt-5 mb-3">Nadelen</h2>
                 <ul className="space-y-2 text-sm text-slate-600">
-                  <li className="flex gap-2"><span className="text-red-500 shrink-0">❌</span> Advertentiegedreven — veel banners and onderbrekingen</li>
+                  <li className="flex gap-2"><span className="text-red-500 shrink-0">❌</span> Advertentiegedreven — veel banners en onderbrekingen</li>
                   <li className="flex gap-2"><span className="text-red-500 shrink-0">❌</span> Minder nauwkeurig op lokaal niveau (2,5 km grid)</li>
                   <li className="flex gap-2"><span className="text-red-500 shrink-0">❌</span> Beperkte personalisatie van waarschuwingen</li>
                   <li className="flex gap-2"><span className="text-red-500 shrink-0">❌</span> Geen API voor zakelijk gebruik</li>
@@ -214,9 +214,9 @@ export default async function VsBuienradarPage() {
                 waarschuwingen op maat belangrijk vindt of als bedrijf weerinformatie wilt gebruiken.
               </p>
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                <strong>Kies Buienradar</strong> als je vooral de neerslagradar wilt zien and gewend
+                <strong>Kies Buienradar</strong> als je vooral de neerslagradar wilt zien en gewend
                 bent aan de vertrouwde interface. Buienradar blijft een uitstekende keuze voor
-                snelle radarcontroles and 14-daagse verwachtingen. Houd wel rekening met advertenties.
+                snelle radarcontroles en 14-daagse verwachtingen. Houd wel rekening met advertenties.
               </p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-5">
                 <Link

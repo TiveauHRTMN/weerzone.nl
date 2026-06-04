@@ -29,8 +29,8 @@ const globalSchemasLd = [
     sameAs: [
       "https://www.youtube.com/@weerzone",
       "https://x.com/weerzone",
-      "https://www.instagram.com/weerzone",
-      "https://www.tiktok.com/@weerzone",
+      "https://www.instagram.com/weerzonenl",
+      "https://www.tiktok.com/@weerzonenl",
       "https://www.reddit.com/r/weerzone",
       "https://www.wikidata.org/wiki/Q139675943",
     ],

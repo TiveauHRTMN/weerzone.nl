@@ -140,7 +140,7 @@ export default async function VergelijkenIndexPage() {
               <p className="text-sm text-slate-600 leading-relaxed">
                 Alle vergelijkingen op deze pagina zijn gebaseerd op publiek beschikbare informatie
                 van de betreffende diensten, reviewplatforms zoals G2 en Trustpilot, en eigen
-                praktijktests. Ervaring zijn gecontroleerd per{" "}
+                praktijktests. Deze vergelijkingen zijn gecontroleerd per{" "}
                 {new Date().toLocaleDateString("nl-NL", { year: "numeric", month: "long", day: "numeric" })}.
                 WEERZONE is een eigen product van Tiveau. Voor elke vergelijking vermelden we
                 duidelijk welk product van ons is.

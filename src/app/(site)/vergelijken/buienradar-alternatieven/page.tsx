@@ -244,7 +244,7 @@ export default async function BuienradarAlternatievenPage() {
                 </div>
 
                 <p className="text-xs font-black text-slate-700 mb-3">
-                  Best voor: <span className="font-normal text-slate-600">{alt.bestFor}</span>
+                  Beste voor: <span className="font-normal text-slate-600">{alt.bestFor}</span>
                 </p>
 
                 <Link

@@ -12,7 +12,7 @@ import { hreflangSelf } from "@/lib/hreflang";
 export const metadata: Metadata = {
   title: "Zakelijk weerbericht voor buitenwerk",
   description:
-    "Werkt u buiten? Dan kost onverwacht weer u geld. WEERZONE levert de nauwkeurigste 48-uurs voorspelling van Nederland — op 1 bij 1 kilometer, voor uw bedrijfsadres.",
+    "Werk je buiten? Dan kost onverwacht weer je geld. WEERZONE levert de nauwkeurigste 48-uurs voorspelling van Nederland — op 1 bij 1 kilometer, voor jouw bedrijfsadres.",
   alternates: {
     canonical: "https://weerzone.nl/zakelijk",
     languages: hreflangSelf("nl", "/zakelijk"),
@@ -80,7 +80,7 @@ const FEATURES = [
   { icon: BarChart3, title: "Op de vierkante meter", desc: "Niet ergens in de regio. Jouw adres, jouw locatie, jouw weer." },
   { icon: Zap, title: "Alleen wat telt", desc: "Geen melding dat het bewolkt wordt. Wel een signaal als het jou iets gaat kosten." },
   { icon: Shield, title: "Meest nauwkeurig", desc: "De nauwkeurigste weersvoorspelling van Nederland. Op 1 bij 1 kilometer precies." },
-  { icon: TrendingUp, title: "Elke ochtend om 08:00", desc: "Uw weerrapport staat in uw inbox voor de dag begint. Geen app nodig." },
+  { icon: TrendingUp, title: "Elke ochtend om 08:00", desc: "Je weerrapport staat in je inbox voordat de dag begint. Geen app nodig." },
   { icon: Building2, title: "Meerdere locaties", desc: "Meerdere vestigingen of bouwplaatsen? Elk adres zijn eigen data. Overzicht houd je zelf." },
 ];
 
@@ -155,7 +155,7 @@ export default async function ZakelijkPage() {
             {/* Het eerlijke verhaal */}
             <div className="card p-6">
               <h2 className="text-lg font-black text-text-primary mb-2">
-                Een voorspelling waar u uw werk op kunt plannen.
+                Een voorspelling waar je je werk op kunt plannen.
               </h2>
               <p className="text-text-secondary text-sm leading-relaxed">
                 Na drie dagen loopt de nauwkeurigheid van elke weersvoorspelling sterk terug.
@@ -164,7 +164,7 @@ export default async function ZakelijkPage() {
               </p>
               <p className="text-text-primary font-semibold text-sm mt-3">
                 WEERZONE richt zich op de komende 48 uur — de periode waarin voorspellingen
-                écht kloppen. Op 1 bij 1 kilometer precies, voor uw locatie.
+                écht kloppen. Op 1 bij 1 kilometer precies, voor jouw locatie.
               </p>
             </div>
 
@@ -174,9 +174,9 @@ export default async function ZakelijkPage() {
                 Hoe het werkt
               </p>
               <p className="text-text-primary text-sm leading-relaxed">
-                U geeft uw bedrijfsadres op. Wij maken elke ochtend een nieuwe voorspelling
-                op 1 bij 1 kilometer. Zodra er in de komende 48 uur iets uw werk raakt —
-                regen, vorst, storm, hitte — krijgt u een mail. Anders niet.
+                Je geeft je bedrijfsadres op. Wij maken elke ochtend een nieuwe voorspelling
+                op 1 bij 1 kilometer. Zodra er in de komende 48 uur iets jouw werk raakt —
+                regen, vorst, storm, hitte — krijg je een mail. Anders niet.
               </p>
               <p className="text-text-secondary text-sm leading-relaxed mt-2">
                 Geen overbodige meldingen. Geen app. Eén mail wanneer het telt.
@@ -243,10 +243,10 @@ export default async function ZakelijkPage() {
                 >
                   <Mail className="w-7 h-7 text-accent-orange" />
                 </div>
-                <h2 className="text-2xl font-black text-text-primary mb-2">Meld u aan voor de bèta</h2>
+                <h2 className="text-2xl font-black text-text-primary mb-2">Meld je aan voor de bèta</h2>
                 <p className="text-text-secondary text-sm leading-relaxed max-w-sm mx-auto">
-                  WEERZONE Zakelijk is momenteel in actieve ontwikkeling. Laat uw gegevens achter —
-                  wij nodigen u uit zodra uw branche aan de beurt is.
+                  WEERZONE Zakelijk is momenteel in actieve ontwikkeling. Laat je gegevens achter —
+                  wij nodigen je uit zodra jouw branche aan de beurt is.
                 </p>
               </div>
               <B2BSignupForm />
@@ -255,7 +255,7 @@ export default async function ZakelijkPage() {
             {/* Meet Steve + triade */}
             <div className="card p-6">
               <p className="text-[10px] font-black text-accent-orange uppercase tracking-wider mb-2">
-                Wat ontvangt u?
+                Wat ontvang je?
               </p>
               <h3 className="text-lg font-black text-text-primary mb-2">
                 Kort. Zakelijk. Geen ruis.

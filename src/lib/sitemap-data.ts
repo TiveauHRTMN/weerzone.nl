@@ -125,6 +125,12 @@ export function buildStaticSitemap(): string {
     { url: `${BASE_URL}/weer/regen`, lastmod: today, changefreq: "hourly", priority: 0.6 },
     { url: `${BASE_URL}/contact`, lastmod: today, changefreq: "monthly", priority: 0.4 },
     { url: `${BASE_URL}/privacy`, lastmod: today, changefreq: "monthly", priority: 0.3 },
+    { url: `${BASE_URL}/zakelijk`, lastmod: today, changefreq: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/vergelijken`, lastmod: today, changefreq: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/vergelijken/weerzone-vs-buienradar`, lastmod: today, changefreq: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/vergelijken/buienradar-alternatieven`, lastmod: today, changefreq: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/vergelijken/beste-weerwebsites`, lastmod: today, changefreq: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/vergelijken/vergelijkingstabel`, lastmod: today, changefreq: "monthly", priority: 0.5 },
   ];
 
   for (const slug of THEME_SLUGS) {

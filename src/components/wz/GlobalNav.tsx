@@ -295,7 +295,7 @@ export default function GlobalNav() {
                   const composed: typeof links = [...links];
                   const overHref = "/over";
                   const contactHref = "/contact";
-                  const overLabel = "About";
+                  const overLabel = "Over";
                   const contactLabel = "Contact";
                   if (!composed.some(l => l.href === overHref)) {
                     composed.push({ key: "over", label: overLabel, href: overHref, weight: "muted" });

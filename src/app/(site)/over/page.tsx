@@ -4,7 +4,7 @@ import WeerzoneBackground from "@/components/WeerzoneBackground";
 import { hreflangCluster } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: { absolute: "Over Weerzone — wat is Weerzone?" },
   description:
     "Weerzone is je persoonlijke weeragent voor de komende 48 uur. Piet geeft je dagelijkse heads-up, Reed helpt bij buien, wind en onweer, Koos helpt als je eropuit wilt.",
   alternates: {
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     }),
   },
   openGraph: {
-    title: "About Weerzone",
+    title: "Over Weerzone",
     description:
       "Weerzone is je persoonlijke weeragent voor de komende 48 uur. Piet, Reed en Koos helpen je beslissen.",
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "About Weerzone",
+    title: "Over Weerzone",
     description: "Je persoonlijke weeragent voor de komende 48 uur.",
   },
 };
@@ -90,7 +90,7 @@ const JSON_LD = [
   {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    name: "About Weerzone",
+    name: "Over Weerzone",
     description:
       "Weerzone is je persoonlijke weeragent voor de komende 48 uur, met Piet, Reed en Koos.",
     url: "https://weerzone.nl/over",
@@ -124,7 +124,7 @@ export default function OverPage() {
           {/* Header */}
           <header className="space-y-3">
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
-              About
+              Over
             </p>
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white drop-shadow-sm leading-[1.05]">
               Het idee achter Weerzone

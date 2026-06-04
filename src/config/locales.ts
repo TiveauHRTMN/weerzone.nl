@@ -40,7 +40,7 @@ const nlNav: LocaleConfig["nav"] = [
   { key: "reed", label: "Reed", href: "/reed", sublabel: "Voor buien, wind en onweer" },
   { key: "koos", label: "Koos", href: "/koos", sublabel: "Als je eropuit wilt" },
   { key: "steve", label: "Steve", href: "/steve", sublabel: "Je zakelijke heads-up" },
-  { key: "over", label: "About", href: "/over", weight: "muted" },
+  { key: "over", label: "Over", href: "/over", weight: "muted" },
   { key: "contact", label: "Contact", href: "/contact", weight: "muted" },
   { key: "mijn-weerzone", label: "Mijn Weerzone", href: "/mijn-weerzone", weight: "strong" },
 ];

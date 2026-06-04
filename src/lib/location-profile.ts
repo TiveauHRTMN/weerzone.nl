@@ -149,7 +149,7 @@ const MICRO_TAGS = {
     "hoogtekamer",
     "plateaurand",
     "dalzoom",
-    "reliefzone",
+    "reliëfzone",
     "randen van hoger terrein",
   ],
   inland: [
@@ -256,7 +256,7 @@ function inferSpecialContext(place: Place): { label?: string; summary?: string; 
     factors: [
       `${tag} bepaalt hoe snel lucht hier doorstroomt`,
       `${orientation} stuurt lokale temperatuurverschillen`,
-      `coordinaten ${place.lat.toFixed(2)}, ${place.lon.toFixed(2)} voor lokale modelcorrectie`,
+      `coördinaten ${place.lat.toFixed(2)}, ${place.lon.toFixed(2)} voor lokale modelcorrectie`,
     ],
   };
 }
@@ -273,7 +273,7 @@ export function getLocationWeatherProfile(place: Place): LocationWeatherProfile 
   const factors = [
     ...special.factors,
     provinceContext.factor,
-    `coordinaten ${place.lat.toFixed(2)}, ${place.lon.toFixed(2)} voor lokale modelcorrectie`,
+    `coördinaten ${place.lat.toFixed(2)}, ${place.lon.toFixed(2)} voor lokale modelcorrectie`,
   ].slice(0, 4);
 
   return {

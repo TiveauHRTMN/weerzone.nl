@@ -241,7 +241,7 @@ function StatusHeader({ view }: { view: ReedView }) {
         >
           Niks aan het handje op jouw locatie.
         </h1>
-        <p className="mt-4 text-[24px] sm:text-[32px] font-extrabold text-slate-900">Saai he?</p>
+        <p className="mt-4 text-[24px] sm:text-[32px] font-extrabold text-slate-900">Saai hè?</p>
       </div>
     );
   }

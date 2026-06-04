@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { NL_PLACES, findPlace, isNLProvince, nearbyPlaces, placeRouteSlug, PROVINCE_LABELS, type Province } from "@/lib/places-data";
-import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset, schemaAggregateRating } from "@/lib/schema";
+import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset } from "@/lib/schema";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
 import ProvinceTopCities from "@/components/ProvinceTopCities";
@@ -210,11 +210,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   const datasetLd = schemaCityDataset({ placeName: place.name, url: `https://weerzone.nl/weer/${province}/${slug}` });
   datasetLd.temporalCoverage = `${dateModified.split('T')[0]}/${new Date(now.getTime() + 48 * 3600 * 1000).toISOString().split('T')[0]}`;
-  const ratingLd = schemaAggregateRating({
-    itemName: `WeerZone ${place.name} Radar & Data`,
-    ratingValue: initialWeather ? 4.8 : 4.6,
-    ratingCount: initialWeather ? 184 : 42
-  });
 
   const breadcrumbLd = schemaBreadcrumb([
     { name: "WEERZONE", item: "https://weerzone.nl" },
@@ -240,7 +235,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
             weatherPageLd,
             breadcrumbLd,
             datasetLd,
-            ratingLd,
             ...(hermesSEO?.json_ld ? [hermesSEO.json_ld] : []),
           ])}
       />
