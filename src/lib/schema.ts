@@ -2,6 +2,8 @@
  * Centrale schema.org JSON-LD builders voor WEERZONE.
  */
 
+import { venueSchemaType, type VenueType } from "./venue-content";
+
 const ORG = {
   "@type": "Organization",
   name: "WEERZONE",
@@ -172,6 +174,40 @@ export function schemaService(opts: {
   };
 }
 
+export function schemaWeatherWarnings(
+  warnings: Array<{
+    name: string;
+    description?: string;
+    url: string;
+    validFrom?: string;
+    validUntil?: string;
+    issuedAt?: string;
+    areaServed?: string;
+  }>,
+) {
+  return warnings.map((warning) => ({
+    "@context": "https://schema.org",
+    "@type": "SpecialAnnouncement",
+    name: warning.name,
+    ...(warning.description ? { text: warning.description, description: warning.description } : {}),
+    url: warning.url,
+    ...(warning.issuedAt ? { datePosted: warning.issuedAt } : {}),
+    ...(warning.validFrom ? { validFrom: warning.validFrom } : {}),
+    ...(warning.validUntil ? { expires: warning.validUntil } : {}),
+    ...(warning.areaServed
+      ? {
+          spatialCoverage: {
+            "@type": "AdministrativeArea",
+            name: warning.areaServed,
+          },
+        }
+      : {}),
+    publisher: ORG,
+    inLanguage: "nl-NL",
+    category: "Weather warning",
+  }));
+}
+
 export function schemaCityWeatherPage(opts: {
   placeName: string;
   lat: number;
@@ -182,6 +218,7 @@ export function schemaCityWeatherPage(opts: {
   name?: string;
   description?: string;
   speakableSelectors?: string[];
+  venueType?: VenueType;
 }) {
   return {
     "@context": "https://schema.org",
@@ -192,7 +229,7 @@ export function schemaCityWeatherPage(opts: {
     ...(opts.description ? { description: opts.description } : {}),
     inLanguage: opts.inLanguage ?? "nl-NL",
     about: {
-      "@type": "City",
+      "@type": opts.venueType ? venueSchemaType(opts.venueType) : "City",
       name: opts.placeName,
       geo: {
         "@type": "GeoCoordinates",
@@ -231,4 +268,3 @@ export function schemaCityDataset(opts: {
     },
   };
 }
-
