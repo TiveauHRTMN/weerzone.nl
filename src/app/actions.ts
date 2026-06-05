@@ -13,6 +13,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BASE_URL } from "@/lib/sitemap-data";
 import type { PersonaTier } from "@/lib/personas";
 import type { Locale } from "@/config/locales";
+import { venuePromptFragment, type VenueType } from "@/lib/venue-content";
 
 /**
  * Update het profiel van de ingelogde gebruiker.
@@ -566,6 +567,7 @@ export async function getLocationSEOContent(
   placeName: string,
   province: string,
   character?: string,
+  venueType?: VenueType,
   _locale: "nl" | "de" | "fr" | "es" = "nl",
 ): Promise<string> {
   try {
@@ -589,6 +591,7 @@ export async function getLocationSEOContent(
 
     const prompt = `Je bent de SEO-copywriter van WEERZONE. Schrijf een KORTE, unieke tekst (max 2-3 zinnen) over de weerskenmerken van ${placeName} (${province}).
 ${character ? `Houd rekening met het karakter: ${character}.` : ""}
+${venueType ? venuePromptFragment(placeName, venueType) : ""}
 - Gebruik geen clichés als "Welkom in".
 - Link het naar de geografische ligging van ${placeName}.
 - Vertel bijvoorbeeld over de invloed van de zee (indien kust), de wind op de open vlakte, of de hitte in de stad (urban heat island).
