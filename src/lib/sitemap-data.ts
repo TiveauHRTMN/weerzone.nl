@@ -160,7 +160,7 @@ export function buildNLSitemap(): string {
     const url = `${BASE_URL}/weer/${place.province}/${slug}`;
     if (seen.has(url)) continue;
     seen.add(url);
-    entries.push({ url, lastmod: today, changefreq: "hourly", priority: placePriority(place.population) });
+    entries.push({ url, lastmod: today, changefreq: "hourly", priority: place.venueType ? 0.7 : placePriority(place.population) });
   }
 
   entries.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
