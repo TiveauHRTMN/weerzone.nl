@@ -10,6 +10,8 @@
 
 import allPlacesRaw from "./places.json";
 import { KOOS_NL_CAMPING_PLACES } from "./koos-nl-camping-places.generated";
+import type { VenueType } from "./venue-content";
+import { NL_VENUE_PLACES } from "./nl-venues";
 
 export interface Place {
   name: string;
@@ -20,6 +22,7 @@ export interface Place {
   population?: number;
   geonames_id?: number;
   character?: "coastal" | "inland" | "highland" | "urban" | "mountain" | "mediterranean coastal" | "atlantic coastal" | "northern continental"; // Voor slimme AI-commentaar en affiliates
+  venueType?: VenueType;
 }
 
 const KOOS_NL_PLACES: Place[] = [
@@ -61,26 +64,26 @@ const KOOS_NL_PLACES: Place[] = [
   { name: "Weerribben-Wieden", province: "overijssel", lat: 52.73, lon: 6.05, character: "inland" },
 
   // Campings en vakantieparken: weerpagina's voor buitenplanning, geen boekingsadvies.
-  { name: "Camping De Lakens", province: "noord-holland", lat: 52.407, lon: 4.546, slug: "camping-de-lakens", character: "coastal" },
-  { name: "Camping Bakkum", province: "noord-holland", lat: 52.555, lon: 4.637, slug: "camping-bakkum", character: "coastal" },
-  { name: "Camping De Krim", province: "noord-holland", lat: 53.159, lon: 4.866, slug: "camping-de-krim", character: "coastal" },
-  { name: "Camping Tempelhof", province: "noord-holland", lat: 52.847, lon: 4.708, slug: "camping-tempelhof", character: "coastal" },
-  { name: "Camping Stortemelk", province: "friesland", lat: 53.298, lon: 5.078, slug: "camping-stortemelk", character: "coastal" },
-  { name: "Camping It Wiid", province: "friesland", lat: 53.131, lon: 5.946, slug: "camping-it-wiid", character: "coastal" },
-  { name: "Camping Lauwersoog", province: "groningen", lat: 53.407, lon: 6.205, slug: "camping-lauwersoog", character: "coastal" },
-  { name: "Camping De Norgerberg", province: "drenthe", lat: 53.063, lon: 6.463, slug: "camping-de-norgerberg", character: "inland" },
-  { name: "Camping Beerze Bulten", province: "overijssel", lat: 52.52, lon: 6.54, slug: "camping-beerze-bulten", character: "inland" },
-  { name: "Camping De Kleine Wolf", province: "overijssel", lat: 52.55, lon: 6.44, slug: "camping-de-kleine-wolf", character: "inland" },
-  { name: "Camping De Wildhoeve", province: "gelderland", lat: 52.3, lon: 5.98, slug: "camping-de-wildhoeve", character: "inland" },
-  { name: "Camping De Pampel", province: "gelderland", lat: 52.12, lon: 5.86, slug: "camping-de-pampel", character: "highland" },
-  { name: "Camping De Helfterkamp", province: "gelderland", lat: 52.31, lon: 5.99, slug: "camping-de-helfterkamp", character: "inland" },
-  { name: "Camping Ginkelduin", province: "utrecht", lat: 52.01, lon: 5.45, slug: "camping-ginkelduin", character: "highland" },
-  { name: "Camping Duinrell", province: "zuid-holland", lat: 52.146, lon: 4.389, slug: "camping-duinrell", character: "coastal" },
-  { name: "Camping Janse", province: "zeeland", lat: 51.503, lon: 3.475, slug: "camping-janse", character: "coastal" },
-  { name: "Camping Ons Buiten", province: "zeeland", lat: 51.567, lon: 3.555, slug: "camping-ons-buiten", character: "coastal" },
-  { name: "Camping De Pekelinge", province: "zeeland", lat: 51.566, lon: 3.557, slug: "camping-de-pekelinge", character: "coastal" },
-  { name: "Camping De Paal", province: "noord-brabant", lat: 51.33, lon: 5.34, slug: "camping-de-paal", character: "inland" },
-  { name: "Camping De Leistert", province: "limburg", lat: 51.255, lon: 5.926, slug: "camping-de-leistert", character: "inland" },
+  { name: "Camping De Lakens", province: "noord-holland", lat: 52.407, lon: 4.546, slug: "camping-de-lakens", character: "coastal", venueType: "camping" },
+  { name: "Camping Bakkum", province: "noord-holland", lat: 52.555, lon: 4.637, slug: "camping-bakkum", character: "coastal", venueType: "camping" },
+  { name: "Camping De Krim", province: "noord-holland", lat: 53.159, lon: 4.866, slug: "camping-de-krim", character: "coastal", venueType: "camping" },
+  { name: "Camping Tempelhof", province: "noord-holland", lat: 52.847, lon: 4.708, slug: "camping-tempelhof", character: "coastal", venueType: "camping" },
+  { name: "Camping Stortemelk", province: "friesland", lat: 53.298, lon: 5.078, slug: "camping-stortemelk", character: "coastal", venueType: "camping" },
+  { name: "Camping It Wiid", province: "friesland", lat: 53.131, lon: 5.946, slug: "camping-it-wiid", character: "coastal", venueType: "camping" },
+  { name: "Camping Lauwersoog", province: "groningen", lat: 53.407, lon: 6.205, slug: "camping-lauwersoog", character: "coastal", venueType: "camping" },
+  { name: "Camping De Norgerberg", province: "drenthe", lat: 53.063, lon: 6.463, slug: "camping-de-norgerberg", character: "inland", venueType: "camping" },
+  { name: "Camping Beerze Bulten", province: "overijssel", lat: 52.52, lon: 6.54, slug: "camping-beerze-bulten", character: "inland", venueType: "camping" },
+  { name: "Camping De Kleine Wolf", province: "overijssel", lat: 52.55, lon: 6.44, slug: "camping-de-kleine-wolf", character: "inland", venueType: "camping" },
+  { name: "Camping De Wildhoeve", province: "gelderland", lat: 52.3, lon: 5.98, slug: "camping-de-wildhoeve", character: "inland", venueType: "camping" },
+  { name: "Camping De Pampel", province: "gelderland", lat: 52.12, lon: 5.86, slug: "camping-de-pampel", character: "highland", venueType: "camping" },
+  { name: "Camping De Helfterkamp", province: "gelderland", lat: 52.31, lon: 5.99, slug: "camping-de-helfterkamp", character: "inland", venueType: "camping" },
+  { name: "Camping Ginkelduin", province: "utrecht", lat: 52.01, lon: 5.45, slug: "camping-ginkelduin", character: "highland", venueType: "camping" },
+  { name: "Camping Duinrell", province: "zuid-holland", lat: 52.146, lon: 4.389, slug: "camping-duinrell", character: "coastal", venueType: "camping" },
+  { name: "Camping Janse", province: "zeeland", lat: 51.503, lon: 3.475, slug: "camping-janse", character: "coastal", venueType: "camping" },
+  { name: "Camping Ons Buiten", province: "zeeland", lat: 51.567, lon: 3.555, slug: "camping-ons-buiten", character: "coastal", venueType: "camping" },
+  { name: "Camping De Pekelinge", province: "zeeland", lat: 51.566, lon: 3.557, slug: "camping-de-pekelinge", character: "coastal", venueType: "camping" },
+  { name: "Camping De Paal", province: "noord-brabant", lat: 51.33, lon: 5.34, slug: "camping-de-paal", character: "inland", venueType: "camping" },
+  { name: "Camping De Leistert", province: "limburg", lat: 51.255, lon: 5.926, slug: "camping-de-leistert", character: "inland", venueType: "camping" },
 ];
 
 function mergePlaces(base: Place[], extra: Place[]): Place[] {
@@ -100,6 +103,7 @@ function mergePlaces(base: Place[], extra: Place[]): Place[] {
 export const ALL_PLACES = mergePlaces(allPlacesRaw as Place[], [
   ...KOOS_NL_PLACES,
   ...KOOS_NL_CAMPING_PLACES,
+  ...NL_VENUE_PLACES,
 ]);
 export const PLACES_COUNT = ALL_PLACES.length;
 

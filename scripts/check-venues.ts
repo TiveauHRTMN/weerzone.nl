@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import { VENUE_TYPES, venueH1, venueMetaTitle, venueSchemaType, venuePromptFragment } from "../src/lib/venue-content";
+import { NL_PLACES, placeRouteSlug, findPlace } from "../src/lib/places-data";
 
 // All four types configured
 assert.deepStrictEqual([...VENUE_TYPES].sort(), ["attractiepark", "camping", "dierentuin", "zwembad"]);
@@ -19,3 +20,18 @@ assert.ok(venuePromptFragment("Toverland", "attractiepark").includes("Toverland"
 assert.ok(venueMetaTitle("Artis", "dierentuin").includes("Artis"));
 
 console.log("OK: venue-content helpers");
+
+const venues = NL_PLACES.filter((p) => p.venueType);
+assert.ok(venues.length >= 15, `expected >=15 venues, got ${venues.length}`);
+
+const seen = new Set<string>();
+for (const v of venues) {
+  const slug = placeRouteSlug(v);
+  assert.ok(slug && !slug.includes("--"), `bad slug for ${v.name}: ${slug}`);
+  const key = `${v.province}/${slug}`;
+  assert.ok(!seen.has(key), `duplicate venue route: ${key}`);
+  seen.add(key);
+  assert.ok(findPlace(v.province, slug), `findPlace failed for ${key}`);
+  assert.ok(Math.abs(v.lat) <= 54 && Math.abs(v.lon) <= 8, `coord out of NL range: ${v.name}`);
+}
+console.log(`OK: ${venues.length} venues resolve uniquely`);
