@@ -91,7 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const locationProfile = getLocationWeatherProfile(place);
 
   const title = place.venueType
-    ? `${venueMetaTitle(place.name, place.venueType)} | WEERZONE`
+    ? venueMetaTitle(place.name, place.venueType)
     : `Weer ${place.name} | 10x nauwkeuriger op straatniveau`;
   const description = hermesSEO?.meta_description || `${locationProfile.summary} Bekijk het weer in ${place.name} (${provLabel}) per uur: temperatuur, regen, wind en lokale context.`;
 
