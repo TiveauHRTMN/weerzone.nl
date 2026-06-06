@@ -9,7 +9,7 @@
  * https://www.indexnow.org/documentation
  */
 
-const INDEXNOW_KEY = "164e98d07e1af78853b81f16870c011c";
+const INDEXNOW_KEY = "7c4e2a8b9d1f3e6c5b8a7d4f2e1c9b6a";
 const HOST = "weerzone.nl";
 const ENDPOINT = "https://api.indexnow.org/IndexNow";
 
