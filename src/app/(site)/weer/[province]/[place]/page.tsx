@@ -13,6 +13,7 @@ import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import Link from "next/link";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
+import { venueH1, venueMetaTitle } from "@/lib/venue-content";
 
 interface PageProps {
   params: Promise<{ province: string; place: string }>;
@@ -89,7 +90,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const hermesSEO = await getHermesSEO(place.name, province);
   const locationProfile = getLocationWeatherProfile(place);
 
-  const title = `Weer ${place.name} | 10x nauwkeuriger op straatniveau`;
+  const title = place.venueType
+    ? `${venueMetaTitle(place.name, place.venueType)} | WEERZONE`
+    : `Weer ${place.name} | 10x nauwkeuriger op straatniveau`;
   const description = hermesSEO?.meta_description || `${locationProfile.summary} Bekijk het weer in ${place.name} (${provLabel}) per uur: temperatuur, regen, wind en lokale context.`;
 
   const nlPath = `/weer/${province}/${slug}`;
@@ -175,7 +178,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
     fetchWeatherData(place.lat, place.lon, false, true, place, "nl", true).catch(() => undefined),
     fetchKNMIWarnings().catch(() => []),
     getHermesSEO(place.name, province).catch(() => null),
-    getLocationSEOContent(place.name, provLabel, place.character).catch(() => ""),
+    getLocationSEOContent(place.name, provLabel, place.character, place.venueType).catch(() => ""),
   ]);
   const provinceWarnings = warningsForProvince(allWarnings, province);
 
@@ -197,12 +200,13 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   now.setMinutes(0, 0, 0);
   const dateModified = now.toISOString();
 
-  const weatherPageLd = schemaCityWeatherPage({ 
-    placeName: place.name, 
-    lat: place.lat, 
-    lon: place.lon, 
-    province, 
-    slug 
+  const weatherPageLd = schemaCityWeatherPage({
+    placeName: place.name,
+    lat: place.lat,
+    lon: place.lon,
+    province,
+    slug,
+    venueType: place.venueType,
   });
   
   // Override the default dateModified from schema helper with our stable hourly one
@@ -244,6 +248,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
         <WeatherDashboard
           initialCity={place}
           initialWeather={initialWeather}
+          titleOverride={place.venueType ? venueH1(place.name, place.venueType) : undefined}
           beforeFooter={
             <div className="space-y-6 pt-10">
               <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
