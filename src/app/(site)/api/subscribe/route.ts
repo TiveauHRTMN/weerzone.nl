@@ -7,7 +7,7 @@ import { logAgentAction } from "@/lib/agent-logger";
 export async function POST(req: Request) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY || "dummy");
-    const { email, city, lat, lon } = await req.json();
+    const { email, city, lat, lon, reed_on, koos_on } = await req.json();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Ongeldig e-mailadres" }, { status: 400 });
@@ -16,12 +16,23 @@ export async function POST(req: Request) {
     const supabase = getSupabase();
     if (!supabase) return NextResponse.json({ ok: true, demo: true });
 
-    const { error } = await supabase
+    const hasCoords = typeof lat === "number" && typeof lon === "number";
+    const { data: row, error } = await supabase
       .from("subscribers")
       .upsert(
-        { email: email.toLowerCase().trim(), city: city || "Amsterdam", lat, lon, active: true },
+        {
+          email: email.toLowerCase().trim(),
+          city: city || "Amsterdam",
+          lat, lon,
+          active: true,
+          ...(typeof reed_on === "boolean" ? { reed_on } : {}),
+          ...(typeof koos_on === "boolean" ? { koos_on } : {}),
+          ...(hasCoords ? { gps_updated_at: new Date().toISOString() } : {}),
+        },
         { onConflict: "email" }
-      );
+      )
+      .select("manage_token")
+      .single();
 
     if (error) return NextResponse.json({ error: "Opslaan mislukt" }, { status: 500 });
 
@@ -50,7 +61,17 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ ok: true });
+    const res = NextResponse.json({ ok: true });
+    if (row?.manage_token) {
+      res.cookies.set("wz_sub", row.manage_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+    return res;
   } catch (e: any) {
     return NextResponse.json({ error: "Server error", details: e.message }, { status: 500 });
   }
