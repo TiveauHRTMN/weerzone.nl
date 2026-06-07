@@ -1,0 +1,91 @@
+import { NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import {
+  HARTMANWK_MEMBERS_TABLE,
+  HARTMANWK_PREDICTIONS_TABLE,
+  HARTMANWK_RESULTS_TABLE,
+  HARTMANWK_PLAYER_STATS_TABLE,
+  fantasyPoints,
+  normalizePlayerKey,
+  scoreMatch,
+} from "@/lib/hartmanwk";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+type MemberRow = { id: string; name: string; photo: string | null; joined_at: string; player_pick: string | null };
+type PredRow = { member_id: string; match_id: string; home: number; away: number };
+type ResultRow = { match_id: string; home: number; away: number };
+type StatRow = { player_key: string; goals: number; assists: number; minutes: number; yellow: number; red: number };
+
+/**
+ * De berekende ranglijst: per deelnemer de echte punten uit voorspellingen +
+ * uitslagen + fantasypunten van de gekozen sterspeler. Bevat geen contactgegevens.
+ */
+export async function GET() {
+  const admin = createSupabaseAdminClient();
+
+  const [members, predictions, results, stats] = await Promise.all([
+    admin.from(HARTMANWK_MEMBERS_TABLE).select("id, name, photo, joined_at, player_pick").order("joined_at", { ascending: true }),
+    admin.from(HARTMANWK_PREDICTIONS_TABLE).select("member_id, match_id, home, away"),
+    admin.from(HARTMANWK_RESULTS_TABLE).select("match_id, home, away"),
+    admin.from(HARTMANWK_PLAYER_STATS_TABLE).select("player_key, goals, assists, minutes, yellow, red"),
+  ]);
+
+  if (members.error) {
+    console.error("Hartman WK standings read error:", members.error.message);
+    return NextResponse.json({ error: "Kon de ranglijst niet laden." }, { status: 500 });
+  }
+
+  const memberRows = (members.data ?? []) as MemberRow[];
+  const resultById = new Map<string, ResultRow>(((results.data ?? []) as ResultRow[]).map((r) => [r.match_id, r]));
+  const statByKey = new Map<string, StatRow>(((stats.data ?? []) as StatRow[]).map((s) => [s.player_key, s]));
+
+  const predsByMember = new Map<string, PredRow[]>();
+  for (const p of ((predictions.data ?? []) as PredRow[])) {
+    const list = predsByMember.get(p.member_id) ?? [];
+    list.push(p);
+    predsByMember.set(p.member_id, list);
+  }
+
+  const standings = memberRows.map((m) => {
+    let points = 0;
+    let exact = 0;
+    let toto = 0;
+    for (const pred of predsByMember.get(m.id) ?? []) {
+      const result = resultById.get(pred.match_id);
+      if (!result) continue;
+      const score = scoreMatch(pred, result);
+      points += score.points;
+      if (score.hit === "exact") exact += 1;
+      else if (score.hit === "toto") toto += 1;
+    }
+    const matchPoints = points;
+    const fantasy = m.player_pick ? fantasyPoints(statByKey.get(normalizePlayerKey(m.player_pick))) : 0;
+
+    return {
+      id: m.id,
+      name: m.name,
+      photo: m.photo ?? "",
+      joinedAt: m.joined_at,
+      player: m.player_pick ?? null,
+      pts: matchPoints + fantasy,
+      matchPoints,
+      fantasyPoints: fantasy,
+      exact,
+      toto,
+      rond: 0,
+    };
+  });
+
+  standings.sort((a, b) => b.pts - a.pts || String(a.joinedAt).localeCompare(String(b.joinedAt)));
+
+  // Echte uitslagen meesturen zodat de client de groepstanden + wedstrijdkaarten bijwerkt.
+  const realResults = ((results.data ?? []) as ResultRow[]).map((r) => ({
+    matchId: r.match_id,
+    home: r.home,
+    away: r.away,
+  }));
+
+  return NextResponse.json({ members: standings, results: realResults, scoredAt: new Date().toISOString() });
+}
