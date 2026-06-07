@@ -146,7 +146,7 @@ function buildMorningEmailHtml(
   city: string,
   narrative: string,
   data: Record<string, unknown>,
-  subscriberEmail: string
+  voorkeurenUrl: string
 ): string {
   const current = data.current as Record<string, number>;
   const daily = (data.daily as Record<string, number[]>);
@@ -167,7 +167,7 @@ function buildMorningEmailHtml(
   const sunset = daily.sunset?.[0]  ? new Date(daily.sunset[0]).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }) : "—";
 
   const rows = dagdeelRows(hourly);
-  const unsubUrl = `https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(subscriberEmail)}`;
+  const unsubUrl = voorkeurenUrl;
   const pietUrl = `https://weerzone.nl/piet`;
 
   // Piet-stem tekst: markeer **vetgedrukt** → <strong>
@@ -269,7 +269,7 @@ function buildMorningEmailHtml(
     <div style="text-align:center;padding-top:8px;">
       <p style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6;">
         Weerzone · 48 uur vooruit, niet verder.<br>
-        <a href="${unsubUrl}" style="color:rgba(255,255,255,0.7);text-decoration:underline;">Uitschrijven</a>
+        <a href="${unsubUrl}" style="color:rgba(255,255,255,0.7);text-decoration:underline;">Voorkeuren aanpassen of uitschrijven</a>
       </p>
     </div>
 
@@ -298,34 +298,24 @@ export async function GET(req: Request) {
   const resend = new Resend(resendKey);
   const admin = createSupabaseAdminClient();
 
-  // 1. Haal alle actieve Piet + Reed abonnees op met locatie
-  const { data: subs, error } = await admin
-    .from("subscriptions")
-    .select(`
-      user_id,
-      tier,
-      user_profile!inner(email, full_name, primary_lat, primary_lon)
-    `)
-    .in("status", ["trialing", "active"])
-    .in("tier", ["piet", "reed"]);
+  // 1. Haal alle actieve gratis abonnees op met locatie
+  const { data: subsRaw } = await admin
+    .from("subscribers")
+    .select("email, city, lat, lon, manage_token")
+    .eq("active", true)
+    .not("lat", "is", null)
+    .not("lon", "is", null);
+  const subs = (subsRaw ?? []) as { email: string; city: string | null; lat: number; lon: number; manage_token: string }[];
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!subs?.length) return NextResponse.json({ sent: 0, reason: "Geen abonnees" });
+  if (!subs.length) return NextResponse.json({ sent: 0, reason: "Geen abonnees" });
 
-  type SubRow = {
-    user_id: string;
-    tier: string;
-    user_profile: { email: string; full_name: string | null; primary_lat: number | null; primary_lon: number | null };
-  };
-
-  const validSubs = (subs as unknown as SubRow[]).filter(
-    (s) => s.user_profile?.primary_lat != null && s.user_profile?.primary_lon != null
-  );
+  const validSubs = subs;
 
   // 2. Groepeer op locatie
+  type SubRow = { email: string; city: string | null; lat: number; lon: number; manage_token: string };
   const locGroups = new Map<string, SubRow[]>();
   for (const sub of validSubs) {
-    const key = gridKey(sub.user_profile.primary_lat!, sub.user_profile.primary_lon!);
+    const key = gridKey(sub.lat, sub.lon);
     if (!locGroups.has(key)) locGroups.set(key, []);
     locGroups.get(key)!.push(sub);
   }
@@ -336,20 +326,22 @@ export async function GET(req: Request) {
   const results = await Promise.allSettled(
     Array.from(locGroups.entries()).map(async ([, group]) => {
       const first = group[0];
-      const lat = first.user_profile.primary_lat!;
-      const lon = first.user_profile.primary_lon!;
+      const lat = first.lat;
+      const lon = first.lon;
 
       const data = await fetchWeather48h(lat, lon);
 
-      // Stads-naam: probeer reverse-geocode, anders coördinaten
-      let cityLabel = `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
-      try {
-        const geo = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lon}&count=1&language=nl`
-        );
-        const geoData = await geo.json();
-        if (geoData.results?.[0]?.name) cityLabel = geoData.results[0].name;
-      } catch {}
+      // Stads-naam: gebruik opgeslagen city, daarna reverse-geocode, anders coördinaten
+      let cityLabel = first.city ?? `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+      if (!first.city) {
+        try {
+          const geo = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lon}&count=1&language=nl`
+          );
+          const geoData = await geo.json();
+          if (geoData.results?.[0]?.name) cityLabel = geoData.results[0].name;
+        } catch {}
+      }
 
       const weatherJson = JSON.stringify({
         current: data.current,
@@ -371,16 +363,16 @@ export async function GET(req: Request) {
         throw new Error(`AI error ${cityLabel}: ${e}`);
       }
 
-      const html = buildMorningEmailHtml(cityLabel, narrative, data, "__EMAIL__");
       const subjectEmoji = getWeatherEmoji(data.current.weather_code, true);
       const subjectTemp = Math.round(data.current.temperature_2m);
       const subject = `${subjectEmoji} ${subjectTemp}° in ${cityLabel} — jouw 48-uurs update`;
 
       return group.map(sub => {
-        const personalHtml = html.replace("__EMAIL__", sub.user_profile.email);
+        const voorkeurenUrl = `https://weerzone.nl/voorkeuren?token=${sub.manage_token}`;
+        const personalHtml = buildMorningEmailHtml(cityLabel, narrative, data, voorkeurenUrl);
         return {
           from: "Piet van Weerzone <piet@weerzone.nl>",
-          to: sub.user_profile.email,
+          to: sub.email,
           subject,
           html: personalHtml,
         };
