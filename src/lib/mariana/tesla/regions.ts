@@ -102,3 +102,17 @@ export const TESLA_REGIONS: readonly TeslaRegion[] = [
 export function getTeslaRegion(slug: string): TeslaRegion | undefined {
   return TESLA_REGIONS.find((r) => r.slug === slug);
 }
+
+/** Dichtstbijzijnde mesoschaal-regio bij een coördinaat (hemelsbreed). */
+export function nearestTeslaRegion(lat: number, lon: number): TeslaRegion {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dist = (r: TeslaRegion) => {
+    const dLat = toRad(r.lat - lat);
+    const dLon = toRad(r.lon - lon);
+    const h =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat)) * Math.cos(toRad(r.lat)) * Math.sin(dLon / 2) ** 2;
+    return Math.asin(Math.sqrt(h));
+  };
+  return TESLA_REGIONS.reduce((best, r) => (dist(r) < dist(best) ? r : best), TESLA_REGIONS[0]);
+}
