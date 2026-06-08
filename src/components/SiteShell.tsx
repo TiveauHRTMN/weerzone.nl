@@ -2,8 +2,14 @@
 
 import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import GlobalNav from "@/components/wz/GlobalNav";
 import Footer from "@/components/Footer";
+import GlobalWeatherBackground from "@/components/GlobalWeatherBackground";
+
+// Stand-alone routes draaien bovenop weerzone.nl maar zonder enige WEERZONE-chrome
+// of overlays (navbar, footer, cookiebanner, persona-modal, toggles).
+const STANDALONE_PATHS = ["/hartmanwk2026"];
 
 const MobilePageSwipe = dynamic(() => import("@/components/MobilePageSwipe"), { ssr: false });
 const CookieBanner = dynamic(() => import("@/components/CookieBanner"), { ssr: false });
@@ -24,6 +30,8 @@ export default function SiteShell({
   children,
 }: SiteShellProps) {
   const [showDeferredShell, setShowDeferredShell] = useState(false);
+  const pathname = usePathname() ?? "/";
+  const standalone = STANDALONE_PATHS.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
     const win = window as Window & {
@@ -39,8 +47,17 @@ export default function SiteShell({
     return () => window.clearTimeout(id);
   }, []);
 
+  if (standalone) {
+    return <>{children}</>;
+  }
+
   return (
     <>
+      {/* Universele weer-lucht achter elke pagina (per locatie). De witte/lichte
+          content-kaarten liggen er bovenop; weer/agent-pagina's tekenen hun eigen
+          geanimeerde achtergrond op z-0 daar weer overheen. */}
+      <GlobalWeatherBackground />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(globalSchemasLd) }}
