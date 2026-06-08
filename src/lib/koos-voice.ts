@@ -35,7 +35,7 @@ VERBODEN:
 async function _koosVoice(
   origin: GetawayOrigin,
   opportunities: WeatherOpportunity[],
-  context?: { marianaText?: string | null },
+  context?: { marianaText?: string | null; dayFlavour?: string | null },
 ): Promise<string | null> {
   if (opportunities.length === 0) return null;
   const lines = opportunities
@@ -47,7 +47,8 @@ async function _koosVoice(
   const marianaBlock = context?.marianaText
     ? `\n\nDAGDUIDING VOOR THUIS (extra context, niet als bron noemen):\n${context.marianaText}`
     : "";
-  const userPrompt = `Thuis: ${origin.name}.\nDoorgerekende kansen (gebruik als feiten, schrijf om in jouw stem):\n${lines}${marianaBlock}`;
+  const dayBlock = context?.dayFlavour ? `\n\nWANNEER: ${context.dayFlavour}` : "";
+  const userPrompt = `Thuis: ${origin.name}.\nDoorgerekende kansen (gebruik als feiten, schrijf om in jouw stem):\n${lines}${marianaBlock}${dayBlock}`;
   try {
     const text = await hermesChat(
       [
@@ -69,7 +70,7 @@ async function _koosVoice(
 export function koosVoice(
   origin: GetawayOrigin,
   opportunities: WeatherOpportunity[],
-  context?: { marianaText?: string | null },
+  context?: { marianaText?: string | null; dayFlavour?: string | null },
 ): Promise<string | null> {
   const latKey = String(Math.round(origin.lat * 10));
   const lonKey = String(Math.round(origin.lon * 10));
@@ -80,9 +81,10 @@ export function koosVoice(
   const marianaKey = context?.marianaText
     ? `${context.marianaText.length}:${context.marianaText.slice(0, 80)}`
     : "none";
+  const dayKey = context?.dayFlavour ?? "none";
   return unstable_cache(
     () => _koosVoice(origin, opportunities, context),
-    ["koos-voice", latKey, lonKey, dateKey, idKey, marianaKey],
+    ["koos-voice", latKey, lonKey, dateKey, idKey, marianaKey, dayKey],
     { revalidate: 1800 },
   )();
 }
