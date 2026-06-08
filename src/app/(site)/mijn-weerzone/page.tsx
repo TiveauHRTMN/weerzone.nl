@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { getDayContext } from "@/lib/agents/day-context";
 import ProfileEditForm from "@/components/wz/ProfileEditForm";
+import AgentTogglesForm from "@/components/wz/AgentTogglesForm";
 import LogoutButton from "@/components/LogoutButton";
 import WeerzoneBackground from "@/components/WeerzoneBackground";
 
@@ -14,42 +15,6 @@ export const metadata: Metadata = {
   title: "Mijn Weerzone",
   robots: { index: false, follow: false },
 };
-
-const AGENT_COLOR: Record<"piet" | "reed" | "koos", { dot: string; label: string }> = {
-  piet: { dot: "#10b981", label: "text-emerald-700" },
-  reed: { dot: "#ef4444", label: "text-rose-600" },
-  koos: { dot: "#f59e0b", label: "text-amber-600" },
-};
-
-function AgentCard({
-  agent,
-  title,
-  sublabel,
-  message,
-}: {
-  agent: "piet" | "reed" | "koos";
-  title: string;
-  sublabel: string;
-  message: string;
-}) {
-  const c = AGENT_COLOR[agent];
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-2">
-        <span
-          className="inline-block w-1.5 h-1.5 rounded-full"
-          style={{ background: c.dot }}
-          aria-hidden
-        />
-        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${c.label}`}>
-          {title}
-        </p>
-      </div>
-      <p className="mt-1 text-sm font-bold text-slate-700">{sublabel}</p>
-      <p className="mt-4 text-base leading-relaxed text-slate-800">{message}</p>
-    </div>
-  );
-}
 
 export default async function MijnWeerzonePage() {
   const supabase = await createSupabaseServerClient();
@@ -66,7 +31,9 @@ export default async function MijnWeerzonePage() {
     getSavedLocationServer(),
   ]);
 
-  const profile = profileRes.data as { full_name?: string; postcode?: string } | null;
+  const profile = profileRes.data as
+    | { full_name?: string; postcode?: string; piet_on?: boolean; reed_on?: boolean; koos_on?: boolean }
+    | null;
   const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? "";
 
   const day = getDayContext();
@@ -90,31 +57,23 @@ export default async function MijnWeerzonePage() {
           <p className="text-sm text-white/75 capitalize">{dayLabel}</p>
         </header>
 
-        {/* Vandaag — agent-blokken */}
+        {/* Je agents — welke mogen je per e-mail een seintje geven */}
         <section className="space-y-3">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70 px-1">
-            Vandaag
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <AgentCard
-              agent="piet"
-              title="Piet"
-              sublabel="Je dagelijkse heads-up"
-              message="Piet kijkt mee voor je dagelijkse heads-up. Zodra er iets is om te beslissen, hoor je het hier."
-            />
-            <AgentCard
-              agent="reed"
-              title="Reed"
-              sublabel="Voor buien, wind en onweer"
-              message="Reed ziet geen verhoogd risico op je plekken."
-            />
-            <AgentCard
-              agent="koos"
-              title="Koos"
-              sublabel="Als je eropuit wilt"
-              message="Koos heeft vandaag geen betere richting nodig."
-            />
+          <div className="flex items-baseline justify-between px-1">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
+              Je agents
+            </h2>
+            <Link href="/vandaag" className="text-[11px] font-bold text-white/75 hover:text-white">
+              Bekijk vandaag →
+            </Link>
           </div>
+          <AgentTogglesForm
+            initial={{
+              piet: profile?.piet_on ?? true,
+              reed: profile?.reed_on ?? false,
+              koos: profile?.koos_on ?? false,
+            }}
+          />
         </section>
 
         {/* Mijn plek */}

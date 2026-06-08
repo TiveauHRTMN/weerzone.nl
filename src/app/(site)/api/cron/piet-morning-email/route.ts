@@ -298,26 +298,27 @@ export async function GET(req: Request) {
   const resend = new Resend(resendKey);
   const admin = createSupabaseAdminClient();
 
-  // 1. Haal alle actieve gratis abonnees op met locatie
+  // 1. Haal alle accounts op die Piet's ochtendmail willen, met een vaste locatie.
+  //    Account-gebaseerd (user_profile): e-mail + opgeslagen primaire locatie +
+  //    piet_on. De toggle staat op het account; on-site blijft alles zichtbaar.
   const { data: subsRaw } = await admin
-    .from("subscribers")
-    .select("email, city, lat, lon, manage_token")
-    .eq("active", true)
-    .not("lat", "is", null)
-    .not("lon", "is", null);
-  const subs = (subsRaw ?? []) as { email: string; city: string | null; lat: number; lon: number; manage_token: string }[];
+    .from("user_profile")
+    .select("email, primary_lat, primary_lon")
+    .eq("piet_on", true)
+    .not("primary_lat", "is", null)
+    .not("primary_lon", "is", null);
+  const subs = (subsRaw ?? []) as { email: string | null; primary_lat: number; primary_lon: number }[];
 
-  if (!subs.length) return NextResponse.json({ sent: 0, reason: "Geen abonnees" });
-
-  const validSubs = subs;
+  if (!subs.length) return NextResponse.json({ sent: 0, reason: "Geen ontvangers" });
 
   // 2. Groepeer op locatie
-  type SubRow = { email: string; city: string | null; lat: number; lon: number; manage_token: string };
+  type SubRow = { email: string; city: string | null; lat: number; lon: number };
   const locGroups = new Map<string, SubRow[]>();
-  for (const sub of validSubs) {
-    const key = gridKey(sub.lat, sub.lon);
+  for (const sub of subs) {
+    if (!sub.email) continue;
+    const key = gridKey(sub.primary_lat, sub.primary_lon);
     if (!locGroups.has(key)) locGroups.set(key, []);
-    locGroups.get(key)!.push(sub);
+    locGroups.get(key)!.push({ email: sub.email, city: null, lat: sub.primary_lat, lon: sub.primary_lon });
   }
 
   let sent = 0;
@@ -368,7 +369,8 @@ export async function GET(req: Request) {
       const subject = `${subjectEmoji} ${subjectTemp}° in ${cityLabel} — jouw 48-uurs update`;
 
       return group.map(sub => {
-        const voorkeurenUrl = `https://weerzone.nl/voorkeuren?token=${sub.manage_token}`;
+        // Account-gebruikers beheren hun agents op /mijn-weerzone (ingelogd).
+        const voorkeurenUrl = `https://weerzone.nl/mijn-weerzone`;
         const personalHtml = buildMorningEmailHtml(cityLabel, narrative, data, voorkeurenUrl);
         return {
           from: "Piet van Weerzone <piet@weerzone.nl>",
@@ -400,5 +402,5 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ sent, total: validSubs.length, errors: errors.slice(0, 10) });
+  return NextResponse.json({ sent, total: subs.length, errors: errors.slice(0, 10) });
 }

@@ -21,6 +21,13 @@ const TOPICS: Array<{ k: TopicKey; t: string; d: string; reed?: boolean }> = [
   { k: "snow", t: "Winterweer", d: "Sneeuw, gladheid en ijsvorming", reed: true },
 ];
 
+type AgentKey = "piet" | "reed" | "koos";
+const AGENTS: Array<{ k: AgentKey; t: string; d: string; dot: string }> = [
+  { k: "piet", t: "Piet", d: "Elke ochtend je weerbericht", dot: "#0284C7" },
+  { k: "reed", t: "Reed", d: "Alleen bij onweer, storm of zware regen", dot: "#EA580C" },
+  { k: "koos", t: "Koos", d: "Tips voor een dagje weg", dot: "#059669" },
+];
+
 const TIMES: Array<{ k: TimeKey; t: string; d: string }> = [
   { k: "06:30", t: "Vroege vogel", d: "06:30 — voordat je de deur uit gaat" },
   { k: "07:00", t: "Ontbijt", d: "07:00 — bij je eerste bak koffie" },
@@ -44,6 +51,11 @@ export default function OnboardingClient({ email }: { email: string }) {
   const [gpsStatus, setGpsStatus] = useState<"idle" | "asking" | "ok" | "denied">("idle");
   const [authChecked, setAuthChecked] = useState(false);
   const [topics, setTopics] = useState<TopicKey[]>(["rain", "temp"]);
+  const [agents, setAgents] = useState<{ piet: boolean; reed: boolean; koos: boolean }>({
+    piet: true,
+    reed: false,
+    koos: false,
+  });
   const [time, setTime] = useState<TimeKey>("07:00");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -139,6 +151,9 @@ export default function OnboardingClient({ email }: { email: string }) {
           postcode: postcode.trim().toUpperCase() || null,
           primary_lat: gpsCoords?.lat ?? null,
           primary_lon: gpsCoords?.lon ?? null,
+          piet_on: agents.piet,
+          reed_on: agents.reed,
+          koos_on: agents.koos,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "id" },
@@ -345,6 +360,53 @@ export default function OnboardingClient({ email }: { email: string }) {
 
           {step === 1 && (
             <div className="grid gap-2.5">
+              <p className="wz-micro" style={{ color: "var(--wz-text-mute)" }}>
+                Welke agents mogen je een seintje geven? (alleen e-mail — op de site zie je altijd alles)
+              </p>
+              {AGENTS.map((a) => {
+                const active = agents[a.k];
+                return (
+                  <label
+                    key={a.k}
+                    className="wz-card flex items-center gap-3 cursor-pointer transition-colors"
+                    style={{
+                      padding: 14,
+                      borderColor: active ? "var(--wz-brand)" : "var(--wz-border)",
+                      background: active ? "var(--wz-brand-soft)" : "#fff",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={active}
+                      onChange={() => setAgents((s) => ({ ...s, [a.k]: !s[a.k] }))}
+                      className="w-[18px] h-[18px]"
+                      style={{ accentColor: "var(--wz-brand)" }}
+                    />
+                    <div className="flex-1">
+                      <div
+                        className="font-bold text-[15px] flex items-center gap-2"
+                        style={{ color: "var(--wz-text)" }}
+                      >
+                        <span
+                          className="inline-block w-1.5 h-1.5 rounded-full"
+                          style={{ background: a.dot }}
+                          aria-hidden
+                        />
+                        {a.t}
+                      </div>
+                      <div className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>
+                        {a.d}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+              <div
+                className="mt-2 mb-1 text-[11px] font-bold uppercase tracking-[0.14em]"
+                style={{ color: "var(--wz-text-mute)" }}
+              >
+                Fijn afstellen
+              </div>
               {TOPICS.map((o) => {
                 const active = topics.includes(o.k);
                 return (
