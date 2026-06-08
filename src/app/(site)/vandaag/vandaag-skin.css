@@ -1,30 +1,30 @@
-/* Vandaag — de gedeelde agent-feed. Kalme "ochtendbriefing"-sfeer, cohesief met
-   /piet /reed /koos (Manrope, licht, redactioneel), maar met eigen identiteit:
-   per agent een accentkleur + rol, en een gefaseerde entree. Scoped onder .va-skin. */
+/* Vandaag — de gedeelde agent-feed, als "ochtendbriefing" boven de live weer-lucht.
+   WeatherBackground levert de sfeer (per locatie); de inhoud staat in frosted-glass
+   kaarten zodat tekst op elke lucht (dag/nacht/regen) leesbaar blijft. Cohesief met
+   /piet /reed /koos. Scoped onder .va-skin. */
 
 .va-skin {
-  background:
-    radial-gradient(1200px 600px at 50% -10%, #fff7ed 0%, transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, #eff6ff 0%, transparent 55%),
-    linear-gradient(180deg, #fbfaf8 0%, #f4f5f7 100%);
   min-height: 100vh;
+  position: relative;
 }
 
+/* ---- Frosted-glass kaart ---- */
 .va-card {
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 24px;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 18px 40px -28px rgba(15, 23, 42, 0.28);
   position: relative;
   overflow: hidden;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 8px 24px -14px rgba(2, 8, 23, 0.45),
+    0 24px 56px -32px rgba(2, 8, 23, 0.5);
 }
 
 /* Linker accentbalk in de agent-kleur. */
-.va-card::before {
+.va-card.has-accent::before {
   content: "";
   position: absolute;
   left: 0;
@@ -34,12 +34,26 @@
   background: var(--va-accent, #94a3b8);
 }
 
+/* Leidende heads-up: subtiele kleurwas + dikkere accentbalk. */
+.va-lead {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--va-accent, #0284c7) 9%, rgba(255, 255, 255, 0.86)) 0%, rgba(255, 255, 255, 0.86) 60%);
+}
+.va-lead.has-accent::before {
+  width: 5px;
+}
+
+/* ---- Tekst op de lucht (overline / sectielabel / footer): wit met schaduw ---- */
+.va-onsky {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(2, 8, 23, 0.55), 0 2px 14px rgba(2, 8, 23, 0.35);
+}
+
 .va-micro {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #94a3b8;
 }
 
 .va-chip {
@@ -48,8 +62,8 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 3px 9px;
+  letter-spacing: 0.03em;
+  padding: 4px 10px;
   border-radius: 999px;
   background: var(--va-accent-bg, #f1f5f9);
   color: var(--va-accent-fg, #475569);
@@ -62,14 +76,11 @@
   background: var(--va-accent, #94a3b8);
   flex: none;
 }
-
 .va-dot.is-urgent {
-  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
   animation: vaPulse 1.8s infinite;
 }
-
 @keyframes vaPulse {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
   70% { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
   100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
@@ -77,13 +88,24 @@
 .va-action {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
+  gap: 7px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--va-accent-fg, #334155);
 }
 
-/* Gefaseerde entree bij laden. */
+.va-deeplink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--va-accent-fg, #475569);
+  opacity: 0.9;
+}
+.va-deeplink:hover { opacity: 1; }
+
+/* ---- Gefaseerde entree ---- */
 .va-stagger > * {
   animation: vaRise 0.62s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -94,9 +116,8 @@
 .va-stagger > *:nth-child(5) { animation-delay: 0.36s; }
 .va-stagger > *:nth-child(6) { animation-delay: 0.44s; }
 .va-stagger > *:nth-child(7) { animation-delay: 0.52s; }
-
 @keyframes vaRise {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
