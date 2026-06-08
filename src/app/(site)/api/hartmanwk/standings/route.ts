@@ -13,7 +13,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type MemberRow = { id: string; name: string; photo: string | null; joined_at: string; player_pick: string | null };
+type MemberRow = { id: string; name: string; photo: string | null; joined_at: string; player_pick: string | null; player_pick_id: string | null };
 type PredRow = { member_id: string; match_id: string; home: number; away: number };
 type ResultRow = { match_id: string; home: number; away: number };
 type StatRow = { player_key: string; goals: number; assists: number; minutes: number; yellow: number; red: number };
@@ -26,7 +26,7 @@ export async function GET() {
   const admin = createSupabaseAdminClient();
 
   const [members, predictions, results, stats] = await Promise.all([
-    admin.from(HARTMANWK_MEMBERS_TABLE).select("id, name, photo, joined_at, player_pick").order("joined_at", { ascending: true }),
+    admin.from(HARTMANWK_MEMBERS_TABLE).select("id, name, photo, joined_at, player_pick, player_pick_id").order("joined_at", { ascending: true }),
     admin.from(HARTMANWK_PREDICTIONS_TABLE).select("member_id, match_id, home, away"),
     admin.from(HARTMANWK_RESULTS_TABLE).select("match_id, home, away"),
     admin.from(HARTMANWK_PLAYER_STATS_TABLE).select("player_key, goals, assists, minutes, yellow, red"),
@@ -61,7 +61,8 @@ export async function GET() {
       else if (score.hit === "toto") toto += 1;
     }
     const matchPoints = points;
-    const fantasy = m.player_pick ? fantasyPoints(statByKey.get(normalizePlayerKey(m.player_pick))) : 0;
+    const statKey = m.player_pick_id || (m.player_pick ? normalizePlayerKey(m.player_pick) : null);
+    const fantasy = statKey ? fantasyPoints(statByKey.get(statKey)) : 0;
 
     return {
       id: m.id,

@@ -145,18 +145,42 @@ function RulesLegend() {
 }
 
 // ---------- Sterspeler-keuze ----------
-function PlayerPickCard({ playerPick, onPlayerPick, locked }) {
+function wkNorm(s) {
+  return (s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+function wkResolvePlayer(value, players) {
+  const nv = wkNorm(value);
+  if (!nv || !players || !players.length) return null;
+  return (
+    players.find((p) => wkNorm(p.name + ' — ' + p.team) === nv)
+    || players.find((p) => wkNorm(p.name) === nv)
+    || (players.filter((p) => wkNorm(p.name).includes(nv)).length === 1
+      ? players.filter((p) => wkNorm(p.name).includes(nv))[0]
+      : null)
+  );
+}
+
+function PlayerPickCard({ playerPick, onPlayerPick, players, locked }) {
   const [name, setName] = useState(playerPick || '');
   const [status, setStatus] = useState('idle'); // idle | saving | saved | error
   const [error, setError] = useState('');
   React.useEffect(() => { setName(playerPick || ''); }, [playerPick]);
 
+  const list = players || [];
+  const q = wkNorm(name);
+  const options = q.length >= 2
+    ? list.filter((p) => wkNorm(p.name).includes(q) || wkNorm(p.team).includes(q)).slice(0, 40)
+    : [];
+  const resolved = wkResolvePlayer(name, list);
+
   const save = async () => {
-    const trimmed = name.trim();
-    if (trimmed.length < 2) { setStatus('error'); setError('Vul de naam van je speler in.'); return; }
+    const match = wkResolvePlayer(name, list);
+    const finalName = match ? match.name : name.trim();
+    const finalId = match ? match.id : null;
+    if (finalName.length < 2) { setStatus('error'); setError('Kies of typ je sterspeler.'); return; }
     setStatus('saving'); setError('');
-    const res = await onPlayerPick(trimmed);
-    if (res && res.ok) { setStatus('saved'); setTimeout(() => setStatus('idle'), 1800); }
+    const res = await onPlayerPick(finalName, finalId);
+    if (res && res.ok) { if (match) setName(match.name); setStatus('saved'); setTimeout(() => setStatus('idle'), 1800); }
     else { setStatus('error'); setError((res && res.error) || 'Opslaan mislukt.'); }
   };
 
@@ -169,20 +193,28 @@ function PlayerPickCard({ playerPick, onPlayerPick, locked }) {
         </div>
         {playerPick && <span className="ptpill pt-saved">{playerPick}</span>}
       </div>
-      <p className="pickcard-sub">Speelminuten, goals en assists leveren punten op; gele en rode kaarten kosten punten. Kies slim — je speler blijft het hele toernooi staan.</p>
+      <p className="pickcard-sub">Begin te typen en kies je speler uit de officiële WK-selecties. Goals en assists leveren punten op, kaarten kosten punten — je speler blijft het hele toernooi staan.</p>
       <div className="pickcard-row">
         <input
           className="field-input pickcard-input"
           value={name}
+          list="wk-player-list"
           disabled={locked}
           onChange={(e) => { setName(e.target.value); setStatus('idle'); setError(''); }}
           onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
-          placeholder="Bijv. Mbappé of Gakpo"
+          placeholder={list.length ? 'Begin te typen, bv. Ronaldo of Gakpo' : 'Sterspeler laden…'}
+          autoComplete="off"
         />
+        <datalist id="wk-player-list">
+          {options.map((p) => <option key={p.id} value={p.name + ' — ' + p.team} />)}
+        </datalist>
         <button className="auth-submit pickcard-btn" type="button" disabled={locked || status === 'saving'} onClick={save}>
           {locked ? 'Op slot' : status === 'saving' ? 'Opslaan…' : status === 'saved' ? 'Opgeslagen ✓' : 'Opslaan'}
         </button>
       </div>
+      {!locked && name.trim().length >= 2 && !resolved && (
+        <div className="pickcard-hint">Kies je speler uit de suggesties zodat zijn punten automatisch meetellen.</div>
+      )}
       {error && <div className="pickcard-err">{error}</div>}
     </div>
   );
@@ -295,7 +327,7 @@ function StandScreen() {
 }
 
 // ---------- Wedstrijden ----------
-function WedstrijdenScreen({ preds, setPred, playerPick, onPlayerPick, locked }) {
+function WedstrijdenScreen({ preds, setPred, playerPick, onPlayerPick, players, locked }) {
   const W = window.WK;
   const [filter, setFilter] = useState('alles');
   const roundLabels = {
@@ -336,7 +368,7 @@ function WedstrijdenScreen({ preds, setPred, playerPick, onPlayerPick, locked })
 
   return (
     <div className="screen">
-      <PlayerPickCard playerPick={playerPick} onPlayerPick={onPlayerPick} locked={locked} />
+      <PlayerPickCard playerPick={playerPick} onPlayerPick={onPlayerPick} players={players} locked={locked} />
 
       <div className="card progresscard">
         <div className="progress-top">
