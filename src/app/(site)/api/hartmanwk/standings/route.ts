@@ -22,12 +22,28 @@ type StatRow = { player_key: string; goals: number; assists: number; minutes: nu
  * De berekende ranglijst: per deelnemer de echte punten uit voorspellingen +
  * uitslagen + fantasypunten van de gekozen sterspeler. Bevat geen contactgegevens.
  */
+/** Alle voorspellingen in pagina's van 1000 (Supabase kapt anders af op 1000). */
+async function allPredictions(admin: ReturnType<typeof createSupabaseAdminClient>): Promise<PredRow[]> {
+  const PAGE = 1000;
+  const out: PredRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await admin
+      .from(HARTMANWK_PREDICTIONS_TABLE)
+      .select("member_id, match_id, home, away")
+      .range(from, from + PAGE - 1);
+    if (error) { console.error("Hartman WK predictions read error:", error.message); break; }
+    out.push(...((data ?? []) as PredRow[]));
+    if (!data || data.length < PAGE) break;
+  }
+  return out;
+}
+
 export async function GET() {
   const admin = createSupabaseAdminClient();
 
-  const [members, predictions, results, stats] = await Promise.all([
+  const [members, predRows, results, stats] = await Promise.all([
     admin.from(HARTMANWK_MEMBERS_TABLE).select("id, name, photo, joined_at, player_pick, player_pick_id").order("joined_at", { ascending: true }),
-    admin.from(HARTMANWK_PREDICTIONS_TABLE).select("member_id, match_id, home, away"),
+    allPredictions(admin),
     admin.from(HARTMANWK_RESULTS_TABLE).select("match_id, home, away"),
     admin.from(HARTMANWK_PLAYER_STATS_TABLE).select("player_key, goals, assists, minutes, yellow, red"),
   ]);
@@ -42,7 +58,7 @@ export async function GET() {
   const statByKey = new Map<string, StatRow>(((stats.data ?? []) as StatRow[]).map((s) => [s.player_key, s]));
 
   const predsByMember = new Map<string, PredRow[]>();
-  for (const p of ((predictions.data ?? []) as PredRow[])) {
+  for (const p of predRows) {
     const list = predsByMember.get(p.member_id) ?? [];
     list.push(p);
     predsByMember.set(p.member_id, list);

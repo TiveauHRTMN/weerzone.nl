@@ -289,7 +289,7 @@ function App() {
   React.useEffect(() => {
     if (!account || !account.memberId) return;
     let alive = true;
-    fetch(PLAYERS_URL, { cache: 'force-cache' })
+    fetch(PLAYERS_URL, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (alive && d && Array.isArray(d.players)) setPlayers(d.players); })
       .catch(() => {});
