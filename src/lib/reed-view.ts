@@ -316,6 +316,7 @@ export function buildReedView(input: {
   provinceLabel?: string | null;
   estofex?: ReedEstofex | null;
   knmi?: KNMIWarning[];
+  tesla?: TeslaSignal | null;
   now?: Date;
 }): ReedView {
   const { weather, locationName, now = new Date() } = input;
@@ -352,7 +353,7 @@ export function buildReedView(input: {
     active,
     days: { vd, mo },
     capeMax,
-    tesla: null,
+    tesla: input.tesla ?? null,
     estofex,
     knmi: {
       severityLabel: knmiWorst ? SEVERITY_LABEL[knmiWorst.severity] : null,
