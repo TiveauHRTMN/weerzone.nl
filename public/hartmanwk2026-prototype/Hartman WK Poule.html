@@ -399,6 +399,21 @@
   .pickcard-btn { margin-top: 0; width: 100%; white-space: nowrap; padding: 14px 16px; }
   .pickcard-err { margin-top: 8px; color: var(--warn); font-size: .78rem; font-weight: 700; }
   .pickcard-hint { margin-top: 8px; color: var(--some); font-size: .78rem; font-weight: 600; }
+  .pickcard-field { position: relative; }
+  .pickcard-suggest {
+    position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 60;
+    background: var(--card-2); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow); overflow-y: auto; max-height: 264px;
+  }
+  .pickcard-opt {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: left; border: none; cursor: pointer; font-family: inherit;
+    background: none; color: var(--ink); padding: 11px 13px; border-bottom: 1px solid var(--line-soft);
+  }
+  .pickcard-opt:last-child { border-bottom: none; }
+  .pickcard-opt:hover { background: color-mix(in oklab, var(--accent), var(--card-2) 78%); }
+  .pickcard-opt-n { font-weight: 700; font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pickcard-opt-t { font-size: .76rem; color: var(--ink-faint); white-space: nowrap; flex: 0 0 auto; }
 
   .progresscard { padding: 14px 16px; }
   .progress-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }

@@ -162,25 +162,30 @@ function wkResolvePlayer(value, players) {
 
 function PlayerPickCard({ playerPick, onPlayerPick, players, locked }) {
   const [name, setName] = useState(playerPick || '');
+  const [open, setOpen] = useState(false);
+  const [pickedId, setPickedId] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | saving | saved | error
   const [error, setError] = useState('');
   React.useEffect(() => { setName(playerPick || ''); }, [playerPick]);
 
   const list = players || [];
   const q = wkNorm(name);
-  const options = q.length >= 2
-    ? list.filter((p) => wkNorm(p.name).includes(q) || wkNorm(p.team).includes(q)).slice(0, 40)
+  const suggestions = (open && q.length >= 2 && list.length)
+    ? list.filter((p) => wkNorm(p.name).includes(q) || wkNorm(p.team).includes(q)).slice(0, 8)
     : [];
-  const resolved = wkResolvePlayer(name, list);
+  const resolved = pickedId || wkResolvePlayer(name, list);
+
+  const choose = (p) => { setName(p.name); setPickedId(p.id); setOpen(false); setStatus('idle'); setError(''); };
 
   const save = async () => {
+    let id = pickedId;
+    let finalName = name.trim();
     const match = wkResolvePlayer(name, list);
-    const finalName = match ? match.name : name.trim();
-    const finalId = match ? match.id : null;
-    if (finalName.length < 2) { setStatus('error'); setError('Kies of typ je sterspeler.'); return; }
+    if (match) { id = match.id; finalName = match.name; }
+    if (finalName.length < 2) { setStatus('error'); setError('Kies je sterspeler uit de lijst.'); return; }
     setStatus('saving'); setError('');
-    const res = await onPlayerPick(finalName, finalId);
-    if (res && res.ok) { if (match) setName(match.name); setStatus('saved'); setTimeout(() => setStatus('idle'), 1800); }
+    const res = await onPlayerPick(finalName, id);
+    if (res && res.ok) { setName(finalName); setStatus('saved'); setTimeout(() => setStatus('idle'), 1800); }
     else { setStatus('error'); setError((res && res.error) || 'Opslaan mislukt.'); }
   };
 
@@ -195,25 +200,40 @@ function PlayerPickCard({ playerPick, onPlayerPick, players, locked }) {
       </div>
       <p className="pickcard-sub">Begin te typen en kies je speler uit de officiële WK-selecties. Goals en assists leveren punten op, kaarten kosten punten — je speler blijft het hele toernooi staan.</p>
       <div className="pickcard-row">
-        <input
-          className="field-input pickcard-input"
-          value={name}
-          list="wk-player-list"
-          disabled={locked}
-          onChange={(e) => { setName(e.target.value); setStatus('idle'); setError(''); }}
-          onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
-          placeholder={list.length ? 'Begin te typen, bv. Ronaldo of Gakpo' : 'Sterspeler laden…'}
-          autoComplete="off"
-        />
-        <datalist id="wk-player-list">
-          {options.map((p) => <option key={p.id} value={p.name + ' — ' + p.team} />)}
-        </datalist>
+        <div className="pickcard-field">
+          <input
+            className="field-input pickcard-input"
+            value={name}
+            disabled={locked}
+            onChange={(e) => { setName(e.target.value); setPickedId(null); setOpen(true); setStatus('idle'); setError(''); }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => window.setTimeout(() => setOpen(false), 150)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setOpen(false); save(); } }}
+            placeholder={list.length ? 'Begin te typen, bv. Ronaldo of Gakpo' : 'Sterspeler laden…'}
+            autoComplete="off"
+          />
+          {suggestions.length > 0 && (
+            <div className="pickcard-suggest">
+              {suggestions.map((p) => (
+                <button
+                  type="button"
+                  key={p.id}
+                  className="pickcard-opt"
+                  onMouseDown={(e) => { e.preventDefault(); choose(p); }}
+                >
+                  <span className="pickcard-opt-n">{p.name}</span>
+                  <span className="pickcard-opt-t">{p.team}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button className="auth-submit pickcard-btn" type="button" disabled={locked || status === 'saving'} onClick={save}>
           {locked ? 'Op slot' : status === 'saving' ? 'Opslaan…' : status === 'saved' ? 'Opgeslagen ✓' : 'Opslaan'}
         </button>
       </div>
       {!locked && name.trim().length >= 2 && !resolved && (
-        <div className="pickcard-hint">Kies je speler uit de suggesties zodat zijn punten automatisch meetellen.</div>
+        <div className="pickcard-hint">Kies je speler uit de lijst zodat zijn punten automatisch meetellen.</div>
       )}
       {error && <div className="pickcard-err">{error}</div>}
     </div>
