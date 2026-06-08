@@ -151,13 +151,21 @@ export default function OnboardingClient({ email }: { email: string }) {
           postcode: postcode.trim().toUpperCase() || null,
           primary_lat: gpsCoords?.lat ?? null,
           primary_lon: gpsCoords?.lon ?? null,
-          piet_on: agents.piet,
-          reed_on: agents.reed,
-          koos_on: agents.koos,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "id" },
       );
+
+      // Agent-toggles apart en best-effort: zo breekt een nog-niet-toegepaste
+      // migratie (ontbrekende kolommen) de kern-upsert van locatie/postcode niet.
+      try {
+        await supabase
+          .from("user_profile")
+          .update({ piet_on: agents.piet, reed_on: agents.reed, koos_on: agents.koos })
+          .eq("id", uid);
+      } catch {
+        /* migratie nog niet toegepast — toggles volgen later */
+      }
 
       if (gpsCoords) {
         await supabase
