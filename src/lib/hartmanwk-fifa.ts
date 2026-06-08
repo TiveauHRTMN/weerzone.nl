@@ -10,6 +10,7 @@ import {
   HARTMANWK_RESULTS_TABLE,
   HARTMANWK_PLAYER_STATS_TABLE,
   HARTMANWK_MEMBERS_TABLE,
+  HARTMANWK_PLAYERS_TABLE,
   normalizePlayerKey,
 } from "@/lib/hartmanwk";
 import { HARTMANWK_GROUP_MATCHES } from "@/lib/hartmanwk-matches";
@@ -80,6 +81,51 @@ function accumulateTeam(team: Record<string, unknown>, acc: Map<string, PlayerAc
   }
 }
 
+/**
+ * Haalt alle WK-selecties op bij FIFA (1 call per land, parallel) en schrijft ze
+ * naar hartmanwk_players — de bron voor de sterspeler-kieslijst. Eenmalig/zelden.
+ */
+export async function syncSquads(admin: ReturnType<typeof createSupabaseAdminClient>): Promise<number> {
+  const data = await fifaGet(`/calendar/matches?idCompetition=${ID_COMPETITION}&idSeason=${ID_SEASON}&count=200&language=en`);
+  const all = (data.Results as Record<string, unknown>[]) || [];
+  const teams = new Map<string, { code: string; name: string }>();
+  for (const m of all) {
+    for (const side of ["Home", "Away"] as const) {
+      const t = m[side] as Record<string, unknown> | undefined;
+      const idTeam = t?.IdTeam as string;
+      if (idTeam && !teams.has(idTeam)) {
+        teams.set(idTeam, { code: (t!.IdCountry as string) || "", name: localeText(t!.TeamName as LocaleText) || "" });
+      }
+    }
+  }
+
+  const now = new Date().toISOString();
+  const rows: Record<string, unknown>[] = [];
+  await Promise.all(
+    [...teams.entries()].map(async ([idTeam, info]) => {
+      try {
+        const sq = await fifaGet(`/teams/${idTeam}/squad?idCompetition=${ID_COMPETITION}&idSeason=${ID_SEASON}&language=en`);
+        for (const p of ((sq.Players as Record<string, unknown>[]) || [])) {
+          const id = p.IdPlayer as string;
+          if (!id) continue;
+          rows.push({
+            id_player: id,
+            name: localeText(p.PlayerName as LocaleText) || localeText(p.ShortName as LocaleText) || id,
+            team_code: info.code,
+            team_name: info.name,
+            position: (p.Position as number) ?? null,
+            jersey: (p.JerseyNum as number) ?? null,
+            updated_at: now,
+          });
+        }
+      } catch { /* sla dit land over bij een fout */ }
+    }),
+  );
+
+  if (rows.length) await admin.from(HARTMANWK_PLAYERS_TABLE).upsert(rows, { onConflict: "id_player" });
+  return rows.length;
+}
+
 export type HartmanWkSyncResult = { results: number; players: number; finished: number };
 
 /**
@@ -116,17 +162,17 @@ export async function runHartmanWkFifaSync(): Promise<HartmanWkSyncResult> {
     await admin.from(HARTMANWK_RESULTS_TABLE).upsert(resultRows, { onConflict: "match_id" });
   }
 
-  // 2) Statjes — alleen voor spelers die deelnemers gekozen hebben.
-  const { data: members } = await admin.from(HARTMANWK_MEMBERS_TABLE).select("player_pick");
-  const pickedKeys = new Set(
-    ((members ?? []) as { player_pick: string | null }[])
-      .map((m) => m.player_pick)
-      .filter((p): p is string => Boolean(p))
-      .map(normalizePlayerKey),
+  // 2) Statjes — voor de gekozen sterspelers, bij voorkeur exact op FIFA-ID,
+  //    anders op naam (oude vrij ingetypte keuzes).
+  const { data: members } = await admin.from(HARTMANWK_MEMBERS_TABLE).select("player_pick, player_pick_id");
+  const memberPicks = (members ?? []) as { player_pick: string | null; player_pick_id: string | null }[];
+  const pickedIds = new Set(memberPicks.map((m) => m.player_pick_id).filter((v): v is string => Boolean(v)));
+  const pickedNames = new Set(
+    memberPicks.filter((m) => !m.player_pick_id && m.player_pick).map((m) => normalizePlayerKey(m.player_pick as string)),
   );
 
   let playerRows: Record<string, unknown>[] = [];
-  if (pickedKeys.size > 0) {
+  if (pickedIds.size > 0 || pickedNames.size > 0) {
     const acc = new Map<string, PlayerAcc>();
     for (const m of finished) {
       const detail = await fifaGet(`/live/football/${ID_COMPETITION}/${ID_SEASON}/${m.IdStage}/${m.IdMatch}?language=en`);
@@ -137,23 +183,27 @@ export async function runHartmanWkFifaSync(): Promise<HartmanWkSyncResult> {
       await sleep(150); // beleefd tegen de FIFA-API
     }
 
-    // naam → FIFA-speler-id index, zodat een vrij ingetypte keuze matcht
-    const idByName = new Map<string, string>();
-    for (const [id, p] of acc) for (const nm of p.names) idByName.set(normalizePlayerKey(nm), id);
+    const toRow = (key: string, p: PlayerAcc) => ({
+      player_key: key,
+      display_name: [...p.names][0] || key,
+      goals: p.goals, assists: p.assists, minutes: p.minutes, yellow: p.yellow, red: p.red,
+      updated_at: now,
+    });
 
-    playerRows = [...pickedKeys]
-      .map((key) => {
+    // exact op FIFA speler-ID (de kieslijst)
+    for (const id of pickedIds) {
+      const p = acc.get(id);
+      if (p) playerRows.push(toRow(id, p));
+    }
+    // fallback: vrij ingetypte naam → matchen op naam
+    if (pickedNames.size > 0) {
+      const idByName = new Map<string, string>();
+      for (const [id, p] of acc) for (const nm of p.names) idByName.set(normalizePlayerKey(nm), id);
+      for (const key of pickedNames) {
         const id = idByName.get(key);
-        if (!id) return null; // niet gevonden in FIFA-data → handmatige waarde laten staan
-        const p = acc.get(id)!;
-        return {
-          player_key: key,
-          display_name: [...p.names][0] || key,
-          goals: p.goals, assists: p.assists, minutes: p.minutes, yellow: p.yellow, red: p.red,
-          updated_at: now,
-        };
-      })
-      .filter((r): r is Record<string, unknown> => r !== null);
+        if (id) playerRows.push(toRow(key, acc.get(id)!));
+      }
+    }
 
     if (playerRows.length) {
       await admin.from(HARTMANWK_PLAYER_STATS_TABLE).upsert(playerRows, { onConflict: "player_key" });

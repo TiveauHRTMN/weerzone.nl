@@ -9,6 +9,7 @@ const MEMBERS_URL = '/api/hartmanwk/members';
 const STANDINGS_URL = '/api/hartmanwk/standings';
 const PREDICTIONS_URL = '/api/hartmanwk/predictions';
 const PICK_URL = '/api/hartmanwk/pick';
+const PLAYERS_URL = '/api/hartmanwk/players';
 const MEMBERS_POLL_MS = 15000;
 
 /* Verplicht-slot: alle groepsvoorspellingen + sterspeler vast bij de eerste
@@ -173,6 +174,7 @@ function App() {
   const [tab, setTab] = useS('stand');
   const [preds, setPreds] = useS({});
   const [playerPick, setPlayerPick] = useS('');
+  const [players, setPlayers] = useS([]);
   const saveTimers = React.useRef({});
   const locked = wkLocked();
 
@@ -196,14 +198,14 @@ function App() {
     if (typeof h === 'number' && typeof a === 'number') persistPrediction(id, h, a);
   };
 
-  const handlePlayerPick = async (name) => {
+  const handlePlayerPick = async (name, playerId) => {
     if (!account || !account.memberId) return { ok: false, error: 'Nog niet ingelogd.' };
     if (locked) return { ok: false, error: 'De groepsfase is op slot.' };
     try {
       const res = await fetch(PICK_URL, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ memberId: account.memberId, contact: account.contact, player: name }),
+        body: JSON.stringify({ memberId: account.memberId, contact: account.contact, player: name, playerId: playerId || null }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) { setPlayerPick(data.player || name); return { ok: true }; }
@@ -282,6 +284,17 @@ function App() {
     })();
     return () => { alive = false; };
   }, [account ? account.memberId : null, account ? account.contact : null]);
+
+  // WK-selecties ophalen voor de sterspeler-kieslijst (eenmalig na inloggen).
+  React.useEffect(() => {
+    if (!account || !account.memberId) return;
+    let alive = true;
+    fetch(PLAYERS_URL, { cache: 'force-cache' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && d && Array.isArray(d.players)) setPlayers(d.players); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [account ? account.memberId : null]);
 
   const me = window.WK.people.find((p) => p.me);
   const myRank = window.WK.people.indexOf(me) + 1;
@@ -411,7 +424,7 @@ function App() {
           {/* ---- Content ---- */}
           <main className="content">
             {tab === 'stand' && <StandScreen />}
-            {tab === 'wedstrijden' && <WedstrijdenScreen preds={preds} setPred={setPred} playerPick={playerPick} onPlayerPick={handlePlayerPick} locked={locked} />}
+            {tab === 'wedstrijden' && <WedstrijdenScreen preds={preds} setPred={setPred} playerPick={playerPick} onPlayerPick={handlePlayerPick} players={players} locked={locked} />}
             {tab === 'poules' && <PoulesScreen />}
           </main>
 

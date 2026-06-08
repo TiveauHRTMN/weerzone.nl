@@ -7,6 +7,7 @@ export const HARTMANWK_MEMBERS_TABLE = "hartmanwk_members";
 export const HARTMANWK_PREDICTIONS_TABLE = "hartmanwk_predictions";
 export const HARTMANWK_RESULTS_TABLE = "hartmanwk_results";
 export const HARTMANWK_PLAYER_STATS_TABLE = "hartmanwk_player_stats";
+export const HARTMANWK_PLAYERS_TABLE = "hartmanwk_players";
 export const MAX_PHOTO_LENGTH = 600_000; // ~ ruim genoeg voor een 360px jpeg, blokkeert misbruik
 
 // Aantal groepswedstrijden (id 1..72, gid A–L). De rest (73..104) is knock-out.

@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
   const memberId = String(b.memberId ?? "");
   const contact = String(b.contact ?? "").trim().toLowerCase();
   const player = cleanPlayerName(String(b.player ?? ""));
+  const playerId = b.playerId ? String(b.playerId).trim() : null;
 
   if (isLocked()) {
     return NextResponse.json({ error: "De groepsfase is op slot." }, { status: 423 });
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin
     .from(HARTMANWK_MEMBERS_TABLE)
-    .update({ player_pick: player, updated_at: new Date().toISOString() })
+    .update({ player_pick: player, player_pick_id: playerId, updated_at: new Date().toISOString() })
     .eq("id", memberId)
     .eq("contact", contact)
     .select("id")
