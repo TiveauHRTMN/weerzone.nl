@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Manrope } from "next/font/google";
 import AgentFeed from "@/components/AgentFeed";
 import WeatherBackdrop from "@/components/WeatherBackdrop";
@@ -34,47 +35,77 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function VandaagPage() {
-  const loc = await getSavedLocationServer().catch(() => null);
-  const activeLoc =
-    loc || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0];
+/**
+ * De zware kant: wereldmodel + orkestratie (incl. LLM-stemmen en Koos' fetches).
+ * Staat achter een Suspense-grens zodat de pagina-shell meteen paint en dit
+ * binnenstroomt — i.p.v. ~5s blocken op de SSR. De globale weer-lucht
+ * (GlobalWeatherBackground) staat al achter de skeleton, dus geen witte flits.
+ */
+async function VandaagFeed({ name, lat, lon }: { name: string; lat: number; lon: number }) {
+  const ctx = await buildAgentContext({ name, lat, lon });
 
-  const ctx = await buildAgentContext({
-    name: activeLoc.name,
-    lat: activeLoc.lat,
-    lon: activeLoc.lon,
-  });
-
-  // Zeldzame upstream-uitval: nette rust-staat i.p.v. een crash.
   if (!ctx) {
     return (
-      <main className={`va-skin ${manrope.className}`}>
-        <div
-          className="fixed inset-0 z-0"
-          style={{ background: "linear-gradient(170deg,#3a9ae8 0%,#7ec4f6 100%)" }}
-          aria-hidden
-        />
-        <div className="relative z-10 max-w-[640px] mx-auto px-4 sm:px-6 py-14 text-center">
-          <div className="va-card has-accent p-7 sm:p-9">
-            <h1 className="text-[22px] font-extrabold text-slate-900">Even geen verbinding met de weerdata</h1>
-            <p className="mt-2 text-[14px] text-slate-600">
-              De agents kunnen de gegevens voor {activeLoc.name} nu niet ophalen. Probeer het zo nog eens.
-            </p>
-          </div>
+      <div className="relative z-10 max-w-[640px] mx-auto px-4 sm:px-6 py-14 text-center">
+        <div className="va-card has-accent p-7 sm:p-9">
+          <h1 className="text-[22px] font-extrabold text-slate-900">Even geen verbinding met de weerdata</h1>
+          <p className="mt-2 text-[14px] text-slate-600">
+            De agents kunnen de gegevens voor {name} nu niet ophalen. Probeer het zo nog eens.
+          </p>
         </div>
-      </main>
+      </div>
     );
   }
 
   const result = await orchestrateAgents(ctx);
 
   return (
-    <main className={`va-skin ${manrope.className}`}>
+    <>
       <WeatherBackdrop
         weatherCode={ctx.weather.current.weatherCode}
         isDay={ctx.weather.current.isDay}
       />
-      <AgentFeed result={result} locationName={activeLoc.name} day={ctx.day} />
+      <AgentFeed result={result} locationName={name} day={ctx.day} />
+    </>
+  );
+}
+
+/** Directe shell tijdens het streamen: hero met locatie + rustige skeleton-kaarten. */
+function VandaagSkeleton({ locationName }: { locationName: string }) {
+  return (
+    <div className="relative z-10 max-w-[640px] mx-auto px-4 sm:px-6 py-9 sm:py-14 space-y-4">
+      <header className="va-card has-accent p-6 sm:p-8">
+        <div className="va-micro text-slate-400">WEERZONE · Vandaag</div>
+        <h1
+          className="mt-3 text-[30px] sm:text-[40px] font-extrabold text-slate-900 leading-[1.03]"
+          style={{ letterSpacing: "-0.032em" }}
+        >
+          Jouw dag in {locationName}
+        </h1>
+        <p className="mt-3 text-[14px] text-slate-500">Piet, Reed en Koos kijken even mee…</p>
+      </header>
+      {[0, 1].map((i) => (
+        <div key={i} className="va-card has-accent p-5 sm:p-6 animate-pulse">
+          <div className="h-3 w-28 rounded bg-slate-200/70" />
+          <div className="mt-4 h-5 w-3/4 rounded bg-slate-200/70" />
+          <div className="mt-2 h-3 w-full rounded bg-slate-100" />
+          <div className="mt-1.5 h-3 w-2/3 rounded bg-slate-100" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default async function VandaagPage() {
+  const loc = await getSavedLocationServer().catch(() => null);
+  const activeLoc =
+    loc || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0];
+
+  return (
+    <main className={`va-skin ${manrope.className}`}>
+      <Suspense fallback={<VandaagSkeleton locationName={activeLoc.name} />}>
+        <VandaagFeed name={activeLoc.name} lat={activeLoc.lat} lon={activeLoc.lon} />
+      </Suspense>
     </main>
   );
 }
