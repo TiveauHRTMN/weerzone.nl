@@ -36,6 +36,7 @@ const nlRoutes = {
 };
 
 const nlNav: LocaleConfig["nav"] = [
+  { key: "vandaag", label: "Vandaag", href: "/vandaag", sublabel: "Piet, Reed en Koos samen" },
   { key: "piet", label: "Piet", href: "/piet", sublabel: "Je dagelijkse heads-up" },
   { key: "reed", label: "Reed", href: "/reed", sublabel: "Voor buien, wind en onweer" },
   { key: "koos", label: "Koos", href: "/koos", sublabel: "Als je eropuit wilt" },

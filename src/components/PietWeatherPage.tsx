@@ -311,14 +311,16 @@ function PietHero({ view }: { view: PietView }) {
   );
 }
 
-function PietWeerberichtCard({ view, lat, lon }: { view: PietView; lat: number; lon: number }) {
+function PietWeerberichtCard({ view, lat, lon, voice }: { view: PietView; lat: number; lon: number; voice?: string | null }) {
   const fallback = [
     view.days.vd.story,
     view.days.mo.story && view.days.mo.story !== view.days.vd.story
       ? `${view.days.mo.weekday}: ${view.days.mo.story}`
       : "",
   ].filter(Boolean).join("\n\n");
-  const [forecast, setForecast] = useState(fallback);
+  // Server-side al berekende LLM-stem als startwaarde → geen sjabloon-flits;
+  // de client-fetch hieronder ververst hooguit.
+  const [forecast, setForecast] = useState(voice?.trim() || fallback);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -794,6 +796,7 @@ function FooterTrust() {
 /* ---------- Page ---------- */
 export default function PietWeatherPage({
   view,
+  voice = null,
   fontClassName = "",
   weatherCode = 0,
   isDay = true,
@@ -801,6 +804,7 @@ export default function PietWeatherPage({
   lon = 5.18,
 }: {
   view: PietView;
+  voice?: string | null;
   fontClassName?: string;
   weatherCode?: number;
   isDay?: boolean;
@@ -815,7 +819,7 @@ export default function PietWeatherPage({
       </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 piet-stagger">
         <PietHero view={view} />
-        <PietWeerberichtCard view={view} lat={lat} lon={lon} />
+        <PietWeerberichtCard view={view} lat={lat} lon={lon} voice={voice} />
         <RegenradarSlot lat={lat} lon={lon} locationName={view.locationName} />
         <Briefing48h days={view.days} />
         <DagscoresGrid scores={view.scores} />

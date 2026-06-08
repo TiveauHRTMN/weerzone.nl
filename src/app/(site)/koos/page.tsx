@@ -7,6 +7,8 @@ import { koosVoice } from "@/lib/koos-voice";
 import { buildKoosView } from "@/lib/koos-view";
 import { marianaKoosText } from "@/lib/mariana/agent-context";
 import { nearestRegionData } from "@/lib/mariana/regions/storage";
+import { getDayContext } from "@/lib/agents/day-context";
+import { koosDayFlavour } from "@/lib/agents/koos-agent";
 import { fetchWeatherData } from "@/lib/weather";
 import KoosTravelPage from "@/components/KoosTravelPage";
 import "./koos-skin.css";
@@ -50,9 +52,14 @@ export default async function KoosPage() {
   ]);
   const marianaText = marianaKoosText(marianaData);
   const opportunities = picks.map((p) => p.opportunity);
+  const day = getDayContext();
   const intro =
     picks.length > 0
-      ? (await withTimeout(koosVoice(origin, opportunities, { marianaText }), 1200, null)) ?? marianaText
+      ? (await withTimeout(
+          koosVoice(origin, opportunities, { marianaText, dayFlavour: koosDayFlavour(day) }),
+          1200,
+          null,
+        )) ?? marianaText
       : null;
   const view = buildKoosView(origin.name, originOutlook, picks, intro);
 

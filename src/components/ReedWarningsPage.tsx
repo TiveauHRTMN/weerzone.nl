@@ -287,7 +287,7 @@ const ACTIVE_GRADIENT: Record<ReedActiveWarning["tone"], string> = {
   amber: "linear-gradient(160deg, #FBBF24 0%, #F59E0B 45%, #B45309 100%)",
   blue: "linear-gradient(160deg, #60A5FA 0%, #3B82F6 45%, #1D4ED8 100%)",
 };
-function ActiveWarning({ data }: { data: ReedActiveWarning }) {
+function ActiveWarning({ data, voice }: { data: ReedActiveWarning; voice?: string | null }) {
   const chipTone = "onorange" as const;
   return (
     <div
@@ -337,7 +337,7 @@ function ActiveWarning({ data }: { data: ReedActiveWarning }) {
             <span className={`rchip rchip-${chipTone}`}>{data.levelLabel}</span>
           </div>
           <p className="mt-2 text-[14.5px] leading-relaxed" style={{ color: "rgba(255,255,255,.92)" }}>
-            {data.summary}
+            {voice ?? data.summary}
           </p>
           {data.chips.length > 0 && (
             <div className="mt-3 flex items-center gap-2 flex-wrap">
@@ -755,11 +755,13 @@ function FooterTrust() {
 /* ---------- Page ---------- */
 export default function ReedWarningsPage({
   view,
+  voice = null,
   fontClassName = "",
   weatherCode = 2,
   isDay = true,
 }: {
   view: ReedView;
+  voice?: string | null;
   fontClassName?: string;
   weatherCode?: number;
   isDay?: boolean;
@@ -776,7 +778,7 @@ export default function ReedWarningsPage({
         <StatusHeader view={view} />
         {hasWarning ? (
           <>
-            <ActiveWarning data={view.active!} />
+            <ActiveWarning data={view.active!} voice={voice} />
             <SectionHeader windowLabel={view.windowLabel} />
             <LiveRisicoperiode view={view} />
             <FooterTrust />

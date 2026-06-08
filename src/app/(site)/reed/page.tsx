@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
 import ReedWarningsPage from "@/components/ReedWarningsPage";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES, type WeatherData } from "@/lib/types";
-import { fetchWeatherData } from "@/lib/weather";
-import { nearestProvinceSlug, PROVINCE_SLUG_TO_KNMI } from "@/lib/knmi-warnings";
 import { buildReedView } from "@/lib/reed-view";
+import { buildAgentContext } from "@/lib/agents/context";
+import { reedAgent, estofexToReed } from "@/lib/agents/reed-agent";
 import { hreflangCluster } from "@/lib/hreflang";
 import "./reed-skin.css";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 function buildCalmFallbackWeather(now = new Date()): WeatherData {
   const isoDay = (offset: number) => {
@@ -93,25 +86,30 @@ export default async function ReedPage() {
   const loc = await getSavedLocationServer().catch(() => null);
   const activeLoc =
     loc || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0];
-  const provinceSlug = await nearestProvinceSlug(activeLoc.lat, activeLoc.lon);
 
-  // Background is dynamisch op basis van het lokale weer (zelfde bron als /weer).
-  const liveWeather = await fetchWeatherData(activeLoc.lat, activeLoc.lon, false, true).catch(
-    () => null,
-  );
-  const weather = liveWeather ?? buildCalmFallbackWeather();
+  // Eén gedeeld wereldmodel: weer + echte KNMI-waarschuwingen + ESTOFEX + Tesla.
+  const ctx = await buildAgentContext({
+    name: activeLoc.name,
+    lat: activeLoc.lat,
+    lon: activeLoc.lon,
+  });
 
+  const weather = ctx?.weather ?? buildCalmFallbackWeather();
+  const report = ctx ? await reedAgent(ctx) : null;
   const view = buildReedView({
     weather,
     locationName: activeLoc.name,
-    provinceLabel: provinceSlug ? PROVINCE_SLUG_TO_KNMI[provinceSlug] : null,
-    knmi: [],
+    provinceLabel: ctx?.location.provinceLabel ?? null,
+    estofex: estofexToReed(ctx?.estofex ?? null),
+    knmi: ctx?.knmi ?? [],
+    tesla: ctx?.tesla ?? null,
   });
 
   return (
     <ReedWarningsPage
       view={view}
-      fontClassName={manrope.className}
+      voice={report?.voice ?? null}
+      fontClassName="font-manrope"
       weatherCode={weather.current.weatherCode}
       isDay={weather.current.isDay}
       lat={activeLoc.lat}

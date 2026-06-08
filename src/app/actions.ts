@@ -23,6 +23,9 @@ export async function updateProfile(args: {
   postcode?: string;
   lat?: number;
   lon?: number;
+  pietOn?: boolean;
+  reedOn?: boolean;
+  koosOn?: boolean;
 }) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -35,6 +38,9 @@ export async function updateProfile(args: {
   if (args.postcode !== undefined) updates.postcode = args.postcode;
   if (args.lat !== undefined) updates.primary_lat = args.lat;
   if (args.lon !== undefined) updates.primary_lon = args.lon;
+  if (args.pietOn !== undefined) updates.piet_on = args.pietOn;
+  if (args.reedOn !== undefined) updates.reed_on = args.reedOn;
+  if (args.koosOn !== undefined) updates.koos_on = args.koosOn;
 
   const { error } = await supabase
     .from("user_profile")
