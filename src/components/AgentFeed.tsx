@@ -41,6 +41,13 @@ const AGENT_META: Record<WeatherAgent, AgentMeta> = {
   steve: { label: "Steve", role: "Zakelijk", accent: "#7c3aed", accentBg: "#ede9fe", accentFg: "#6d28d9", icon: <Sun /> },
 };
 
+const AGENT_HREF: Record<WeatherAgent, string> = {
+  piet: "/piet",
+  reed: "/reed",
+  koos: "/koos",
+  steve: "/steve",
+};
+
 const SEVERITY_DOT: Record<AgentHeadsUp["severity"], string> = {
   urgent: "#EF4444",
   important: "#F97316",
@@ -107,6 +114,14 @@ function HeadsUpCard({ h, lead = false }: { h: AgentHeadsUp; lead?: boolean }) {
         <Arrow />
         <span>{h.action}</span>
       </div>
+
+      <a
+        href={AGENT_HREF[h.agent]}
+        className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-bold"
+        style={{ color: m.accentFg }}
+      >
+        Meer bij {m.label} — uitgebreid binnen 48 uur <span aria-hidden>→</span>
+      </a>
     </article>
   );
 }
