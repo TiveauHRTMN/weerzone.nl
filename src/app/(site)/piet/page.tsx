@@ -3,8 +3,10 @@ import { Manrope } from "next/font/google";
 import PietWeatherPage from "@/components/PietWeatherPage";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES } from "@/lib/types";
-import { fetchWeatherData, fetchAirQuality } from "@/lib/weather";
+import { fetchAirQuality } from "@/lib/weather";
 import { buildPietView } from "@/lib/piet-view";
+import { buildAgentContext } from "@/lib/agents/context";
+import { pietAgent } from "@/lib/agents/piet-agent";
 import { hreflangCluster } from "@/lib/hreflang";
 import "./piet-skin.css";
 
@@ -88,13 +90,13 @@ export default async function PietPage() {
   const activeLoc =
     loc || DUTCH_CITIES.find((c) => c.name === "De Bilt") || DUTCH_CITIES[0];
 
-  // Live data voedt zowel de UI-cijfers als de achtergrond/regenradar.
-  const [initialWeather, air] = await Promise.all([
-    fetchWeatherData(activeLoc.lat, activeLoc.lon).catch(() => null),
+  // Eén gedeeld wereldmodel (weer + Mariana/Tesla/KNMI + day-context) + pollen.
+  const [ctx, air] = await Promise.all([
+    buildAgentContext({ name: activeLoc.name, lat: activeLoc.lat, lon: activeLoc.lon }),
     fetchAirQuality(activeLoc.lat, activeLoc.lon).catch(() => null),
   ]);
 
-  if (!initialWeather) {
+  if (!ctx) {
     // Zeldzame upstream-uitval: nette rust-staat i.p.v. een crash.
     return (
       <main className={`piet-skin relative min-h-screen ${manrope.className}`}>
@@ -110,6 +112,8 @@ export default async function PietPage() {
     );
   }
 
+  const initialWeather = ctx.weather;
+  const report = await pietAgent(ctx);
   const view = buildPietView(initialWeather, activeLoc.name, air);
 
   return (
@@ -120,6 +124,7 @@ export default async function PietPage() {
       />
       <PietWeatherPage
         view={view}
+        voice={report.voice ?? null}
         fontClassName={manrope.className}
         weatherCode={initialWeather.current.weatherCode}
         isDay={initialWeather.current.isDay}
