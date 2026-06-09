@@ -1,11 +1,13 @@
 "use client";
 
 import type { HourlyForecast } from "@/lib/types";
+import type { PluimIntelligence } from "@/lib/model-blend";
 
 interface Props {
   hourly: HourlyForecast[]; // verwacht 48 items
   sunrise?: string;
   sunset?: string;
+  pluim?: PluimIntelligence | null;
 }
 
 const MODELS = [
@@ -36,31 +38,48 @@ function linePath(pts: Array<[number, number]>) {
   return pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
 }
 
-export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
+export default function ModelPluim({ hourly, sunrise, sunset, pluim }: Props) {
   const hours = hourly.slice(0, 48);
   const n = hours.length;
   if (n < 4) return null;
 
-  // ── per-model temperature series ──────────────────────────
-  const series = {
-    harmonie: hours.map(h => h.models?.harmonie?.temperature ?? h.temperature),
-    icon:     hours.map(h => h.models?.icon?.temperature     ?? h.temperature),
-    arome:    hours.map(h => h.models?.arome?.temperature    ?? h.temperature),
-  };
+  // ── alleen modellen met echte data renderen ────────────────
+  const availableModels = MODELS.filter((m) =>
+    hours.some((h) => typeof h.models?.[m.key]?.temperature === "number"),
+  );
 
-  const allT  = Object.values(series).flat();
+  // ── per-model temperature series ──────────────────────────
+  // Een model kan in sommige uren ontbreken (verschillende forecast-lengtes):
+  // per uur terugvallen op de basistemperatuur, net als de huidige code.
+  const series = Object.fromEntries(
+    availableModels.map((m) => [m.key, hours.map((h) => h.models?.[m.key]?.temperature ?? h.temperature)]),
+  ) as Record<(typeof MODELS)[number]["key"], number[]>;
+
+  // ── gewogen hero-lijn ─────────────────────────────────────
+  const blended = pluim?.blended?.slice(0, 48) ?? null;
+  const showBlend = blended !== null && blended.length === n;
+
+  const allT = [...Object.values(series).flat(), ...(showBlend ? blended : [])];
+  if (!allT.length) allT.push(...hours.map((h) => h.temperature));
   const tMin  = Math.floor(Math.min(...allT)) - 1;
   const tMax  = Math.ceil(Math.max(...allT))  + 1;
 
-  // ── spread (min / max across models per hour) ─────────────
-  const bandMin = hours.map((_, i) => Math.min(...MODELS.map(m => series[m.key][i])));
-  const bandMax = hours.map((_, i) => Math.max(...MODELS.map(m => series[m.key][i])));
+  // ── spread (min / max across available models per hour) ───
+  const showBand = availableModels.length >= 2;
+  const bandMin = showBand
+    ? hours.map((_, i) => Math.min(...availableModels.map(m => series[m.key][i])))
+    : [];
+  const bandMax = showBand
+    ? hours.map((_, i) => Math.max(...availableModels.map(m => series[m.key][i])))
+    : [];
 
   const bandUpperPts = bandMax.map((t, i): [number, number] => [xAt(i, n), yTemp(t, tMin, tMax)]);
   const bandLowerPts = bandMin.map((t, i): [number, number] => [xAt(i, n), yTemp(t, tMin, tMax)]);
-  const bandPath = linePath(bandUpperPts)
-    + " " + [...bandLowerPts].reverse().map(([x, y]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(" ")
-    + " Z";
+  const bandPath = showBand
+    ? linePath(bandUpperPts)
+      + " " + [...bandLowerPts].reverse().map(([x, y]) => `L${x.toFixed(1)},${y.toFixed(1)}`).join(" ")
+      + " Z"
+    : "";
 
   // ── temperature Y-axis gridlines ──────────────────────────
   const range = tMax - tMin;
@@ -98,6 +117,34 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
     }
   });
 
+  // ── onweersvenster (amber band) ───────────────────────────
+  const tw = pluim?.thunderWindow ?? null;
+  let thunderRect: { x: number; w: number } | null = null;
+  if (tw) {
+    // Venster kan middernacht kruisen (bv. 22-02): toHour < fromHour betekent
+    // van `date` @ fromHour tot de VOLGENDE dag @ toHour.
+    const crossesMidnight = tw.toHour < tw.fromHour;
+    const nextDate = (() => {
+      const d = new Date(`${tw.date}T12:00:00`);
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().slice(0, 10);
+    })();
+    const idx = hours
+      .map((h, i) => ({ h, i }))
+      .filter(({ h }) => {
+        const hDate = h.time.slice(0, 10);
+        const hr = new Date(h.time).getHours();
+        if (!crossesMidnight) return hDate === tw.date && hr >= tw.fromHour && hr <= tw.toHour;
+        return (hDate === tw.date && hr >= tw.fromHour) || (hDate === nextDate && hr <= tw.toHour);
+      })
+      .map(({ i }) => i);
+    if (idx.length >= 2) {
+      const x1 = xAt(idx[0], n);
+      const x2 = xAt(idx[idx.length - 1], n);
+      thunderRect = { x: x1, w: x2 - x1 };
+    }
+  }
+
   // ── time axis labels ──────────────────────────────────────
   const axisLabels: { text: string; x: number }[] = [];
   let lastDate = "";
@@ -124,14 +171,20 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5">
-            Komende 48 uur
+            {showBlend ? "Komende 48 uur · gewogen tot één lijn" : "Komende 48 uur"}
           </p>
           <h3 className="text-sm font-black text-slate-800 leading-none">
             Temperatuurverwachting
           </h3>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
-          {MODELS.map(m => (
+          {showBlend && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-[3px] rounded-full" style={{ background: "#0f172a" }} />
+              <span className="text-[10px] font-bold text-slate-900">Weerzone-verwachting</span>
+            </div>
+          )}
+          {availableModels.map(m => (
             <div key={m.key} className="flex items-center gap-1.5">
               <div className="w-5 h-[3px] rounded-full" style={{ background: m.color }} />
               <span className="text-[10px] font-bold" style={{ color: m.color }}>
@@ -160,6 +213,19 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
             ) : null
           )}
 
+          {/* Thunder window — amber band, achter gridlines en lijnen */}
+          {thunderRect && (
+            <g>
+              <rect x={thunderRect.x} y={PT} width={thunderRect.w} height={TEMP_H + GAP + PREC_H} fill="#f59e0b" opacity="0.12" />
+              <line x1={thunderRect.x} y1={PT} x2={thunderRect.x + thunderRect.w} y2={PT} stroke="#f59e0b" strokeWidth="2" opacity="0.7" />
+              {thunderRect.w > 70 && (
+                <text x={thunderRect.x + thunderRect.w / 2} y={PT + 11} fill="#b45309" fontSize="8" fontWeight="800" textAnchor="middle" fontFamily="ui-sans-serif, system-ui, sans-serif">
+                  ⚡ VERHOOGDE ONWEERKANS
+                </text>
+              )}
+            </g>
+          )}
+
           {/* Precipitation baseline */}
           <line x1={PL} y1={prY0} x2={W - PR} y2={prY0} stroke="#e2e8f0" strokeWidth="1" />
 
@@ -185,11 +251,11 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
             );
           })}
 
-          {/* Spread band */}
-          <path d={bandPath} fill="#e2e8f0" opacity="0.6" />
+          {/* Spread band — alleen bij 2+ modellen */}
+          {showBand && <path d={bandPath} fill="#e2e8f0" opacity="0.6" />}
 
-          {/* Model lines */}
-          {MODELS.map(m => {
+          {/* Model lines — gedempt wanneer een hero-lijn aanwezig is */}
+          {availableModels.map(m => {
             const pts = series[m.key].map((t, i): [number, number] => [xAt(i, n), yTemp(t, tMin, tMax)]);
             return (
               <path
@@ -197,12 +263,25 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
                 d={linePath(pts)}
                 fill="none"
                 stroke={m.color}
-                strokeWidth="2.2"
+                strokeWidth={showBlend ? "1.6" : "2.2"}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                opacity={showBlend ? "0.55" : "1"}
               />
             );
           })}
+
+          {/* Hero: gewogen Weerzone-lijn — bovenop alle andere lijnen */}
+          {showBlend && (() => {
+            const pts = blended.map((t, i): [number, number] => [xAt(i, n), yTemp(t, tMin, tMax)]);
+            const [endX, endY] = pts[pts.length - 1];
+            return (
+              <g>
+                <path d={linePath(pts)} fill="none" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx={endX} cy={endY} r="3.5" fill="#0f172a" />
+              </g>
+            );
+          })()}
 
           {/* Precipitation bars */}
           {hours.map((h, i) => {
@@ -241,11 +320,26 @@ export default function ModelPluim({ hourly, sunrise, sunset }: Props) {
         </svg>
       </div>
 
+      {/* Insight-regel */}
+      {pluim?.insight && (
+        <p className="text-[11px] font-semibold leading-relaxed text-slate-500">{pluim.insight}</p>
+      )}
+
       {/* Footer legend */}
       <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400 pt-3 border-t border-slate-100">
-        <div className="flex items-center gap-1.5">
-          <div className="w-4 h-3 rounded-sm bg-slate-200" />
-          <span>Grijs = marge</span>
+        <div className="flex items-center gap-4 flex-wrap">
+          {showBand && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-3 rounded-sm bg-slate-200" />
+              <span>Grijs = marge</span>
+            </div>
+          )}
+          {thunderRect && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm bg-amber-400/40" />
+              <span>Onweerkans</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-blue-400" />

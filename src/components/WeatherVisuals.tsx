@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type { WeatherData } from "@/lib/types";
 import type { PluimIntelligence } from "@/lib/model-blend";
 
@@ -35,14 +36,20 @@ export default function WeatherVisuals({ weather, lat, lon, locationName, dayOff
 
       <details className="va-card va-expert-disclosure">
         <summary>
-          <span><strong>{dayOffset === 0 ? "Bekijk de modelverwachting" : "Bekijk de grafieken voor morgen"}</strong><small>Temperatuur en neerslag in één grafiek{reedEnabled ? ", plus weerrisico" : ""}</small></span>
+          <span><strong>{dayOffset === 0 ? "Bekijk de gewogen modelverwachting" : "Bekijk de grafieken voor morgen"}</strong><small>Meerdere verwachtingen gewogen tot één lijn{reedEnabled ? ", plus weerrisico" : ""}</small></span>
           <span className="va-disclosure-icon" aria-hidden>+</span>
         </summary>
         <div className="va-visual-stack space-y-4 px-4 pb-5 sm:px-5 sm:pb-6">
-          <ModelPluim hourly={weather.hourly} sunrise={weather.sunrise} sunset={weather.sunset} />
+          <ModelPluim hourly={weather.hourly} sunrise={weather.sunrise} sunset={weather.sunset} pluim={pluim} />
           {reedEnabled && <ReedExtremeCharts hourly={weather.hourly} showRain={false} />}
         </div>
       </details>
+
+      <p className="px-1 text-right">
+        <Link href="/over#qa" className="text-[11px] font-bold text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline">
+          Hoe komt deze verwachting tot stand?
+        </Link>
+      </p>
     </section>
   );
 }
