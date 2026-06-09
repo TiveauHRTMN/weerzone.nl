@@ -62,6 +62,9 @@ function effectiveWeight(
 ): number {
   const name = KEY_TO_MARIANA[key];
   const tuned = weights?.[name];
+  // Gewicht 0 valt terug op de statische default — een feed-gewicht van 0 is
+  // dus niet genoeg om een model uit de blend te zetten (Regions clampt naar
+  // 0.05-0.95, dus dit pad is theoretisch).
   if (typeof tuned === "number" && Number.isFinite(tuned) && tuned > 0) return tuned;
   return DEFAULT_WEIGHTS[name] ?? 0.45;
 }
@@ -119,7 +122,12 @@ export function topWeightedDisplayModel(
   return hiddenHeavier ? null : winner;
 }
 
-/** "14-18", "14:00 tot 18:00", "tussen 14 en 18" → { fromHour, toHour }. */
+/**
+ * "14-18", "14:00 tot 18:00", "tussen 14 en 18" → { fromHour, toHour }.
+ * Als toHour < fromHour kruist het venster middernacht (bv. 22-02): het loopt
+ * dan van `date` @ fromHour tot de VOLGENDE dag @ toHour. Consumenten moeten
+ * dat afhandelen met (uur >= fromHour || uur <= toHour) over de datumgrens.
+ */
 export function parseTimingWindow(
   timingWindow: string,
 ): { fromHour: number; toHour: number } | null {
@@ -135,7 +143,7 @@ export function parseTimingWindow(
 
 /** Geldt een Tesla-timing_window voor deze dag? (verplaatst uit DayBriefing) */
 export function timingAppliesToDay(timingWindow: string, dayOffset: 0 | 1): boolean {
-  const timing = timingWindow.toLocaleLowerCase("nl-NL");
+  const timing = timingWindow.toLowerCase();
   const saysToday = /\b(vandaag|today)\b/.test(timing);
   const saysTomorrow = /\b(morgen|tomorrow)\b/.test(timing);
   if (saysToday && !saysTomorrow) return dayOffset === 0;
@@ -148,7 +156,7 @@ export function timingAppliesToDay(timingWindow: string, dayOffset: 0 | 1): bool
  * staat er tóch een naam in de LLM-duiding, dan liever gén regel.
  */
 const BANNED_NAMES =
-  /mariana|knmi|dwd|estofex|harmonie|arome|icon|ecmwf|gfs|aifs|open[\s-]?meteo|m[ée]t[ée]o[\s-]?france|noaa|tesla|oracle/i;
+  /(?<![a-zA-Z])(mariana|knmi|dwd|estofex|harmonie|arome|icon|ecmwf|gfs|aifs|open[\s-]?meteo|m[ée]t[ée]o[\s-]?france|noaa|tesla|oracle)(?![a-zA-Z])/i;
 
 export function safeInsight(text: string | null | undefined): string | null {
   const trimmed = text?.trim();

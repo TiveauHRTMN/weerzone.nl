@@ -70,6 +70,8 @@ check("één model geeft null", topWeightedDisplayModel([hour({ harmonie: point(
 check("parse 14-18", parseTimingWindow("vandaag 14-18 uur"), { fromHour: 14, toHour: 18 });
 check("parse 14:00 tot 18:00", parseTimingWindow("tussen 14:00 tot 18:00"), { fromHour: 14, toHour: 18 });
 check("parse zonder venster", parseTimingWindow("in de middag"), null);
+check("parse tussen 9 en 12", parseTimingWindow("tussen 9 en 12"), { fromHour: 9, toHour: 12 });
+check("parse nachtvenster 22-02", parseTimingWindow("vanavond 22-02"), { fromHour: 22, toHour: 2 });
 
 // 8. timingAppliesToDay
 check("vandaag-only geldt niet voor morgen", timingAppliesToDay("vandaag 14-18", 1), false);
@@ -85,6 +87,7 @@ check(
 check("insight met KNMI vervalt", safeInsight("Het KNMI verwacht regen."), null);
 check("insight met Mariana vervalt", safeInsight("Mariana weegt HARMONIE zwaarder."), null);
 check("lege insight geeft null", safeInsight("  "), null);
+check("insight met 'iconische' blijft", safeInsight("Een iconische zomerdag met veel zon."), "Een iconische zomerdag met veel zon.");
 
 if (failures > 0) {
   console.error(`\n${failures} check(s) gefaald`);
