@@ -75,3 +75,19 @@ export const HARTMANWK_TEAM_NAMES: Record<string, string> = {
 export function teamName(code: string): string {
   return HARTMANWK_TEAM_NAMES[code] ?? code;
 }
+
+// Aftrap per wedstrijd in ms. De tijden zijn Nederlandse weergavetijden (CEST = UTC+2,
+// het hele WK valt in de zomertijd), dus +02:00.
+const KICKOFF_MS_BY_ID = new Map(
+  HARTMANWK_GROUP_MATCHES.map((m) => [m.id, Date.parse(`${m.date}T${m.time}:00+02:00`)]),
+);
+
+export function groupMatchKickoffMs(matchId: string): number | null {
+  return KICKOFF_MS_BY_ID.get(matchId) ?? null;
+}
+
+/** Is de aftrap van deze groepswedstrijd al geweest? (per-wedstrijd-slot) */
+export function isGroupMatchStarted(matchId: string, now: Date = new Date()): boolean {
+  const k = KICKOFF_MS_BY_ID.get(matchId);
+  return k !== undefined && now.getTime() >= k;
+}

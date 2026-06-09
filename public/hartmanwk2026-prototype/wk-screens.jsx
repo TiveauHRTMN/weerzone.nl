@@ -12,11 +12,8 @@ function matchStartDate(m) {
   return new Date(`${m.date}T${m.time}:00`);
 }
 
-// Verplicht-slot: de hele groepsfase gaat op slot bij de eerste aftrap
-// (2026-06-11 21:00 CEST = 19:00 UTC). Knock-out blijft per wedstrijd sluiten.
-const WK_LOCK_MS = Date.parse('2026-06-11T19:00:00Z');
+// Per-wedstrijd-slot: elke wedstrijd sluit op zijn eigen aftrap.
 function isPredictionLocked(m) {
-  if (m.gid !== 'KO') return Date.now() >= WK_LOCK_MS;
   return m.status === 'open' && new Date() >= matchStartDate(m);
 }
 
@@ -393,15 +390,13 @@ function WedstrijdenScreen({ preds, setPred, playerPick, onPlayerPick, players, 
       <div className="card progresscard">
         <div className="progress-top">
           <div>
-            <div className="section-kicker">{locked ? 'Groepsfase gesloten' : complete ? 'Helemaal klaar' : 'Vul alles in vóór 11 juni'}</div>
+            <div className="section-kicker">{complete ? 'Helemaal klaar' : 'Vul je voorspellingen in'}</div>
             <div className="progress-title">{filled}/{total} wedstrijden{hasPlayer ? ' · speler ✓' : ' · nog geen speler'}</div>
           </div>
           <div className="progress-pct">{pct}%</div>
         </div>
         <div className="progress-bar"><span style={{ width: pct + '%' }} /></div>
-        {!locked && !complete && <p className="progress-note">Alles moet ingevuld zijn vóór de aftrap op 11 juni 21:00 — daarna gaat de poule op slot.</p>}
-        {!locked && complete && <p className="progress-note">Top, alles staat. Je kunt nog wijzigen tot 11 juni 21:00.</p>}
-        {locked && <p className="progress-note">Je groepsvoorspellingen en sterspeler zijn vergrendeld. Succes!</p>}
+        <p className="progress-note">Elke wedstrijd kun je voorspellen tot de aftrap; daarna sluit alleen díe wedstrijd. Je sterspeler ligt vast vanaf de eerste aftrap (11 juni 21:00).</p>
       </div>
 
       <div className="chips">

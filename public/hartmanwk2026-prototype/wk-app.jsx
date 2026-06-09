@@ -179,8 +179,10 @@ function App() {
   const locked = wkLocked();
 
   // Voorspelling opslaan (gedebounced) zodra beide scores ingevuld zijn.
+  // Per wedstrijd: het invoerveld is al uitgeschakeld na de aftrap, en de server
+  // weigert een voorspelling voor een begonnen wedstrijd — dus geen globaal slot.
   const persistPrediction = (id, home, away) => {
-    if (!account || !account.memberId || locked || !isGroupId(id)) return;
+    if (!account || !account.memberId || !isGroupId(id)) return;
     clearTimeout(saveTimers.current[id]);
     saveTimers.current[id] = setTimeout(() => {
       fetch(PREDICTIONS_URL, {
