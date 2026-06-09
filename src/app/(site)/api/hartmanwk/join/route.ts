@@ -9,6 +9,9 @@ import {
   toOwnMember,
   toPublicMember,
 } from "@/lib/hartmanwk";
+import { notifyHartmanWkOwner } from "@/lib/hartmanwk-notify";
+
+const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,6 +52,13 @@ export async function POST(request: NextRequest) {
 
   const admin = createSupabaseAdminClient();
 
+  // Was dit contact al bekend? Zo niet, dan is dit een nieuwe deelnemer.
+  const { data: existing } = await admin
+    .from(HARTMANWK_MEMBERS_TABLE)
+    .select("id")
+    .eq("contact", classified.contact)
+    .maybeSingle();
+
   const payload: Record<string, string> = {
     contact: classified.contact,
     contact_type: classified.type,
@@ -76,6 +86,19 @@ export async function POST(request: NextRequest) {
 
   if (membersError) {
     console.error("Hartman WK members read error:", membersError.message);
+  }
+
+  // Eigenaar een seintje bij een nieuwe deelnemer (niet bij opnieuw inloggen).
+  if (!existing) {
+    await notifyHartmanWkOwner(
+      `Nieuwe deelnemer: ${name}`,
+      `<div style="font-family:Arial,sans-serif;line-height:1.5;color:#0f172a">
+        <p><strong>${escapeHtml(name)}</strong> heeft zich zojuist aangemeld voor de Hartman WK 2026 poule.</p>
+        <p style="color:#475569">Contact: ${escapeHtml(classified.contact)}</p>
+        <p>Totaal deelnemers: ${(members ?? []).length}</p>
+        <p><a href="https://weerzone.nl/hartmanwk2026">Bekijk de poule</a></p>
+      </div>`,
+    );
   }
 
   return NextResponse.json({
