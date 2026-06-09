@@ -99,7 +99,6 @@ function riskForDay(ctx: AgentContext, hours: HourlyForecast[], date: string, ma
     if (!item.validFrom || !item.validUntil) return true;
     return item.validFrom.slice(0, 10) <= date && item.validUntil.slice(0, 10) >= date;
   });
-  const maxCape = Math.max(0, ...hours.map((hour) => hour.cape ?? 0));
   const maxWind = Math.max(0, ...hours.map((hour) => hour.windSpeed ?? 0));
   const maxRain = Math.max(0, ...hours.map((hour) => hour.precipitation ?? 0));
   const thunder = hours.find((hour) => hour.weatherCode >= 95 || hour.cape >= 800);
@@ -190,7 +189,10 @@ function pluimIntelligence(
   const leadSentence = leadModel
     ? `De doorgetrokken lijn leunt ${dayOffset === 0 ? "vandaag" : "voor morgen"} het meest op verwachting ${DISPLAY_MODEL_NUMBER[leadModel]}.`
     : null;
-  const insight = [baseInsight, leadSentence].filter(Boolean).join(" ") || null;
+  // LLM-tekst eindigt niet altijd op een leesteken; zonder punt plakken de
+  // twee zinnen aan elkaar.
+  const normalizedBase = baseInsight ? baseInsight.trimEnd().replace(/([^.!?])$/, "$1.") : null;
+  const insight = [normalizedBase, leadSentence].filter(Boolean).join(" ") || null;
 
   const tesla = ctx.tesla;
   const teslaRisk = Boolean(
