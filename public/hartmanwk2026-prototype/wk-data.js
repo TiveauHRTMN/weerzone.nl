@@ -16,7 +16,7 @@
     CAN: { name: 'Canada', fl: { b: ['solid', '#ffffff'], o: [
       { t: 'r', x: 0, y: 0, w: 7.5, h: 20, c: '#FF0000' }, { t: 'r', x: 22.5, y: 0, w: 7.5, h: 20, c: '#FF0000' },
       { t: 's', cx: 15, cy: 10, r: 3.2, c: '#FF0000' }] } },
-    BIH: { name: 'Bosnië-Herzegovina', fl: { b: ['solid', '#002395'], o: [{ t: 'p', d: '8,0 23,0 23,20', c: '#FECB00' }] } },
+    BIH: { name: 'Bosnië', fl: { b: ['solid', '#002395'], o: [{ t: 'p', d: '8,0 23,0 23,20', c: '#FECB00' }] } },
     QAT: { name: 'Qatar', fl: ['v', '#ffffff', '#8A1538', '#8A1538', '#8A1538', '#8A1538'] },
     SUI: { name: 'Zwitserland', fl: { b: ['solid', '#D52B1E'], o: [
       { t: 'r', x: 12.7, y: 5.6, w: 4.6, h: 8.8, c: '#ffffff' }, { t: 'r', x: 10.5, y: 7.8, w: 9, h: 4.4, c: '#ffffff' }] } },
