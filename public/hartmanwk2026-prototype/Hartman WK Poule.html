@@ -32,7 +32,8 @@
     --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; }
+  /* clip i.p.v. hidden: voorkomt zijwaarts scrollen zonder de sticky header te breken */
+  html, body { margin: 0; overflow-x: clip; }
   body {
     font-family: var(--app-font);
     color: var(--ink);
@@ -49,7 +50,7 @@
 
   /* ---------- Header ---------- */
   .hdr {
-    position: sticky; top: 0; z-index: 40;
+    position: -webkit-sticky; position: sticky; top: 0; z-index: 40;
     background:
       linear-gradient(180deg, rgba(255,0,48,.52) 0%, rgba(255,0,48,.32) 100%);
     backdrop-filter: saturate(170%) blur(26px);
@@ -239,9 +240,13 @@
   .stand-share-note { grid-column: 1 / -1; color: var(--good); font-weight: 800; font-size: .76rem; }
 
   /* ---------- Stand: podium ---------- */
-  .podium { display: grid; grid-template-columns: 1fr 1.1fr 1fr; align-items: end; gap: 10px; margin-top: 4px; }
-  .pod { display: flex; flex-direction: column; align-items: center; text-align: center; }
-  .pod-name { font-weight: 700; font-size: .82rem; margin-top: 8px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .podium { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); align-items: end; gap: 10px; margin-top: 4px; }
+  .pod { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+  .pod-name {
+    font-weight: 700; font-size: .82rem; margin-top: 8px; max-width: 100%;
+    overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    line-height: 1.22; overflow-wrap: anywhere;
+  }
   .pod-pts { font-weight: 800; font-size: 1.05rem; color: var(--accent); }
   .pod-pts span { font-size: .62rem; font-weight: 600; color: var(--ink-faint); margin-left: 2px; }
   .pod-base {
@@ -637,9 +642,19 @@
 
   @media (max-width: 460px) {
     .hm-vs { font-size: 1.06rem; }
-    .team-name { font-size: .86rem; }
-    .trow { grid-template-columns: 38px 1fr 44px 42px 50px; }
-    .c-exact, .c-rond { font-size: .78rem; }
+    /* Smal scherm: teamnamen boven de scoreboxen, dan hoeft er niets afgekort */
+    .team-name { font-size: .9rem; white-space: normal; line-height: 1.2; }
+    .match-body { grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+    .match-body .team-h { grid-column: 1; grid-row: 1; justify-content: flex-start; text-align: left; }
+    .match-body .team-a { grid-column: 2; grid-row: 1; justify-content: flex-end; text-align: right; }
+    .match-body .score-zone { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
+    /* Smal scherm: laat de voltreffers-kolom weg zodat namen en koppen ruimte houden. */
+    .trow { grid-template-columns: 34px minmax(0, 1fr) 50px 56px; }
+    .trow .c-exact { display: none; }
+    .thead { letter-spacing: .05em; }
+    .c-name .c-name-n { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow-wrap: anywhere; line-height: 1.2; font-size: .86rem; }
+    .c-rond { font-size: .78rem; }
+    .pod-name { font-size: .76rem; -webkit-line-clamp: 3; }
     .tab span { font-size: .68rem; }
     .tab { padding: 8px 2px; }
     .prow { grid-template-columns: 34px 16px 1fr 40px 1fr 40px; font-size: .78rem; gap: 4px; }
