@@ -309,7 +309,7 @@ function StandScreen() {
             return (
               <div key={pp.name} className={'pod pod-in pod-' + rank} style={{ animationDelay: (oi * 90) + 'ms' }}>
                 <Avatar name={pp.name} me={pp.me} photo={pp.photo} size={rank === 1 ? 56 : 46} />
-                <div className="pod-name">{pp.name}</div>
+                <div className="pod-name">{shortName(pp.name, ppl.map((q) => q.name))}</div>
                 <div className="pod-pts">{pp.pts}<span>pt</span></div>
                 <div className="pod-base"><span className="pod-rank">{rank}</span></div>
               </div>
@@ -328,16 +328,12 @@ function StandScreen() {
         <div className="trow thead">
           <span className="c-rank">#</span>
           <span className="c-name">Deelnemer</span>
-          <span className="c-rond">ronde</span>
-          <span className="c-exact">voltr.</span>
           <span className="c-pts">punten</span>
         </div>
         {ppl.map((pp, i) => (
           <div key={pp.name} style={{ animationDelay: (Math.min(i, 12) * 45) + 'ms' }} className={'trow' + (pp.me ? ' trow-me' : '') + (pp.d > 0 ? ' trow-rise' : pp.d < 0 ? ' trow-fall' : ' trow-in') + (Math.abs(pp.d) >= 3 ? ' trow-bigjump' : '')}>
             <span className="c-rank">{i + 1}<Delta d={pp.d} /></span>
-            <span className="c-name"><Avatar name={pp.name} me={pp.me} photo={pp.photo} size={30} /><span className="c-name-txt"><span className="c-name-n">{pp.name}</span>{pp.player && <span className="c-name-p">★ {pp.player}</span>}</span></span>
-            <span className="c-rond">+{pp.rond}</span>
-            <span className="c-exact">{pp.exact}</span>
+            <span className="c-name"><Avatar name={pp.name} me={pp.me} photo={pp.photo} size={30} /><span className="c-name-txt"><span className="c-name-n">{shortName(pp.name, ppl.map((q) => q.name))}</span>{pp.player && <span className="c-name-p">★ {pp.player}</span>}</span></span>
             <span className="c-pts">{pp.pts}</span>
           </div>
         ))}
