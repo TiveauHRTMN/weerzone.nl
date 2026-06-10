@@ -122,9 +122,9 @@ function buildPeople(members, account) {
       joinedAt: account.joinedAt,
     });
   }
-  // Ranglijst: meeste punten eerst, bij gelijke stand wie het eerst meedeed.
+  // Ranglijst: meeste punten eerst, bij gelijke stand op alfabet.
   list.sort((a, b) => (b.pts || 0) - (a.pts || 0)
-    || String(a.joinedAt || '').localeCompare(String(b.joinedAt || '')));
+    || String(a.name || '').localeCompare(String(b.name || ''), 'nl', { sensitivity: 'base' }));
   const isMe = (m) => (account ? (meId ? m.id === meId : m.name === account.name) : false);
   window.WK.people = list.map((m) => ({
     name: m.name || 'Deelnemer',

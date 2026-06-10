@@ -95,7 +95,8 @@ export async function GET() {
     };
   });
 
-  standings.sort((a, b) => b.pts - a.pts || String(a.joinedAt).localeCompare(String(b.joinedAt)));
+  standings.sort((a, b) => b.pts - a.pts
+    || String(a.name).localeCompare(String(b.name), "nl", { sensitivity: "base" }));
 
   // Echte uitslagen meesturen zodat de client de groepstanden + wedstrijdkaarten bijwerkt.
   const realResults = ((results.data ?? []) as ResultRow[]).map((r) => ({
