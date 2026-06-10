@@ -8,13 +8,22 @@ export const HARTMANWK_PREDICTIONS_TABLE = "hartmanwk_predictions";
 export const HARTMANWK_RESULTS_TABLE = "hartmanwk_results";
 export const HARTMANWK_PLAYER_STATS_TABLE = "hartmanwk_player_stats";
 export const HARTMANWK_PLAYERS_TABLE = "hartmanwk_players";
+export const HARTMANWK_KO_TEAMS_TABLE = "hartmanwk_ko_teams";
 export const MAX_PHOTO_LENGTH = 600_000; // ~ ruim genoeg voor een 360px jpeg, blokkeert misbruik
 
 // Aantal groepswedstrijden (id 1..72, gid A–L). De rest (73..104) is knock-out.
 export const HARTMANWK_GROUP_MATCH_COUNT = 72;
+export const HARTMANWK_MATCH_COUNT = 104;
 export function isGroupMatchId(matchId: string): boolean {
   const n = Number(matchId);
   return Number.isInteger(n) && n >= 1 && n <= HARTMANWK_GROUP_MATCH_COUNT;
+}
+export function isKnockoutMatchId(matchId: string): boolean {
+  const n = Number(matchId);
+  return Number.isInteger(n) && n > HARTMANWK_GROUP_MATCH_COUNT && n <= HARTMANWK_MATCH_COUNT;
+}
+export function isValidMatchId(matchId: string): boolean {
+  return isGroupMatchId(matchId) || isKnockoutMatchId(matchId);
 }
 
 // Verplicht-slot: eerste aftrap 2026-06-11 21:00 CEST = 19:00 UTC.

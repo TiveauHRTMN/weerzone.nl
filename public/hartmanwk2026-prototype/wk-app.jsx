@@ -16,8 +16,10 @@ const MEMBERS_POLL_MS = 15000;
    aftrap, 2026-06-11 21:00 CEST (19:00 UTC). Daarna kan er niets meer wijzigen. */
 const WK_LOCK_MS = Date.parse('2026-06-11T19:00:00Z');
 const GROUP_MATCH_COUNT = 72;
+const MATCH_COUNT = 104; // 72 groepswedstrijden + 32 knock-out
 function wkLocked() { return Date.now() >= WK_LOCK_MS; }
 function isGroupId(id) { const n = Number(id); return Number.isInteger(n) && n >= 1 && n <= GROUP_MATCH_COUNT; }
+function isMatchId(id) { const n = Number(id); return Number.isInteger(n) && n >= 1 && n <= MATCH_COUNT; }
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accent": "#3B8EEA",
@@ -141,6 +143,21 @@ function buildPeople(members, account) {
   window.WK.myToto = mine ? (mine.toto || 0) : 0;
 }
 
+/* Knock-out-bracket invullen: de FIFA-sync levert per KO-wedstrijd de echte
+   landcodes zodra ze bekend zijn; hier vervangen ze de plaatshouders
+   ("Winnaar Poule C"), zodat vlaggen verschijnen en voorspellen opengaat. */
+function applyKoTeams(koTeams) {
+  if (!Array.isArray(koTeams) || !koTeams.length) return;
+  const byId = {};
+  koTeams.forEach((k) => { byId[String(k.matchId)] = k; });
+  window.WK.matches.forEach((m) => {
+    const k = byId[String(m.id)];
+    if (!k) return;
+    if (window.WK.T[k.home]) m.h = k.home;
+    if (window.WK.T[k.away]) m.a = k.away;
+  });
+}
+
 /* Echte uitslagen (door de eigenaar ingevoerd) in de wedstrijden zetten en de
    groepstanden herberekenen, zodat Poules/Programma/Wedstrijden meebewegen. */
 function applyResults(results, preds) {
@@ -171,6 +188,7 @@ function App() {
   const [account, setAccount] = useS(() => loadSession());
   const [members, setMembers] = useS([]);
   const [results, setResults] = useS([]);
+  const [koTeams, setKoTeams] = useS([]);
   const [tab, setTab] = useS('stand');
   const [preds, setPreds] = useS({});
   const [playerPick, setPlayerPick] = useS('');
@@ -179,8 +197,10 @@ function App() {
   const locked = wkLocked();
 
   // Voorspelling opslaan (gedebounced) zodra beide scores ingevuld zijn.
+  // Per wedstrijd: het invoerveld is al uitgeschakeld na de aftrap, en de server
+  // weigert een voorspelling voor een begonnen wedstrijd — dus geen globaal slot.
   const persistPrediction = (id, home, away) => {
-    if (!account || !account.memberId || locked || !isGroupId(id)) return;
+    if (!account || !account.memberId || !isMatchId(id)) return;
     clearTimeout(saveTimers.current[id]);
     saveTimers.current[id] = setTimeout(() => {
       fetch(PREDICTIONS_URL, {
@@ -217,6 +237,7 @@ function App() {
 
   resetTournamentState();
   buildPeople(members, account);
+  applyKoTeams(koTeams);
   applyResults(results, preds);
 
   // Houd de gedeelde deelnemerslijst actueel: bij binnenkomst ophalen, daarna
@@ -233,6 +254,7 @@ function App() {
         if (!alive) return;
         if (Array.isArray(data.members)) setMembers(data.members);
         if (Array.isArray(data.results)) setResults(data.results);
+        if (Array.isArray(data.koTeams)) setKoTeams(data.koTeams);
       } catch { /* offline: lokale stand blijft staan */ }
     };
     const sync = async () => {

@@ -3,9 +3,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   HARTMANWK_MEMBERS_TABLE,
   HARTMANWK_PREDICTIONS_TABLE,
-  isGroupMatchId,
+  isValidMatchId,
   isLocked,
 } from "@/lib/hartmanwk";
+import { isMatchStarted } from "@/lib/hartmanwk-matches";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,11 +68,11 @@ export async function POST(request: NextRequest) {
   const home = Number(b.home);
   const away = Number(b.away);
 
-  if (isLocked()) {
-    return NextResponse.json({ error: "De groepsfase is op slot." }, { status: 423 });
+  if (!isValidMatchId(matchId)) {
+    return NextResponse.json({ error: "Geen geldige wedstrijd." }, { status: 400 });
   }
-  if (!isGroupMatchId(matchId)) {
-    return NextResponse.json({ error: "Geen geldige groepswedstrijd." }, { status: 400 });
+  if (isMatchStarted(matchId)) {
+    return NextResponse.json({ error: "Deze wedstrijd is al begonnen." }, { status: 423 });
   }
   if (![home, away].every((v) => Number.isInteger(v) && v >= 0 && v <= 30)) {
     return NextResponse.json({ error: "Gebruik hele scores van 0 t/m 30." }, { status: 400 });

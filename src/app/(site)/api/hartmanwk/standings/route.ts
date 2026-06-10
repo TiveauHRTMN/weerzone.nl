@@ -5,6 +5,7 @@ import {
   HARTMANWK_PREDICTIONS_TABLE,
   HARTMANWK_RESULTS_TABLE,
   HARTMANWK_PLAYER_STATS_TABLE,
+  HARTMANWK_KO_TEAMS_TABLE,
   fantasyPoints,
   normalizePlayerKey,
   scoreMatch,
@@ -41,11 +42,13 @@ async function allPredictions(admin: ReturnType<typeof createSupabaseAdminClient
 export async function GET() {
   const admin = createSupabaseAdminClient();
 
-  const [members, predRows, results, stats] = await Promise.all([
+  const [members, predRows, results, stats, koTeamRows] = await Promise.all([
     admin.from(HARTMANWK_MEMBERS_TABLE).select("id, name, photo, joined_at, player_pick, player_pick_id").order("joined_at", { ascending: true }),
     allPredictions(admin),
     admin.from(HARTMANWK_RESULTS_TABLE).select("match_id, home, away"),
     admin.from(HARTMANWK_PLAYER_STATS_TABLE).select("player_key, goals, assists, minutes, yellow, red"),
+    // Tabel bestaat pas na migratie 20260610 — een fout hier mag de ranglijst niet breken.
+    admin.from(HARTMANWK_KO_TEAMS_TABLE).select("match_id, home, away"),
   ]);
 
   if (members.error) {
@@ -105,5 +108,12 @@ export async function GET() {
     away: r.away,
   }));
 
-  return NextResponse.json({ members: standings, results: realResults, scoredAt: new Date().toISOString() });
+  // Knock-out-teams (gevuld door de FIFA-sync) zodat de bracket zichzelf invult.
+  const koTeams = ((koTeamRows.data ?? []) as { match_id: string; home: string; away: string }[]).map((r) => ({
+    matchId: r.match_id,
+    home: r.home,
+    away: r.away,
+  }));
+
+  return NextResponse.json({ members: standings, results: realResults, koTeams, scoredAt: new Date().toISOString() });
 }

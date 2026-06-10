@@ -1,6 +1,6 @@
-// Hartman WK 2026 — groepswedstrijden (id 1..72), spiegelt public/hartmanwk2026-prototype/wk-data.js.
-// Nodig server-side voor het beheerscherm (uitslagen invoeren met echte landen).
-// Knock-out (73..104) valt buiten het groepsfase-slot en staat hier bewust niet in.
+// Hartman WK 2026 — speelschema (id 1..104), spiegelt public/hartmanwk2026-prototype/wk-data.js.
+// Groepswedstrijden (1..72) met landcodes voor het beheerscherm; knock-out (73..104)
+// alleen met aftraptijden — de teams vult de FIFA-sync in zodra ze bekend zijn.
 
 export type HartmanWkMatch = {
   id: string;
@@ -75,3 +75,47 @@ export const HARTMANWK_TEAM_NAMES: Record<string, string> = {
 export function teamName(code: string): string {
   return HARTMANWK_TEAM_NAMES[code] ?? code;
 }
+
+// Knock-out (id 73..104): alleen aftraptijden, teams volgen uit de groepsfase.
+// [id, round, date, time] — round 4=laatste 32, 5=laatste 16, 6=kwart, 7=halve, 8=3e/4e, 9=finale.
+const KO_RAW: [number, number, string, string][] = [
+  [73, 4, "2026-06-28", "21:00"], [74, 4, "2026-06-29", "22:30"], [75, 4, "2026-06-30", "03:00"],
+  [76, 4, "2026-06-29", "19:00"], [77, 4, "2026-06-30", "23:00"], [78, 4, "2026-06-30", "19:00"],
+  [79, 4, "2026-07-01", "03:00"], [80, 4, "2026-07-01", "18:00"], [81, 4, "2026-07-02", "02:00"],
+  [82, 4, "2026-07-01", "22:00"], [83, 4, "2026-07-03", "01:00"], [84, 4, "2026-07-02", "21:00"],
+  [85, 4, "2026-07-03", "05:00"], [86, 4, "2026-07-04", "00:00"], [87, 4, "2026-07-04", "03:30"],
+  [88, 4, "2026-07-03", "20:00"],
+  [89, 5, "2026-07-04", "23:00"], [90, 5, "2026-07-04", "19:00"], [91, 5, "2026-07-05", "22:00"],
+  [92, 5, "2026-07-06", "02:00"], [93, 5, "2026-07-06", "21:00"], [94, 5, "2026-07-07", "02:00"],
+  [95, 5, "2026-07-07", "18:00"], [96, 5, "2026-07-07", "22:00"],
+  [97, 6, "2026-07-09", "22:00"], [98, 6, "2026-07-10", "21:00"], [99, 6, "2026-07-11", "23:00"],
+  [100, 6, "2026-07-12", "03:00"],
+  [101, 7, "2026-07-14", "21:00"], [102, 7, "2026-07-15", "21:00"],
+  [103, 8, "2026-07-18", "23:00"], [104, 9, "2026-07-19", "21:00"],
+];
+
+export type HartmanWkKoMatch = { id: string; round: number; date: string; time: string };
+
+export const HARTMANWK_KO_MATCHES: HartmanWkKoMatch[] = KO_RAW.map(
+  ([id, round, date, time]) => ({ id: String(id), round, date, time }),
+);
+
+// Aftrap per wedstrijd in ms (alle 104). De tijden zijn Nederlandse weergavetijden
+// (CEST = UTC+2, het hele WK valt in de zomertijd), dus +02:00.
+const KICKOFF_MS_BY_ID = new Map([
+  ...HARTMANWK_GROUP_MATCHES.map((m) => [m.id, Date.parse(`${m.date}T${m.time}:00+02:00`)] as const),
+  ...HARTMANWK_KO_MATCHES.map((m) => [m.id, Date.parse(`${m.date}T${m.time}:00+02:00`)] as const),
+]);
+
+export function groupMatchKickoffMs(matchId: string): number | null {
+  return KICKOFF_MS_BY_ID.get(matchId) ?? null;
+}
+
+/** Is de aftrap van deze wedstrijd (groep óf knock-out) al geweest? (per-wedstrijd-slot) */
+export function isMatchStarted(matchId: string, now: Date = new Date()): boolean {
+  const k = KICKOFF_MS_BY_ID.get(matchId);
+  return k !== undefined && now.getTime() >= k;
+}
+
+/** Alias voor bestaande aanroepen die alleen groepswedstrijden checken. */
+export const isGroupMatchStarted = isMatchStarted;
