@@ -53,7 +53,7 @@ export default function ModelPluim({ hourly, sunrise, sunset, pluim }: Props) {
   // per uur terugvallen op de basistemperatuur, net als de huidige code.
   const series = Object.fromEntries(
     availableModels.map((m) => [m.key, hours.map((h) => h.models?.[m.key]?.temperature ?? h.temperature)]),
-  ) as Record<(typeof MODELS)[number]["key"], number[]>;
+  ) as Record<string, number[]>;
 
   // ── gewogen hero-lijn ─────────────────────────────────────
   const blended = pluim?.blended?.slice(0, 48) ?? null;
@@ -124,6 +124,8 @@ export default function ModelPluim({ hourly, sunrise, sunset, pluim }: Props) {
     // Venster kan middernacht kruisen (bv. 22-02): toHour < fromHour betekent
     // van `date` @ fromHour tot de VOLGENDE dag @ toHour.
     const crossesMidnight = tw.toHour < tw.fromHour;
+    // toISOString() is UTC; ankeren op 12:00 lokaal zorgt dat de datum de
+    // UTC-conversie overleeft voor UTC+1/+2 — niet "versimpelen" naar middernacht.
     const nextDate = (() => {
       const d = new Date(`${tw.date}T12:00:00`);
       d.setDate(d.getDate() + 1);
@@ -217,8 +219,8 @@ export default function ModelPluim({ hourly, sunrise, sunset, pluim }: Props) {
           {thunderRect && (
             <g>
               <rect x={thunderRect.x} y={PT} width={thunderRect.w} height={TEMP_H + GAP + PREC_H} fill="#f59e0b" opacity="0.12" />
-              <line x1={thunderRect.x} y1={PT} x2={thunderRect.x + thunderRect.w} y2={PT} stroke="#f59e0b" strokeWidth="2" opacity="0.7" />
-              {thunderRect.w > 70 && (
+              <line x1={thunderRect.x} y1={PT - 1} x2={thunderRect.x + thunderRect.w} y2={PT - 1} stroke="#f59e0b" strokeWidth="2" opacity="0.7" />
+              {thunderRect.w > 30 && (
                 <text x={thunderRect.x + thunderRect.w / 2} y={PT + 11} fill="#b45309" fontSize="8" fontWeight="800" textAnchor="middle" fontFamily="ui-sans-serif, system-ui, sans-serif">
                   ⚡ VERHOOGDE ONWEERKANS
                 </text>
@@ -337,7 +339,7 @@ export default function ModelPluim({ hourly, sunrise, sunset, pluim }: Props) {
           {thunderRect && (
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-amber-400/40" />
-              <span>Onweerkans</span>
+              <span>Verhoogde onweerkans</span>
             </div>
           )}
         </div>
