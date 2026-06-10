@@ -53,6 +53,19 @@ function TeamName({ code }) {
   return <span>{team ? team.name : code}</span>;
 }
 
+/* Ranglijst toont alleen de voornaam ("Melissa"); pas bij twee dezelfde voornamen
+   komt er een achternaam-initiaal bij ("Rowan H."). Volledige naam blijft op de
+   eigen kaart, het account en in de WhatsApp-tekst staan. */
+function shortName(name, allNames) {
+  const parts = String(name || '').trim().split(/\s+/);
+  const first = parts[0] || '';
+  const dubbel = (allNames || []).filter((n) =>
+    (String(n || '').trim().split(/\s+/)[0] || '').toLowerCase() === first.toLowerCase()
+  ).length > 1;
+  if (!dubbel || parts.length < 2) return first;
+  return first + ' ' + parts[parts.length - 1][0].toUpperCase() + '.';
+}
+
 // ---------- Weericoon (SVG) ----------
 function WeatherIcon({ c, size = 18 }) {
   const s = size;
@@ -127,7 +140,7 @@ function Icon({ name, size = 22, stroke = 'currentColor' }) {
 }
 
 function Delta({ d }) {
-  if (d === 0) return <span className="delta delta-flat">—</span>;
+  if (d === 0) return null;
   const up = d > 0;
   return <span className={'delta ' + (up ? 'delta-up' : 'delta-down') + (Math.abs(d) >= 3 ? ' delta-jump' : '')}
     title={up ? `${d} plekken gestegen` : `${Math.abs(d)} plekken gezakt`}>
@@ -152,4 +165,4 @@ function StatTile({ label, value, accent, sub }) {
   );
 }
 
-Object.assign(window, { Flag, TeamName, WeatherIcon, WeatherChip, Avatar, Icon, Delta, GroupBadge, StatTile });
+Object.assign(window, { Flag, TeamName, shortName, WeatherIcon, WeatherChip, Avatar, Icon, Delta, GroupBadge, StatTile });

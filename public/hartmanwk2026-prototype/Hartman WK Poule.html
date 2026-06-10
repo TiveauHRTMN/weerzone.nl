@@ -266,7 +266,7 @@
   /* ---------- Stand: tabel ---------- */
   .table { overflow: hidden; }
   .trow {
-    display: grid; grid-template-columns: 46px 1fr 52px 52px 58px; align-items: center;
+    display: grid; grid-template-columns: 46px 1fr 70px; align-items: center;
     padding: 10px 14px; border-bottom: 1px solid var(--line-soft); font-size: .92rem;
   }
   .trow:last-child { border-bottom: none; }
@@ -648,12 +648,9 @@
     .match-body .team-h { grid-column: 1; grid-row: 1; justify-content: flex-start; text-align: left; }
     .match-body .team-a { grid-column: 2; grid-row: 1; justify-content: flex-end; text-align: right; }
     .match-body .score-zone { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
-    /* Smal scherm: laat de voltreffers-kolom weg zodat namen en koppen ruimte houden. */
-    .trow { grid-template-columns: 34px minmax(0, 1fr) 50px 56px; }
-    .trow .c-exact { display: none; }
+    .trow { grid-template-columns: 38px minmax(0, 1fr) 60px; }
     .thead { letter-spacing: .05em; }
-    .c-name .c-name-n { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow-wrap: anywhere; line-height: 1.2; font-size: .86rem; }
-    .c-rond { font-size: .78rem; }
+    .c-name .c-name-n { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow-wrap: anywhere; line-height: 1.2; }
     .pod-name { font-size: .76rem; -webkit-line-clamp: 3; }
     .tab span { font-size: .68rem; }
     .tab { padding: 8px 2px; }
