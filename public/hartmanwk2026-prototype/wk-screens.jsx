@@ -40,7 +40,10 @@ function MatchCard({ m, pred, setPred }) {
   const live = m.status === 'live';
   const open = m.status === 'open';
   const locked = isPredictionLocked(m);
-  const canPredict = open && !locked;
+  // Knock-out: zolang de teams nog plaatshouders zijn ("Winnaar Poule C") valt er
+  // niets te voorspellen; de FIFA-sync vult ze vanzelf in na de groepsfase.
+  const teamsKnown = !!(T[m.h] && T[m.a]);
+  const canPredict = open && !locked && teamsKnown;
   const p = pred || [null, null];
   const hasPred = p[0] !== null && p[0] !== undefined;
 
@@ -75,13 +78,14 @@ function MatchCard({ m, pred, setPred }) {
             </div>
           ) : (
             <div className="predict">
-              <ScoreBox value={p[0]} disabled={locked} onChange={(x) => setPred(m.id, [x, p[1] ?? 0])} />
+              <ScoreBox value={p[0]} disabled={!canPredict} onChange={(x) => setPred(m.id, [x, p[1] ?? 0])} />
               <span className="rdash">-</span>
-              <ScoreBox value={p[1]} disabled={locked} onChange={(x) => setPred(m.id, [p[0] ?? 0, x])} />
+              <ScoreBox value={p[1]} disabled={!canPredict} onChange={(x) => setPred(m.id, [p[0] ?? 0, x])} />
             </div>
           )}
           {live && <span className="liveflag"><span className="livedot" />live {m.min}'</span>}
           {canPredict && <span className="openflag">sluit {m.time}</span>}
+          {open && !locked && !teamsKnown && <span className="openflag">teams nog niet bekend</span>}
           {locked && <span className="lockflag">gesloten sinds {m.time}</span>}
         </div>
 
@@ -97,6 +101,8 @@ function MatchCard({ m, pred, setPred }) {
             ? <>Jouw inzet: <strong>{p[0] ?? '–'}-{p[1] ?? '–'}</strong></>
             : locked
               ? <>Deadline: <strong>{deadlineLabel(m)}</strong></>
+            : !teamsKnown
+              ? <>De teams volgen vanzelf uit de groepsfase.</>
             : hasPred
               ? <>Voorspeld: <strong>{p[0]}-{p[1]}</strong></>
               : <span className="todo-text">Nog niet voorspeld</span>}
@@ -367,14 +373,15 @@ function WedstrijdenScreen({ preds, setPred, playerPick, onPlayerPick, players, 
   ];
   const match = (m) => {
     if (filter === 'alles') return true;
-    if (filter === 'open') return m.status === 'open';
+    if (filter === 'open') return m.status === 'open' && W.T[m.h] && W.T[m.a]; // zonder bekende teams valt er niets te voorspellen
     if (filter === 'NED') return m.h === 'NED' || m.a === 'NED';
     if (filter[0] === 'g') return m.gid === filter.slice(1);
     return true;
   };
-  const groupMatches = W.matches.filter((m) => m.gid !== 'KO');
-  const filled = groupMatches.filter((m) => { const p = preds[m.id]; return p && p[0] != null && p[1] != null; }).length;
-  const total = groupMatches.length;
+  // Groepswedstrijden + de knock-outwedstrijden waarvan de teams al bekend zijn.
+  const predictable = W.matches.filter((m) => m.gid !== 'KO' || (W.T[m.h] && W.T[m.a]));
+  const filled = predictable.filter((m) => { const p = preds[m.id]; return p && p[0] != null && p[1] != null; }).length;
+  const total = predictable.length;
   const pct = total ? Math.round((filled / total) * 100) : 0;
   const hasPlayer = !!(playerPick && playerPick.trim());
   const complete = filled === total && hasPlayer;
@@ -392,7 +399,7 @@ function WedstrijdenScreen({ preds, setPred, playerPick, onPlayerPick, players, 
           <div className="progress-pct">{pct}%</div>
         </div>
         <div className="progress-bar"><span style={{ width: pct + '%' }} /></div>
-        <p className="progress-note">Elke wedstrijd kun je voorspellen tot de aftrap; daarna sluit alleen díe wedstrijd. Je sterspeler ligt vast vanaf de eerste aftrap (11 juni 21:00).</p>
+        <p className="progress-note">Elke wedstrijd kun je voorspellen tot de aftrap; daarna sluit alleen díe wedstrijd. Je sterspeler ligt vast vanaf de eerste aftrap (11 juni 21:00). De knock-outwedstrijden komen er vanzelf bij zodra de teams bekend zijn.</p>
       </div>
 
       <div className="chips">

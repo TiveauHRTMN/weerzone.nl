@@ -11,6 +11,8 @@ import {
   HARTMANWK_PLAYER_STATS_TABLE,
   HARTMANWK_MEMBERS_TABLE,
   HARTMANWK_PLAYERS_TABLE,
+  HARTMANWK_KO_TEAMS_TABLE,
+  isKnockoutMatchId,
   normalizePlayerKey,
 } from "@/lib/hartmanwk";
 import { HARTMANWK_GROUP_MATCHES } from "@/lib/hartmanwk-matches";
@@ -126,10 +128,10 @@ export async function syncSquads(admin: ReturnType<typeof createSupabaseAdminCli
   return rows.length;
 }
 
-export type HartmanWkSyncResult = { results: number; players: number; finished: number };
+export type HartmanWkSyncResult = { results: number; players: number; finished: number; koTeams: number };
 
 /**
- * Volledige sync: uitslagen + (voor de gekozen sterspelers) statjes.
+ * Volledige sync: uitslagen + KO-teams + (voor de gekozen sterspelers) statjes.
  * Idempotent — herberekent uit FIFA en upsert. Onmatchbare spelers worden NIET
  * overschreven, zodat een handmatige correctie in /beheer blijft staan.
  */
@@ -138,18 +140,19 @@ export async function runHartmanWkFifaSync(): Promise<HartmanWkSyncResult> {
 
   const data = await fifaGet(`/calendar/matches?idCompetition=${ID_COMPETITION}&idSeason=${ID_SEASON}&count=200&language=en`);
   const all = (data.Results as Record<string, unknown>[]) || [];
-  const finished = all.filter((m) => {
-    const grp = m.GroupName as unknown[] | undefined;
-    return Array.isArray(grp) && grp.length > 0 && m.MatchStatus === 0 && m.HomeTeamScore != null && m.AwayTeamScore != null;
-  });
+  const finished = all.filter(
+    (m) => m.MatchStatus === 0 && m.HomeTeamScore != null && m.AwayTeamScore != null,
+  );
 
-  // 1) Uitslagen → onze 72 groepswedstrijden via landcodes.
+  // 1) Uitslagen. Groepswedstrijden matchen op landcodes; knock-out direct op
+  //    FIFA's MatchNumber (73..104), dat 1-op-1 onze wedstrijd-id's zijn.
   const now = new Date().toISOString();
   const resultRows: { match_id: string; home: number; away: number; updated_at: string }[] = [];
   for (const m of finished) {
     const home = (m.Home as Record<string, unknown>)?.IdCountry as string;
     const away = (m.Away as Record<string, unknown>)?.IdCountry as string;
-    let id = localByPair.get(`${home}|${away}`);
+    const matchNumber = String(m.MatchNumber ?? "");
+    let id = isKnockoutMatchId(matchNumber) ? matchNumber : localByPair.get(`${home}|${away}`);
     let h = m.HomeTeamScore as number;
     let a = m.AwayTeamScore as number;
     if (!id) {
@@ -160,6 +163,23 @@ export async function runHartmanWkFifaSync(): Promise<HartmanWkSyncResult> {
   }
   if (resultRows.length) {
     await admin.from(HARTMANWK_RESULTS_TABLE).upsert(resultRows, { onConflict: "match_id" });
+  }
+
+  // 1b) Knock-out-teams: zodra FIFA de echte landen in het KO-schema zet
+  //     (winnaars/nummers 2 + de doorgerekende beste nummers 3) nemen wij ze over,
+  //     zodat de bracket in de app zichzelf invult.
+  const koRows: { match_id: string; home: string; away: string; updated_at: string }[] = [];
+  for (const m of all) {
+    const matchNumber = String(m.MatchNumber ?? "");
+    if (!isKnockoutMatchId(matchNumber)) continue;
+    const home = (m.Home as Record<string, unknown>)?.IdCountry as string | undefined;
+    const away = (m.Away as Record<string, unknown>)?.IdCountry as string | undefined;
+    if (home && away) koRows.push({ match_id: matchNumber, home, away, updated_at: now });
+  }
+  if (koRows.length) {
+    const { error } = await admin.from(HARTMANWK_KO_TEAMS_TABLE).upsert(koRows, { onConflict: "match_id" });
+    // Tabel nog niet aangemaakt (migratie 20260610) → sync niet laten falen.
+    if (error) console.error("Hartman WK KO-teams write error:", error.message);
   }
 
   // 2) Statjes — voor de gekozen sterspelers, bij voorkeur exact op FIFA-ID,
@@ -210,5 +230,5 @@ export async function runHartmanWkFifaSync(): Promise<HartmanWkSyncResult> {
     }
   }
 
-  return { results: resultRows.length, players: playerRows.length, finished: finished.length };
+  return { results: resultRows.length, players: playerRows.length, finished: finished.length, koTeams: koRows.length };
 }

@@ -152,7 +152,7 @@ function Delta({ d }) {
 
 // ---------- Groepsbadge ----------
 function GroupBadge({ id, soft }) {
-  return <span className={'gbadge' + (soft ? ' gbadge-soft' : '')}>{'Poule ' + id}</span>;
+  return <span className={'gbadge' + (soft ? ' gbadge-soft' : '')}>{id === 'KO' ? 'Knock-out' : 'Poule ' + id}</span>;
 }
 
 // ---------- Statistiektegel ----------
