@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { runHartmanWkFifaSync } from "@/lib/hartmanwk-fifa";
+import { isInHartmanWkMatchWindow } from "@/lib/hartmanwk-matches";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -20,6 +21,17 @@ export async function GET(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  // De cron vuurt elke 10 minuten, maar syncen heeft alleen zin rond een
+  // wedstrijd (aftrap tot 4 uur erna — de tijden staan in hartmanwk-matches).
+  // Buiten die vensters één vangnet-run per 2 uur, plus altijd via ?force=1.
+  const now = new Date();
+  const force = request.nextUrl.searchParams.get("force") === "1";
+  const baseline = now.getUTCMinutes() < 10 && now.getUTCHours() % 2 === 0;
+  if (!force && !isInHartmanWkMatchWindow(now) && !baseline) {
+    return NextResponse.json({ ok: true, skipped: "geen wedstrijd bezig of net afgelopen" });
+  }
+
   try {
     const result = await runHartmanWkFifaSync();
     return NextResponse.json({ ok: true, ...result });

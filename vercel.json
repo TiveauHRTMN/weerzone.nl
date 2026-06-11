@@ -29,12 +29,16 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/cron/reed-alert-email",
+      "schedule": "*/30 * * * *"
+    },
+    {
       "path": "/api/cron/indexnow-ping",
       "schedule": "0 5 * * *"
     },
     {
       "path": "/api/cron/hartmanwk-sync",
-      "schedule": "0 */2 * * *"
+      "schedule": "*/10 * * * *"
     }
   ]
 }

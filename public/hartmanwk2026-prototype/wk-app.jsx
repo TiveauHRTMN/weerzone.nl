@@ -95,6 +95,37 @@ function loadSession() {
   }
 }
 
+/* Cookie-vangnet naast localStorage: Android gooit localStorage soms weg,
+   en dan zou je opnieuw moeten "aanmelden". De cookie (1 jaar) bewaart alleen
+   memberId + contact; het volledige profiel halen we dan op via /login. */
+const SESSION_COOKIE = 'hartmanwk2026_session';
+
+function readSessionCookie() {
+  try {
+    const hit = document.cookie.split('; ').find((c) => c.indexOf(SESSION_COOKIE + '=') === 0);
+    return hit ? JSON.parse(decodeURIComponent(hit.slice(SESSION_COOKIE.length + 1))) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(session) {
+  window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+  try {
+    if (session && session.contact) {
+      const value = encodeURIComponent(JSON.stringify({ memberId: session.memberId || null, contact: session.contact }));
+      document.cookie = `${SESSION_COOKIE}=${value}; max-age=31536000; path=/; SameSite=Lax`;
+    }
+  } catch { /* cookies uit: localStorage blijft werken */ }
+}
+
+function clearSession() {
+  window.localStorage.removeItem(AUTH_KEY);
+  try {
+    document.cookie = `${SESSION_COOKIE}=; max-age=0; path=/`;
+  } catch { /* ignore */ }
+}
+
 /* Schone, echte toernooistart: geen demo-uitslagen of nepvoorspellingen. */
 function resetTournamentState() {
   window.WK.myTotal = 0;
@@ -240,6 +271,40 @@ function App() {
   applyKoTeams(koTeams);
   applyResults(results, preds);
 
+  // Vangnet: localStorage leeg maar sessie-cookie aanwezig (bijv. na een
+  // opgeschoonde browser) → stil opnieuw inloggen met het bekende contact.
+  React.useEffect(() => {
+    if (account) return;
+    const saved = readSessionCookie();
+    if (!saved || !saved.contact) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/hartmanwk/login', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ contact: saved.contact }),
+        });
+        if (!res.ok || !alive) return;
+        const data = await res.json();
+        const m = data.member;
+        if (!m || !m.id) return;
+        const session = {
+          name: m.name || 'Jij',
+          contact: m.contact || saved.contact,
+          contactType: m.contactType || 'email',
+          photo: m.photo || '',
+          joinedAt: m.joinedAt || new Date().toISOString(),
+          memberId: m.id,
+        };
+        saveSession(session);
+        setAccount(session);
+        if (Array.isArray(data.members)) setMembers(data.members);
+      } catch { /* dan gewoon het loginscherm */ }
+    })();
+    return () => { alive = false; };
+  }, [account ? 'in' : 'uit']);
+
   // Houd de gedeelde deelnemerslijst actueel: bij binnenkomst ophalen, daarna
   // elke 15s verversen zodat nieuw aangemelde familie vanzelf verschijnt. Heeft
   // de sessie nog geen server-id (oude lokale login), dan eerst stil aanmelden.
@@ -270,7 +335,7 @@ function App() {
             if (!alive) return;
             if (data.member && data.member.id) {
               const next = { ...account, memberId: data.member.id, contact: data.member.contact || account.contact };
-              window.localStorage.setItem(AUTH_KEY, JSON.stringify(next));
+              saveSession(next);
               setAccount(next);
             }
             if (Array.isArray(data.members)) setMembers(data.members);
@@ -341,8 +406,17 @@ function App() {
       contactType: nextAccount.contactType,
       photo: nextAccount.photo || '',
       joinedAt: nextAccount.joinedAt || new Date().toISOString(),
-      memberId: null,
+      memberId: nextAccount.memberId || null,
     };
+
+    // Bestaande deelnemer via /login: account is er al, dus niets aanmaken.
+    if (session.memberId) {
+      if (Array.isArray(nextAccount.members)) setMembers(nextAccount.members);
+      saveSession(session);
+      setAccount(session);
+      setTab('stand');
+      return;
+    }
 
     // Meld aan bij de gedeelde lijst. Een echte invoerfout (4xx) tonen we; een
     // tijdelijke serverstoring (5xx/offline) mag het inloggen nooit blokkeren —
@@ -370,13 +444,13 @@ function App() {
       // offline of serverstoring: ga lokaal door, sync volgt vanzelf.
     }
 
-    window.localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+    saveSession(session);
     setAccount(session);
     setTab('stand');
   };
 
   const handleLogout = () => {
-    window.localStorage.removeItem(AUTH_KEY);
+    clearSession();
     setMembers([]);
     setAccount(null);
     setTab('stand');
@@ -385,7 +459,7 @@ function App() {
   const handleUpdateAccount = (patch) => {
     setAccount((current) => {
       const next = { ...current, ...patch };
-      window.localStorage.setItem(AUTH_KEY, JSON.stringify(next));
+      saveSession(next);
       // Een nieuwe foto ook in de gedeelde lijst zetten, zodat familie 'm ziet.
       if (patch.photo && next.contact) {
         fetch(JOIN_URL, {

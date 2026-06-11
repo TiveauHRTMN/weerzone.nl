@@ -119,3 +119,17 @@ export function isMatchStarted(matchId: string, now: Date = new Date()): boolean
 
 /** Alias voor bestaande aanroepen die alleen groepswedstrijden checken. */
 export const isGroupMatchStarted = isMatchStarted;
+
+// De FIFA-sync hoeft alleen te draaien als er iets kán veranderen: vanaf de
+// aftrap tot 4 uur erna (ruim genoeg voor verlenging + strafschoppen en een
+// trage publicatie van de uitslag).
+const SYNC_WINDOW_AFTER_KICKOFF_MS = 4 * 60 * 60 * 1000;
+
+/** Is er nu een wedstrijd bezig of net afgelopen (aftrap tot 4 uur erna)? */
+export function isInHartmanWkMatchWindow(now: Date = new Date()): boolean {
+  const t = now.getTime();
+  for (const kickoff of KICKOFF_MS_BY_ID.values()) {
+    if (t >= kickoff && t <= kickoff + SYNC_WINDOW_AFTER_KICKOFF_MS) return true;
+  }
+  return false;
+}

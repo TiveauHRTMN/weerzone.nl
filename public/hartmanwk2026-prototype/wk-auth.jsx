@@ -79,11 +79,61 @@ function LoginScreen({ onLogin }) {
   const [contactError, setContactError] = useAuthState('');
   const [photoError, setPhotoError] = useAuthState('');
   const [submitting, setSubmitting] = useAuthState(false);
+  // Eerst alleen e-mail/telefoonnummer vragen: wie al meedoet is daarmee direct
+  // binnen (zelfde account, ook op een ander toestel of in een andere browser).
+  // Pas als het contact onbekend is, verschijnen naam + foto voor een nieuw lid.
+  const [isNew, setIsNew] = useAuthState(false);
   const hasInvite = new URLSearchParams(window.location.search).has('uitnodiging');
 
   const submit = async (e) => {
     e.preventDefault();
     if (submitting) return;
+    const raw = contact.trim();
+    const type = accessType(raw);
+    if (!type) {
+      setContactError('Gebruik een geldig e-mailadres of telefoonnummer.');
+      return;
+    }
+    const normalized = type === 'phone' ? normalizePhone(raw) : raw;
+
+    if (!isNew) {
+      // Stap 1: bestaand account? Dan meteen door, zonder nieuw account.
+      setSubmitting(true);
+      try {
+        const res = await fetch('/api/hartmanwk/login', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ contact: normalized }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const m = data.member || {};
+          await onLogin({
+            memberId: m.id || null,
+            name: m.name || '',
+            contact: m.contact || normalized,
+            contactType: m.contactType || type,
+            photo: m.photo || '',
+            joinedAt: m.joinedAt || new Date().toISOString(),
+            members: Array.isArray(data.members) ? data.members : null,
+          });
+          return;
+        }
+        if (res.status === 404) {
+          setIsNew(true);
+          setSubmitting(false);
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        setContactError(data.error || 'Inloggen lukte even niet. Probeer het opnieuw.');
+      } catch {
+        setContactError('Geen verbinding. Probeer het opnieuw.');
+      }
+      setSubmitting(false);
+      return;
+    }
+
+    // Stap 2: nieuw lid — naam en foto erbij.
     const fullName = cleanName(name);
     if (!isFullName(fullName)) {
       setNameError('Vul je echte voor- en achternaam in.');
@@ -93,17 +143,11 @@ function LoginScreen({ onLogin }) {
       setPhotoError('Voeg een herkenbare profielfoto toe.');
       return;
     }
-    const raw = contact.trim();
-    const type = accessType(raw);
-    if (!type) {
-      setContactError('Gebruik een geldig e-mailadres of telefoonnummer.');
-      return;
-    }
     setSubmitting(true);
     try {
       await onLogin({
         name: fullName,
-        contact: type === 'phone' ? normalizePhone(raw) : raw,
+        contact: normalized,
         contactType: type,
         photo,
         joinedAt: new Date().toISOString(),
@@ -126,7 +170,11 @@ function LoginScreen({ onLogin }) {
           <div className="auth-flagbar" />
         </div>
         <p className="auth-intro">
-          {hasInvite ? 'Je bent uitgenodigd voor de Hartman WK Poule. Vul je echte naam en e-mail of telefoonnummer in.' : 'Meedoen is simpel. Vul je echte naam en e-mail of telefoonnummer in, dan zit je direct in de poule.'}
+          {isNew
+            ? 'Dit e-mailadres of telefoonnummer kennen we nog niet. Vul je echte naam in en kies een foto, dan zit je direct in de poule.'
+            : hasInvite
+              ? 'Je bent uitgenodigd voor de Hartman WK Poule. Vul je e-mail of telefoonnummer in — doe je al mee, dan ben je direct binnen.'
+              : 'Vul je e-mail of telefoonnummer in. Doe je al mee, dan ben je direct binnen — nieuw? Dan vragen we daarna je naam en een foto.'}
         </p>
         <div className="auth-mini">
           <span>WK 2026</span>
@@ -134,31 +182,35 @@ function LoginScreen({ onLogin }) {
         </div>
 
         <div className="auth-form">
-          <label className={'photo-field' + (photoError ? ' field-error' : '')}>
-            <span className="field-label">Profielfoto</span>
-            <span className="photo-picker">
-              <span className="photo-preview">{photo ? <img src={photo} alt="" /> : 'Foto'}</span>
-              <span className="photo-copy">
-                <strong>Voeg een herkenbare foto toe</strong>
-                <em>Dan ziet iedereen meteen wie er bovenaan staat.</em>
-              </span>
-            </span>
-            <input type="file" accept="image/*" onChange={(e) => {
-              const file = e.target.files && e.target.files[0];
-              readProfilePhoto(file, (next) => { setPhoto(next); setPhotoError(''); }, setPhotoError);
-            }} />
-            {photoError && <span className="field-msg">{photoError}</span>}
-          </label>
-          <Field label="Voor- en achternaam" value={name} onChange={(v) => { setName(v); setNameError(''); }}
-            placeholder="Bijv. Jan Hartman" autoComplete="name" error={nameError} />
           <Field label="E-mail of telefoonnummer" type="text" value={contact}
             onChange={(v) => { setContact(v); setContactError(''); }}
             placeholder="e-mail of telefoonnummer"
             autoComplete="email"
             error={contactError} />
+          {isNew && (
+            <React.Fragment>
+              <label className={'photo-field' + (photoError ? ' field-error' : '')}>
+                <span className="field-label">Profielfoto</span>
+                <span className="photo-picker">
+                  <span className="photo-preview">{photo ? <img src={photo} alt="" /> : 'Foto'}</span>
+                  <span className="photo-copy">
+                    <strong>Voeg een herkenbare foto toe</strong>
+                    <em>Dan ziet iedereen meteen wie er bovenaan staat.</em>
+                  </span>
+                </span>
+                <input type="file" accept="image/*" onChange={(e) => {
+                  const file = e.target.files && e.target.files[0];
+                  readProfilePhoto(file, (next) => { setPhoto(next); setPhotoError(''); }, setPhotoError);
+                }} />
+                {photoError && <span className="field-msg">{photoError}</span>}
+              </label>
+              <Field label="Voor- en achternaam" value={name} onChange={(v) => { setName(v); setNameError(''); }}
+                placeholder="Bijv. Jan Hartman" autoComplete="name" error={nameError} />
+            </React.Fragment>
+          )}
         </div>
 
-        <button className="auth-submit" type="submit" disabled={submitting}>{submitting ? 'Bezig…' : 'Naar de poule'}</button>
+        <button className="auth-submit" type="submit" disabled={submitting}>{submitting ? 'Bezig…' : isNew ? 'Meedoen aan de poule' : 'Naar de poule'}</button>
         <div className="auth-note">Geen wachtwoord nodig. Uitloggen kan via Account.</div>
       </form>
     </div>
