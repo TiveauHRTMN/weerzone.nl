@@ -167,6 +167,7 @@ function buildPeople(members, account) {
     d: 0,
     exact: m.exact || 0,
     rond: m.rond || 0,
+    fantasy: m.fantasyPoints || 0,
     player: m.player || null,
     me: isMe(m),
   }));
@@ -213,6 +214,13 @@ function applyResults(results, preds) {
   if (window.WK.standings && window.WK.tables) {
     window.WK.groups.forEach((g) => { window.WK.tables[g.id] = window.WK.standings(g.id); });
   }
+  // "Deze ronde" op de eigen kaart: mijn punten uit de laatste speelronde
+  // waarin al een wedstrijd gespeeld is (groep 1-3, daarna knock-outrondes).
+  const done = window.WK.matches.filter((m) => m.status === 'done' && m.round);
+  const currentRound = done.length ? Math.max(...done.map((m) => m.round)) : 0;
+  window.WK.myRond = done
+    .filter((m) => m.round === currentRound)
+    .reduce((sum, m) => sum + (m.pts || 0), 0);
 }
 
 function App() {

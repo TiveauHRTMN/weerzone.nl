@@ -219,7 +219,7 @@ function LoginScreen({ onLogin }) {
 
 function AccountScreen({ account, onLogout, onBack, onUpdateAccount }) {
   const me = window.WK.people.find((p) => p.me);
-  const myRank = window.WK.people.indexOf(me) + 1;
+  const myRank = sharedRanks(window.WK.people)[window.WK.people.indexOf(me)];
   const [meld, setMeld] = useAuthState(true);
   const [herinner, setHerinner] = useAuthState(true);
   const [shareStatus, setShareStatus] = useAuthState('');
