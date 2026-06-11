@@ -314,12 +314,11 @@ async function buildStandShareImage(ppl) {
   // Profielfoto's vooraf laden (data-URLs, dus direct beschikbaar).
   const photos = await Promise.all(rows.map((p) => loadShareImage(p.photo)));
   const allNames = ppl.map((q) => q.name);
-  const ranks = sharedRanks(ppl);
   const medal = { 1: '#FFC53D', 2: '#C9D1DB', 3: '#D08A4E' };
 
   rows.forEach((p, i) => {
     const y = headerH + i * rowH;
-    const rank = ranks[i];
+    const rank = i + 1;
 
     // Rijkaart (eigen rij krijgt een accentrandje).
     ctx.fillStyle = '#23272E';
@@ -386,8 +385,7 @@ function StandScreen() {
   const W = window.WK;
   const ppl = W.people;
   const me = ppl.find((p) => p.me);
-  const ranks = sharedRanks(ppl);
-  const myRank = ranks[ppl.indexOf(me)];
+  const myRank = ppl.indexOf(me) + 1;
   const podium = ppl.slice(0, 3);
   const order = [podium[1], podium[0], podium[2]];
   const hasRealStand = ppl.length > 1;
@@ -397,7 +395,7 @@ function StandScreen() {
   const shareLines = [
     `Hartman WK 2026 Poule - avondstand (${ppl.length} deelnemer${ppl.length === 1 ? '' : 's'})`,
     '',
-    ...ppl.map((p, i) => `${ranks[i]}. ${p.name} - ${p.pts} punten${p.d ? ` (${p.d > 0 ? '+' : ''}${p.d} plek${Math.abs(p.d) === 1 ? '' : 'ken'})` : ''}`),
+    ...ppl.map((p, i) => `${i + 1}. ${p.name} - ${p.pts} punten${p.d ? ` (${p.d > 0 ? '+' : ''}${p.d} plek${Math.abs(p.d) === 1 ? '' : 'ken'})` : ''}`),
     '',
     `Jouw plek: ${myRank}e met ${me.pts} punten`,
     movers.length ? `Beweging: ${movers.slice(0, 4).map((p) => `${p.name} ${p.d > 0 ? '+' : ''}${p.d}`).join(', ')}` : 'Beweging: nog geen stijgers of dalers',
@@ -501,7 +499,7 @@ function StandScreen() {
         </div>
         {ppl.map((pp, i) => (
           <div key={pp.name} style={{ animationDelay: (Math.min(i, 12) * 45) + 'ms' }} className={'trow' + (pp.me ? ' trow-me' : '') + (pp.d > 0 ? ' trow-rise' : pp.d < 0 ? ' trow-fall' : ' trow-in') + (Math.abs(pp.d) >= 3 ? ' trow-bigjump' : '')}>
-            <span className="c-rank">{ranks[i]}<Delta d={pp.d} /></span>
+            <span className="c-rank">{i + 1}<Delta d={pp.d} /></span>
             <span className="c-name"><Avatar name={pp.name} me={pp.me} photo={pp.photo} size={30} /><span className="c-name-txt"><span className="c-name-n">{shortName(pp.name, ppl.map((q) => q.name))}</span>{pp.player && <span className="c-name-p">★ {pp.player}</span>}</span></span>
             <span className="c-pts">{pp.pts}</span>
           </div>

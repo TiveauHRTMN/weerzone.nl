@@ -165,14 +165,4 @@ function StatTile({ label, value, accent, sub }) {
   );
 }
 
-/* Gedeelde rang bij gelijke punten: wie samen op 75 staat, staat samen 1e
-   (de alfabetische tabelvolgorde bepaalt dan niet langer je rangnummer). */
-function sharedRanks(ppl) {
-  let lastPts = null, rank = 0;
-  return ppl.map((p, i) => {
-    if (p.pts !== lastPts) { rank = i + 1; lastPts = p.pts; }
-    return rank;
-  });
-}
-
-Object.assign(window, { Flag, TeamName, shortName, sharedRanks, WeatherIcon, WeatherChip, Avatar, Icon, Delta, GroupBadge, StatTile });
+Object.assign(window, { Flag, TeamName, shortName, WeatherIcon, WeatherChip, Avatar, Icon, Delta, GroupBadge, StatTile });
