@@ -34,7 +34,9 @@ function nextOpen() {
 }
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  // Nederlandse kalenderdag (het speelschema staat in NL-tijd). toISOString()
+  // is UTC en bleef tot 02:00 's nachts op de vorige dag hangen.
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' });
 }
 
 function matchesOn(date) {
