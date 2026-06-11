@@ -243,6 +243,143 @@ function PlayerPickCard({ playerPick, onPlayerPick, players, locked }) {
   );
 }
 
+// ---------- Ranglijst als deelbare afbeelding (zelfde stijl als de poule) ----------
+const SHARE_PALETTE = ['#1E83C8', '#2E9E8F', '#C77D2E', '#7A6BD6', '#C25B7E', '#3E8E5A', '#5E89B0'];
+
+function shareAvatarColor(name, me) {
+  if (me) return '#3B8EEA';
+  const clean = (name || '').replace(/\(.*?\)/g, '').trim();
+  let hash = 0; for (let i = 0; i < clean.length; i++) hash = clean.charCodeAt(i) + ((hash << 5) - hash);
+  return SHARE_PALETTE[Math.abs(hash) % SHARE_PALETTE.length];
+}
+
+function loadShareImage(src) {
+  return new Promise((resolve) => {
+    if (!src) { resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+function shareRoundRect(ctx, x, y, w, h, r) {
+  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+  else { ctx.beginPath(); ctx.rect(x, y, w, h); }
+}
+
+async function buildStandShareImage(ppl) {
+  const W = 1080;
+  const PAD = 72;
+  const headerH = 330;
+  const rowH = 104;
+  const rows = ppl.slice(0, 12);
+  const footerH = 140;
+  const H = headerH + rows.length * rowH + footerH;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  try { await document.fonts.ready; } catch { /* systeemfont is prima */ }
+  const F = "'Inter', system-ui, sans-serif";
+
+  // Donkere poule-achtergrond met een zachte blauw→rood gloed.
+  ctx.fillStyle = '#0D0F12'; ctx.fillRect(0, 0, W, H);
+  const glow = ctx.createLinearGradient(0, 0, W, H);
+  glow.addColorStop(0, 'rgba(59,142,234,.12)');
+  glow.addColorStop(.5, 'rgba(0,0,0,0)');
+  glow.addColorStop(1, 'rgba(255,0,48,.10)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+  // Kop: kicker / HARTMAN / WK 2026 POULE / rood balkje — zoals het loginscherm.
+  const spacing = (px) => { try { ctx.letterSpacing = px; } catch { /* oudere browser */ } };
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#3B8EEA'; ctx.font = '800 28px ' + F; spacing('5px');
+  ctx.fillText('BESLOTEN FAMILIEPOULE', PAD, 112);
+  spacing('0px');
+  ctx.fillStyle = '#FFFFFF'; ctx.font = '900 96px ' + F;
+  ctx.fillText('HARTMAN', PAD - 4, 212);
+  ctx.fillStyle = '#FF0030'; ctx.font = '700 36px ' + F; spacing('9px');
+  ctx.fillText('WK 2026 POULE', PAD, 266);
+  spacing('0px');
+  ctx.fillStyle = '#FF0030';
+  shareRoundRect(ctx, PAD, 290, 112, 8, 4); ctx.fill();
+
+  // Datum rechtsboven.
+  const datum = new Date().toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'long' });
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '600 27px ' + F; ctx.textAlign = 'right';
+  ctx.fillText('Stand · ' + datum, W - PAD, 112);
+  ctx.textAlign = 'left';
+
+  // Profielfoto's vooraf laden (data-URLs, dus direct beschikbaar).
+  const photos = await Promise.all(rows.map((p) => loadShareImage(p.photo)));
+  const allNames = ppl.map((q) => q.name);
+  const medal = { 1: '#FFC53D', 2: '#C9D1DB', 3: '#D08A4E' };
+
+  rows.forEach((p, i) => {
+    const y = headerH + i * rowH;
+    const rank = i + 1;
+
+    // Rijkaart (eigen rij krijgt een accentrandje).
+    ctx.fillStyle = '#23272E';
+    shareRoundRect(ctx, PAD - 16, y, W - 2 * (PAD - 16), rowH - 14, 18); ctx.fill();
+    if (p.me) {
+      ctx.strokeStyle = 'rgba(59,142,234,.65)'; ctx.lineWidth = 3;
+      shareRoundRect(ctx, PAD - 16, y, W - 2 * (PAD - 16), rowH - 14, 18); ctx.stroke();
+    }
+
+    const midY = y + (rowH - 14) / 2;
+
+    // Rang (podium in medailletinten).
+    ctx.fillStyle = medal[rank] || 'rgba(255,255,255,.45)';
+    ctx.font = '800 40px ' + F; ctx.textAlign = 'center';
+    ctx.fillText(String(rank), PAD + 34, midY + 14);
+    ctx.textAlign = 'left';
+
+    // Avatar: foto in een cirkel, anders initialen op kleur.
+    const ax = PAD + 90, r = 31;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(ax + r, midY, r, 0, Math.PI * 2); ctx.clip();
+    const img = photos[i];
+    if (img) {
+      const s = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, ax, midY - r, r * 2, r * 2);
+    } else {
+      ctx.fillStyle = shareAvatarColor(p.name, p.me);
+      ctx.fillRect(ax, midY - r, r * 2, r * 2);
+      const parts = (p.name || '?').trim().split(' ');
+      const initials = ((parts[0][0] || '?') + (parts[1] ? parts[1][0] : '')).toUpperCase();
+      ctx.fillStyle = '#fff'; ctx.font = '700 26px ' + F; ctx.textAlign = 'center';
+      ctx.fillText(initials, ax + r, midY + 9);
+      ctx.textAlign = 'left';
+    }
+    ctx.restore();
+
+    // Naam (zelfde korte weergave als de ranglijst).
+    ctx.fillStyle = '#FFFFFF'; ctx.font = '700 36px ' + F;
+    ctx.fillText(shortName(p.name, allNames), PAD + 172, midY + 13, W - PAD - 420);
+
+    // Punten rechts.
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#FFFFFF'; ctx.font = '800 42px ' + F;
+    ctx.fillText(String(p.pts), W - PAD - 52, midY + 14);
+    ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.font = '700 24px ' + F;
+    ctx.fillText('pt', W - PAD - 16, midY + 14);
+    ctx.textAlign = 'left';
+  });
+
+  // Voet: uitnodiging.
+  const footY = headerH + rows.length * rowH + 78;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '600 26px ' + F;
+  ctx.fillText('Meedoen of meekijken: weerzone.nl/hartmanwk2026', W / 2, footY);
+  ctx.fillStyle = '#FF0030';
+  shareRoundRect(ctx, W / 2 - 56, footY + 26, 112, 8, 4); ctx.fill();
+  ctx.textAlign = 'left';
+
+  return canvas;
+}
+
 // ---------- Stand ----------
 function StandScreen() {
   const W = window.WK;
@@ -273,6 +410,30 @@ function StandScreen() {
       setShareStatus('Kopiëren lukte niet. Selecteer de tekst handmatig.');
     }
   };
+  // Ranglijst als afbeelding in poule-stijl: delen via het deelmenu van de
+  // telefoon (WhatsApp), op desktop een download.
+  const shareStandImage = async () => {
+    try {
+      setShareStatus('Afbeelding maken…');
+      const canvas = await buildStandShareImage(ppl);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('geen blob');
+      const file = new File([blob], 'hartman-wk-poule-stand.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Hartman WK 2026 Poule' });
+        setShareStatus('Gedeeld!');
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'hartman-wk-poule-stand.png';
+        a.click();
+        setShareStatus('Afbeelding gedownload — deel hem in WhatsApp.');
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') { setShareStatus(''); return; } // deelmenu weggeklikt
+      setShareStatus('Afbeelding maken lukte niet. Probeer het opnieuw.');
+    }
+  };
   return (
     <div className="screen">
       {/* persoonlijk overzicht */}
@@ -297,10 +458,13 @@ function StandScreen() {
       <div className="stand-share card">
         <div>
           <div className="stand-share-k">WhatsApp update</div>
-          <div className="stand-share-title">Deel de avondstand</div>
-          <p>Alle {ppl.length} deelnemer{ppl.length === 1 ? '' : 's'}, inclusief punten en stijgers/dalers.</p>
+          <div className="stand-share-title">Deel de ranglijst</div>
+          <p>Als afbeelding in poule-stijl, of als tekst om te plakken.</p>
         </div>
-        <button className="stand-share-btn" type="button" onClick={copyStand}>Ranglijst kopiëren</button>
+        <div className="stand-share-btns">
+          <button className="stand-share-btn" type="button" onClick={shareStandImage}>Afbeelding delen</button>
+          <button className="stand-share-btn stand-share-btn-ghost" type="button" onClick={copyStand}>Tekst kopiëren</button>
+        </div>
         {shareStatus && <div className="stand-share-note">{shareStatus}</div>}
       </div>
 

@@ -72,7 +72,8 @@ function DayMatchesCard() {
         <div className="day-list">
           {shownMatches.map((m) => (
             <div key={m.id} className="day-row">
-              <span className="day-time">{m.time}</span>
+              {/* Na afloop vervangt de uitslag de aftraptijd (zelfde plek, zelfde accent). */}
+              <span className="day-time">{m.status === 'done' && m.result ? `${m.result[0]}–${m.result[1]}` : m.time}</span>
               <span className="day-team day-home"><Flag code={m.h} w={25} /><TeamName code={m.h} /></span>
               <span className="day-vs">–</span>
               <span className="day-team"><Flag code={m.a} w={25} /><TeamName code={m.a} /></span>
