@@ -5,8 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 
 const SWIPE_ROUTES = [
   "/",
-  "/piet",
-  "/reed",
+  "/vandaag",
+  "/morgen",
   "/over",
   "/contact",
 ];

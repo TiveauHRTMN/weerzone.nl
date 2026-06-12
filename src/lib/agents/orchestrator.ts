@@ -16,6 +16,12 @@ import {
 import { pietAgent } from "@/lib/agents/piet-agent";
 import { reedAgent } from "@/lib/agents/reed-agent";
 import { koosAgent } from "@/lib/agents/koos-agent";
+import {
+  ALL_AGENT_PREFERENCES,
+  hasActiveAgents,
+  isAgentEnabled,
+  type AgentPreferences,
+} from "@/lib/agents/preferences";
 
 export interface CoordinationInput {
   piet: AgentHeadsUp[];
@@ -29,6 +35,13 @@ export interface AgentSystemResult {
   leadAgent: WeatherAgent;
   emptyState: string;
   reports: Record<WeatherAgent, AgentReport>;
+  preferences: AgentPreferences;
+  sources: {
+    mariana: boolean;
+    tesla: boolean;
+    knmi: boolean;
+    estofex: boolean;
+  };
 }
 
 /** Categorieën die "ga lekker naar buiten" impliceren en bij gevaar wegvallen. */
@@ -42,42 +55,65 @@ const OUTDOOR_INVITE: ReadonlySet<string> = new Set(["best_moment", "going_out"]
 export function coordinate(
   input: CoordinationInput,
   now: Date,
+  preferences: AgentPreferences = ALL_AGENT_PREFERENCES,
 ): { headsUps: AgentHeadsUp[]; leadAgent: WeatherAgent } {
-  const reedDanger = input.reed.some(
+  const reedDanger = isAgentEnabled(preferences, "reed") && input.reed.some(
     (x) => x.severity === "important" || x.severity === "urgent",
   );
 
-  let piet = input.piet;
-  let koos = input.koos;
+  const reed = isAgentEnabled(preferences, "reed") ? input.reed : [];
+  let piet = isAgentEnabled(preferences, "piet") ? input.piet : [];
+  let koos = isAgentEnabled(preferences, "koos") ? input.koos : [];
   if (reedDanger) {
     piet = piet.filter((x) => !OUTDOOR_INVITE.has(x.category));
     koos = koos.filter((x) => x.category !== "going_out");
   }
 
-  const merged = filterActiveHeadsUps([...input.reed, ...piet, ...koos], now);
+  const merged = filterActiveHeadsUps([...reed, ...piet, ...koos], now);
   const headsUps = rankHeadsUps(merged);
-  const leadAgent: WeatherAgent = reedDanger ? "reed" : "piet";
+  const leadAgent: WeatherAgent = reedDanger
+    ? "reed"
+    : isAgentEnabled(preferences, "piet")
+      ? "piet"
+      : isAgentEnabled(preferences, "koos")
+        ? "koos"
+        : "reed";
   return { headsUps, leadAgent };
 }
 
 /** Draai het hele systeem voor een context. */
-export async function orchestrateAgents(ctx: AgentContext): Promise<AgentSystemResult> {
+export async function orchestrateAgents(
+  ctx: AgentContext,
+  preferences: AgentPreferences = ALL_AGENT_PREFERENCES,
+  options: { includeVoices?: boolean; koosTimeoutMs?: number; koosLocalOnly?: boolean } = {},
+): Promise<AgentSystemResult> {
+  const emptyReport = (agent: WeatherAgent): AgentReport => ({ agent, headsUps: [], voice: null });
   const [piet, reed, koos] = await Promise.all([
-    pietAgent(ctx),
-    reedAgent(ctx),
-    koosAgent(ctx),
+    isAgentEnabled(preferences, "piet") ? pietAgent(ctx, { includeVoice: options.includeVoices }) : Promise.resolve(emptyReport("piet")),
+    isAgentEnabled(preferences, "reed") ? reedAgent(ctx, { includeVoice: options.includeVoices }) : Promise.resolve(emptyReport("reed")),
+    isAgentEnabled(preferences, "koos") ? koosAgent(ctx, { includeVoice: options.includeVoices, timeoutMs: options.koosTimeoutMs, localOnly: options.koosLocalOnly }) : Promise.resolve(emptyReport("koos")),
   ]);
 
   const { headsUps, leadAgent } = coordinate(
     { piet: piet.headsUps, reed: reed.headsUps, koos: koos.headsUps },
     ctx.now,
+    preferences,
   );
 
   return {
     headsUps,
     byAgent: groupByAgent(headsUps),
     leadAgent,
-    emptyState: emptyHeadsUpResult().emptyStateMessage,
+    emptyState: hasActiveAgents(preferences)
+      ? emptyHeadsUpResult().emptyStateMessage
+      : "Je hebt alle weeragents uitgezet.",
     reports: { piet, reed, koos, steve: { agent: "steve", headsUps: [], voice: null } },
+    preferences,
+    sources: {
+      mariana: ctx.mariana !== null,
+      tesla: ctx.tesla !== null,
+      knmi: ctx.knmi.length > 0,
+      estofex: ctx.estofex !== null,
+    },
   };
 }

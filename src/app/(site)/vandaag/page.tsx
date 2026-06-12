@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Manrope } from "next/font/google";
 import DayBriefing from "@/components/DayBriefing";
-import WeatherBackdrop from "@/components/WeatherBackdrop";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES } from "@/lib/types";
 import { buildAgentContext } from "@/lib/agents/context";
 import { getAgentPreferences } from "@/lib/agents/preferences-server";
 import { fetchAirQuality } from "@/lib/weather";
 import { hreflangSelf } from "@/lib/hreflang";
+import { schemaLd, schemaWebPage } from "@/lib/schema";
 import "./vandaag-skin.css";
 
 const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
@@ -39,7 +39,7 @@ async function VandaagFlow({ name, lat, lon }: { name: string; lat: number; lon:
     withDeadline(fetchAirQuality(lat, lon), 1200, null),
   ]);
   if (!ctx) return <div className="relative z-10 mx-auto max-w-[680px] px-4 py-14"><div className="va-card p-8 text-center"><h1 className="text-2xl font-extrabold text-slate-950">De weergegevens zijn even niet beschikbaar</h1><p className="mt-2 text-sm text-slate-600">Probeer het over een moment opnieuw.</p></div></div>;
-  return <><WeatherBackdrop weatherCode={ctx.weather.current.weatherCode} isDay={ctx.weather.current.isDay} /><DayBriefing ctx={ctx} preferences={preferences} dayOffset={0} airQuality={airQuality} /></>;
+  return <DayBriefing ctx={ctx} preferences={preferences} dayOffset={0} airQuality={airQuality} />;
 }
 
 async function VandaagContent() {
@@ -49,5 +49,5 @@ async function VandaagContent() {
 }
 
 export default function VandaagPage() {
-  return <main className={`va-skin ${manrope.className}`}><Suspense fallback={<Loading />}><VandaagContent /></Suspense></main>;
+  return <><script {...schemaLd(schemaWebPage({ name: "Het weer vandaag voor jouw locatie", url: "https://weerzone.nl/vandaag", description: metadata.description as string }))} /><main className={`va-skin ${manrope.className}`}><Suspense fallback={<Loading />}><VandaagContent /></Suspense></main></>;
 }

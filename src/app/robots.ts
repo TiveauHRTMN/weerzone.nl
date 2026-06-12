@@ -18,6 +18,8 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "PerplexityBot", allow: "/" },
       // Gemini training crawler — expliciet toegelaten (pro-AI-zichtbaarheid)
       { userAgent: "Google-Extended", allow: "/" },
+      // AdSense crawler
+      { userAgent: "Mediapartners-Google", allow: "/" },
       // Training-only crawler — geblokkeerd
       { userAgent: "CCBot", disallow: "/" },
     ],

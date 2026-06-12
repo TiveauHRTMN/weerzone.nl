@@ -127,9 +127,6 @@ export default function SignupClient() {
         </>
       }
     >
-      <h1 className="h-1 mb-2">{isDE ? "Konto erstellen" : "Maak een account"}</h1>
-      <p className="t-body mb-6">{isDE ? "Kostenlos testen - keine Kreditkarte nötig." : "Gratis proberen - geen creditcard nodig."}</p>
-
       {/* TODO: Supabase Pro Custom Domain benodigd voor clean OAuth
       <WzSocialButtons onGoogle={() => handleOAuth("google")} onApple={() => handleOAuth("apple")} loading={loading} />
       <WzDivider />

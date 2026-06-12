@@ -171,6 +171,10 @@ function buildPeople(members, account) {
     rond: m.rond || 0,
     fantasy: m.fantasyPoints || 0,
     player: m.player || null,
+    // Transparantie: voorspellingen van begonnen wedstrijden (van de server),
+    // zodat iedereen elkaars inzet kan terugkijken.
+    preds: m.preds || {},
+    predCount: m.predCount || 0,
     me: isMe(m),
   }));
   const mine = list.find(isMe);

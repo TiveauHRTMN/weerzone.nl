@@ -60,12 +60,16 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/home",            destination: "/",               permanent: true },
       { source: "/homepage",        destination: "/",               permanent: true },
       { source: "/about",           destination: "/over",            permanent: true },
-      { source: "/mijnweer",        destination: "/piet",           permanent: true },
-      { source: "/mijn-weer",       destination: "/piet",           permanent: true },
-      { source: "/jouwweer",        destination: "/piet",           permanent: true },
-      { source: "/waarschuwingen",  destination: "/reed",           permanent: true },
+      { source: "/mijnweer",        destination: "/vandaag",        permanent: true },
+      { source: "/mijn-weer",       destination: "/vandaag",        permanent: true },
+      { source: "/jouwweer",        destination: "/vandaag",        permanent: true },
+      { source: "/waarschuwingen",  destination: "/vandaag#reed",   permanent: true },
+      { source: "/piet",            destination: "/vandaag#piet",   permanent: true },
+      { source: "/reed",            destination: "/vandaag#reed",   permanent: true },
+      { source: "/koos",            destination: "/vandaag#koos",   permanent: true },
       { source: "/prijzen",         destination: "/",               permanent: true },
       { source: "/app/checkout/:path*", destination: "/mijn-weerzone", permanent: true },
       // Reiszone is verwijderd in v2 (agent-first relaunch). Alle Reiszone-URLs

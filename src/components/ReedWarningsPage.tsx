@@ -7,17 +7,11 @@
  * geen uitleg. Styling: src/app/(site)/reed/reed-skin.css (scoped onder .reed-skin).
  */
 
-import { Suspense, useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import dynamic from "next/dynamic";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import type { ReedView, ReedRiskDay, ReedActiveWarning, ReedChip as ReedChipData } from "@/lib/reed-view";
 import { persistCity } from "@/lib/persist-city";
 
 // Dynamische, weer-gestuurde achtergrond — zelfde component als /weer.
-const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
-  ssr: false,
-  loading: () => <div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />,
-});
-
 /**
  * Vraagt de GPS van de browser op, zet de exacte coördinaten via
  * /api/resolve-location om naar de plek waar je écht bent (woonplaats of POI),
@@ -771,9 +765,6 @@ export default function ReedWarningsPage({
   const hasWarning = !!view.active;
   return (
     <main className={`reed-skin relative min-h-screen ${fontClassName}`}>
-      <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />}>
-        <WeatherBackground weatherCode={weatherCode} isDay={isDay} />
-      </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 reed-stagger">
         <StatusHeader view={view} />
         {hasWarning ? (

@@ -1,4 +1,5 @@
 import { hermesChat } from "./hermes";
+import { nlCopyGuardValue } from "./nl-copy-guard";
 import { fetchWeatherData } from "./weather";
 import { findNearestCity } from "./types";
 
@@ -163,7 +164,7 @@ Genereer de output payload uitsluitend als geldige JSON.`,
       },
     ], { model: "persona", json: true, maxTokens: 1200 });
 
-    return JSON.parse(text.replace(/```json|```/g, "").trim()) as WWSPayload;
+    return nlCopyGuardValue(JSON.parse(text.replace(/```json|```/g, "").trim()) as WWSPayload);
   } catch (err) {
     console.error("WWS Pipeline Error:", err);
     return null;

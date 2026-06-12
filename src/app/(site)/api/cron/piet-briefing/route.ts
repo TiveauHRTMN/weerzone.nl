@@ -80,7 +80,7 @@ Data:
 - Zon: ${main.daily[0].sunHours}u, UV: ${main.uvIndex.toFixed(1)}
 - Regio's: ${validWeather.map(r => `${r.name}: ${r.weather!.current.temperature}°`).join(", ")}`,
       },
-    ], { model: "persona", maxTokens: 200 });
+    ], { model: "persona", maxTokens: 200, nlGuard: true });
 
     // 5. Send EXTREME High-End Email
     const reportDate = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();

@@ -3,6 +3,7 @@ import { isMarianaAuthorized, marianaUnauthorized } from "@/lib/mariana/http";
 import { runOracle } from "@/lib/mariana/oracle/engine";
 import { saveOracleRun } from "@/lib/mariana/oracle/storage";
 import { TESLA_REGIONS } from "@/lib/mariana/tesla/regions";
+import { saveTeslaRun } from "@/lib/mariana/tesla/storage";
 import { runMarianaRegion } from "@/lib/mariana/regions/engine";
 import { saveMarianaRun } from "@/lib/mariana/regions/storage";
 import { fetchWeatherData } from "@/lib/weather";
@@ -16,8 +17,9 @@ export const maxDuration = 300;
  * Draait de hele cascade 1x/dag:
  *   1. Oracle  -> landelijk 48-96u regime + binaire gate (1 LLM-call).
  *   2. Regions -> per mesoschaal-regio (11) de LLM-duiding; bij gate ACTIVATE
- *      draait Regions intern Tesla voor die regio. Schrijft mariana_regions +
- *      het voederkanaal (local_feed) waar Mariana Local per request uit leest.
+ *      draait Regions intern Tesla voor die regio. Schrijft mariana_regions,
+ *      mariana_tesla en het voederkanaal (local_feed) waar Mariana Local per
+ *      request uit leest.
  *
  * Tesla en Oracle hebben GEEN eigen route — alleen Mariana (de orchestrator)
  * heeft dit cron-entrypoint. Registreer in vercel.json (crons[]).
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
 
   const result = {
     oracle: { ok: false as boolean, gate: "" as string, persisted: false as boolean },
-    regions: { processed: 0, saved: 0, convective: 0, errors: [] as string[] },
+    regions: { processed: 0, saved: 0, convective: 0, teslaSaved: 0, errors: [] as string[] },
   };
 
   // --- 1. Oracle: landelijk regime + gate. ---
@@ -84,6 +86,14 @@ export async function GET(request: NextRequest) {
       result.regions.processed++;
       if (saved.ok) result.regions.saved++;
       if (run.signal.tesla_context_used) result.regions.convective++;
+      if (run.teslaRun) {
+        const teslaSaved = await saveTeslaRun(run.teslaRun);
+        if (teslaSaved.ok) {
+          result.regions.teslaSaved++;
+        } else {
+          result.regions.errors.push(`${region.slug}: Tesla niet opgeslagen: ${teslaSaved.reason ?? "onbekend"}`);
+        }
+      }
     } catch (err) {
       result.regions.errors.push(`${region.slug}: ${err instanceof Error ? err.message : String(err)}`);
     }

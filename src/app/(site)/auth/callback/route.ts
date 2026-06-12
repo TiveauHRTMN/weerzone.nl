@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ensureHartmanWkPouleMembership } from "@/lib/poule";
+import { ensurePouleMembershipForInvite } from "@/lib/poule";
 
 /**
  * Magic-link / OAuth callback: wisselt `code` om voor een sessie
@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
       }
 
       if (user && next.startsWith("/wkpoule")) {
-        await ensureHartmanWkPouleMembership(user.id, {
+        const nextUrl = new URL(next, origin);
+        await ensurePouleMembershipForInvite(user.id, {
+          inviteCode: nextUrl.searchParams.get("inviteCode") || nextUrl.searchParams.get("code"),
+          groupId: nextUrl.searchParams.get("groupId") || nextUrl.searchParams.get("poolId"),
+        }, {
           email: user.email,
           fullName: typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null,
         });

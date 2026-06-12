@@ -16,7 +16,7 @@ const SEVERITY_STYLE: Record<KNMISeverity, { bg: string; border: string; chip: s
 
 interface Props {
   warnings: KNMIWarning[];
-  /** Toon de "meer details" link naar /reed. Default true. */
+  /** Toon de link naar de risicolaag op Vandaag. */
   detailsLink?: boolean;
   /** Compact = enkel de chip + 1 regel, geen description of adviesblokken. */
   compact?: boolean;
@@ -65,7 +65,7 @@ export default function KnmiWarningBanner({ warnings, detailsLink = true, compac
                 </div>
                 {detailsLink && (
                   <Link
-                    href="/reed"
+                    href="/vandaag#reed"
                     className="flex-none text-[11px] font-bold text-white/80 hover:text-white underline underline-offset-2"
                   >
                     details

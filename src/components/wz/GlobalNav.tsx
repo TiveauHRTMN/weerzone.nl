@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Globe2, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import WzLogo from "./WzLogo";
 import NLPulse from "@/components/NLPulse";
 import LocatieButton from "@/components/wz/LocatieButton";
@@ -51,114 +51,72 @@ function LogoBadge({ tier, isFounder }: { tier: PersonaTier | null; isFounder: b
   );
 }
 
-const HIDDEN_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", "/auth"];
+const HIDDEN_PATHS = ["/app/login", "/app/signup", "/app/reset", "/app/verify", "/auth", "/hartmanwk2026"];
 
-const COUNTRIES = [
-  { code: "nl", label: "NL", href: "/" },
-] as const;
-
-function activeCountry(pathname: string, locale: Locale) {
-  return "nl";
-}
-
-function CountryPulse({ country }: { country: string }) {
-  return <NLPulse />;
-}
-
-function CountryDropdown({
-  value,
-  onNavigate,
-  compact = false,
-}: {
-  value: string;
-  onNavigate?: () => void;
-  compact?: boolean;
-}) {
-  const [countryOpen, setCountryOpen] = useState(false);
-  const selected = COUNTRIES.find((country) => country.code === value) ?? COUNTRIES[0];
+function AnonymousNav({ loading }: { loading: boolean }) {
+  const headerBg =
+    "radial-gradient(ellipse at top, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 40%, transparent 65%)," +
+    "linear-gradient(180deg, #ffe060 0%, #ffd21a 55%, #f5c500 100%)";
 
   return (
-    <div className={`relative ${compact ? "w-full" : "w-[112px]"}`}>
-      <button
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={countryOpen}
-        onClick={() => setCountryOpen((current) => !current)}
-        className="flex w-full items-center justify-between rounded-xl px-3 text-[10px] font-black uppercase tracking-widest text-[#0f1a2c] shadow-sm transition-all active:scale-95"
-        style={{
-          height: BTN_H,
-          background: "linear-gradient(180deg, #ffe060 0%, #ffd21a 100%)",
-          border: "1px solid rgba(180,130,0,0.35)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 2px rgba(160,110,0,0.15)",
-        }}
-      >
-        <span className="flex items-center gap-2">
-          <Globe2 className="h-3.5 w-3.5 text-black/55" />
-          {selected.label}
-        </span>
-        <ChevronDown className="h-3.5 w-3.5 text-black/55" />
-      </button>
-
-      {countryOpen && (
-        <div
-          role="listbox"
-          className="absolute right-0 top-[calc(100%+6px)] z-[70] w-full min-w-[112px] overflow-hidden rounded-xl shadow-xl"
-          style={{
-            background: "linear-gradient(180deg, #ffd21a 0%, #f0c500 100%)",
-            border: "1px solid rgba(180,130,0,0.35)",
-          }}
-        >
-          {COUNTRIES.map((country) => (
-            <button
-              key={country.code}
-              type="button"
-              role="option"
-              aria-selected={country.code === value}
-              onClick={() => {
-                setCountryOpen(false);
-                onNavigate?.();
-                window.location.href = country.href;
-              }}
-              className="flex h-9 w-full items-center px-4 text-left text-[10px] font-black uppercase tracking-widest text-[#0f1a2c] transition-colors hover:bg-black/10"
-              style={{ background: country.code === value ? "rgba(0,0,0,0.12)" : undefined }}
-            >
-              {country.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <header
+      className="sticky top-0 z-50"
+      style={{
+        background: headerBg,
+        borderBottom: "1px solid rgba(180,130,0,0.25)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75), 0 8px 24px rgba(160,110,0,0.12)",
+        color: "#0f1a2c",
+      }}
+    >
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3 px-4 py-2.5 md:px-6">
+        <Link href="/" aria-label="Weerzone home" className="transition-opacity hover:opacity-80">
+          <LogoBadge tier={null} isFounder={false} />
+        </Link>
+        {!loading && (
+          <div className="flex items-center gap-2">
+            <Link href="/app/login" className="rounded-xl border border-black/10 bg-white/25 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-950 sm:px-4">
+              Inloggen
+            </Link>
+            <Link href="/app/signup" className="rounded-xl bg-slate-950 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white sm:px-4">
+              Account maken
+            </Link>
+          </div>
+        )}
+      </div>
+    </header>
   );
 }
 
 export default function GlobalNav() {
   const pathname = usePathname() ?? "/";
-  const { user, tier, isFounder } = useSession();
+  const { user, tier, isFounder, agentPreferences, loading } = useSession();
   const [open, setOpen] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<"vandaag" | "morgen" | null>(null);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
+  function toggleMenu() {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+    if (nextOpen) {
+      if (pathname.startsWith("/vandaag")) setExpandedSection("vandaag");
+      else if (pathname.startsWith("/morgen")) setExpandedSection("morgen");
+    }
+  }
+
   if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
+  if (!user) return <AnonymousNav loading={loading} />;
 
   const locale: Locale = detectLocale(pathname);
   const localeConfig = LOCALES[locale];
   const links = localeConfig.nav;
   const homeHref = localeConfig.routes.home;
-  const country = activeCountry(pathname, locale);
   const loginHref = "/app/login";
   const signupHref = "/app/signup";
 
   function isActive(linkHref: string, key: string) {
-    if (key === "mijnweer" || key === "piet") {
-      const myWeatherPath = "/piet";
-      const weatherPath = "/weer";
-      return pathname.startsWith(myWeatherPath) || pathname.startsWith(weatherPath) || pathname.startsWith("/jouwweer");
-    }
-    if (key === "reed" || key === "waarschuwingen") {
-      return pathname.startsWith("/reed");
-    }
     if (key === "over") return pathname.startsWith("/over");
     if (key === "contact") return pathname.startsWith("/contact");
     return pathname === linkHref || pathname.startsWith(linkHref + "/");
@@ -184,7 +142,7 @@ export default function GlobalNav() {
         color: "#0f1a2c",
       }}
     >
-      <CountryPulse country={country} />
+      <NLPulse />
 
       {/* Main Bar */}
       <div className="flex items-center max-w-[1200px] mx-auto px-4 md:px-6 py-2.5 gap-2 md:gap-3">
@@ -198,7 +156,7 @@ export default function GlobalNav() {
 
           {/* Hamburger Menu (Gateway) */}
           <button
-            onClick={() => setOpen(!open)}
+            onClick={toggleMenu}
             className="w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:bg-black/5 border border-transparent active:scale-95"
             aria-label="Menu"
           >
@@ -219,8 +177,6 @@ export default function GlobalNav() {
 
         {/* Right: Flags & Actions (Desktop only - 1024px+) */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
-          <CountryDropdown value={country} />
-
           <div className="flex items-center gap-2">
             {user ? (
               <>
@@ -265,7 +221,7 @@ export default function GlobalNav() {
                   Inloggen
                 </Link>
                 <Link href={signupHref} className={actionBtnClass} style={{ background: "#0f1a2c", height: BTN_H, color: "white", boxShadow: "0 2px 8px rgba(15,26,44,0.25)" }}>
-                  Aanmelden
+                  Maak een account aan
                 </Link>
               </>
             )}
@@ -283,30 +239,67 @@ export default function GlobalNav() {
         >
           <div className="max-w-[1200px] mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            {/* Column 1: Main Pages & Flags (Flags moved here for mobile/tablet) */}
+            {/* Column 1: Main Pages */}
             <div>
-              <div className="lg:hidden mb-6">
-                <CountryDropdown value={country} compact onNavigate={() => setOpen(false)} />
-              </div>
-
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/35 mb-4 px-4">Menu</p>
               <nav className="grid gap-1">
                 {(() => {
-                  const composed: typeof links = [...links];
-                  const overHref = "/over";
-                  const contactHref = "/contact";
-                  const overLabel = "Over";
-                  const contactLabel = "Contact";
-                  if (!composed.some(l => l.href === overHref)) {
-                    composed.push({ key: "over", label: overLabel, href: overHref, weight: "muted" });
-                  }
-                  if (!composed.some(l => l.href === contactHref)) {
-                    composed.push({ key: "contact", label: contactLabel, href: contactHref, weight: "muted" });
-                  }
-                  return composed.map(l => {
+                  return links.map(l => {
                     const active = isActive(l.href, l.key);
                     const isStrong = l.weight === "strong";
                     const isMuted  = l.weight === "muted";
+                    const isDaySection = l.key === "vandaag" || l.key === "morgen";
+
+                    if (isDaySection) {
+                      const section = l.key as "vandaag" | "morgen";
+                      const expanded = expandedSection === section;
+                      const items = [
+                        { key: "piet", label: "Piet", detail: "Dagbeeld" },
+                        { key: "reed", label: "Reed", detail: "Risico" },
+                        { key: "koos", label: "Koos", detail: "Eropuit" },
+                      ].filter((item) => agentPreferences[item.key as keyof typeof agentPreferences]);
+
+                      return (
+                        <div key={l.key} className="overflow-hidden rounded-2xl" style={{ background: active ? "rgba(0,0,0,0.08)" : "transparent" }}>
+                          <div className="flex items-stretch">
+                            <Link
+                              href={l.href}
+                              onClick={() => setOpen(false)}
+                              className="min-w-0 flex-1 px-4 py-3 transition-all"
+                              style={{ color: active ? "#0f1a2c" : "rgba(15,26,44,0.60)" }}
+                            >
+                              <span className="block text-sm font-black uppercase tracking-widest">{l.label}</span>
+                              {l.sublabel && <span className="mt-1 block text-[11px] font-medium normal-case tracking-normal opacity-65">{l.sublabel}</span>}
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedSection(expanded ? null : section)}
+                              disabled={items.length === 0}
+                              className="flex w-12 items-center justify-center rounded-xl text-slate-900/60 transition hover:bg-black/5 hover:text-slate-900 disabled:cursor-default disabled:opacity-25"
+                              aria-label={`${expanded ? "Verberg" : "Toon"} Piet, Reed en Koos voor ${l.label.toLowerCase()}`}
+                              aria-expanded={expanded}
+                            >
+                              <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                            </button>
+                          </div>
+                          {expanded && items.length > 0 && (
+                            <div className="grid gap-1 px-2 pb-2">
+                              {items.map((item) => (
+                                <Link
+                                  key={item.key}
+                                  href={`${l.href}#${item.key}`}
+                                  onClick={() => setOpen(false)}
+                                  className="flex items-center justify-between rounded-xl bg-white/35 px-4 py-3 text-slate-900 transition hover:bg-white/60"
+                                >
+                                  <span className="text-sm font-extrabold">{item.label}</span>
+                                  <span className="text-[11px] font-semibold text-slate-600">{item.detail}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
 
                     if (isStrong) {
                       return (
@@ -395,7 +388,7 @@ export default function GlobalNav() {
                       Inloggen
                     </Link>
                     <Link href={signupHref} onClick={() => setOpen(false)} className="py-4 rounded-2xl text-center text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1a2c]">
-                      Aanmelden
+                      Maak een account aan
                     </Link>
                   </>
                 )}

@@ -23,9 +23,9 @@ const body = `# WEERZONE
 - [48 hours](https://weerzone.nl/weer/48-uur): Core short-range forecast
 - [Rain](https://weerzone.nl/weer/regen): Rain-focused overview
 - [Thunderstorms](https://weerzone.nl/weer/onweer): Thunder risk and lightning context
-- [Piet](https://weerzone.nl/piet): Personal Dutch weather briefing
-- [Reed](https://weerzone.nl/reed): Dutch weather warnings
-- [Koos](https://weerzone.nl/koos): Dutch outdoor planning
+- [Vandaag](https://weerzone.nl/vandaag): Local weather story with optional Piet, Reed and Koos layers
+- [Morgen](https://weerzone.nl/morgen): Tomorrow's local weather story with optional Piet, Reed and Koos layers
+- [How WEERZONE works](https://weerzone.nl/over): Sources, model weighting, Mariana and the 48-hour methodology
 - [Steve](https://weerzone.nl/steve): Dutch business weather briefing
 
 ## Netherlands

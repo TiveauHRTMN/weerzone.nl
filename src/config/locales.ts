@@ -31,19 +31,16 @@ export type NavLink = LocaleConfig["nav"][number];
 const nlRoutes = {
   home: "/",
   weather: "/weer",
-  myWeather: "/piet",
-  warnings: "/reed",
+  myWeather: "/vandaag",
+  warnings: "/vandaag#reed",
 };
 
 const nlNav: LocaleConfig["nav"] = [
-  { key: "vandaag", label: "Vandaag", href: "/vandaag", sublabel: "Piet, Reed en Koos samen" },
-  { key: "piet", label: "Piet", href: "/piet", sublabel: "Je dagelijkse heads-up" },
-  { key: "reed", label: "Reed", href: "/reed", sublabel: "Voor buien, wind en onweer" },
-  { key: "koos", label: "Koos", href: "/koos", sublabel: "Als je eropuit wilt" },
-  { key: "steve", label: "Steve", href: "/steve", sublabel: "Je zakelijke heads-up" },
-  { key: "over", label: "Over", href: "/over", weight: "muted" },
-  { key: "contact", label: "Contact", href: "/contact", weight: "muted" },
-  { key: "mijn-weerzone", label: "Mijn Weerzone", href: "/mijn-weerzone", weight: "strong" },
+  { key: "home", label: "Home", href: "/", sublabel: "Het weer op jouw plek" },
+  { key: "vandaag", label: "Vandaag", href: "/vandaag", sublabel: "Wat vandaag voor jou betekent" },
+  { key: "morgen", label: "Morgen", href: "/morgen", sublabel: "Vooruitkijken zonder ruis" },
+  { key: "over", label: "Over", href: "/over", sublabel: "Hoe Weerzone werkt" },
+  { key: "contact", label: "Contact", href: "/contact", sublabel: "Vraag of opmerking" },
 ];
 
 function disabledLocale(code: Locale): LocaleConfig {

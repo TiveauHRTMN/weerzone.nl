@@ -51,6 +51,10 @@ export interface HourlyForecast {
   precipitation: number;
   windSpeed: number;
   cape: number; // Convective Available Potential Energy (J/kg) — onweersrisico
+  cin?: number; // Convective inhibition (J/kg) — rem op buienvorming
+  dewPoint?: number; // Dauwpunt op 2 meter (°C)
+  liftedIndex?: number; // Negatief betekent een instabielere atmosfeer
+  windShear?: number; // Verschil tussen wind op 10 en 80 meter (km/u)
   confidence: "high" | "medium" | "low";
   mariana?: MarianaHourlyIntelligence;
   oracle?: OracleHourlyIntelligence;
@@ -455,6 +459,7 @@ export interface PouleMatch {
 export interface PoulePrediction {
   id: string;
   user_id: string;
+  group_id: string;
   match_id: string;
   home_prediction: number;
   away_prediction: number;

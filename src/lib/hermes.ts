@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { nlCopyGuard } from "@/lib/nl-copy-guard";
 
 const PRIMARY_MODEL = "nousresearch/hermes-4-70b";
 const FALLBACK_MODEL = "deepseek/deepseek-v4-pro";
@@ -8,6 +9,7 @@ const MODELS = {
   fast:    PRIMARY_MODEL,
   seo:     PRIMARY_MODEL,
   persona: "deepseek/deepseek-v4-flash", // persona briefs: speed > power
+  personaPro: "deepseek/deepseek-v4-pro",
 } as const;
 
 export type HermesModel = keyof typeof MODELS;
@@ -31,6 +33,7 @@ type HermesOptions = {
   temperature?: number;
   maxTokens?: number;
   json?: boolean;
+  nlGuard?: boolean;
 };
 
 export async function hermesChat(
@@ -48,12 +51,14 @@ export async function hermesChat(
 
   try {
     const result = await client.chat.completions.create({ model: requestedModel, ...params });
-    return result.choices[0].message.content ?? "";
+    const content = result.choices[0].message.content ?? "";
+    return options.nlGuard && !options.json ? nlCopyGuard(content) : content;
   } catch (err) {
     // persona already uses a fast model — don't retry with Pro
     if (requestedModel === "deepseek/deepseek-v4-flash") throw err;
     console.warn(`hermesChat: ${requestedModel} gefaald, fallback naar ${FALLBACK_MODEL}`);
     const result = await client.chat.completions.create({ model: FALLBACK_MODEL, ...params });
-    return result.choices[0].message.content ?? "";
+    const content = result.choices[0].message.content ?? "";
+    return options.nlGuard && !options.json ? nlCopyGuard(content) : content;
   }
 }

@@ -10,6 +10,7 @@ import {
   normalizePlayerKey,
   scoreMatch,
 } from "@/lib/hartmanwk";
+import { isMatchStarted } from "@/lib/hartmanwk-matches";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,7 +72,13 @@ export async function GET() {
     let points = 0;
     let exact = 0;
     let toto = 0;
+    // Transparantie: ieders voorspellingen zijn zichtbaar voor de hele poule,
+    // maar pas vanaf de aftrap — tot die tijd blijft de inzet geheim.
+    const visiblePreds: Record<string, [number, number]> = {};
+    let predCount = 0;
     for (const pred of predsByMember.get(m.id) ?? []) {
+      predCount += 1;
+      if (isMatchStarted(pred.match_id)) visiblePreds[pred.match_id] = [pred.home, pred.away];
       const result = resultById.get(pred.match_id);
       if (!result) continue;
       const score = scoreMatch(pred, result);
@@ -95,6 +102,8 @@ export async function GET() {
       exact,
       toto,
       rond: 0,
+      preds: visiblePreds,
+      predCount,
     };
   });
 

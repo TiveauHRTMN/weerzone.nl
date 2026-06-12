@@ -1,3 +1,4 @@
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 function isAssetPath(pathname: string) {
@@ -8,22 +9,47 @@ function isAssetPath(pathname: string) {
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
     pathname === "/manifest.webmanifest" ||
-    /\.(?:xml|png|jpg|jpeg|gif|svg|webp|ico|css|js|map)$/.test(pathname)
+    /\.(?:xml|txt|json|webmanifest|png|jpg|jpeg|gif|svg|webp|ico|css|js|map)$/.test(pathname)
   );
 }
 
-// Slugs die zowel als provincie (canonical) bestaan; daar mogen we niet ingrijpen.
+function isPublicPath(pathname: string) {
+  return (
+    pathname === "/" ||
+    pathname === "/vandaag" ||
+    pathname === "/morgen" ||
+    pathname === "/over" ||
+    pathname === "/contact" ||
+    pathname === "/jouwweer" ||
+    pathname === "/piet" ||
+    pathname === "/reed" ||
+    pathname === "/koos" ||
+    pathname === "/steve" ||
+    pathname === "/waarschuwingen" ||
+    pathname === "/embed" ||
+    pathname === "/widget" ||
+    pathname === "/voorwaarden" ||
+    pathname === "/privacy" ||
+    (pathname === "/weer" || pathname.startsWith("/weer/")) ||
+    (pathname === "/zakelijk" || pathname.startsWith("/zakelijk/")) ||
+    (pathname === "/steun" || pathname.startsWith("/steun/")) ||
+    pathname === "/app/login" ||
+    pathname === "/app/signup" ||
+    pathname.startsWith("/app/reset") ||
+    pathname.startsWith("/app/verify") ||
+    pathname.startsWith("/auth/") ||
+    pathname.startsWith("/wkpoule") ||
+    pathname.startsWith("/hartmanwk2026")
+  );
+}
+
 const PROVINCE_SLUGS = new Set([
   "groningen", "friesland", "drenthe", "overijssel", "flevoland",
   "gelderland", "utrecht", "noord-holland", "zuid-holland", "zeeland",
-  "noord-brabant", "limburg",
-  "48-uur", "onweer", "regen", "themas",
+  "noord-brabant", "limburg", "48-uur", "onweer", "regen", "themas",
 ]);
 
-// City-slug → province voor de top NL+BE-steden zonder provincieprefix.
-// Beperkt tot ~80 entries om de middleware-bundle klein te houden.
 const CITY_TO_PROVINCE: Record<string, string> = {
-  // NL — top 50
   amsterdam: "noord-holland",
   rotterdam: "zuid-holland",
   "den-haag": "zuid-holland",
@@ -75,11 +101,9 @@ const CITY_TO_PROVINCE: Record<string, string> = {
   hoorn: "noord-holland",
   veenendaal: "utrecht",
   middelburg: "zeeland",
-  // BE — top 10
 };
 
 function cityRedirect(pathname: string, search: string, requestUrl: string): NextResponse | null {
-  // Match alleen exact /weer/<slug> — niet /weer/<province>/<place>.
   const match = pathname.match(/^\/weer\/([a-z0-9-]+)\/?$/);
   if (!match) return null;
   const slug = match[1];
@@ -89,25 +113,25 @@ function cityRedirect(pathname: string, search: string, requestUrl: string): Nex
   return NextResponse.redirect(new URL(`/weer/${province}/${slug}${search}`, requestUrl), 308);
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  if (isAssetPath(pathname)) {
-    return NextResponse.next();
+  const requestHost = request.headers.get("host")?.split(":", 1)[0].toLowerCase();
+  if (requestHost === "www.weerzone.nl") {
+    const canonicalUrl = request.nextUrl.clone();
+    canonicalUrl.hostname = "weerzone.nl";
+    return NextResponse.redirect(canonicalUrl, 308);
   }
 
+  if (isAssetPath(pathname)) return NextResponse.next();
+
   const requestHeaders = new Headers(request.headers);
-  // Injecteert pathname zodat de root layout het HTML lang-attribuut dynamisch
-  // kan instellen (NL vs DE) zonder een volledige i18n-bibliotheek.
   requestHeaders.set("x-pathname", pathname);
-  if (pathname.startsWith("/wkpoule")) {
-    requestHeaders.set("x-site-skin", "wk");
-  }
+  if (pathname.startsWith("/wkpoule")) requestHeaders.set("x-site-skin", "wk");
 
   if (pathname === "/poule") {
     return NextResponse.redirect(new URL(`/wkpoule${search}`, request.url), 308);
   }
-
   if (pathname.startsWith("/poule/")) {
     return NextResponse.redirect(new URL(pathname.replace(/^\/poule/, "/wkpoule") + search, request.url), 308);
   }
@@ -115,12 +139,37 @@ export function proxy(request: NextRequest) {
   const city = cityRedirect(pathname, search, request.url);
   if (city) return city;
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  if (isPublicPath(pathname)) return response;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) return NextResponse.redirect(new URL("/", request.url));
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request: { headers: requestHeaders } });
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options as CookieOptions);
+        });
+      },
     },
   });
+
+  const { data, error } = await supabase.auth.getClaims();
+  if (error || !data?.claims?.sub) {
+    const onboardingUrl = new URL("/", request.url);
+    onboardingUrl.searchParams.set("van", pathname);
+    return NextResponse.redirect(onboardingUrl);
+  }
+
+  return response;
 }
+
+export default proxy;
 
 export const config = {
   matcher: ["/:path*"],

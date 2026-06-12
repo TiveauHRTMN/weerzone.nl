@@ -7,7 +7,8 @@ import { getDayContext } from "@/lib/agents/day-context";
 import ProfileEditForm from "@/components/wz/ProfileEditForm";
 import AgentTogglesForm from "@/components/wz/AgentTogglesForm";
 import LogoutButton from "@/components/LogoutButton";
-import WeerzoneBackground from "@/components/WeerzoneBackground";
+import { activeAgentKeys, preferencesFromProfile } from "@/lib/agents/preferences";
+import LocateButton from "@/components/LocateButton";
 
 export const dynamic = "force-dynamic";
 
@@ -26,8 +27,14 @@ export default async function MijnWeerzonePage() {
     redirect("/app/login?next=/mijn-weerzone");
   }
 
-  const [profileRes, savedLocation] = await Promise.all([
+  const [profileRes, accountLocationRes, savedLocation] = await Promise.all([
     supabase.from("user_profile").select("*").eq("id", user.id).single(),
+    supabase
+      .from("user_locations")
+      .select("label, lat, lon")
+      .eq("user_id", user.id)
+      .eq("is_primary", true)
+      .maybeSingle(),
     getSavedLocationServer(),
   ]);
 
@@ -35,6 +42,14 @@ export default async function MijnWeerzonePage() {
     | { full_name?: string; postcode?: string; piet_on?: boolean; reed_on?: boolean; koos_on?: boolean }
     | null;
   const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? "";
+  const displayLocation = accountLocationRes.data
+    ? { name: accountLocationRes.data.label, lat: accountLocationRes.data.lat, lon: accountLocationRes.data.lon }
+    : savedLocation;
+  const agentPreferences = preferencesFromProfile(profile, user.user_metadata?.agent_preferences);
+  const activeAgentLabels = activeAgentKeys(agentPreferences).map((agent) => agent.charAt(0).toUpperCase() + agent.slice(1));
+  const activeAgentText = activeAgentLabels.length > 0
+    ? `${activeAgentLabels.join(", ")} ${activeAgentLabels.length === 1 ? "staat" : "staan"} aan voor Vandaag en Morgen.`
+    : "Je hebt nog geen onderdelen aangezet.";
 
   const day = getDayContext();
   const dayLabel = day.isHoliday
@@ -43,7 +58,6 @@ export default async function MijnWeerzonePage() {
 
   return (
     <>
-      <WeerzoneBackground />
       <main className="relative z-10 min-h-screen px-4 py-10 sm:py-14 text-white">
       <div className="mx-auto max-w-3xl space-y-10">
         {/* Header */}
@@ -61,19 +75,13 @@ export default async function MijnWeerzonePage() {
         <section className="space-y-3">
           <div className="flex items-baseline justify-between px-1">
             <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
-              Je agents
+              Piet, Reed en Koos
             </h2>
             <Link href="/vandaag" className="text-[11px] font-bold text-white/75 hover:text-white">
-              Bekijk vandaag →
+              Naar Vandaag →
             </Link>
           </div>
-          <AgentTogglesForm
-            initial={{
-              piet: profile?.piet_on ?? true,
-              reed: profile?.reed_on ?? false,
-              koos: profile?.koos_on ?? false,
-            }}
-          />
+          <AgentTogglesForm initial={agentPreferences} />
         </section>
 
         {/* Mijn plek */}
@@ -82,22 +90,22 @@ export default async function MijnWeerzonePage() {
             Mijn plek
           </h2>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            {savedLocation ? (
+            {displayLocation ? (
               <>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Huidige plek
                 </p>
                 <p className="mt-1 text-xl font-black text-slate-900">
-                  {savedLocation.name}
+                  {displayLocation.name}
                 </p>
                 <p className="mt-2 text-sm text-slate-500">
-                  Piet, Reed en Koos kijken hier mee.
+                  {activeAgentText}
                 </p>
                 <Link
-                  href="/weer"
+                  href="/vandaag"
                   className="mt-4 inline-flex items-center text-xs font-black uppercase tracking-widest text-slate-900 hover:underline"
                 >
-                  Open je weer →
+                  Open Vandaag →
                 </Link>
               </>
             ) : (
@@ -106,15 +114,22 @@ export default async function MijnWeerzonePage() {
                   Je hebt nog geen plek bewaard.
                 </p>
                 <p className="mt-2 text-sm text-slate-500">
-                  Kies je plek vanaf een weerpagina; daarna kijken Piet, Reed
-                  en Koos hier mee.
+                  Kies je plek vanaf een weerpagina; daarna gebruiken Piet, Reed en Koos die plek.
                 </p>
                 <Link
-                  href="/weer"
+                  href="/vandaag"
                   className="mt-4 inline-flex items-center text-xs font-black uppercase tracking-widest text-slate-900 hover:underline"
                 >
                   Kies een plek →
                 </Link>
+                <div className="mt-4">
+                  <LocateButton
+                    saveToAccount
+                    compact
+                    label="Gebruik mijn huidige locatie"
+                    className="!border-slate-200 !bg-slate-100 !text-slate-900 hover:!bg-slate-200"
+                  />
+                </div>
               </>
             )}
           </div>

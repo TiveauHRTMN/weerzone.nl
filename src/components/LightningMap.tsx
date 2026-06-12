@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Zap } from "lucide-react";
 
 interface Props {
@@ -12,10 +12,7 @@ interface Props {
 export default function LightningMap({ lat, lon, locale = "nl" }: Props) {
   const isDE = locale === "de";
   const isFR = locale === "fr";
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return <div className="h-[450px] bg-slate-100 animate-pulse rounded-2xl" />;
+  const [active, setActive] = useState(false);
 
   // Blitzortung.org is the raw live lightning network powering LightningMaps.org
   const src = `https://map.blitzortung.org/#7/${lat}/${lon}`;
@@ -37,13 +34,25 @@ export default function LightningMap({ lat, lon, locale = "nl" }: Props) {
         </div>
       </div>
       <div className="w-full h-[450px] bg-slate-50 relative">
-        <iframe
-          width="100%"
-          height="100%"
-          src={src}
-          frameBorder="0"
-          className="absolute inset-0"
-        />
+        {!active ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 px-6 text-center text-white">
+            <Zap className="h-10 w-10 fill-amber-300 text-amber-300" aria-hidden />
+            <p className="max-w-sm text-sm font-semibold text-slate-300">De live bliksemkaart gebruikt externe netwerkdata en wordt pas geopend wanneer jij dat kiest.</p>
+            <button type="button" onClick={() => setActive(true)} className="btn btn-primary inline-flex items-center gap-2">
+              <Zap className="h-4 w-4" aria-hidden />
+              {isFR ? "Ouvrir le radar" : isDE ? "Blitzradar öffnen" : "Open live bliksemradar"}
+            </button>
+          </div>
+        ) : (
+          <iframe
+            width="100%"
+            height="100%"
+            src={src}
+            className="absolute inset-0 border-0"
+            loading="lazy"
+            title={isFR ? "Radar de foudre en direct" : isDE ? "Live Blitzradar" : "Live bliksemradar"}
+          />
+        )}
       </div>
     </div>
   );

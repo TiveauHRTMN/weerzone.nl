@@ -14,7 +14,8 @@
  *    gemiddeld). Regions zet dan ook Piet's refer_to_reed aan.
  *
  * Flow: Oracle + Tesla -> Regions (per regio, 1x/dag) -> Mariana Local (wiskunde,
- * per locatie) -> 10.000 paginas / Piet / Koos / Reed.
+ * per locatie) -> 10.000 paginas / Piet / Koos. Reed leest de Tesla-run direct
+ * uit mariana_tesla.
  *
  * Geen route, geen frontend.
  */
@@ -122,6 +123,7 @@ export async function runMarianaRegion(
   // --- CONVECTIEVE baan: Tesla draait voor DEZE regio als Oracle de gate opent. ---
   let reed: MarianaReedOutput = { active: false, region_slug: null, region_name: null, tesla: null };
   let gate: ConvectiveGateStatus = { active: false, regionName: null, note: null };
+  let teslaRunForReed: TeslaRun | null = null;
 
   if (oracle && shouldRunTesla(oracle)) {
     try {
@@ -130,6 +132,7 @@ export async function runMarianaRegion(
         oracleContext: oracleContextForTesla(oracle),
         founderNotes: opts.founderNotes,
       });
+      teslaRunForReed = teslaRun;
       reed = {
         active: true,
         region_slug: region.slug,
@@ -219,5 +222,6 @@ export async function runMarianaRegion(
     model: result.model,
     signal,
     local_feed,
+    teslaRun: teslaRunForReed,
   };
 }

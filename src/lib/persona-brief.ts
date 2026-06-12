@@ -1,4 +1,5 @@
 import { hermesChat } from "./hermes";
+import { nlCopyGuardValue } from "@/lib/nl-copy-guard";
 import { PERSONAS, type PersonaTier } from "@/lib/personas";
 import type { WeatherData } from "@/lib/types";
 import type { KNMIWarning } from "@/lib/knmi-warnings";
@@ -271,7 +272,7 @@ ${SHARED_STYLE}
   // DeepSeek/LLM kan een object wrappen in uitleg — zoek het eerste { ... }
   const match = cleaned.match(/\{[\s\S]*\}/);
   if (!match) throw new Error(`Geen JSON gevonden in LLM-response: ${cleaned.slice(0, 100)}`);
-  const parsed = JSON.parse(match[0]) as PersonaBrief;
+  const parsed = nlCopyGuardValue(JSON.parse(match[0]) as PersonaBrief);
 
   // Defensieve sanering
   return {

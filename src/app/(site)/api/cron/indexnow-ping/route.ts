@@ -12,9 +12,8 @@ import { pingIndexNow } from "@/lib/indexnow";
 const STATIC_URLS = [
   "https://weerzone.nl",
   "https://weerzone.nl/weer",
-  "https://weerzone.nl/piet",
-  "https://weerzone.nl/reed",
-  "https://weerzone.nl/koos",
+  "https://weerzone.nl/vandaag",
+  "https://weerzone.nl/morgen",
   "https://weerzone.nl/steve",
   "https://weerzone.nl/over",
 ];

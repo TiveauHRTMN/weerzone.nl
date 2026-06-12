@@ -5,11 +5,17 @@ import type { User } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import { isFounderEmail, FOUNDER_TIER } from "@/lib/founders";
+import {
+  ALL_AGENT_PREFERENCES,
+  preferencesFromProfile,
+  type AgentPreferences,
+} from "@/lib/agents/preferences";
 
 interface SessionState {
   user: User | null;
   tier: PersonaTier | null;
   isFounder: boolean;
+  agentPreferences: AgentPreferences;
   primaryLocation: { name: string; lat: number; lon: number } | null;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -19,6 +25,7 @@ const SessionContext = createContext<SessionState>({
   user: null,
   tier: null,
   isFounder: false,
+  agentPreferences: ALL_AGENT_PREFERENCES,
   primaryLocation: null,
   loading: true,
   refresh: async () => {},
@@ -33,6 +40,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [tier, setTier] = useState<PersonaTier | null>(null);
   const [isFounder, setIsFounder] = useState(false);
+  const [agentPreferences, setAgentPreferences] = useState<AgentPreferences>(ALL_AGENT_PREFERENCES);
   const [primaryLocation, setPrimaryLocation] = useState<{ name: string; lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,13 +51,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     if (!u) {
       setTier(null);
       setIsFounder(false);
+      setAgentPreferences(ALL_AGENT_PREFERENCES);
       setPrimaryLocation(null);
       setLoading(false);
       return;
     }
 
-    // Parallel fetch: subs and primary location
-    const [subsRes, locRes] = await Promise.all([
+    // Parallel fetch: subscription, primary location and legacy profile fallback.
+    const [subsRes, locRes, profileRes] = await Promise.all([
       supabase
         .from("subscriptions")
         .select("tier, status")
@@ -60,7 +69,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         .select("label, lat, lon")
         .eq("user_id", u.id)
         .eq("is_primary", true)
-        .maybeSingle()
+        .maybeSingle(),
+      supabase
+        .from("user_profile")
+        .select("piet_on, reed_on, koos_on")
+        .eq("id", u.id)
+        .maybeSingle(),
     ]);
 
     const activeSubs = subsRes.data || [];
@@ -74,6 +88,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     let t = (sortedSubs[0]?.tier ?? null) as PersonaTier | null;
     if (founderCheck) t = FOUNDER_TIER;
     setTier(t && (PERSONA_ORDER.includes(t as any) || t === 'steve') ? t : null);
+    setAgentPreferences(preferencesFromProfile(profileRes.data, u.user_metadata?.agent_preferences));
 
     if (locRes.data) {
       setPrimaryLocation({
@@ -98,7 +113,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SessionContext.Provider value={{ user, tier, isFounder, primaryLocation, loading, refresh: hydrate }}>
+    <SessionContext.Provider value={{ user, tier, isFounder, agentPreferences, primaryLocation, loading, refresh: hydrate }}>
       {children}
     </SessionContext.Provider>
   );

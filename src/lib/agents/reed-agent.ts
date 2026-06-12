@@ -70,7 +70,7 @@ export function reedHeadsUps(view: ReedView, now: Date): AgentHeadsUp[] {
 }
 
 /** Reed-agent over de context: bouwt view (met echte KNMI/ESTOFEX/Tesla) + stem. */
-export async function reedAgent(ctx: AgentContext): Promise<AgentReport> {
+export async function reedAgent(ctx: AgentContext, options: { includeVoice?: boolean } = {}): Promise<AgentReport> {
   const view = buildReedView({
     weather: ctx.weather,
     locationName: ctx.location.name,
@@ -81,6 +81,8 @@ export async function reedAgent(ctx: AgentContext): Promise<AgentReport> {
     now: ctx.now,
   });
   const headsUps = reedHeadsUps(view, ctx.now);
-  const voice = headsUps.length > 0 ? await reedVoice(view).catch(() => null) : null;
+  const voice = headsUps.length > 0 && options.includeVoice !== false
+    ? await reedVoice(view).catch(() => null)
+    : null;
   return { agent: "reed", headsUps, voice };
 }

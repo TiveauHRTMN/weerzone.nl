@@ -15,6 +15,13 @@ import {
 
 export const BASE_URL = "https://weerzone.nl";
 
+/**
+ * De informatieve site is publiek; account-, voorkeuren- en beheerroutes
+ * blijven achter de login-proxy. Sitemap-builders nemen alleen openbare
+ * canonicals op die anoniem een 200-response horen te geven.
+ */
+export const GATE_MODE = false;
+
 export const THEME_SLUGS = [
   "bbq-weer",
   "strandweer",
@@ -53,7 +60,10 @@ function isSitemapPlace(p: Place): boolean {
   if (p.name.length > 60) return false;
   const slug = placeRouteSlug(p);
   if (!slug || slug.includes("--")) return false;
-  return true;
+  // Start met plaatsen met aantoonbare zoekvraag en alle echte venues. Dit
+  // houdt de index beheersbaar voor een jong domein zonder nuttige locaties
+  // uit de WaaS-laag te verwijderen.
+  return Boolean(p.venueType) || (p.population ?? 0) >= 1_000;
 }
 
 function placePriority(pop?: number): number {
@@ -104,7 +114,8 @@ export function xmlResponse(body: string): Response {
 
 export function buildSitemapIndex(): string {
   const lastmod = todayIso();
-  return xmlSitemapIndex(SITEMAP_FILES.map((file) => ({
+  const files = GATE_MODE ? ["sitemap-static.xml"] : [...SITEMAP_FILES];
+  return xmlSitemapIndex(files.map((file) => ({
     url: `${BASE_URL}/${file}`,
     lastmod,
   })));
@@ -112,12 +123,20 @@ export function buildSitemapIndex(): string {
 
 export function buildStaticSitemap(): string {
   const today = todayIso();
+
+  if (GATE_MODE) {
+    return xmlUrlset([
+      { url: BASE_URL, lastmod: today, changefreq: "daily", priority: 1.0 },
+      { url: `${BASE_URL}/voorwaarden`, lastmod: today, changefreq: "monthly", priority: 0.3 },
+      { url: `${BASE_URL}/privacy`, lastmod: today, changefreq: "monthly", priority: 0.3 },
+    ]);
+  }
+
   const entries: SitemapEntry[] = [
     { url: BASE_URL, lastmod: today, changefreq: "hourly", priority: 1.0 },
+    { url: `${BASE_URL}/vandaag`, lastmod: today, changefreq: "hourly", priority: 0.95 },
+    { url: `${BASE_URL}/morgen`, lastmod: today, changefreq: "hourly", priority: 0.9 },
     { url: `${BASE_URL}/weer`, lastmod: today, changefreq: "hourly", priority: 0.9 },
-    { url: `${BASE_URL}/piet`, lastmod: today, changefreq: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/reed`, lastmod: today, changefreq: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/koos`, lastmod: today, changefreq: "weekly", priority: 0.7 },
     { url: `${BASE_URL}/steve`, lastmod: today, changefreq: "weekly", priority: 0.7 },
     { url: `${BASE_URL}/over`, lastmod: today, changefreq: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/weer/48-uur`, lastmod: today, changefreq: "hourly", priority: 0.7 },
@@ -125,7 +144,9 @@ export function buildStaticSitemap(): string {
     { url: `${BASE_URL}/weer/regen`, lastmod: today, changefreq: "hourly", priority: 0.6 },
     { url: `${BASE_URL}/contact`, lastmod: today, changefreq: "monthly", priority: 0.4 },
     { url: `${BASE_URL}/privacy`, lastmod: today, changefreq: "monthly", priority: 0.3 },
+    { url: `${BASE_URL}/voorwaarden`, lastmod: today, changefreq: "monthly", priority: 0.3 },
     { url: `${BASE_URL}/zakelijk`, lastmod: today, changefreq: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/steun`, lastmod: today, changefreq: "monthly", priority: 0.4 },
   ];
 
   for (const slug of THEME_SLUGS) {
@@ -146,6 +167,10 @@ export function buildStaticSitemap(): string {
 
 export function buildNLSitemap(): string {
   const today = todayIso();
+
+  // In gate-modus zijn alle plaatspagina's dicht; lever een lege urlset zodat
+  // een gecachte verwijzing naar dit bestand geen duizenden redirects aanbiedt.
+  if (GATE_MODE) return xmlUrlset([]);
   const seen = new Set<string>();
   const entries: SitemapEntry[] = [];
 

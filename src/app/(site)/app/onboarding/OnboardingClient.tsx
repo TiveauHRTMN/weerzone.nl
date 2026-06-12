@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import { WzTextField } from "@/components/wz/WzForm";
+import { updateProfile } from "@/app/actions";
 
 type TopicKey = "rain" | "temp" | "wind" | "uv" | "snow";
 type TimeKey = "06:30" | "07:00" | "08:00" | "avond";
@@ -156,16 +157,12 @@ export default function OnboardingClient({ email }: { email: string }) {
         { onConflict: "id" },
       );
 
-      // Agent-toggles apart en best-effort: zo breekt een nog-niet-toegepaste
-      // migratie (ontbrekende kolommen) de kern-upsert van locatie/postcode niet.
-      try {
-        await supabase
-          .from("user_profile")
-          .update({ piet_on: agents.piet, reed_on: agents.reed, koos_on: agents.koos })
-          .eq("id", uid);
-      } catch {
-        /* migratie nog niet toegepast — toggles volgen later */
-      }
+      const preferenceResult = await updateProfile({
+        pietOn: agents.piet,
+        reedOn: agents.reed,
+        koosOn: agents.koos,
+      });
+      if (!preferenceResult.ok) throw new Error(preferenceResult.error ?? "Voorkeuren opslaan mislukt.");
 
       if (gpsCoords) {
         await supabase
@@ -185,7 +182,7 @@ export default function OnboardingClient({ email }: { email: string }) {
       // Onderwerpen + meldingstijd: in user_metadata. Mijn Weerzone gebruikt
       // deze later voor persoonlijke heads-ups.
       await supabase.auth.updateUser({
-        data: { topics, notification_time: time },
+        data: { topics, notification_time: time, agent_preferences: agents },
       });
 
       router.replace(nextHref);

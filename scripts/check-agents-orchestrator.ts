@@ -62,4 +62,9 @@ assert(
 // Overal rust → lege lijst.
 const eRes = coordinate({ piet: [], reed: [], koos: [] }, now);
 assert.equal(eRes.headsUps.length, 0, "alles rustig → geen heads-ups");
+
+const prefRes = coordinate(danger, now, { piet: true, reed: false, koos: false });
+assert.equal(prefRes.leadAgent, "piet", "uitgeschakelde Reed kan niet leiden");
+assert(!prefRes.headsUps.some((x) => x.agent === "reed"), "uitgeschakelde Reed wordt weggefilterd");
+assert(!prefRes.headsUps.some((x) => x.agent === "koos"), "uitgeschakelde Koos wordt weggefilterd");
 console.log("OK: orchestrator coordination");

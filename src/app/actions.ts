@@ -23,6 +23,7 @@ export async function updateProfile(args: {
   postcode?: string;
   lat?: number;
   lon?: number;
+  locationName?: string;
   pietOn?: boolean;
   reedOn?: boolean;
   koosOn?: boolean;
@@ -31,32 +32,74 @@ export async function updateProfile(args: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Niet ingelogd");
 
-  const updates: any = {
-    updated_at: new Date().toISOString(),
-  };
+  const updates: Record<string, string | number> = {};
   if (args.fullName !== undefined) updates.full_name = args.fullName;
   if (args.postcode !== undefined) updates.postcode = args.postcode;
   if (args.lat !== undefined) updates.primary_lat = args.lat;
   if (args.lon !== undefined) updates.primary_lon = args.lon;
-  if (args.pietOn !== undefined) updates.piet_on = args.pietOn;
-  if (args.reedOn !== undefined) updates.reed_on = args.reedOn;
-  if (args.koosOn !== undefined) updates.koos_on = args.koosOn;
-
-  const { error } = await supabase
-    .from("user_profile")
-    .update(updates)
-    .eq("id", user.id);
-
-  if (error) {
-    console.error("Profile update error:", error);
-    return { ok: false, error: error.message };
+  if (Object.keys(updates).length > 0) {
+    const { error } = await supabase
+      .from("user_profile")
+      .upsert({ id: user.id, email: user.email ?? "", updated_at: new Date().toISOString(), ...updates }, { onConflict: "id" });
+    if (error) {
+      console.error("Profile update error:", error);
+      return { ok: false, error: error.message };
+    }
   }
 
-  // Ook auth metadata bijwerken voor consistentie
-  if (args.fullName) {
-    await supabase.auth.updateUser({
-      data: { full_name: args.fullName }
+  if (args.lat !== undefined && args.lon !== undefined) {
+    const { error: deleteError } = await supabase
+      .from("user_locations")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("is_primary", true);
+    if (deleteError) return { ok: false, error: deleteError.message };
+
+    const { error: locationError } = await supabase.from("user_locations").insert({
+      user_id: user.id,
+      label: args.locationName?.trim() || "Mijn locatie",
+      lat: args.lat,
+      lon: args.lon,
+      is_primary: true,
     });
+    if (locationError) return { ok: false, error: locationError.message };
+  }
+
+  const preferenceProfileUpdates: Record<string, boolean> = {};
+  if (args.pietOn !== undefined) preferenceProfileUpdates.piet_on = args.pietOn;
+  if (args.reedOn !== undefined) preferenceProfileUpdates.reed_on = args.reedOn;
+  if (args.koosOn !== undefined) preferenceProfileUpdates.koos_on = args.koosOn;
+
+  const currentPreferences = (user.user_metadata?.agent_preferences ?? {}) as Record<string, unknown>;
+  const agentPreferences = {
+    ...currentPreferences,
+    ...(args.pietOn !== undefined ? { piet: args.pietOn } : {}),
+    ...(args.reedOn !== undefined ? { reed: args.reedOn } : {}),
+    ...(args.koosOn !== undefined ? { koos: args.koosOn } : {}),
+  };
+  if (args.fullName || args.pietOn !== undefined || args.reedOn !== undefined || args.koosOn !== undefined) {
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        ...(args.fullName ? { full_name: args.fullName } : {}),
+        agent_preferences: agentPreferences,
+      },
+    });
+    if (error) return { ok: false, error: error.message };
+  }
+
+  if (Object.keys(preferenceProfileUpdates).length > 0) {
+    const { error } = await supabase
+      .from("user_profile")
+      .upsert(
+        {
+          id: user.id,
+          email: user.email ?? "",
+          updated_at: new Date().toISOString(),
+          ...preferenceProfileUpdates,
+        },
+        { onConflict: "id" },
+      );
+    if (error) console.warn("Agent preference profile mirror failed:", error.message);
   }
 
   return { ok: true };
@@ -603,7 +646,7 @@ ${venueType ? venuePromptFragment(placeName, venueType) : ""}
 - Vertel bijvoorbeeld over de invloed van de zee (indien kust), de wind op de open vlakte, of de hitte in de stad (urban heat island).
 - De tekst moet informatief en autoritair klinken voor iemand die het weer zoekt.`.trim();
 
-    const content = (await hermesChat([{ role: "user", content: prompt }], { model: "seo" })).trim();
+    const content = (await hermesChat([{ role: "user", content: prompt }], { model: "seo", nlGuard: true })).trim();
 
     // 2. Persist to cache zodat we geen herhaalde Hermes-calls doen.
     try {
@@ -635,7 +678,7 @@ export async function getProvinceVerdict(provinceLabel: string): Promise<string>
       Denk aan geografische kenmerken: de Zeeuwse stromen, de Limburgse heuvels, de Utrechtse Heuvelrug, of de Groningse open klei.
       Geen introducties, begin direct met de essentie.`.trim();
 
-    return (await hermesChat([{ role: "user", content: prompt }], { model: "seo" })).trim();
+    return (await hermesChat([{ role: "user", content: prompt }], { model: "seo", nlGuard: true })).trim();
   } catch {
     return `In ${provinceLabel} vind je diverse microklimaten. Van de kust tot de zandgronden, wij brengen het per uur in kaart.`;
   }

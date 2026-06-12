@@ -6,6 +6,8 @@ import { updateProfile } from "@/app/actions";
 import { Loader2, MapPin, Check, Lock } from "lucide-react";
 import { WzTextField } from "./WzForm";
 import Link from "next/link";
+import { reverseGeocode } from "@/lib/types";
+import { persistCity } from "@/lib/persist-city";
 
 interface Props {
   user: { email: string; id: string };
@@ -62,12 +64,15 @@ export default function ProfileEditForm({ user, profile, onSuccess }: Props) {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
+          const city = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
           const res = await updateProfile({
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,
+            locationName: city.name,
           });
 
           if (res.ok) {
+            persistCity(city);
             setSuccess(true);
             router.refresh();
             setTimeout(() => setSuccess(false), 3000);

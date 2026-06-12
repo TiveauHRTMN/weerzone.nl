@@ -1,5 +1,6 @@
 import type { WeatherData, HourlyForecast, MinutelyPrecipitation, AirQualityData, MarineData } from "./types";
 import { hermesChat } from "@/lib/hermes";
+import { nlCopyGuardValue } from "@/lib/nl-copy-guard";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { fetchGoogleWeather, mapGoogleWeatherConditionToWMO } from "./google-weather";
 import type { Locale } from "@/config/locales";
@@ -88,6 +89,67 @@ interface RawModelHourly {
   cape?: number[];
 }
 
+interface ConvectiveHourlyData {
+  time: string[];
+  cape?: Array<number | null>;
+  dew_point_2m?: Array<number | null>;
+  convective_inhibition?: Array<number | null>;
+  lifted_index?: Array<number | null>;
+  wind_speed_10m?: Array<number | null>;
+  wind_speed_80m?: Array<number | null>;
+  wind_direction_10m?: Array<number | null>;
+  wind_direction_80m?: Array<number | null>;
+}
+
+async function fetchConvectiveHourly(lat: number, lon: number, timezone: string): Promise<ConvectiveHourlyData | null> {
+  const params = new URLSearchParams({
+    latitude: lat.toString(),
+    longitude: lon.toString(),
+    hourly: [
+      "cape",
+      "dew_point_2m",
+      "convective_inhibition",
+      "lifted_index",
+      "wind_speed_10m",
+      "wind_speed_80m",
+      "wind_direction_10m",
+      "wind_direction_80m",
+    ].join(","),
+    timezone,
+    forecast_days: "4",
+    forecast_hours: "96",
+  });
+
+  try {
+    const res = await fetch(`${OPEN_METEO_BASE}?${params}`, {
+      next: { revalidate: 600 },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.hourly as ConvectiveHourlyData;
+  } catch {
+    return null;
+  }
+}
+
+function windVector(speed: number, direction: number) {
+  const radians = direction * Math.PI / 180;
+  return { x: speed * Math.sin(radians), y: speed * Math.cos(radians) };
+}
+
+function windShearAt(data: ConvectiveHourlyData, index: number): number | undefined {
+  const speed10 = data.wind_speed_10m?.[index];
+  const speed80 = data.wind_speed_80m?.[index];
+  if (speed10 == null || speed80 == null) return undefined;
+  const direction10 = data.wind_direction_10m?.[index];
+  const direction80 = data.wind_direction_80m?.[index];
+  if (direction10 == null || direction80 == null) return Math.abs(speed80 - speed10);
+  const low = windVector(speed10, direction10);
+  const high = windVector(speed80, direction80);
+  return Math.sqrt((high.x - low.x) ** 2 + (high.y - low.y) ** 2);
+}
+
 async function fetchModel(
   url: string,
   lat: number,
@@ -155,6 +217,7 @@ export async function fetchWeatherData(
   // Skip live API calls during Next.js build-time static generation
   if (process.env.NEXT_PHASE === 'phase-production-build') return null as any;
   const timezone = locale === "de" ? "Europe/Berlin" : locale === "fr" ? "Europe/Paris" : locale === "es" ? "Europe/Madrid" : "Europe/Amsterdam";
+  const convectivePromise = isBot ? Promise.resolve(null) : fetchConvectiveHourly(lat, lon, timezone);
 
   const attemptFetch = async (): Promise<any> => {
     const models = BASE_MODELS_BY_LOCALE[locale];
@@ -220,7 +283,7 @@ export async function fetchWeatherData(
       }
     }
 
-    const results = await Promise.all(fetchPromises);
+    const [results, convectiveData] = await Promise.all([Promise.all(fetchPromises), convectivePromise]);
     const coreData = results[0];
 
     // Defensive check for core data
@@ -253,6 +316,7 @@ export async function fetchWeatherData(
     
     // 1. BLEND HOURLY DATA WITH MULTIPLE MODELS
     const times = data.hourly.time ?? [];
+    const convectiveIndex = new Map((convectiveData?.time ?? []).map((time, index) => [time, index]));
     const hourly: HourlyForecast[] = times.map((time: string, i: number) => {
       const harmonie = (harmonieData && Array.isArray(harmonieData.temperature_2m) && harmonieData.temperature_2m[i] !== undefined) ? {
         temperature: Math.round(harmonieData.temperature_2m[i]),
@@ -321,6 +385,13 @@ export async function fetchWeatherData(
       const precipitation = data.hourly.precipitation?.[i] ?? 0;
       const weatherCode = data.hourly.weather_code?.[i] ?? 0;
       const windSpeed = Math.round(data.hourly.wind_speed_10m?.[i] ?? 0);
+      const expertIndex = convectiveIndex.get(time);
+      const expertValue = (values?: Array<number | null>) => expertIndex === undefined ? undefined : values?.[expertIndex] ?? undefined;
+      const expertCape = expertValue(convectiveData?.cape);
+      const dewPoint = expertValue(convectiveData?.dew_point_2m);
+      const cin = expertValue(convectiveData?.convective_inhibition);
+      const liftedIndex = expertValue(convectiveData?.lifted_index);
+      const windShear = convectiveData && expertIndex !== undefined ? windShearAt(convectiveData, expertIndex) : undefined;
 
       return {
         time,
@@ -329,7 +400,11 @@ export async function fetchWeatherData(
         weatherCode,
         precipitation,
         windSpeed,
-        cape: Math.round(data.hourly.cape?.[i] ?? 0),
+        cape: Math.round(expertCape ?? data.hourly.cape?.[i] ?? 0),
+        cin: cin === undefined ? undefined : Math.round(cin),
+        dewPoint: dewPoint === undefined ? undefined : Number(dewPoint.toFixed(1)),
+        liftedIndex: liftedIndex === undefined ? undefined : Number(liftedIndex.toFixed(1)),
+        windShear: windShear === undefined ? undefined : Math.round(windShear),
         confidence: leadModelEntry ? "high" : "medium",
         models: { harmonie, icon, arome, ecmwf, gfs, aifs, google, ...externalAiModels }
       };
@@ -537,7 +612,7 @@ export async function getNeuralInsights(lat: number, lon: number, weather: Weath
     `.trim();
 
     const raw = await hermesChat([{ role: "user", content: prompt }], { json: true });
-    return JSON.parse(raw.trim().replace(/```json|```/g, ""));
+    return nlCopyGuardValue(JSON.parse(raw.trim().replace(/```json|```/g, "")));
   } catch (e) {
     console.error("Neural Insights Error:", e);
     return undefined;

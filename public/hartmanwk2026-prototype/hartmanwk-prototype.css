@@ -427,3 +427,34 @@
     .st-value { font-size: 1.15rem; }
     .mecard-total span { font-size: 1.6rem; }
   }
+
+  /* ---------- Voorspellingen van een deelnemer (transparantie) ---------- */
+  .trow-click { cursor: pointer; }
+  .trow-click:hover { background: var(--card-2); }
+  .trow-me.trow-click:hover { background: color-mix(in oklab, var(--accent), var(--card) 70%); }
+  .pod { cursor: pointer; }
+  .table-hint { font-size: .72rem; color: var(--ink-faint); text-align: center; padding: 10px 14px 12px; }
+
+  .pview-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(7, 9, 12, .72); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 18px; animation: fadeIn .15s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .pview { width: 100%; max-width: 480px; max-height: min(82vh, 640px); display: flex; flex-direction: column; padding: 18px 18px 10px; animation: pviewIn .18s ease; }
+  @keyframes pviewIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .pview-head { display: flex; align-items: center; gap: 12px; }
+  .pview-id { flex: 1; min-width: 0; }
+  .pview-name { font-weight: 800; font-size: 1.02rem; }
+  .pview-sub { font-size: .8rem; color: var(--ink-soft); }
+  .pview-close { border: 1px solid var(--line); background: var(--card-2); color: var(--ink-soft); width: 32px; height: 32px; border-radius: 10px; font-size: 1.1rem; line-height: 1; cursor: pointer; flex: 0 0 auto; }
+  .pview-close:hover { color: var(--ink); }
+  .pview-note { font-size: .78rem; color: var(--ink-faint); margin: 10px 0 8px; line-height: 1.45; }
+  .pview-list { overflow-y: auto; margin: 0 -6px; padding: 0 6px 8px; }
+  .pview-row { display: grid; grid-template-columns: 76px 1fr 56px 72px; align-items: center; gap: 8px; padding: 9px 4px; border-bottom: 1px solid var(--line-soft); }
+  .pview-row:last-child { border-bottom: none; }
+  .pview-thead { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); padding: 4px; border-bottom: 1px solid var(--line); }
+  .pview-date { font-size: .74rem; color: var(--ink-faint); }
+  .pview-mid { display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .pview-score { font-weight: 800; font-size: .9rem; min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
+  .pview-pred { font-weight: 800; font-size: .9rem; text-align: center; font-variant-numeric: tabular-nums; }
+  .pview-none { color: var(--ink-faint); font-weight: 600; font-size: .76rem; }
+  .pview-pts { display: flex; justify-content: flex-end; }
+  .pview-wait { color: var(--ink-faint); }
+  .pview-empty { font-size: .82rem; color: var(--ink-soft); padding: 14px 4px 18px; }

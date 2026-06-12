@@ -5,11 +5,11 @@ import type { WeatherData } from "@/lib/types";
 import { buildMarianaContext, isMarianaRunStale } from "@/lib/mariana/piet-context";
 
 const WC_LABEL: Record<number, string> = {
-  0: "stralend", 1: "zonnig", 2: "half bewolkt", 3: "bewolkt",
-  45: "mistig", 48: "rijpige mist",
-  51: "lichte motregen", 53: "matige motregen", 55: "dichte motregen",
-  61: "lichte regen", 63: "matige regen", 65: "zware regen",
-  71: "lichte sneeuw", 73: "matige sneeuw", 75: "zware sneeuw",
+  0: "helder", 1: "zonnig", 2: "half bewolkt", 3: "bewolkt",
+  45: "mistig", 48: "mistig met rijp",
+  51: "lichte motregen", 53: "motregen", 55: "dichte motregen",
+  61: "lichte regen", 63: "regen", 65: "zware regen",
+  71: "lichte sneeuw", 73: "sneeuw", 75: "zware sneeuw",
   80: "regenbuien", 81: "stevige buien", 82: "zware stortbuien",
   95: "onweer", 96: "onweer met hagel", 99: "zwaar onweer met hagel",
 };
@@ -18,121 +18,79 @@ function wcLabel(code: number): string {
   return WC_LABEL[code] ?? "wisselend";
 }
 
-const DAGEN = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
-
-function dagNaam(offsetDagen = 0): string {
-  const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Amsterdam" }));
-  d.setDate(d.getDate() + offsetDagen);
-  return DAGEN[d.getDay()];
+function dayName(date: string): string {
+  return new Date(`${date}T12:00:00`).toLocaleDateString("nl-NL", { weekday: "long" });
 }
 
-function weatherToContext(w: WeatherData, city: string): string {
-  const now = w.current;
-  const today = w.daily[0];
-  const tomorrow = w.daily[1];
-  const vandaag = dagNaam(0);
-  const morgen = dagNaam(1);
-
-  const hourlyLines = w.hourly
-    .slice(0, 18)
-    .filter((_, i) => i % 3 === 0)
-    .map((h) => {
-      const time = new Date(h.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
-      return `  ${time}: ${h.temperature}° ${wcLabel(h.weatherCode)}, ${h.precipitation}mm, wind ${h.windSpeed}km/u`;
+function weatherToContext(weather: WeatherData, city: string, dayOffset: 0 | 1): string {
+  const selected = weather.daily[dayOffset];
+  const selectedName = selected ? dayName(selected.date) : dayOffset === 0 ? "vandaag" : "morgen";
+  const hourly = weather.hourly
+    .filter((hour) => !selected || hour.time.slice(0, 10) === selected.date)
+    .filter((_, index) => index % 3 === 0)
+    .map((hour) => {
+      const time = new Date(hour.time).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+      return `${time}: ${Math.round(hour.temperature)} graden, ${wcLabel(hour.weatherCode)}, ${hour.precipitation} mm regen, wind ${Math.round(hour.windSpeed)} km/u`;
     })
     .join("\n");
 
   const lines = [
-    `Locatie: ${city}`,
-    `Nu: ${now.temperature}°C (voelt ${now.feelsLike}°), ${wcLabel(now.weatherCode)}, wind ${now.windSpeed}km/u (vlagen ${now.windGusts}), neerslag ${now.precipitation}mm, vochtigheid ${now.humidity}%.`,
-    `${vandaag.charAt(0).toUpperCase() + vandaag.slice(1)} (vandaag): min ${today.tempMin}°, max ${today.tempMax}°, ${wcLabel(today.weatherCode)}, neerslag ${today.precipitationSum}mm, wind max ${today.windSpeedMax}km/u, zon ${today.sunHours}u.`,
-    `Uurverloop ${vandaag}:\n${hourlyLines}`,
+    `Locatie: ${city}. Gekozen dag: ${selectedName}.`,
+    `Nu: ${Math.round(weather.current.temperature)} graden, voelt als ${Math.round(weather.current.feelsLike)} graden, ${wcLabel(weather.current.weatherCode)}, wind ${Math.round(weather.current.windSpeed)} km/u, windvlagen ${Math.round(weather.current.windGusts)} km/u.`,
   ];
 
-  if (tomorrow) {
-    lines.push(`${morgen.charAt(0).toUpperCase() + morgen.slice(1)} (morgen): min ${tomorrow.tempMin}°, max ${tomorrow.tempMax}°, ${wcLabel(tomorrow.weatherCode)}, neerslag ${tomorrow.precipitationSum}mm.`);
-  }
-
+  weather.daily.slice(0, 2).forEach((day, index) => {
+    lines.push(`${index === 0 ? "Vandaag" : "Morgen"}: ${dayName(day.date)}, ${Math.round(day.tempMin)} tot ${Math.round(day.tempMax)} graden, ${wcLabel(day.weatherCode)}, ${day.precipitationSum} mm regen, wind maximaal ${Math.round(day.windSpeedMax)} km/u.`);
+  });
+  lines.push(`Uurverloop ${selectedName}:\n${hourly}`);
   return lines.join("\n\n");
 }
 
 const PIET_SYSTEM = `
-Je bent Piet — een gewone Nederlandse buurman die het weer serieus bijhoudt als hobby. Je vertelt het aan iemand bij de koffie of bij het hek: direct, licht, met een droge noot hier en daar. Altijd feitelijk correct en grammaticaal foutloos.
+Je bent Piet: een nuchtere Nederlandse buurman die het weer goed bijhoudt. Schrijf kort, natuurlijk en praktisch.
 
-TOON:
-- Conversationeel maar verzorgd. Geen slordig taalgebruik.
-- Lichte droge humor mag — een opmerking die klopt, geen grap die uitgelegd moet worden.
-- Nooit dramatisch. Slecht weer is gewoon slecht weer.
-- Schrijf alsof je er al vanochtend naar hebt gekeken en je conclusie klaar is.
-
-STRUCTUUR:
-- 2 tot 3 vloeiende alinea's. Geen bullets, geen lijstjes, geen kopjes.
-- Eerste alinea: de dag in één beweging neerzetten.
-- Tweede alinea: het verloop of de details die er écht toe doen.
-- Derde alinea (optioneel): morgen kort aantippen als dat relevant is.
-
-DAGNAMEN — VERPLICHT:
-- Schrijf altijd de concrete dag van de week, nooit vage tijdsaanduidingen.
-- Gebruik NIET: "vandaag", "vanmiddag", "vanavond", "morgen" alleen.
-- Gebruik WEL: "zondagmiddag", "maandagochtend", "morgen (maandag)", "dinsdagavond".
-- De data geeft de dagnamen mee — gebruik ze altijd in de tekst.
-
-VERBODEN:
-- Geen meteorologie-jargon ("trog", "lagedrukgebied", "front", "hogedrukgebied").
-- Geen anglicismen.
-- Geen "Er is een kans op...", "Meteorologisch gezien...".
-- Geen bronvermelding of zelfverwijzing ("KNMI zegt...", "volgens de data...").
-- Geen emoji. Max 200 woorden.
-
-Lever alleen de tekst. Niets eromheen.
+REGELS:
+- Schrijf 1 of 2 korte alinea's zonder kopjes of opsommingen.
+- Beschrijf alleen de gekozen dag en gebruik de concrete dagnaam waar dat helpt.
+- Vertaal weerdata naar wat iemand buiten merkt en wanneer dat ertoe doet.
+- Gebruik geen meteorologisch jargon, anglicismen, bronvermeldingen, interne modelnamen of emoji.
+- Noem geen KNMI, Mariana, DeepSeek of kunstmatige intelligentie.
+- Maximaal 120 woorden. Lever alleen de tekst.
 `.trim();
 
-/**
- * Mariana-dagduiding voor de KNMI-briefing. Combineert de RIJKE signaal-duiding
- * (agent_outputs.piet.text + risk_summary + mariana_summary + regime) met de
- * compacte local_feed (regime/gevaar/Reed-verwijzing) van de dichtstbijzijnde
- * regio. Zo krijgt de 30-min live-overlay het volledige dagfundament van de
- * cascade mee, zonder zelf een LLM-redenering te draaien. Best-effort; faalt zacht.
- */
 async function marianaLocalContext(lat: number, lon: number): Promise<string | null> {
   try {
     const { nearestRegionData } = await import("@/lib/mariana/regions/storage");
     const data = await nearestRegionData(lat, lon).catch(() => null);
-    if (!data) return null;
-    if (isMarianaRunStale(data.runAt)) return null;
+    if (!data || isMarianaRunStale(data.runAt)) return null;
     return buildMarianaContext(data.signal, data.feed);
   } catch {
     return null;
   }
 }
 
-async function _generate(
-  w: WeatherData,
+async function generateDayStory(
+  weather: WeatherData,
   city: string,
-  point?: { lat: number; lon: number }
+  point: { lat: number; lon: number },
+  dayOffset: 0 | 1,
 ): Promise<string | null> {
-  // Haal KNMI-bulletin, weerdata en de Mariana Local-dagduiding parallel op
-  const [knmiText, weatherContext, marianaContext] = await Promise.all([
+  const [knmiText, marianaContext] = await Promise.all([
     fetchKNMIShortForecast().catch(() => null),
-    Promise.resolve(weatherToContext(w, city)),
-    point ? marianaLocalContext(point.lat, point.lon) : Promise.resolve(null),
+    marianaLocalContext(point.lat, point.lon),
   ]);
-
-  const marianaBlock = marianaContext
-    ? `\n\nMARIANA DAGDUIDING (context — schrijf in Piet's stijl, geen jargon overnemen):\n${marianaContext}`
-    : "";
-
-  const userPrompt = knmiText
-    ? `OFFICIËLE KNMI-VERWACHTING (gebruik als feitelijke basis, schrijf om in jouw stijl):\n"${knmiText}"\n\nHYPERLOKALE DATA voor ${city}:\n${weatherContext}${marianaBlock}`
-    : `HYPERLOCALE DATA voor ${city}:\n${weatherContext}${marianaBlock}`;
+  const selectedDay = dayOffset === 0 ? "vandaag" : "morgen";
+  const userPrompt = [
+    `Schrijf uitsluitend het weerverhaal voor ${selectedDay}.`,
+    knmiText ? `Landelijke verwachting als feitelijke basis:\n${knmiText}` : null,
+    `Lokale data voor ${city}:\n${weatherToContext(weather, city, dayOffset)}`,
+    marianaContext ? `Aanvullende lokale duiding, zonder interne termen over te nemen:\n${marianaContext}` : null,
+  ].filter(Boolean).join("\n\n");
 
   try {
     const text = await hermesChat(
-      [
-        { role: "system", content: PIET_SYSTEM },
-        { role: "user", content: userPrompt },
-      ],
-      { model: "persona", temperature: 0.72, maxTokens: 350 }
+      [{ role: "system", content: PIET_SYSTEM }, { role: "user", content: userPrompt }],
+      { model: "personaPro", temperature: 0.58, maxTokens: 240, nlGuard: true },
     );
     return text.trim() || null;
   } catch {
@@ -140,23 +98,28 @@ async function _generate(
   }
 }
 
-/**
- * Genereert Piet's weerbericht: KNMI-bulletin + hyperlocale Open-Meteo data → DeepSeek V4 Flash.
- * Gecached per ~1km² per 30 minuten.
- */
-export function fetchPietWeerbericht(
+export function fetchPietDayStory(
   lat: number,
   lon: number,
   city: string,
-  weather: WeatherData
+  weather: WeatherData,
+  dayOffset: 0 | 1,
 ): Promise<string | null> {
   const latKey = String(Math.round(lat * 10));
   const lonKey = String(Math.round(lon * 10));
   const dateKey = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
-
   return unstable_cache(
-    () => _generate(weather, city, { lat, lon }),
-    ["piet-weerbericht", latKey, lonKey, dateKey],
-    { revalidate: 1800, tags: ["piet-weerbericht"] }
+    () => generateDayStory(weather, city, { lat, lon }, dayOffset),
+    ["piet-dagverhaal", latKey, lonKey, dateKey, String(dayOffset)],
+    { revalidate: 1800, tags: ["piet-weerbericht"] },
   )();
+}
+
+export function fetchPietWeerbericht(
+  lat: number,
+  lon: number,
+  city: string,
+  weather: WeatherData,
+): Promise<string | null> {
+  return fetchPietDayStory(lat, lon, city, weather, 0);
 }

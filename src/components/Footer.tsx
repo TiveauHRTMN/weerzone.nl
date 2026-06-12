@@ -14,10 +14,11 @@ const SOCIALS = [
 ];
 
 const NAV_ITEMS = [
-  { label: "Hooikoorts", href: "/weer/themas/hooikoorts" },
-  { label: "Amsterdam", href: "/weer/noord-holland/amsterdam" },
-  { label: "Den Haag", href: "/weer/zuid-holland/den-haag" },
-  { label: "BBQ weer", href: "/weer/themas/bbq-weer" },
+  { label: "Vandaag", href: "/vandaag" },
+  { label: "Morgen", href: "/morgen" },
+  { label: "Over", href: "/over" },
+  { label: "Contact", href: "/contact" },
+  { label: "Mijn Weerzone", href: "/mijn-weerzone" },
 ];
 
 export default function Footer() {
@@ -29,7 +30,7 @@ export default function Footer() {
 
   return (
     <footer className="w-full flex flex-col items-center pb-10 mt-12 relative z-10">
-      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6">
+      <div className="w-full max-w-[820px] mx-auto px-4 sm:px-6">
         {!isHome && (
           <Link
             href="/"
@@ -46,11 +47,6 @@ export default function Footer() {
               <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
                 <LogoFull height={28} />
               </Link>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-white/90 leading-tight">
-                Weer voor jouw plek.
-                <br />
-                Vandaag en morgen.
-              </p>
             </div>
 
             <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2">
@@ -66,7 +62,7 @@ export default function Footer() {
             </nav>
 
             <p className="mx-auto max-w-md text-[11px] font-semibold leading-relaxed text-white/55">
-              WEERZONE combineert actuele weergegevens met heldere uitleg voor jouw locatie. De officiele bronnen behouden hun eigen credits.
+              WEERZONE combineert actuele weergegevens met heldere uitleg voor jouw locatie. De officiële bronnen behouden hun eigen credits.
             </p>
 
             <div className="space-y-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/35">

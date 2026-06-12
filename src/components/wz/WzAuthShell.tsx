@@ -6,8 +6,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import WzLogo from "./WzLogo";
 import { audienceHomeHref, resolveAuthAudience } from "@/lib/auth-i18n";
 
-const PAGE_BG = "linear-gradient(160deg, #1a3a6e 0%, #0f2244 40%, #080f1f 100%)";
-
 const GLASS_CARD: React.CSSProperties = {
   background: "rgba(255,255,255,0.95)",
   backdropFilter: "blur(24px)",
@@ -40,10 +38,7 @@ export default function WzAuthShell({
       : "Weerzone home";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6" style={{ background: PAGE_BG }}>
-      {/* Subtle noise overlay */}
-      <div className="fixed inset-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)", backgroundSize: "3px 3px", opacity: 0.6 }} />
-
+    <div className="min-h-screen min-h-[100svh] flex flex-col items-center justify-center p-4 sm:p-6">
       <div className="relative w-full" style={{ maxWidth: 440 }}>
         {/* Logo boven de kaart */}
         <div className="flex justify-center mb-8">
@@ -54,10 +49,26 @@ export default function WzAuthShell({
 
         {/* Title + subtitle */}
         <div className="text-center mb-8">
-          <h1 className="text-white font-black whitespace-pre-line mb-3" style={{ fontSize: "clamp(26px,4vw,34px)", letterSpacing: "-0.025em", lineHeight: 1.1 }}>
+          <h1
+            className="text-white font-black whitespace-pre-line mb-3"
+            style={{
+              fontSize: "clamp(26px,4vw,34px)",
+              letterSpacing: "-0.025em",
+              lineHeight: 1.1,
+              textShadow: "0 2px 18px rgba(15,26,44,0.4)",
+            }}
+          >
             {title}
           </h1>
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)", maxWidth: 360, margin: "0 auto" }}>
+          <p
+            className="text-sm leading-relaxed"
+            style={{
+              color: "rgba(255,255,255,0.84)",
+              maxWidth: 360,
+              margin: "0 auto",
+              textShadow: "0 1px 12px rgba(15,26,44,0.5)",
+            }}
+          >
             {subtitle}
           </p>
         </div>

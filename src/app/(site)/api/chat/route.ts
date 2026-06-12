@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
     const answer = await hermesChat(
       [{ role: "user", content: `${SYSTEM_PROMPT}\n\nWEERDATA: ${weatherContext}\n\nVRAAG: ${question}` }],
-      { temperature: 0.8, maxTokens: 200 }
+      { temperature: 0.8, maxTokens: 200, nlGuard: true }
     ) || "Geen antwoord. Probeer het opnieuw.";
 
     return NextResponse.json({ answer });

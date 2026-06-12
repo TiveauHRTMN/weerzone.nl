@@ -67,11 +67,11 @@ export default function ResetConfirmClient() {
         </div>
       ) : !hasSession ? (
         <>
-          <h1 className="wz-h-1 mb-2">Link verlopen</h1>
-          <p className="wz-body mb-6">
+          <h1 className="h-2 mb-2">Link verlopen</h1>
+          <p className="t-body mb-6">
             Deze reset-link is niet meer geldig. Vraag hieronder een nieuwe aan.
           </p>
-          <Link href="/app/reset" className="wz-btn wz-btn-primary wz-btn-block wz-btn-lg">
+          <Link href="/app/reset" className="btn btn-primary btn-block btn-lg">
             Nieuwe link aanvragen
           </Link>
         </>
@@ -83,13 +83,13 @@ export default function ResetConfirmClient() {
           >
             <Check className="w-8 h-8" strokeWidth={2.5} />
           </div>
-          <h1 className="wz-h-1 mb-2">Wachtwoord ingesteld</h1>
-          <p className="wz-body">We sturen je even door naar je account…</p>
+          <h1 className="h-2 mb-2">Wachtwoord ingesteld</h1>
+          <p className="t-body">We sturen je even door naar je account…</p>
         </div>
       ) : (
         <>
-          <h1 className="wz-h-1 mb-2">Nieuw wachtwoord</h1>
-          <p className="wz-body mb-6">Minstens 8 tekens. Dubbel invullen voor de zekerheid.</p>
+          <h1 className="h-2 mb-2">Nieuw wachtwoord</h1>
+          <p className="t-body mb-6">Minstens 8 tekens. Dubbel invullen voor de zekerheid.</p>
 
           <form onSubmit={handleSubmit} noValidate>
             <WzPasswordField
@@ -123,7 +123,7 @@ export default function ResetConfirmClient() {
             <button
               type="submit"
               disabled={loading}
-              className="wz-btn wz-btn-primary wz-btn-block wz-btn-lg disabled:opacity-60"
+              className="btn btn-primary btn-block btn-lg disabled:opacity-60"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Wachtwoord opslaan"}
             </button>

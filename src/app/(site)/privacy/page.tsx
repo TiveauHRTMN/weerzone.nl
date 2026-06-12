@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Privacybeleid",
   description: "Hoe WEERZONE omgaat met je gegevens. Kort, eerlijk, zonder juridisch geneuzel.",
+  alternates: { canonical: "https://weerzone.nl/privacy" },
 };
 
 export default function PrivacyPage() {
@@ -27,6 +28,11 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-bold text-gray-900">Wat we verzamelen</h2>
             <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+              <li>
+                <strong>Account:</strong> je naam, e-mailadres en wachtwoord als
+                je een account aanmaakt. Wachtwoorden worden versleuteld
+                opgeslagen; we kunnen ze zelf niet lezen.
+              </li>
               <li>
                 <strong>E-mailadres:</strong> alleen als je je aanmeldt voor onze weerberichten of waarschuwingen. We gebruiken dit uitsluitend om je de weerrapporten te sturen waarvoor je hebt gekozen.
               </li>
@@ -96,8 +102,15 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-bold text-gray-900">Je rechten</h2>
             <p className="text-sm text-gray-700">
               Je kunt je cookie-voorkeur altijd wijzigen door je browserdata te
-              wissen. Aangezien we geen persoonsgegevens opslaan, is er niks om
-              in te zien of te verwijderen.
+              wissen. Heb je een account, dan kun je je gegevens inzien of laten
+              verwijderen: mail naar{" "}
+              <a
+                href="mailto:info@weerzone.nl"
+                className="text-accent-orange hover:underline font-medium"
+              >
+                info@weerzone.nl
+              </a>{" "}
+              en we regelen het.
             </p>
           </section>
 

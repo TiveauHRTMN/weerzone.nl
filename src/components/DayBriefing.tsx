@@ -1,6 +1,7 @@
 import type { AgentContext } from "@/lib/agents/context";
 import type { AgentPreferences } from "@/lib/agents/preferences";
 import type { AirQualityData, HourlyForecast } from "@/lib/types";
+import Link from "next/link";
 import { getPollenLevel, getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
 import { formatWindowLabel, SEVERITY_LABEL } from "@/lib/knmi-warnings";
 import { marianaKoosText } from "@/lib/mariana/agent-context";
@@ -15,6 +16,7 @@ import {
   type PluimIntelligence,
 } from "@/lib/model-blend";
 import HeroWeatherStory from "@/components/HeroWeatherStory";
+import RainMap from "@/components/RainMap";
 import WeatherVisuals from "@/components/WeatherVisuals";
 
 interface DayBriefingProps {
@@ -22,6 +24,22 @@ interface DayBriefingProps {
   preferences: AgentPreferences;
   dayOffset: 0 | 1;
   airQuality: AirQualityData | null;
+}
+
+type WeatherAgent = "piet" | "reed" | "koos";
+type AgentDecisionState = "active" | "quiet" | "watching" | "urgent";
+
+interface AgentDecision {
+  agent: WeatherAgent;
+  icon: string;
+  label: string;
+  state: AgentDecisionState;
+  title: string;
+  summary: string;
+  timing: string;
+  action: string;
+  confidence: string;
+  enabled: boolean;
 }
 
 const DAYPARTS = [
@@ -47,6 +65,12 @@ function confidenceLabel(agreement: number): string {
   if (agreement >= 80) return "Hoog";
   if (agreement >= 60) return "Redelijk";
   return "Beperkt";
+}
+
+function confidenceWord(agreement: number): string {
+  if (agreement >= 80) return "hoog";
+  if (agreement >= 60) return "redelijk";
+  return "beperkt";
 }
 
 function compactCopy(value: string | null | undefined, maxSentences = 2): string | null {
@@ -172,6 +196,74 @@ function pollenForDay(airQuality: AirQualityData | null, date: string) {
   return rows.length ? `${strongest.name}: ${strongest.label.toLowerCase()}.` : "Geen actuele pollenmeting beschikbaar.";
 }
 
+function reedStateForTitle(title: string, meaningful: boolean): AgentDecisionState {
+  if (!meaningful) return "quiet";
+  const t = title.toLowerCase();
+  if (t.includes("code rood") || t.includes("code oranje") || t.includes("zwaar")) return "urgent";
+  return "watching";
+}
+
+function shortTiming(text: string, fallback: string): string {
+  const first = text.split(".")[0]?.trim();
+  if (!first) return fallback;
+  return first.length > 82 ? `${first.slice(0, 79).trim()}...` : first;
+}
+
+function buildAgentDecisions(input: {
+  preferences: AgentPreferences;
+  label: string;
+  pietAdvice: string;
+  risk: ReturnType<typeof riskForDay>;
+  choice: ReturnType<typeof choiceForDay>;
+  agreement: number;
+}): AgentDecision[] {
+  const { preferences, label, pietAdvice, risk, choice, agreement } = input;
+  const confidence = confidenceWord(agreement);
+  const koosHasMove =
+    !choice.title.toLowerCase().includes("hoeft niet uit") &&
+    !choice.title.toLowerCase().includes("huidige plan");
+  const reedState = reedStateForTitle(risk.title, risk.meaningful);
+
+  return [
+    {
+      agent: "piet",
+      icon: "P",
+      label: "Piet",
+      state: preferences.piet ? "active" : "quiet",
+      title: preferences.piet ? "Dagadvies staat klaar" : "Dagadvies staat uit",
+      summary: pietAdvice,
+      timing: label === "Vandaag" ? "nu, straks en vanavond" : "morgen per dagdeel",
+      action: preferences.piet ? "Gebruik dit als basis voor je dag." : "Zet Piet aan voor je dagelijkse briefing.",
+      confidence,
+      enabled: preferences.piet,
+    },
+    {
+      agent: "reed",
+      icon: "R",
+      label: "Reed",
+      state: preferences.reed ? reedState : "quiet",
+      title: preferences.reed ? risk.title : "Risicobewaking staat uit",
+      summary: preferences.reed ? risk.impact : "Reed kan onweer, wind, zware regen en gladheid voor je blijven volgen.",
+      timing: preferences.reed ? shortTiming(risk.text, "geen bijzonder risicovenster") : "alleen na activeren",
+      action: preferences.reed ? (risk.meaningful ? risk.impact : "Geen extra actie nodig; Weerzone blijft kijken.") : "Zet Reed aan voor risicosignalen.",
+      confidence,
+      enabled: preferences.reed,
+    },
+    {
+      agent: "koos",
+      icon: "K",
+      label: "Koos",
+      state: preferences.koos ? (koosHasMove ? "active" : "quiet") : "quiet",
+      title: preferences.koos ? choice.title : "Planningshulp staat uit",
+      summary: preferences.koos ? choice.text : "Koos kan meekijken of later, morgen of een andere plek slimmer is.",
+      timing: koosHasMove ? "als je je plan kunt schuiven" : "geen duidelijke uitwijk nodig",
+      action: preferences.koos ? (koosHasMove ? "Neem dit mee voordat je vertrekt." : "Blijf bij je huidige plan.") : "Zet Koos aan voor planning en alternatieven.",
+      confidence,
+      enabled: preferences.koos,
+    },
+  ];
+}
+
 function pluimIntelligence(
   ctx: AgentContext,
   preferences: AgentPreferences,
@@ -236,10 +328,17 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
       || ctx.mariana?.signal?.agent_outputs.piet.text,
     2,
   ) ?? clothingAdvice(daily.tempMin, daily.tempMax, maxWind, daily.precipitationSum);
+  const agentDecisions = buildAgentDecisions({ preferences, label, pietAdvice, risk, choice, agreement });
 
   return (
     <div className="va-stagger va-page relative z-10 mx-auto max-w-[820px] space-y-7 px-4 py-9 sm:px-6 sm:py-14">
       <header className="va-card va-hero p-6 sm:p-8">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <nav className="va-day-toggle" aria-label="Vandaag of morgen">
+            <Link href="/vandaag" className={dayOffset === 0 ? "is-active" : ""}>Vandaag</Link>
+            <Link href="/morgen" className={dayOffset === 1 ? "is-active" : ""}>Morgen</Link>
+          </nav>
+        </div>
         <div className="va-micro text-slate-400">Weerzone · {label}</div>
         <div className="mt-4 flex items-center justify-between gap-5">
           <div className="min-w-0">
@@ -261,12 +360,49 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
         </div>
       </header>
 
+      {dayOffset === 0 && <RainMap lat={ctx.location.lat} lon={ctx.location.lon} />}
+
       <section className="space-y-3">
         <div className="va-section-head px-1">
-          <div><span className="va-onsky va-micro">Van uur tot uur</span><h2>Zo verloopt de dag</h2></div>
+          <div><span className="va-onsky va-micro">Drie blikken vooruit</span><h2>Piet, Reed en Koos</h2></div>
           <span className="va-section-number">01</span>
         </div>
-        <div className="va-daypart-grid grid grid-cols-2 gap-3">
+        <div className="va-agent-strip grid gap-3 lg:grid-cols-3">
+          {agentDecisions.map((decision) => (
+            <article
+              key={decision.agent}
+              id={decision.agent}
+              className={`va-card va-agent-tile is-${decision.state} ${decision.enabled ? "" : "is-muted"} scroll-mt-24 p-4 sm:p-5`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="va-agent-mark" aria-hidden>{decision.icon}</span>
+                  <div className="min-w-0">
+                    <span className="va-chip"><span className={`va-dot ${decision.state === "urgent" ? "is-urgent" : ""}`} />{decision.label}</span>
+                    <h3>{decision.title}</h3>
+                  </div>
+                </div>
+                <span className={`va-state-pill is-${decision.state}`}>
+                  {decision.state === "quiet" ? "Rustig" : decision.state === "watching" ? "Let op" : decision.state === "urgent" ? "Urgent" : "Actief"}
+                </span>
+              </div>
+              <p>{decision.summary}</p>
+              <dl className="va-agent-ops">
+                <div><dt>Timing</dt><dd>{decision.timing}</dd></div>
+                <div><dt>Actie</dt><dd>{decision.action}</dd></div>
+                <div><dt>Zekerheid</dt><dd>{decision.confidence}</dd></div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <div className="va-section-head px-1">
+          <div><span className="va-onsky va-micro">Van uur tot uur</span><h2>Zo verloopt je dag</h2></div>
+          <span className="va-section-number">02</span>
+        </div>
+        <div className="va-daypart-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
           {DAYPARTS.map((part) => {
             const partHours = hours.filter((hour) => hourNumber(hour.time) >= part.start && hourNumber(hour.time) < part.end);
             if (!partHours.length) return null;
@@ -284,30 +420,6 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
           })}
         </div>
       </section>
-
-      {(preferences.piet || preferences.reed || preferences.koos) && (
-        <section className="space-y-3">
-          <div className="va-section-head px-1">
-            <div><span className="va-onsky va-micro">Voor jouw planning</span><h2>Piet, Reed en Koos</h2></div>
-            <span className="va-section-number">02</span>
-          </div>
-          {preferences.piet && (
-            <article id="piet" className="va-card va-agent-layer scroll-mt-24 p-5 sm:p-6">
-              <span className="va-agent-icon">☀️</span><div><span className="va-chip">Piet · Dagadvies</span><h3>Zo bereid je je voor</h3><p>{pietAdvice}</p></div>
-            </article>
-          )}
-          {preferences.reed && (
-            <article id="reed" className="va-card va-agent-layer scroll-mt-24 p-5 sm:p-6">
-              <span className="va-agent-icon">⚡</span><div><span className="va-chip">Reed · Risico</span><h3>{risk.title}</h3><p>{risk.impact}</p></div>
-            </article>
-          )}
-          {preferences.koos && (
-            <article id="koos" className="va-card va-agent-layer scroll-mt-24 p-5 sm:p-6">
-              <span className="va-agent-icon">🧭</span><div><span className="va-chip">Koos · Plannen</span><h3>{choice.title}</h3><p>{choice.text}</p></div>
-            </article>
-          )}
-        </section>
-      )}
 
       <section className="space-y-3">
         <div className="va-section-head px-1">

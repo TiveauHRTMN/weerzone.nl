@@ -8,8 +8,7 @@
  * visitor's location. Styling: src/app/(site)/piet/piet-skin.css.
  */
 
-import { Fragment, Suspense, useEffect, useState, type ReactNode } from "react";
-import dynamic from "next/dynamic";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { kindFromCode } from "@/lib/piet-view";
 import type { PietView, PietDay, PietScore, PietPollenRow } from "@/lib/piet-view";
 import { persistCity } from "@/lib/persist-city";
@@ -40,11 +39,6 @@ function locateAndReload(setBusy: (b: boolean) => void) {
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
   );
 }
-
-const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
-  ssr: false,
-  loading: () => <div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />,
-});
 
 /* ---------- Lucide-style inline icons ---------- */
 type IconProps = {
@@ -814,9 +808,6 @@ export default function PietWeatherPage({
   const { uv, pollen } = view;
   return (
     <main className={`piet-skin relative min-h-screen ${fontClassName}`}>
-      <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />}>
-        <WeatherBackground weatherCode={weatherCode} isDay={isDay} />
-      </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 piet-stagger">
         <PietHero view={view} />
         <PietWeerberichtCard view={view} lat={lat} lon={lon} voice={voice} />

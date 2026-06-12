@@ -115,9 +115,6 @@ export default function LoginClient() {
 
   const renderEmailStep = () => (
     <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-      <h1 className="h-1 mb-2">{isDE ? "Willkommen zurück." : "Welkom terug."}</h1>
-      <p className="t-body mb-6">{isDE ? "Gib deine E-Mail-Adresse ein, um weiterzumachen." : "Voer je e-mailadres in om verder te gaan."}</p>
-
       {/* TODO: Supabase Pro Custom Domain benodigd voor clean OAuth
       <WzSocialButtons onGoogle={() => handleOAuth("google")} onApple={() => handleOAuth("apple")} loading={loading} />
       <WzDivider>oder mit E-Mail fortfahren</WzDivider>

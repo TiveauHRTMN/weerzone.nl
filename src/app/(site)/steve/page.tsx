@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import WeerzoneBackground from "@/components/WeerzoneBackground";
 import { hreflangSelf } from "@/lib/hreflang";
 
 export const metadata: Metadata = {
@@ -15,7 +14,6 @@ export const metadata: Metadata = {
 export default function StevePage() {
   return (
     <>
-      <WeerzoneBackground />
       <main className="relative z-10 mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-5 py-16 text-center text-white">
         <h1 className="text-5xl sm:text-6xl font-black tracking-tight drop-shadow-sm">
           Steve

@@ -54,6 +54,17 @@ export interface AgentReport {
   voice?: string | null;
 }
 
+interface BuildAgentContextOptions {
+  fast?: boolean;
+}
+
+function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise.catch(() => fallback),
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
+}
+
 /** Pure assembler — geen I/O. Gebruikt door buildAgentContext en de tests. */
 export function makeAgentContext(parts: {
   location: AgentLocation;
@@ -83,14 +94,32 @@ export function makeAgentContext(parts: {
 export async function buildAgentContext(
   location: { name: string; lat: number; lon: number },
   now: Date = new Date(),
+  options: BuildAgentContextOptions = {},
 ): Promise<AgentContext | null> {
   const { lat, lon, name } = location;
-  const [weather, mariana, knmiAll, provinceSlug, estofex] = await Promise.all([
-    fetchWeatherData(lat, lon, false, true).catch(() => null),
-    nearestRegionData(lat, lon).catch(() => null),
-    fetchKNMIWarnings().catch(() => [] as KNMIWarning[]),
-    nearestProvinceSlug(lat, lon).catch(() => null),
-    fetchEstofexBeneluxSummary(2).catch(() => null),
+  const weatherPromise = options.fast
+    ? withDeadline(fetchWeatherData(lat, lon, false, false), 1800, null as WeatherData | null)
+    : withDeadline(
+        fetchWeatherData(lat, lon, false, true),
+        1200,
+        null as WeatherData | null,
+      ).then((weather) => weather ?? withDeadline(
+        fetchWeatherData(lat, lon, false, false),
+        1800,
+        null as WeatherData | null,
+      ));
+  const teslaPromise = withDeadline(
+    loadLatestTeslaRun(nearestTeslaRegion(lat, lon).slug).then((run) => run?.signal ?? null),
+    650,
+    null as TeslaSignal | null,
+  );
+  const [weather, mariana, knmiAll, provinceSlug, estofex, tesla] = await Promise.all([
+    weatherPromise,
+    withDeadline(nearestRegionData(lat, lon), 650, null),
+    withDeadline(fetchKNMIWarnings(), 650, [] as KNMIWarning[]),
+    withDeadline(nearestProvinceSlug(lat, lon), 650, null),
+    withDeadline(fetchEstofexBeneluxSummary(2), 650, null),
+    teslaPromise,
   ]);
   if (!weather) return null;
 
@@ -100,15 +129,6 @@ export async function buildAgentContext(
     : null;
 
   // Tesla: dichtstbijzijnde mesoschaal-regio → laatste run → signaal (best-effort).
-  let tesla: TeslaSignal | null = null;
-  try {
-    const region = nearestTeslaRegion(lat, lon);
-    const run = await loadLatestTeslaRun(region.slug);
-    tesla = run?.signal ?? null;
-  } catch {
-    tesla = null;
-  }
-
   return makeAgentContext({
     location: { name, lat, lon, provinceLabel },
     now,

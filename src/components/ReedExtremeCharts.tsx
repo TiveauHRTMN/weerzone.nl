@@ -9,6 +9,7 @@ type ChartLocale = "nl" | "de" | "fr" | "es";
 interface Props {
   hourly: HourlyForecast[];
   locale?: ChartLocale;
+  showRain?: boolean;
 }
 
 const COPY: Record<ChartLocale, {
@@ -300,7 +301,7 @@ function ChartPanel({
   );
 }
 
-export default function ReedExtremeCharts({ hourly, locale }: Props) {
+export default function ReedExtremeCharts({ hourly, locale, showRain = true }: Props) {
   const pathname = usePathname() ?? "/";
   const activeLocale = locale ?? detectLocale(pathname);
   const copy = COPY[activeLocale];
@@ -416,18 +417,20 @@ export default function ReedExtremeCharts({ hourly, locale }: Props) {
         />
       )}
 
-      <ChartPanel
-        title={copy.rain}
-        maxLabel={`${precipMax.toFixed(1)}`}
-        data={precipData}
-        hours={hours}
-        yMax={10}
-        unit="mm"
-        threshold={5}
-        thresholdLabel={copy.heavyRain}
-        colorFn={(v) => v > 5 ? "#dc2626" : v > 1 ? "#2563eb" : "#60a5fa"}
-        locale={activeLocale}
-      />
+      {showRain && (
+        <ChartPanel
+          title={copy.rain}
+          maxLabel={`${precipMax.toFixed(1)}`}
+          data={precipData}
+          hours={hours}
+          yMax={10}
+          unit="mm"
+          threshold={5}
+          thresholdLabel={copy.heavyRain}
+          colorFn={(v) => v > 5 ? "#dc2626" : v > 1 ? "#2563eb" : "#60a5fa"}
+          locale={activeLocale}
+        />
+      )}
       <ChartPanel
         title={copy.wind}
         maxLabel={`${windMax.toFixed(0)}`}

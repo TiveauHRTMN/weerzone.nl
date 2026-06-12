@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { ArrowRight, CalendarDays, Clock, QrCode, Trophy, Users } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ensureHartmanWkPouleMembership, getGroupStandings } from "@/lib/poule";
+import { ensurePouleMembershipForInvite, getGroupStandings, type PouleInviteTarget } from "@/lib/poule";
 import PredictionRow from "@/components/PredictionRow";
 
 type MatchRow = {
@@ -15,6 +15,23 @@ type MatchRow = {
     user_id: string;
     home_prediction: number;
     away_prediction: number;
+  }>;
+};
+
+type PredictionRowData = {
+  user_id: string;
+  group_id: string;
+  match_id: string;
+  home_prediction: number;
+  away_prediction: number;
+};
+
+type PageProps = {
+  searchParams?: Promise<{
+    inviteCode?: string;
+    code?: string;
+    groupId?: string;
+    poolId?: string;
   }>;
 };
 
@@ -50,13 +67,27 @@ function hasPrediction(match: MatchRow, userId: string) {
   return match.poule_predictions?.some((prediction) => prediction.user_id === userId) ?? false;
 }
 
-export default async function WkPouleDashboard() {
+function buildInviteQuery(target: PouleInviteTarget) {
+  const params = new URLSearchParams();
+  if (target.groupId) params.set("groupId", target.groupId);
+  if (target.inviteCode) params.set("inviteCode", target.inviteCode);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+export default async function WkPouleDashboard({ searchParams }: PageProps) {
+  const sp = (await searchParams) ?? {};
+  const inviteTarget: PouleInviteTarget = {
+    inviteCode: (sp.inviteCode || sp.code || "").trim() || null,
+    groupId: (sp.groupId || sp.poolId || "").trim() || null,
+  };
+  const inviteQuery = buildInviteQuery(inviteTarget);
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/wkpoule/inloggen");
+  if (!user) redirect(`/wkpoule/inloggen${inviteQuery}`);
 
   const { data: profile } = await supabase
     .from("user_profile")
@@ -64,7 +95,7 @@ export default async function WkPouleDashboard() {
     .eq("id", user.id)
     .maybeSingle();
 
-  const group = await ensureHartmanWkPouleMembership(user.id, {
+  const group = await ensurePouleMembershipForInvite(user.id, inviteTarget, {
     email: profile?.email || user.email,
     fullName:
       profile?.full_name ||
@@ -79,20 +110,30 @@ export default async function WkPouleDashboard() {
   const currentStanding = standings.find((entry) => entry.user_id === user.id);
   const currentRank = currentStanding ? standings.findIndex((entry) => entry.user_id === user.id) + 1 : null;
 
-  const { data: matches } = await supabase
+  const [{ data: matches }, { data: predictions }] = await Promise.all([
+    supabase
     .from("poule_matches")
-    .select(`
-      *,
-      poule_predictions (
-        user_id,
-        home_prediction,
-        away_prediction
-      )
-    `)
+    .select("*")
     .eq("status", "scheduled")
-    .order("kickoff", { ascending: true });
+    .order("kickoff", { ascending: true }),
+    supabase
+      .from("poule_predictions")
+      .select("user_id, group_id, match_id, home_prediction, away_prediction")
+      .eq("group_id", group.id)
+      .eq("user_id", user.id),
+  ]);
 
-  const matchRows = ((matches ?? []) as MatchRow[]).slice();
+  const predictionByMatchId = new Map(
+    ((predictions ?? []) as PredictionRowData[]).map((prediction) => [prediction.match_id, prediction]),
+  );
+
+  const matchRows = ((matches ?? []) as MatchRow[]).map((match) => {
+    const prediction = predictionByMatchId.get(match.id);
+    return {
+      ...match,
+      poule_predictions: prediction ? [prediction] : [],
+    };
+  });
   const groupedMatches = matchRows.reduce<Record<string, MatchRow[]>>((groups, match) => {
     const dayKey = getDayKey(new Date(match.kickoff));
     if (!groups[dayKey]) groups[dayKey] = [];
@@ -104,8 +145,8 @@ export default async function WkPouleDashboard() {
   const daySummaries = Object.entries(groupedMatches)
     .map(([dayKey, dayMatches]) => {
       const firstKickoff = new Date(dayMatches[0].kickoff);
-      const isLocked = now >= firstKickoff.getTime();
       const filled = dayMatches.filter((match) => hasPrediction(match, user.id)).length;
+      const isLocked = dayMatches.every((match) => now >= new Date(match.kickoff).getTime());
       return { dayKey, dayMatches, firstKickoff, isLocked, filled };
     })
     .sort((a, b) => a.firstKickoff.getTime() - b.firstKickoff.getTime());
@@ -116,8 +157,7 @@ export default async function WkPouleDashboard() {
   const savedPredictions = matchRows.filter((match) => hasPrediction(match, user.id)).length;
   const predictionProgress = matchRows.length > 0 ? Math.round((savedPredictions / matchRows.length) * 100) : 0;
   const displayName = profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Jij";
-  const topFive = standings.slice(0, 5);
-  const participantsPreview = standings.slice(0, 12);
+  const participants = standings;
 
   return (
     <div className="text-white">
@@ -219,14 +259,15 @@ export default async function WkPouleDashboard() {
                 return (
                   <PredictionRow
                     key={match.id}
+                    groupId={group.id}
                     matchId={match.id}
                     homeTeam={match.home_team}
                     awayTeam={match.away_team}
                     kickoffLabel={formatTime(new Date(match.kickoff))}
                     initialHome={prediction?.home_prediction}
                     initialAway={prediction?.away_prediction}
-                    locked={heroDay?.isLocked ?? false}
-                    lockLabel={heroDay?.isLocked ? "Gesloten" : "Open"}
+                    locked={now >= new Date(match.kickoff).getTime()}
+                    lockLabel={now >= new Date(match.kickoff).getTime() ? "Gesloten" : "Open"}
                   />
                 );
               })
@@ -260,7 +301,7 @@ export default async function WkPouleDashboard() {
               </div>
             </div>
             <div className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-black/10 px-3">
-              {topFive.map((entry, index) => (
+              {standings.map((entry, index) => (
                 <div key={entry.user_id} className="grid grid-cols-[42px_1fr_auto] items-center gap-3 py-3">
                   <div className="text-slate-500">#{index + 1}</div>
                   <div className="min-w-0 truncate font-semibold text-white">{entry.display_name}</div>
@@ -277,7 +318,7 @@ export default async function WkPouleDashboard() {
             Deelnemers
           </div>
           <div className="flex flex-wrap gap-2">
-            {participantsPreview.map((entry, index) => (
+            {participants.map((entry, index) => (
               <span
                 key={entry.user_id}
                 className={`inline-flex items-center gap-2 border px-3 py-2 text-sm font-semibold ${
@@ -312,14 +353,15 @@ export default async function WkPouleDashboard() {
                       return (
                         <PredictionRow
                           key={match.id}
+                          groupId={group.id}
                           matchId={match.id}
                           homeTeam={match.home_team}
                           awayTeam={match.away_team}
                           kickoffLabel={formatTime(new Date(match.kickoff))}
                           initialHome={prediction?.home_prediction}
                           initialAway={prediction?.away_prediction}
-                          locked={day.isLocked}
-                          lockLabel={day.isLocked ? "Gesloten" : "Open"}
+                          locked={now >= new Date(match.kickoff).getTime()}
+                          lockLabel={now >= new Date(match.kickoff).getTime() ? "Gesloten" : "Open"}
                         />
                       );
                     })}

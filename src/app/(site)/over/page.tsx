@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import WeerzoneBackground from "@/components/WeerzoneBackground";
 import { hreflangCluster } from "@/lib/hreflang";
+import { schemaAboutPage, schemaFAQ, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: { absolute: "Over Weerzone - zo werkt het" },
@@ -48,18 +48,33 @@ const QA = [
 export default function OverPage() {
   return (
     <>
-      <WeerzoneBackground />
+      <script {...schemaLd([
+        schemaAboutPage(),
+        schemaFAQ(QA.map(([q, a]) => ({ q, a }))),
+      ])} />
       <main className="relative z-10 px-4 py-12 text-white sm:py-16">
         <div className="mx-auto max-w-3xl space-y-10">
           <header>
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">Over</p>
-            <h1 className="mt-3 text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl">Zo werkt Weerzone</h1>
+            <h1 className="mt-3 text-4xl font-black leading-[1.05] text-white sm:text-5xl">Wat, hoe en waarom</h1>
           </header>
 
-          <section className="rounded-3xl border border-white/20 bg-white p-7 shadow-sm sm:p-10">
-            <h2 className="text-2xl font-black text-slate-950">Eén helder beeld voor 48 uur</h2>
-            <p className="mt-4 text-base leading-7 text-slate-700">Weerzone brengt lokale weerdata, informatie van het KNMI en regionale patronen samen. De aandacht ligt op vandaag, vannacht en morgen: de periode waarin je plannen nog echt kunt aanpassen.</p>
-            <p className="mt-4 text-base leading-7 text-slate-700">Op Vandaag en Morgen zie je het resultaat als een kort weerverhaal, een dagverloop en praktische details. De techniek blijft op de achtergrond.</p>
+          <section className="overflow-hidden rounded-3xl border border-white/20 bg-white shadow-sm">
+            <div className="p-7 sm:p-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-700">Wat</p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950">Een persoonlijke 48-uurs weerdienst</h2>
+              <p className="mt-4 text-base leading-7 text-slate-700">Geen eindeloze 14-daagse verwachting. Wel vandaag, vannacht en morgen: precies de periode waarin weer echt bruikbaar is voor je planning.</p>
+            </div>
+            <div className="border-t border-slate-200 p-7 sm:p-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-700">Hoe</p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950">Meerdere verwachtingen, één helder beeld</h2>
+              <p className="mt-4 text-base leading-7 text-slate-700">Mariana brengt lokale data, KNMI-informatie en regionale patronen samen. Piet maakt het begrijpelijk, Reed bewaakt risico en Koos kijkt mee wanneer je eropuit wilt.</p>
+            </div>
+            <div className="border-t border-slate-200 p-7 sm:p-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-700">Waarom</p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950">Minder ruis, sneller een goede keuze</h2>
+              <p className="mt-4 text-base leading-7 text-slate-700">Weerzone focust op de uren die je echt plant. Zodat je sneller weet: kan ik naar buiten, moet ik opletten, of is morgen slimmer?</p>
+            </div>
           </section>
 
           <section className="space-y-3">

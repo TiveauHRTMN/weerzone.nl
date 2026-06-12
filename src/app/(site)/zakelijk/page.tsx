@@ -268,11 +268,11 @@ export default async function ZakelijkPage() {
                 Niet zakelijk? WEERZONE heeft ook opties voor dagelijks weer en waarschuwingen:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Link href="/piet" className="card p-4 block transition-transform hover:scale-[1.01]">
+                <Link href="/vandaag#piet" className="card p-4 block transition-transform hover:scale-[1.01]">
                   <p className="text-text-primary font-black text-sm mb-1">Dagelijks weer</p>
                   <p className="text-text-muted text-xs">Dagelijks weerbericht voor thuis. Nuchter, kort, zonder drama.</p>
                 </Link>
-                <Link href="/reed" className="card p-4 block transition-transform hover:scale-[1.01]">
+                <Link href="/vandaag#reed" className="card p-4 block transition-transform hover:scale-[1.01]">
                   <p className="text-text-primary font-black text-sm mb-1">Waarschuwingen</p>
                   <p className="text-text-muted text-xs">Alleen een mail als het weer écht gevaarlijk wordt. Code geel, oranje, rood.</p>
                 </Link>

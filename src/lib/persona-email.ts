@@ -360,7 +360,7 @@ export function buildPersonaEmailHtml(
 
   // ---- TOMORROW TEASER + CTA ----
   const ctaUrl =
-    tier === "reed" ? "https://weerzone.nl/reed" : "https://weerzone.nl/piet";
+    tier === "reed" ? "https://weerzone.nl/vandaag#reed" : "https://weerzone.nl/vandaag#piet";
   const tomorrowTeaser = brief.preview_tomorrow ?? null;
   const ctaHtml = `
 ${tomorrowTeaser ? `
@@ -443,7 +443,7 @@ ${tomorrowTeaser ? `
       </div>
       <div style="display:table;width:100%;max-width:200px;margin:0 auto;">
         <div style="display:table-cell;padding:0 10px;">
-            <a href="https://weerzone.nl/piet" style="font-size:11px;font-weight:700;color:${t.accent};text-decoration:none;">Piet</a>
+            <a href="https://weerzone.nl/vandaag#piet" style="font-size:11px;font-weight:700;color:${t.accent};text-decoration:none;">Vandaag</a>
         </div>
         <div style="display:table-cell;padding:0 10px;border-left:1px solid ${t.cardBorder};">
             <a href="${esc(unsubscribeUrl)}" style="font-size:11px;font-weight:700;color:${t.textLabel};text-decoration:none;">Uitschrijven</a>

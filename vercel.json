@@ -33,6 +33,10 @@
       "schedule": "*/30 * * * *"
     },
     {
+      "path": "/api/cron/koos-getaway-nudge",
+      "schedule": "0 7 * * 4"
+    },
+    {
       "path": "/api/cron/indexnow-ping",
       "schedule": "0 5 * * *"
     },

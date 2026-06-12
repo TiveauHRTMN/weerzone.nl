@@ -47,9 +47,6 @@ export default function ResetClient() {
     <WzAuthShell title={t.resetSideTitle} subtitle={t.resetSideSubtitle}>
       {!sent ? (
         <>
-          <h1 className="wz-h-1 mb-2">{t.resetHeading}</h1>
-          <p className="wz-body mb-6">{t.resetBody}</p>
-
           <form onSubmit={handleSubmit} noValidate>
             <WzTextField
               label={t.email}
@@ -64,7 +61,7 @@ export default function ResetClient() {
             <button
               type="submit"
               disabled={loading}
-              className="wz-btn wz-btn-primary wz-btn-block wz-btn-lg disabled:opacity-60"
+              className="btn btn-primary btn-block btn-lg disabled:opacity-60"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t.resetSubmit}
             </button>
@@ -88,11 +85,11 @@ export default function ResetClient() {
           >
             <Check className="w-8 h-8" strokeWidth={2.5} />
           </div>
-          <h1 className="wz-h-1 mb-2">{t.resetSentTitle}</h1>
-          <p className="wz-body mb-6">{t.resetSentBody(email)}</p>
+          <h1 className="h-2 mb-2">{t.resetSentTitle}</h1>
+          <p className="t-body mb-6">{t.resetSentBody(email)}</p>
           <Link
             href={appendLang("/app/login", audience)}
-            className="wz-btn wz-btn-ghost wz-btn-block"
+            className="btn btn-ghost btn-block"
           >
             {t.resetBackToLogin.replace(/^← ?/, "")}
           </Link>

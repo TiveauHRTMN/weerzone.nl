@@ -380,6 +380,82 @@ async function buildStandShareImage(ppl) {
   return canvas;
 }
 
+// ---------- Voorspellingen van een deelnemer (transparantie) ----------
+/* Iedereen kan ieders inzet terugkijken — maar pas vanaf de aftrap, zodat
+   niemand vooraf kan afkijken. De server stuurt alleen voorspellingen mee
+   van wedstrijden die al begonnen zijn. */
+function MemberPredsModal({ person, onClose }) {
+  const W = window.WK;
+  const started = W.matches
+    .filter((m) => m.status === 'done' || m.status === 'live' || isPredictionLocked(m))
+    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+  const firstName = (person.name || 'Deze deelnemer').trim().split(/\s+/)[0];
+
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="pview-overlay" onClick={onClose}>
+      <div className="pview card" role="dialog" aria-label={`Voorspellingen van ${person.name}`} onClick={(e) => e.stopPropagation()}>
+        <div className="pview-head">
+          <Avatar name={person.name} me={person.me} photo={person.photo} size={44} />
+          <div className="pview-id">
+            <div className="pview-name">{person.name}</div>
+            <div className="pview-sub">{person.pts} punten{person.player ? ` · ★ ${person.player}` : ''}</div>
+          </div>
+          <button className="pview-close" type="button" onClick={onClose} aria-label="Sluiten">×</button>
+        </div>
+        <p className="pview-note">
+          Inzet wordt zichtbaar voor de hele poule zodra een wedstrijd is afgetrapt — tot die tijd blijft hij geheim.
+          {person.predCount > 0 && ` ${firstName} heeft ${person.predCount} ${person.predCount === 1 ? 'wedstrijd' : 'wedstrijden'} ingevuld.`}
+        </p>
+        {started.length > 0 ? (
+          <div className="pview-list">
+            <div className="pview-row pview-thead">
+              <span className="pview-date">Wedstrijd</span>
+              <span className="pview-mid">Uitslag</span>
+              <span className="pview-pred">Inzet</span>
+              <span className="pview-pts">Punten</span>
+            </div>
+            {started.map((m) => {
+              const p = person.preds && person.preds[m.id];
+              const done = m.status === 'done';
+              const live = m.status === 'live';
+              let pts = null, hit = null;
+              if (done && p && W.scoreMatchPrediction) {
+                const sc = W.scoreMatchPrediction({ pred: [p[0], p[1]], result: [m.result[0], m.result[1]] });
+                pts = sc.total;
+                hit = sc.parts.exact ? 'exact' : sc.parts.outcome ? 'toto' : 'mis';
+              }
+              return (
+                <div key={m.id} className="pview-row">
+                  <span className="pview-date">{fmtDate(m.date)}</span>
+                  <span className="pview-mid">
+                    <Flag code={m.h} w={20} />
+                    <span className="pview-score">{done || live ? `${m.result[0]}-${m.result[1]}` : 'bezig'}</span>
+                    <Flag code={m.a} w={20} />
+                  </span>
+                  <span className={'pview-pred' + (p ? '' : ' pview-none')}>{p ? `${p[0]}-${p[1]}` : 'geen'}</span>
+                  <span className="pview-pts">
+                    {pts !== null
+                      ? <span className={'ptpill ' + (hit === 'exact' ? 'pt-exact' : hit === 'toto' ? 'pt-some' : 'pt-miss')}>{pts} pt</span>
+                      : live ? <span className="ptpill pt-live">live</span> : <span className="pview-wait">–</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="pview-empty">Nog geen wedstrijd afgetrapt. Na de eerste aftrap zie je hier ieders inzet per wedstrijd.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ---------- Stand ----------
 function StandScreen() {
   const W = window.WK;
@@ -390,6 +466,7 @@ function StandScreen() {
   const order = [podium[1], podium[0], podium[2]];
   const hasRealStand = ppl.length > 1;
   const [shareStatus, setShareStatus] = useState('');
+  const [viewing, setViewing] = useState(null); // deelnemer van wie je de voorspellingen bekijkt
   const inviteLink = `${window.location.origin}/hartmanwk2026?uitnodiging=hartman`;
   const movers = ppl.filter((p) => p.d !== 0);
   const shareLines = [
@@ -474,7 +551,7 @@ function StandScreen() {
           {order.filter(Boolean).map((pp, oi) => {
             const rank = pp === podium[0] ? 1 : pp === podium[1] ? 2 : 3;
             return (
-              <div key={pp.name} className={'pod pod-in pod-' + rank} style={{ animationDelay: (oi * 90) + 'ms' }}>
+              <div key={pp.name} className={'pod pod-in pod-' + rank} style={{ animationDelay: (oi * 90) + 'ms' }} onClick={() => setViewing(pp)} role="button" tabIndex={0}>
                 <Avatar name={pp.name} me={pp.me} photo={pp.photo} size={rank === 1 ? 56 : 46} />
                 <div className="pod-name">{shortName(pp.name, ppl.map((q) => q.name))}</div>
                 <div className="pod-pts">{pp.pts}<span>pt</span></div>
@@ -498,13 +575,16 @@ function StandScreen() {
           <span className="c-pts">punten</span>
         </div>
         {ppl.map((pp, i) => (
-          <div key={pp.name} style={{ animationDelay: (Math.min(i, 12) * 45) + 'ms' }} className={'trow' + (pp.me ? ' trow-me' : '') + (pp.d > 0 ? ' trow-rise' : pp.d < 0 ? ' trow-fall' : ' trow-in') + (Math.abs(pp.d) >= 3 ? ' trow-bigjump' : '')}>
+          <div key={pp.name} style={{ animationDelay: (Math.min(i, 12) * 45) + 'ms' }} className={'trow trow-click' + (pp.me ? ' trow-me' : '') + (pp.d > 0 ? ' trow-rise' : pp.d < 0 ? ' trow-fall' : ' trow-in') + (Math.abs(pp.d) >= 3 ? ' trow-bigjump' : '')} onClick={() => setViewing(pp)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setViewing(pp); } }}>
             <span className="c-rank">{i + 1}<Delta d={pp.d} /></span>
             <span className="c-name"><Avatar name={pp.name} me={pp.me} photo={pp.photo} size={30} /><span className="c-name-txt"><span className="c-name-n">{shortName(pp.name, ppl.map((q) => q.name))}</span>{pp.player && <span className="c-name-p">★ {pp.player}</span>}</span></span>
             <span className="c-pts">{pp.pts}</span>
           </div>
         ))}
+        <div className="table-hint">Tik op een deelnemer om zijn voorspellingen te bekijken — zichtbaar vanaf de aftrap.</div>
       </div>
+
+      {viewing && <MemberPredsModal person={viewing} onClose={() => setViewing(null)} />}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MapPin, Loader2 } from "lucide-react";
 import { reverseGeocode } from "@/lib/types";
 import { persistCity } from "@/lib/persist-city";
+import { updateProfile } from "@/app/actions";
 
 interface Props {
   /** Tekst op de knop. Default "Gebruik mijn locatie". */
@@ -12,6 +13,8 @@ interface Props {
   compact?: boolean;
   /** ClassName voor extra styling op de knop. */
   className?: string;
+  /** Bewaar de GPS-plek ook als primaire locatie van het ingelogde account. */
+  saveToAccount?: boolean;
 }
 
 /**
@@ -23,6 +26,7 @@ export default function LocateButton({
   label = "Gebruik mijn locatie",
   compact = false,
   className = "",
+  saveToAccount = false,
 }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +43,10 @@ export default function LocateButton({
         try {
           const { latitude: lat, longitude: lon } = pos.coords;
           const city = await reverseGeocode(lat, lon);
+          if (saveToAccount) {
+            const result = await updateProfile({ lat, lon, locationName: city.name });
+            if (!result.ok) throw new Error(result.error ?? "Locatie opslaan mislukt.");
+          }
           persistCity(city);
           window.location.reload();
         } catch {

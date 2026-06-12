@@ -9,14 +9,8 @@
  * Styling: src/app/(site)/koos/koos-skin.css (scoped under .koos-skin).
  */
 
-import { Suspense, type ComponentType, type CSSProperties, type ReactNode } from "react";
-import dynamic from "next/dynamic";
+import { type ComponentType, type CSSProperties, type ReactNode } from "react";
 import type { KoosView, KoosDestinationView } from "@/lib/koos-view";
-
-const WeatherBackground = dynamic(() => import("./WeatherBackground"), {
-  ssr: false,
-  loading: () => <div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />,
-});
 
 /* ---------- Lucide-style inline icons ---------- */
 type IconProps = {
@@ -461,9 +455,6 @@ export default function KoosTravelPage({
   const count = (view.top ? 1 : 0) + view.alternatives.length;
   return (
     <main className={`koos-skin relative min-h-screen ${fontClassName}`}>
-      <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" aria-hidden />}>
-        <WeatherBackground weatherCode={view.homeWeatherCode} isDay={isDay} />
-      </Suspense>
       <div className="relative z-10 max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 koos-stagger">
         <KoosHero view={view} count={count} />
         {view.top ? (

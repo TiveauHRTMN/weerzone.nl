@@ -13,6 +13,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { hermesChat } from "@/lib/hermes";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { enabledAgentAccounts } from "@/lib/agents/email-recipients";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
 
 export const dynamic = "force-dynamic";
@@ -77,7 +78,7 @@ GRENZEN:
       { role: "system", content: systemInstruction },
       { role: "user", content: `Stad: ${city}\n\nWeerdata (48u):\n${weatherJson}` },
     ],
-    { model: "persona", temperature: 0.6, maxTokens: 600 }
+    { model: "persona", temperature: 0.6, maxTokens: 600, nlGuard: true }
   )).trim();
 }
 
@@ -168,7 +169,7 @@ function buildMorningEmailHtml(
 
   const rows = dagdeelRows(hourly);
   const unsubUrl = voorkeurenUrl;
-  const pietUrl = `https://weerzone.nl/piet`;
+  const pietUrl = `https://weerzone.nl/vandaag#piet`;
 
   // Piet-stem tekst: markeer **vetgedrukt** → <strong>
   const narrativeHtml = narrative
@@ -298,16 +299,16 @@ export async function GET(req: Request) {
   const resend = new Resend(resendKey);
   const admin = createSupabaseAdminClient();
 
-  // 1. Haal alle accounts op die Piet's ochtendmail willen, met een vaste locatie.
-  //    Account-gebaseerd (user_profile): e-mail + opgeslagen primaire locatie +
-  //    piet_on. De toggle staat op het account; on-site blijft alles zichtbaar.
+  // 1. Accountvoorkeuren staan in auth metadata; locatie blijft in user_profile.
+  const pietAccounts = await enabledAgentAccounts(admin, "piet");
   const { data: subsRaw } = await admin
     .from("user_profile")
-    .select("email, primary_lat, primary_lon")
-    .eq("piet_on", true)
+    .select("id, email, primary_lat, primary_lon")
     .not("primary_lat", "is", null)
     .not("primary_lon", "is", null);
-  const subs = (subsRaw ?? []) as { email: string | null; primary_lat: number; primary_lon: number }[];
+  const subs = ((subsRaw ?? []) as { id: string; email: string | null; primary_lat: number; primary_lon: number }[])
+    .filter((profile) => pietAccounts.has(profile.id))
+    .map((profile) => ({ ...profile, email: profile.email ?? pietAccounts.get(profile.id) ?? null }));
 
   if (!subs.length) return NextResponse.json({ sent: 0, reason: "Geen ontvangers" });
 

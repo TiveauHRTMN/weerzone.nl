@@ -2,8 +2,6 @@ import { NL_PROVINCE_SLUGS, PROVINCE_LABELS, placeSlug, type Province } from "@/
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock3, MapPin, Navigation, Search } from "lucide-react";
-import WeatherBackground from "@/components/WeatherBackground";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Weer in Nederland - 48 uur vooruit per provincie en stad",
@@ -46,9 +44,6 @@ export default function WeerIndexPage() {
       />
 
       <main className="relative min-h-screen overflow-x-hidden">
-        <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" />}>
-          <WeatherBackground weatherCode={1} isDay={true} />
-        </Suspense>
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-20 pt-8 sm:p-6 sm:pb-24">
           <nav className="card px-4 py-3 text-xs font-bold uppercase tracking-widest text-text-secondary">
             <Link href="/" className="hover:text-text-primary">

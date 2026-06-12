@@ -55,7 +55,7 @@ async function _koosVoice(
         { role: "system", content: KOOS_SYSTEM },
         { role: "user", content: userPrompt },
       ],
-      { model: "persona", temperature: 0.7, maxTokens: 160 },
+      { model: "persona", temperature: 0.7, maxTokens: 160, nlGuard: true },
     );
     return text.trim() || null;
   } catch {

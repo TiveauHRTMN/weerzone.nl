@@ -1,4 +1,5 @@
 import { hermesChat } from "./hermes";
+import { nlCopyGuardValue } from "./nl-copy-guard";
 import { fetchWeatherData } from "./weather";
 import { findNearestCity } from "./types";
 
@@ -68,7 +69,7 @@ Bepaal de operationele status voor deze GPS-plek. Wees streng op neerslag diverg
       },
     ], { model: "large", json: true });
 
-    return JSON.parse(text.replace(/```json|```/g, "").trim()) as WWSBusinessPayload;
+    return nlCopyGuardValue(JSON.parse(text.replace(/```json|```/g, "").trim()) as WWSBusinessPayload);
   } catch (err) {
     console.error("Steve Pipeline Error:", err);
     return null;

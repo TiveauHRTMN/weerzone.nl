@@ -4,7 +4,12 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { findWkInvite } from "@/lib/wkpoule-auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { ensureHartmanWkPouleMembership } from "@/lib/poule";
+import {
+  ensurePouleMembershipForInvite,
+  getPouleGroupByInviteTarget,
+  isPouleGroupMember,
+  type PouleInviteTarget,
+} from "@/lib/poule";
 import { Resend } from "resend";
 
 export async function createGroupAction(
@@ -18,10 +23,14 @@ export async function joinGroupAction(inviteCode: string) {
   return { ok: false, error: "Niet van toepassing" };
 }
 
-export async function submitPredictionsAction(matchId: string, home: number, away: number) {
+export async function submitPredictionsAction(groupId: string, matchId: string, home: number, away: number) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Niet ingelogd");
+
+  if (!groupId) {
+    return { ok: false, error: "Geen poule gekozen. Open de poule via je uitnodigingslink." };
+  }
 
   if (!Number.isInteger(home) || !Number.isInteger(away) || home < 0 || away < 0 || home > 30 || away > 30) {
     return { ok: false, error: "Gebruik hele scores van 0 t/m 30." };
@@ -42,23 +51,20 @@ export async function submitPredictionsAction(matchId: string, home: number, awa
     return { ok: false, error: "Deze speeldag is gesloten." };
   }
 
-  const group = await ensureHartmanWkPouleMembership(user.id, {
-    email: user.email,
-    fullName: typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null,
-  });
-
-  if (!group) {
-    return { ok: false, error: "Je kon niet aan de poule worden toegevoegd." };
+  const isMember = await isPouleGroupMember(groupId, user.id);
+  if (!isMember) {
+    return { ok: false, error: "Je bent nog geen deelnemer van deze poule. Open eerst de uitnodigingslink opnieuw." };
   }
 
   const { error } = await admin
     .from("poule_predictions")
     .upsert({
       user_id: user.id,
+      group_id: groupId,
       match_id: matchId,
       home_prediction: home,
       away_prediction: away,
-    }, { onConflict: "user_id,match_id" });
+    }, { onConflict: "group_id,user_id,match_id" });
 
   if (error) {
     console.error("Prediction submit error:", error);
@@ -107,9 +113,21 @@ export async function redeemInviteCodeAction(rawCode: string) {
   return { ok: true, label: invite.label };
 }
 
-export async function sendWkMagicLinkAction(args: { fullName: string; email: string }) {
+function buildWkNextPath(target: PouleInviteTarget) {
+  const params = new URLSearchParams();
+  if (target.groupId) params.set("groupId", target.groupId);
+  if (target.inviteCode) params.set("inviteCode", target.inviteCode.trim().toUpperCase());
+  const query = params.toString();
+  return query ? `/wkpoule?${query}` : "/wkpoule";
+}
+
+export async function sendWkMagicLinkAction(args: { fullName: string; email: string; inviteCode?: string | null; groupId?: string | null }) {
   const fullName = args.fullName.trim();
   const email = args.email.trim().toLowerCase();
+  const target: PouleInviteTarget = {
+    inviteCode: args.inviteCode?.trim() || null,
+    groupId: args.groupId?.trim() || null,
+  };
 
   if (!fullName) {
     return { ok: false, error: "Vul je naam in." };
@@ -126,8 +144,14 @@ export async function sendWkMagicLinkAction(args: { fullName: string; email: str
 
   const admin = createSupabaseAdminClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://weerzone.nl";
-  const redirectTo = `${siteUrl}/auth/callback?next=/wkpoule`;
+  const nextPath = buildWkNextPath(target);
+  const redirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`;
   let userId: string | null = null;
+
+  const targetGroup = await getPouleGroupByInviteTarget(target);
+  if (!targetGroup) {
+    return { ok: false, error: "Deze uitnodigingslink is ongeldig of verlopen." };
+  }
 
   const { data: createdUser, error: createError } = await admin.auth.admin.createUser({
     email,
@@ -162,7 +186,7 @@ export async function sendWkMagicLinkAction(args: { fullName: string; email: str
   }
 
   if (userId) {
-    const group = await ensureHartmanWkPouleMembership(userId, { email, fullName });
+    const group = await ensurePouleMembershipForInvite(userId, target, { email, fullName });
     if (!group) {
       return { ok: false, error: "Je toegang is aangemaakt, maar de poule kon niet worden gekoppeld." };
     }

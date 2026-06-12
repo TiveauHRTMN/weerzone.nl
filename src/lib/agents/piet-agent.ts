@@ -77,14 +77,16 @@ export function pietHeadsUps(view: PietView, day: DayContext, now: Date): AgentH
 }
 
 /** Piet-agent over de context: heads-ups + de echte LLM-stem (soft-fail). */
-export async function pietAgent(ctx: AgentContext): Promise<AgentReport> {
+export async function pietAgent(ctx: AgentContext, options: { includeVoice?: boolean } = {}): Promise<AgentReport> {
   const view = buildPietView(ctx.weather, ctx.location.name, null, ctx.now);
   const headsUps = pietHeadsUps(view, ctx.day, ctx.now);
-  const voice = await fetchPietWeerbericht(
-    ctx.location.lat,
-    ctx.location.lon,
-    ctx.location.name,
-    ctx.weather,
-  ).catch(() => null);
+  const voice = options.includeVoice === false
+    ? null
+    : await fetchPietWeerbericht(
+        ctx.location.lat,
+        ctx.location.lon,
+        ctx.location.name,
+        ctx.weather,
+      ).catch(() => null);
   return { agent: "piet", headsUps, voice };
 }

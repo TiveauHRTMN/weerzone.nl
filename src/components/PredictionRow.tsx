@@ -6,6 +6,7 @@ import { AlertCircle, Check, Clock, Loader2, Lock, Save } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface PredictionRowProps {
+  groupId: string;
   matchId: string;
   homeTeam: string;
   awayTeam: string;
@@ -27,6 +28,7 @@ function parseScore(value: string) {
 }
 
 export default function PredictionRow({
+  groupId,
   matchId,
   homeTeam,
   awayTeam,
@@ -71,7 +73,7 @@ export default function PredictionRow({
     setError("");
 
     try {
-      const result = await submitPredictionsAction(matchId, parsedHome, parsedAway);
+      const result = await submitPredictionsAction(groupId, matchId, parsedHome, parsedAway);
       if (!result.ok) {
         setStatus("error");
         setError(result.error || "Opslaan mislukt.");

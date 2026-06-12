@@ -14,6 +14,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { enabledAgentAccounts } from "@/lib/agents/email-recipients";
 import {
   fetchKNMIWarnings,
   warningsForProvince,
@@ -33,13 +34,11 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 interface SubRow {
-  user_id: string;
-  user_profile: {
-    email: string;
-    full_name: string | null;
-    primary_lat: number | null;
-    primary_lon: number | null;
-  };
+  id: string;
+  email: string;
+  full_name: string | null;
+  primary_lat: number | null;
+  primary_lon: number | null;
 }
 
 const SEVERITY_STYLE: Record<KNMISeverity, { bg: string; border: string; emoji: string; label: string }> = {
@@ -110,7 +109,7 @@ function buildAlertEmailHtml(
 ): string {
   const style = SEVERITY_STYLE[warning.severity];
   const unsubUrl = `https://weerzone.nl/api/unsubscribe?email=\${encodeURIComponent(email)}`;
-  const detailsUrl = "https://weerzone.nl/reed";
+  const detailsUrl = "https://weerzone.nl/vandaag#reed";
   const window = formatWindowLabel(warning);
   const enriched = warning.enriched;
 
@@ -281,28 +280,28 @@ export async function GET(req: Request) {
     return NextResponse.json({ sent: 0, reason: "Geen actieve KNMI-waarschuwingen" });
   }
 
-  // 2. Reed-abonnees ophalen.
+  // 2. Accountvoorkeuren staan in auth metadata; locatie blijft in user_profile.
+  const reedAccounts = await enabledAgentAccounts(admin, "reed");
   const { data: subs, error } = await admin
-    .from("subscriptions")
-    .select("user_id, user_profile!inner(email, full_name, primary_lat, primary_lon)")
-    .in("status", ["trialing", "active"])
-    .eq("tier", "reed");
+    .from("user_profile")
+    .select("id, email, full_name, primary_lat, primary_lon");
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!subs?.length) return NextResponse.json({ sent: 0, reason: "Geen Reed-abonnees" });
 
-  const validSubs = (subs as unknown as SubRow[]).filter(
-    (s) => s.user_profile?.primary_lat != null && s.user_profile?.primary_lon != null,
-  );
+  const validSubs = (subs as unknown as SubRow[])
+    .filter((profile) => reedAccounts.has(profile.id) && profile.primary_lat != null && profile.primary_lon != null)
+    .map((profile) => ({ ...profile, email: profile.email ?? reedAccounts.get(profile.id) ?? "" }))
+    .filter((profile) => Boolean(profile.email));
 
   let sent = 0;
   const errors: string[] = [];
 
   const results = await Promise.allSettled(
     validSubs.map(async (sub) => {
-      const lat = sub.user_profile.primary_lat as number;
-      const lon = sub.user_profile.primary_lon as number;
-      const email = sub.user_profile.email;
+      const lat = sub.primary_lat as number;
+      const lon = sub.primary_lon as number;
+      const email = sub.email;
 
       const provinceSlug = await nearestProvinceSlug(lat, lon);
       if (!provinceSlug) return [];
@@ -314,7 +313,7 @@ export async function GET(req: Request) {
       const generatedAlerts = [];
 
       for (const w of userWarnings) {
-        if (await alreadySent(admin, sub.user_id, w.key)) {
+        if (await alreadySent(admin, sub.id, w.key)) {
           continue;
         }
 
@@ -362,7 +361,7 @@ export async function GET(req: Request) {
       
       await Promise.allSettled(chunk.map(async (item, idx) => {
         const resendId = typedMailData?.data?.[idx]?.id ?? null;
-        await logSent(admin, item.meta.sub.user_id, item.payload.to, item.meta.enriched, resendId);
+        await logSent(admin, item.meta.sub.id, item.payload.to, item.meta.enriched, resendId);
         sent++;
       }));
     } catch (e) {

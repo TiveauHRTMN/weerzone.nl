@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import WeerzoneBackground from "@/components/WeerzoneBackground";
 import ContactForm from "@/components/ContactForm";
 import { schemaContactPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 import { hreflangCluster } from "@/lib/hreflang";
@@ -36,7 +35,6 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <WeerzoneBackground />
       <main className="relative z-10 px-4 py-12 sm:py-16 text-white">
         <script
           {...schemaLd([

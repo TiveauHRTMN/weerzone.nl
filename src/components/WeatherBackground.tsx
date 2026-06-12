@@ -8,6 +8,7 @@ import { resolveWxScenario, WX_QUERY_KEY } from "@/lib/wx-scenarios";
 interface Props {
   weatherCode: number;
   isDay: boolean;
+  transparentBase?: boolean;
 }
 
 function getWeatherTheme(code: number, isDay: boolean) {
@@ -37,15 +38,15 @@ function getWeatherTheme(code: number, isDay: boolean) {
 
 export { getWeatherTheme };
 
-export default function WeatherBackground({ weatherCode, isDay }: Props) {
+export default function WeatherBackground({ weatherCode, isDay, transparentBase = false }: Props) {
   return (
     <Suspense fallback={<div className="fixed inset-0 z-0 bg-sky-300" />}>
-      <WeatherBackgroundInner weatherCode={weatherCode} isDay={isDay} />
+      <WeatherBackgroundInner weatherCode={weatherCode} isDay={isDay} transparentBase={transparentBase} />
     </Suspense>
   );
 }
 
-function WeatherBackgroundInner({ weatherCode, isDay }: Props) {
+function WeatherBackgroundInner({ weatherCode, isDay, transparentBase = false }: Props) {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
 
@@ -142,13 +143,15 @@ function WeatherBackgroundInner({ weatherCode, isDay }: Props) {
 
   return (
     <>
-      <motion.div
-        className="fixed inset-0 z-0"
-        initial={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
-        animate={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
-        style={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
-      />
+      {!transparentBase && (
+        <motion.div
+          className="fixed inset-0 z-0"
+          initial={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
+          animate={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+          style={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
+        />
+      )}
 
       {/* Atmospheric haze — subtiele radial sheen voor depth */}
       <div className="ambient-haze" aria-hidden />

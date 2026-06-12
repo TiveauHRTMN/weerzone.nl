@@ -4,6 +4,11 @@ import { PouleGroup, UserPouleStats } from "./types";
 export const WK_POULE_NAME = "Hartman WK 2026";
 export const WK_POULE_INVITE_CODE = (process.env.WK_POULE_INVITE_CODE || "HARTMAN-WK-2026").toUpperCase();
 
+export type PouleInviteTarget = {
+  inviteCode?: string | null;
+  groupId?: string | null;
+};
+
 type WkProfileInput = {
   email?: string | null;
   fullName?: string | null;
@@ -22,6 +27,7 @@ type UserProfileRow = {
 
 type PredictionRow = {
   user_id: string;
+  group_id: string;
   match_id: string;
   home_prediction: number;
   away_prediction: number;
@@ -36,6 +42,13 @@ type MatchScoreRow = {
 
 function normalizeInviteCode(inviteCode: string) {
   return inviteCode.trim().toUpperCase();
+}
+
+function cleanTarget(target?: PouleInviteTarget | null): Required<PouleInviteTarget> {
+  return {
+    inviteCode: target?.inviteCode?.trim() || null,
+    groupId: target?.groupId?.trim() || null,
+  };
 }
 
 async function upsertWkProfile(userId: string, profile?: WkProfileInput) {
@@ -136,6 +149,48 @@ async function getOrCreateHartmanWkPouleGroup(): Promise<PouleGroup | null> {
   return data as PouleGroup;
 }
 
+export async function getPouleGroupByInviteTarget(target?: PouleInviteTarget | null): Promise<PouleGroup | null> {
+  const { inviteCode, groupId } = cleanTarget(target);
+  const supabase = createSupabaseAdminClient();
+
+  if (groupId) {
+    const { data, error } = await supabase
+      .from("poule_groups")
+      .select("*")
+      .eq("id", groupId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("WK group lookup by id error:", error.message);
+      return null;
+    }
+
+    return (data as PouleGroup | null) ?? null;
+  }
+
+  if (inviteCode) {
+    const normalized = normalizeInviteCode(inviteCode);
+    if (normalized === WK_POULE_INVITE_CODE) {
+      return getOrCreateHartmanWkPouleGroup();
+    }
+
+    const { data, error } = await supabase
+      .from("poule_groups")
+      .select("*")
+      .eq("invite_code", normalized)
+      .maybeSingle();
+
+    if (error) {
+      console.error("WK group lookup by invite target error:", error.message);
+      return null;
+    }
+
+    return (data as PouleGroup | null) ?? null;
+  }
+
+  return getOrCreateHartmanWkPouleGroup();
+}
+
 /**
  * Maak een nieuwe poule groep aan.
  */
@@ -203,17 +258,42 @@ export async function joinPouleGroup(groupId: string, userId: string): Promise<b
   return true;
 }
 
-export async function ensureHartmanWkPouleMembership(
+export async function isPouleGroupMember(groupId: string, userId: string): Promise<boolean> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("poule_group_members")
+    .select("group_id")
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Poule membership check error:", error.message);
+    return false;
+  }
+
+  return Boolean(data);
+}
+
+export async function ensurePouleMembershipForInvite(
   userId: string,
+  target?: PouleInviteTarget | null,
   profile?: WkProfileInput,
 ): Promise<PouleGroup | null> {
   await upsertWkProfile(userId, profile);
 
-  const group = await getOrCreateHartmanWkPouleGroup();
+  const group = await getPouleGroupByInviteTarget(target);
   if (!group) return null;
 
   const joined = await joinPouleGroup(group.id, userId);
   return joined ? group : null;
+}
+
+export async function ensureHartmanWkPouleMembership(
+  userId: string,
+  profile?: WkProfileInput,
+): Promise<PouleGroup | null> {
+  return ensurePouleMembershipForInvite(userId, { inviteCode: WK_POULE_INVITE_CODE }, profile);
 }
 
 /**
@@ -246,7 +326,8 @@ export async function getGroupStandings(groupId: string): Promise<UserPouleStats
       .in("id", userIds),
     supabase
       .from("poule_predictions")
-      .select("user_id, match_id, home_prediction, away_prediction, calculated_points")
+      .select("user_id, group_id, match_id, home_prediction, away_prediction, calculated_points")
+      .eq("group_id", groupId)
       .in("user_id", userIds),
   ]);
 

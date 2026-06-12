@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import GlobalNav from "@/components/wz/GlobalNav";
 import Footer from "@/components/Footer";
 import GlobalWeatherBackground from "@/components/GlobalWeatherBackground";
+import { useSession } from "@/lib/session-context";
 
 // Stand-alone routes draaien bovenop weerzone.nl maar zonder enige WEERZONE-chrome
 // of overlays (navbar, footer, cookiebanner, persona-modal, toggles).
@@ -31,6 +32,7 @@ export default function SiteShell({
 }: SiteShellProps) {
   const [showDeferredShell, setShowDeferredShell] = useState(false);
   const pathname = usePathname() ?? "/";
+  const { user } = useSession();
   const standalone = STANDALONE_PATHS.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
@@ -66,9 +68,9 @@ export default function SiteShell({
       <Suspense fallback={null}>
         <GlobalNav />
       </Suspense>
-      <div className="min-h-[60vh]">{children}</div>
-      <Footer />
-      {showDeferredShell && (
+      <div className="relative z-10 min-h-[60vh]">{children}</div>
+      {user && <Footer />}
+      {user && showDeferredShell && (
         <>
           <MobilePageSwipe />
           <Suspense fallback={null}>

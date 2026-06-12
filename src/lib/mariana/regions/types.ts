@@ -3,7 +3,8 @@
  *
  * Mariana Regions is de LLM-duidingslaag van de cascade:
  *   Oracle + Tesla -> Regions (LLM, per regio, 1x/dag) -> Mariana Local (wiskunde,
- *   per locatie, per request) -> 10.000 paginas / Piet / Koos / Reed.
+ *   per locatie, per request) -> 10.000 paginas / Piet / Koos. Reed leest
+ *   Mariana Tesla direct uit de aparte Tesla-run.
  *
  * Regions redeneert over de 11 Tesla-mesoschaalregio's — niet per locatie. De
  * duiding (regime/gevaar/verhaal) is regionaal gedeeld; de lokale GETALLEN doet
@@ -18,7 +19,7 @@
  * Geen frontend, geen route. Scope NL 0-48u; oude Mariana buiten NL blijft intact.
  */
 
-import type { TeslaSignal } from "@/lib/mariana/tesla/types";
+import type { TeslaRun, TeslaSignal } from "@/lib/mariana/tesla/types";
 
 /**
  * Het voederkanaal Regions -> Local. Dit is wat de LLM-duiding doorgeeft aan de
@@ -155,6 +156,8 @@ export interface MarianaRun {
   signal: MarianaSignal;
   /** Het voederkanaal naar Mariana Local (regime + gewichten + confidence + gevaar). */
   local_feed: MarianaLocalFeed;
+  /** Directe Tesla-run voor Reed; de cron bewaart deze apart in mariana_tesla. */
+  teslaRun?: TeslaRun | null;
 }
 
 /** ---- Normalizer voor de LLM-output van de operationele baan ---- */

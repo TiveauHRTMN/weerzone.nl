@@ -8,11 +8,14 @@ export default function WzFooter() {
           WEERZONE
         </Link>
         <nav className="flex flex-wrap gap-4">
-          <Link href="/piet" className="hover:text-slate-900">
-            Mijn Weer
+          <Link href="/vandaag" className="hover:text-slate-900">
+            Vandaag
           </Link>
-          <Link href="/reed" className="hover:text-slate-900">
-            Waarschuwingen
+          <Link href="/morgen" className="hover:text-slate-900">
+            Morgen
+          </Link>
+          <Link href="/mijn-weerzone" className="hover:text-slate-900">
+            Mijn Weerzone
           </Link>
           <Link href="/contact" className="hover:text-slate-900">
             Contact

@@ -24,7 +24,7 @@ Weerdata om te analyseren:
 - Korte voorspelling: ${weather.summaryVerdict || 'Geen specifieke samenvatting'}
 `;
 
-    const responseText = await hermesChat([{ role: "user", content: prompt }]);
+    const responseText = await hermesChat([{ role: "user", content: prompt }], { nlGuard: true });
 
     if (!responseText) {
       throw new Error("Geen valide tekst gegenereerd");

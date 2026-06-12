@@ -41,7 +41,7 @@ async function _reedVoice(view: ReedView): Promise<string | null> {
         { role: "system", content: REED_SYSTEM },
         { role: "user", content: facts },
       ],
-      { model: "persona", temperature: 0.6, maxTokens: 140 },
+      { model: "persona", temperature: 0.6, maxTokens: 140, nlGuard: true },
     );
     return text.trim() || null;
   } catch {

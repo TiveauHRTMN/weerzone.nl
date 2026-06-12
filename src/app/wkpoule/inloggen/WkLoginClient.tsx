@@ -9,9 +9,11 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 type WkLoginClientProps = {
   signedInEmail?: string | null;
   signedInName?: string | null;
+  inviteCode?: string | null;
+  groupId?: string | null;
 };
 
-export default function WkLoginClient({ signedInEmail, signedInName }: WkLoginClientProps) {
+export default function WkLoginClient({ signedInEmail, signedInName, inviteCode, groupId }: WkLoginClientProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -20,11 +22,19 @@ export default function WkLoginClient({ signedInEmail, signedInName }: WkLoginCl
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared" | "saved" | "error">("idle");
   const [error, setError] = useState("");
 
-  const loginPath = "/wkpoule/inloggen";
+  const inviteQuery = useMemo(() => {
+    const params = new URLSearchParams();
+    if (groupId) params.set("groupId", groupId);
+    if (inviteCode) params.set("inviteCode", inviteCode);
+    const query = params.toString();
+    return query ? `?${query}` : "";
+  }, [groupId, inviteCode]);
+  const loginPath = `/wkpoule/inloggen${inviteQuery}`;
+  const poulePath = `/wkpoule${inviteQuery}`;
   const loginUrl = useMemo(() => {
     const base = typeof window === "undefined" ? "https://weerzone.nl" : window.location.origin;
     return `${base}${loginPath}`;
-  }, []);
+  }, [loginPath]);
   const qrImage = `/api/wkpoule/qr?target=${encodeURIComponent(loginPath)}`;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -32,7 +42,7 @@ export default function WkLoginClient({ signedInEmail, signedInName }: WkLoginCl
     setError("");
     setLoading(true);
 
-    const result = await sendWkMagicLinkAction({ fullName, email });
+    const result = await sendWkMagicLinkAction({ fullName, email, inviteCode, groupId });
     if (!result.ok) {
       setError(result.error || "Inloggen mislukt.");
       setLoading(false);
@@ -50,7 +60,7 @@ export default function WkLoginClient({ signedInEmail, signedInName }: WkLoginCl
     try {
       await createSupabaseBrowserClient().auth.signOut();
     } finally {
-      window.location.href = "/wkpoule/inloggen";
+      window.location.href = loginPath;
     }
   }
 
@@ -124,7 +134,7 @@ export default function WkLoginClient({ signedInEmail, signedInName }: WkLoginCl
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/wkpoule"
+              href={poulePath}
               className="inline-flex min-h-10 items-center justify-center rounded-full bg-[linear-gradient(90deg,#ef4444_0%,#3b82f6_54%,#22c55e_100%)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(59,130,246,0.20)] transition hover:shadow-[0_16px_34px_rgba(59,130,246,0.26)]"
             >
               Open poule
