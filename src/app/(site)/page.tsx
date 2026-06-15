@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import HomeOnboarding from "@/components/HomeOnboarding";
+import HomeWeatherTeaser from "@/components/HomeWeatherTeaser";
 import { schemaWebSite, schemaLd } from "@/lib/schema";
 import { hreflangLanguages } from "@/lib/hreflang";
 
@@ -36,7 +38,17 @@ export default function Home() {
       <script
         {...schemaLd(schemaWebSite())}
       />
-      <HomeOnboarding />
+      <HomeOnboarding
+        teaser={
+          <Suspense
+            fallback={
+              <div className="h-[88px] w-full max-w-md animate-pulse rounded-2xl bg-white/10" aria-hidden />
+            }
+          >
+            <HomeWeatherTeaser />
+          </Suspense>
+        }
+      />
     </>
   );
 }

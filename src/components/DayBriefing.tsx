@@ -310,7 +310,12 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
   const condition = getWeatherDescription(daily.weatherCode);
   const maxWind = Math.max(daily.windSpeedMax, ...hours.map((hour) => hour.windSpeed));
   const maxRain = Math.max(0, ...hours.map((hour) => hour.precipitation));
-  const feels = hours.length ? average(hours.map((hour) => hour.apparentTemperature)) : dayOffset === 0 ? ctx.weather.current.feelsLike : daily.tempMax;
+  const dayHours = hours.filter((hour) => hourNumber(hour.time) >= 9 && hourNumber(hour.time) <= 21);
+  const feels = dayHours.length
+    ? average(dayHours.map((hour) => hour.apparentTemperature))
+    : hours.length
+      ? average(hours.map((hour) => hour.apparentTemperature))
+      : dayOffset === 0 ? ctx.weather.current.feelsLike : daily.tempMax;
   const risk = riskForDay(ctx, hours, date, daily.tempMax, dayOffset);
   const choice = choiceForDay(ctx, hours, daily.tempMax);
   const pluim = pluimIntelligence(ctx, preferences, dayOffset, date);
@@ -321,7 +326,8 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
   if (preferences.reed && risk.meaningful) synthesisParts.push(risk.title.toLowerCase());
   if (preferences.koos) synthesisParts.push(choice.title.toLowerCase());
   const synthesis = `${synthesisParts.join("; ")}.`;
-  const uvLabel = ctx.weather.uvIndex >= 6 ? "Hoog" : ctx.weather.uvIndex >= 3 ? "Matig" : "Laag";
+  const uvMax = daily.uvIndexMax ?? ctx.weather.uvIndex;
+  const uvLabel = uvMax >= 6 ? "Hoog" : uvMax >= 3 ? "Matig" : "Laag";
   const agreement = cascadeAgreement(ctx);
   const pietAdvice = compactCopy(
     ctx.mariana?.signal?.location_output_contract.best_action
@@ -431,7 +437,7 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
             ["💨", "Wind", `${Math.round(maxWind)} km/u`],
             ["🌧️", "Regen", `${daily.precipitationSum.toFixed(1)} mm`],
             ["🌡️", "Gevoel", `${Math.round(feels)}°`],
-            ["☀️", "UV", `${uvLabel} · ${Math.round(ctx.weather.uvIndex)}`],
+            ["☀️", "UV", `${uvLabel} · ${Math.round(uvMax)}`],
             ["🌿", "Pollen", pollen.replace(/\.$/, "")],
             ["🎯", "Zekerheid", `${agreement}% · ${confidenceLabel(agreement)}`],
           ].map(([icon, title, value]) => (

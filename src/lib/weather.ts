@@ -133,6 +133,39 @@ async function fetchConvectiveHourly(lat: number, lon: number, timezone: string)
   }
 }
 
+/**
+ * Daily UV-index per datum. Het NL-basismodel (knmi_seamless) levert geen
+ * uv_index_max — dat veld komt terug als null. Daarom halen we de UV apart op bij
+ * het default/global model (best_match), dat wél een UV-verwachting heeft.
+ */
+async function fetchUvIndexMaxByDate(lat: number, lon: number, timezone: string): Promise<Map<string, number>> {
+  const params = new URLSearchParams({
+    latitude: lat.toString(),
+    longitude: lon.toString(),
+    daily: "uv_index_max",
+    timezone,
+    forecast_days: "4",
+  });
+  try {
+    const res = await fetch(`${OPEN_METEO_BASE}?${params}`, {
+      next: { revalidate: 600 },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return new Map();
+    const data = await res.json();
+    const dates: string[] = data?.daily?.time ?? [];
+    const values: Array<number | null> = data?.daily?.uv_index_max ?? [];
+    const map = new Map<string, number>();
+    dates.forEach((date, i) => {
+      const value = values[i];
+      if (typeof value === "number") map.set(date, value);
+    });
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 function windVector(speed: number, direction: number) {
   const radians = direction * Math.PI / 180;
   return { x: speed * Math.sin(radians), y: speed * Math.cos(radians) };
@@ -218,6 +251,7 @@ export async function fetchWeatherData(
   if (process.env.NEXT_PHASE === 'phase-production-build') return null as any;
   const timezone = locale === "de" ? "Europe/Berlin" : locale === "fr" ? "Europe/Paris" : locale === "es" ? "Europe/Madrid" : "Europe/Amsterdam";
   const convectivePromise = isBot ? Promise.resolve(null) : fetchConvectiveHourly(lat, lon, timezone);
+  const uvPromise = fetchUvIndexMaxByDate(lat, lon, timezone);
 
   const attemptFetch = async (): Promise<any> => {
     const models = BASE_MODELS_BY_LOCALE[locale];
@@ -283,7 +317,7 @@ export async function fetchWeatherData(
       }
     }
 
-    const [results, convectiveData] = await Promise.all([Promise.all(fetchPromises), convectivePromise]);
+    const [results, convectiveData, uvByDate] = await Promise.all([Promise.all(fetchPromises), convectivePromise, uvPromise]);
     const coreData = results[0];
 
     // Defensive check for core data
@@ -303,7 +337,9 @@ export async function fetchWeatherData(
     const externalAiData = shouldFetchExternalAi ? results[6] ?? null : null;
 
     const harmonieData = locale === "nl" ? coreHourly : secondaryData;
-    const iconData = locale === "de" ? coreHourly : (locale === "fr" ? secondaryData : null);
+    // NL haalt ICON als secundair model op (en labelt het in `sources`); zonder deze
+    // koppeling bereikt "Verwachting 2" de pluim-grafiek nooit en blijft de marge-band weg.
+    const iconData = locale === "de" ? coreHourly : ((locale === "fr" || locale === "nl") ? secondaryData : null);
     const googleData: any = null;
 
     const data = coreData;
@@ -496,10 +532,11 @@ export async function fetchWeatherData(
         precipitationSum: data.daily.precipitation_sum?.[i] ?? 0,
         windSpeedMax: Math.round(data.daily.wind_speed_10m_max?.[i] ?? 0),
         sunHours: Number(((data.daily.sunshine_duration?.[i] ?? 0) / 3600).toFixed(1)),
+        uvIndexMax: Math.round((uvByDate.get(date) ?? data.daily.uv_index_max?.[i] ?? 0) * 10) / 10,
       })),
       sunrise: data.daily?.sunrise?.[0],
       sunset: data.daily?.sunset?.[0],
-      uvIndex: data.daily?.uv_index_max?.[0] ?? 0,
+      uvIndex: uvByDate.get(data.daily?.time?.[0]) ?? data.daily?.uv_index_max?.[0] ?? 0,
       models: {
         agreement,
         label: locale === "de"

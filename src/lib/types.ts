@@ -78,6 +78,7 @@ export interface DailyForecast {
   precipitationSum: number;
   windSpeedMax: number;
   sunHours: number;
+  uvIndexMax: number;
 }
 
 export interface ModelComparison {

@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     canonical: "https://weerzone.nl/steve",
     languages: hreflangSelf("nl", "/steve"),
   },
+  // Coming-soon: niet indexeren tot Steve live is.
+  robots: { index: false, follow: true },
 };
 
 export default function StevePage() {

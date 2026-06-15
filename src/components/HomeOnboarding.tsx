@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -44,7 +45,7 @@ function AuthActions({ signedIn }: { signedIn: boolean }) {
   );
 }
 
-export default function HomeOnboarding() {
+export default function HomeOnboarding({ teaser }: { teaser?: ReactNode }) {
   const { user, loading } = useSession();
 
   return (
@@ -68,6 +69,7 @@ export default function HomeOnboarding() {
             <AuthActions signedIn={Boolean(user)} />
           )}
         </div>
+        {teaser ? <div className="mt-6 flex w-full justify-center">{teaser}</div> : null}
         <nav aria-label="Openbare Weerzone-pagina's" className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-white/80">
           <Link href="/vandaag" className="transition hover:text-white">Vandaag</Link>
           <Link href="/morgen" className="transition hover:text-white">Morgen</Link>
