@@ -101,7 +101,7 @@ export async function buildAgentContext(
     ? withDeadline(fetchWeatherData(lat, lon, false, false), 1800, null as WeatherData | null)
     : withDeadline(
         fetchWeatherData(lat, lon, false, true),
-        1200,
+        3500,
         null as WeatherData | null,
       ).then((weather) => weather ?? withDeadline(
         fetchWeatherData(lat, lon, false, false),

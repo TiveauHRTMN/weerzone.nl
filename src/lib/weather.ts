@@ -200,7 +200,10 @@ async function fetchModel(
   });
 
   try {
-    const res = await fetch(`${url}?${params}`, { next: { revalidate: 600 } });
+    const res = await fetch(`${url}?${params}`, {
+      next: { revalidate: 600 },
+      signal: AbortSignal.timeout(3000),
+    });
     if (!res.ok) return null;
     const data = await res.json();
     return data.hourly as RawModelHourly;
@@ -289,35 +292,47 @@ export async function fetchWeatherData(
   };
 
   try {
-    const leadRes = await attemptFetch();
+    // De lead-fetch (basismodel) en de zware extra modellen draaien parallel.
+    // De extra modellen hangen niet van het basismodel af; seriëel wachten op de
+    // lead kostte op een koude cache onnodig ~3s extra, waardoor de pluim door de
+    // deadline in buildAgentContext afgekapt werd en alleen "Verwachting 1" overbleef.
+    const leadPromise = attemptFetch();
     const shouldFetchExternalAi = !isBot && forceHighRes && includeExternalAi;
-
-    const fetchPromises: Promise<any>[] = [Promise.resolve(leadRes)];
 
     // Zware extra modellen: alleen ophalen als expliciet gevraagd (forceHighRes)
     // of bij bots nooit. Default = alleen het basismodel → geen rate limiting.
-    if (!isBot && forceHighRes) {
-      fetchPromises.push(
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: SECONDARY_MODEL_BY_LOCALE[locale] }).catch(() => null),
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome_france_hd" }).catch(() => null),
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "ecmwf_ifs0p25" }).catch(() => null),
-        fetchModel(OPEN_METEO_BASE, lat, lon, { models: "gfs_seamless" }).catch(() => null),
-        fetchModel(ECMWF_BASE, lat, lon, { models: "ecmwf_aifs025_single" }).catch(() => null)
-      );
-      if (shouldFetchExternalAi) {
-        fetchPromises.push(
+    const extraModelPromises: Promise<any>[] =
+      !isBot && forceHighRes
+        ? [
+            fetchModel(OPEN_METEO_BASE, lat, lon, { models: SECONDARY_MODEL_BY_LOCALE[locale] }).catch(() => null),
+            fetchModel(OPEN_METEO_BASE, lat, lon, { models: "meteofrance_arome_france_hd" }).catch(() => null),
+            fetchModel(OPEN_METEO_BASE, lat, lon, { models: "ecmwf_ifs0p25" }).catch(() => null),
+            fetchModel(OPEN_METEO_BASE, lat, lon, { models: "gfs_seamless" }).catch(() => null),
+            fetchModel(ECMWF_BASE, lat, lon, { models: "ecmwf_aifs025_single" }).catch(() => null),
+          ]
+        : [];
+
+    // externalAi heeft de tijdas van de lead nodig → chain op de leadPromise.
+    const externalAiPromise: Promise<any> = shouldFetchExternalAi
+      ? leadPromise.then((leadRes) =>
           fetchExternalAiWeatherForecast({
             lat,
             lon,
             timezone,
             hours: 96,
             validTimes: Array.isArray(leadRes?.hourly?.time) ? leadRes.hourly.time.slice(0, 96) : undefined,
-          }).catch(() => null)
-        );
-      }
-    }
+          }).catch(() => null),
+        )
+      : Promise.resolve(null);
 
-    const [results, convectiveData, uvByDate] = await Promise.all([Promise.all(fetchPromises), convectivePromise, uvPromise]);
+    const [leadRes, extraResults, externalAiData, convectiveData, uvByDate] = await Promise.all([
+      leadPromise,
+      Promise.all(extraModelPromises),
+      externalAiPromise,
+      convectivePromise,
+      uvPromise,
+    ]);
+    const results = [leadRes, ...extraResults];
     const coreData = results[0];
 
     // Defensive check for core data
@@ -334,7 +349,6 @@ export async function fetchWeatherData(
     const ecmwfData = (!isBot && forceHighRes ? results[3] : null) || null;
     const gfsData = (!isBot && forceHighRes ? results[4] : null) || null;
     const aifsData = (!isBot && forceHighRes ? results[5] : null) || null;
-    const externalAiData = shouldFetchExternalAi ? results[6] ?? null : null;
 
     const harmonieData = locale === "nl" ? coreHourly : secondaryData;
     // NL haalt ICON als secundair model op (en labelt het in `sources`); zonder deze
