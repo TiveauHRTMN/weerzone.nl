@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import { WzTextField } from "@/components/wz/WzForm";
-import { updateProfile } from "@/app/actions";
+import { updateProfile, geocodePostcode } from "@/app/actions";
 
 type TopicKey = "rain" | "temp" | "wind" | "uv" | "snow";
 type TimeKey = "06:30" | "07:00" | "08:00" | "avond";
@@ -145,26 +145,46 @@ export default function OnboardingClient({ email }: { email: string }) {
         return;
       }
 
+      const trimmedPostcode = postcode.trim().toUpperCase();
+
+      // Coördinaten bepalen: GPS heeft voorrang, anders geocoden we de postcode.
+      // Zonder coördinaten valt het account uit de agent-cron (die filtert op
+      // niet-null primary_lat/lon), dus dit is wat de e-mail laat aankomen.
+      let coords: { lat: number; lon: number } | null = gpsCoords;
+      if (!coords && trimmedPostcode) {
+        const geo = await geocodePostcode(trimmedPostcode);
+        if (geo) {
+          coords = { lat: geo.lat, lon: geo.lon };
+        } else {
+          setError("Die postcode konden we niet vinden. Controleer 'm of gebruik GPS.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Een agent is alleen zinvol "aan" als er een locatie is om over te mailen.
+      const hasLocation = !!coords;
+
       await supabase.from("user_profile").upsert(
         {
           id: uid,
           email,
-          postcode: postcode.trim().toUpperCase() || null,
-          primary_lat: gpsCoords?.lat ?? null,
-          primary_lon: gpsCoords?.lon ?? null,
+          postcode: trimmedPostcode || null,
+          primary_lat: coords?.lat ?? null,
+          primary_lon: coords?.lon ?? null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "id" },
       );
 
       const preferenceResult = await updateProfile({
-        pietOn: agents.piet,
-        reedOn: agents.reed,
-        koosOn: agents.koos,
+        pietOn: hasLocation && agents.piet,
+        reedOn: hasLocation && agents.reed,
+        koosOn: hasLocation && agents.koos,
       });
       if (!preferenceResult.ok) throw new Error(preferenceResult.error ?? "Voorkeuren opslaan mislukt.");
 
-      if (gpsCoords) {
+      if (coords) {
         await supabase
           .from("user_locations")
           .delete()
@@ -173,16 +193,26 @@ export default function OnboardingClient({ email }: { email: string }) {
         await supabase.from("user_locations").insert({
           user_id: uid,
           label: "Thuis",
-          lat: gpsCoords.lat,
-          lon: gpsCoords.lon,
+          lat: coords.lat,
+          lon: coords.lon,
           is_primary: true,
         });
       }
 
       // Onderwerpen + meldingstijd: in user_metadata. Mijn Weerzone gebruikt
-      // deze later voor persoonlijke heads-ups.
+      // deze later voor persoonlijke heads-ups. agent_preferences blijft gelijk
+      // aan de gegate-waarde (geen locatie ⇒ alles uit), want metadata wint van
+      // het profiel in preferencesFromProfile.
       await supabase.auth.updateUser({
-        data: { topics, notification_time: time, agent_preferences: agents },
+        data: {
+          topics,
+          notification_time: time,
+          agent_preferences: {
+            piet: hasLocation && agents.piet,
+            reed: hasLocation && agents.reed,
+            koos: hasLocation && agents.koos,
+          },
+        },
       });
 
       router.replace(nextHref);

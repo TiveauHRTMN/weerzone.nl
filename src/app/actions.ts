@@ -16,6 +16,18 @@ import type { Locale } from "@/config/locales";
 import { venuePromptFragment, type VenueType } from "@/lib/venue-content";
 
 /**
+ * Geocodeer een Nederlandse postcode naar coördinaten (PDOK, gratis).
+ * Onboarding gebruikt dit als GPS niet beschikbaar is, zodat het account
+ * alsnog een `primary_lat/lon` krijgt en in de agent-cron belandt.
+ */
+export async function geocodePostcode(
+  postcode: string,
+): Promise<{ lat: number; lon: number; label: string } | null> {
+  const { geocodePostcodeNL } = await import("@/lib/geocode");
+  return geocodePostcodeNL(postcode);
+}
+
+/**
  * Update het profiel van de ingelogde gebruiker.
  */
 export async function updateProfile(args: {
