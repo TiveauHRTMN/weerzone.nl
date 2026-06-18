@@ -491,8 +491,8 @@ export async function sendBrandedMagicLink(email: string, tier: PersonaTier, ful
  * via de browser-client worden gezet).
  *
  * chosen_tier + full_name gaan in user_metadata. De DB-trigger
- * handle_new_user (zie migratie 20260420_fix_chosen_tier.sql) maakt dan
- * automatisch de juiste subscription aan.
+ * handle_new_user (zie migratie 20260618_fix_handle_new_user_signup_error.sql)
+ * maakt dan automatisch de juiste subscription aan.
  */
 export async function registerUser(args: {
   email: string;
