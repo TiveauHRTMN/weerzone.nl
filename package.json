@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
     "script:youtube": "tsx scripts/gen-youtube-script.ts"
   },
   "dependencies": {

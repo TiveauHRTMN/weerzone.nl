@@ -8,10 +8,18 @@
  * DOEL: ~7.000 plaatsen → ~7.000 indexeerbare pagina's.
  */
 
-import allPlacesRaw from "./places.json";
 import { KOOS_NL_CAMPING_PLACES } from "./koos-nl-camping-places.generated";
 import type { VenueType } from "./venue-content";
 import { NL_VENUE_PLACES } from "./nl-venues";
+
+// places.json bevat ~150k plaatsen. Bij een normale `import` leidt TypeScript
+// het type af uit de inhoud (een union van ~150k distinct object-literals) en
+// loopt de subtype-reductie de type-relatiecache vol → `tsc` hangt minutenlang
+// of crasht met "RangeError: Map maximum size exceeded". Via `require` typeert
+// TS het als `any` en slaat die afleiding over; de bundler (Turbopack/webpack)
+// inlinet de JSON identiek, dus runtime verandert niet.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const allPlacesRaw: Place[] = require("./places.json");
 
 export interface Place {
   name: string;
@@ -100,7 +108,7 @@ function mergePlaces(base: Place[], extra: Place[]): Place[] {
   return merged;
 }
 
-export const ALL_PLACES = mergePlaces(allPlacesRaw as Place[], [
+export const ALL_PLACES = mergePlaces(allPlacesRaw, [
   ...KOOS_NL_PLACES,
   ...KOOS_NL_CAMPING_PLACES,
   ...NL_VENUE_PLACES,
@@ -112,7 +120,7 @@ export const PLACES_COUNT = ALL_PLACES.length;
  * campings, vakantieparken en natuurgebieden. Gebruik dit voor "waar ben ik?"-
  * GPS-resolutie: een gebruiker woont in een plaats, niet op een camping.
  */
-export const SETTLEMENT_PLACES = allPlacesRaw as Place[];
+export const SETTLEMENT_PLACES = allPlacesRaw;
 
 /**
  * Koos' getaway-kandidaten: échte dagbestemmingen (Waddeneilanden, natuurgebieden,
