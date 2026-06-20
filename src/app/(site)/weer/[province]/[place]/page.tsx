@@ -1,18 +1,24 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import { NL_PLACES, findPlace, isNLProvince, nearbyPlaces, placeRouteSlug, PROVINCE_LABELS, type Province } from "@/lib/places-data";
 import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset } from "@/lib/schema";
-import WeatherDashboard from "@/components/WeatherDashboard";
+import DayBriefing from "@/components/DayBriefing";
 import NearbyLinks from "@/components/NearbyLinks";
 import ProvinceTopCities from "@/components/ProvinceTopCities";
 import LocalComparison from "@/components/LocalComparison";
 import { getLocationSEOContent } from "@/app/actions";
-import { fetchWeatherData } from "@/lib/weather";
+import { buildAgentContext } from "@/lib/agents/context";
+import { ALL_AGENT_PREFERENCES } from "@/lib/agents/preferences";
+import { fetchAirQuality } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import Link from "next/link";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
-import { venueH1, venueMetaTitle } from "@/lib/venue-content";
+import { venueMetaTitle } from "@/lib/venue-content";
+import "../../../vandaag/vandaag-skin.css";
+
+const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
 
 interface PageProps {
   params: Promise<{ province: string; place: string }>;
@@ -124,13 +130,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-const TOP_CITIES = [
-  "Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Eindhoven", 
-  "Groningen", "Tilburg", "Almere", "Breda", "Nijmegen", 
-  "Apeldoorn", "Enschede", "Haarlem", "Arnhem", "Amersfoort", 
-  "Zwolle", "Zoetermeer", "Leiden", "Dordrecht", "'s-Hertogenbosch"
-];
-
 export default async function PlaceWeatherPage({ params }: PageProps) {
   const { province, place: slug } = await params;
   if (!isNLProvince(province)) notFound();
@@ -169,30 +168,20 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
   const provLabel = PROVINCE_LABELS[province as Province] || province;
   const nearby = nearbyPlaces(place, 24).filter((nearbyPlace) => isNLProvince(nearbyPlace.province)).slice(0, 12);
-  const isTopCity = TOP_CITIES.includes(place.name);
   const locationProfile = getLocationWeatherProfile(place);
 
-  // Fetch weather, KNMI warnings, and SEO data all in parallel
-  const [initialWeather, allWarnings, hermesSEO, seoContent] = await Promise.all([
-    fetchWeatherData(place.lat, place.lon, false, true, place, "nl", true).catch(() => undefined),
+  // Bouw dezelfde premium agent-context als /vandaag, maar voor déze plaats.
+  // buildAgentContext doet alleen cache/storage-reads met deadlines (geen LLM),
+  // dus het is veilig voor de ~10k programmatische ISR-pagina's.
+  const [ctx, airQuality, allWarnings, hermesSEO, seoContent] = await Promise.all([
+    buildAgentContext({ name: place.name, lat: place.lat, lon: place.lon }).catch(() => null),
+    fetchAirQuality(place.lat, place.lon).catch(() => null),
     fetchKNMIWarnings().catch(() => []),
     getHermesSEO(place.name, province).catch(() => null),
     getLocationSEOContent(place.name, provLabel, place.character, place.venueType).catch(() => ""),
   ]);
+  const initialWeather = ctx?.weather;
   const provinceWarnings = warningsForProvince(allWarnings, province);
-
-  // Hermes Disaster SEO: Dynamic Schema Injection
-  let schemaTitle = `Weer ${place.name} — WEERZONE`;
-  let schemaDesc = `De nauwkeurigste 48-uurs weersvoorspelling voor ${place.name}, ${provLabel}. Op 1 bij 1 kilometer precies.`;
-
-  if (initialWeather) {
-    const { getMisereScore } = await import("@/lib/commentary");
-    const misery = getMisereScore(initialWeather);
-    if (misery.score >= 8) {
-      schemaTitle = `🚨 ALARM: Extreem Weer ${place.name} — WEERZONE`;
-      schemaDesc = `WAARSCHUWING voor ${place.name}: ${misery.label}. Bekijk de exacte 48-uurs voorspelling en extremiteiten-index.`;
-    }
-  }
 
   // Freshness signal for Google: rounded to the current hour
   const now = new Date();
@@ -221,8 +210,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
     { name: place.name, item: `https://weerzone.nl/weer/${province}/${slug}` },
   ]);
 
-  const city = { name: place.name, lat: place.lat, lon: place.lon };
-
   const geoBlock = buildCityGeoBlock({
     place,
     regionLabel: provLabel,
@@ -241,63 +228,81 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
             ...(hermesSEO?.json_ld ? [hermesSEO.json_ld] : []),
           ])}
       />
-      <main>
+      <main className={`va-skin ${manrope.className}`}>
         <KnmiWarningBanner warnings={provinceWarnings} />
 
-        <WeatherDashboard
-          initialCity={place}
-          initialWeather={initialWeather}
-          titleOverride={place.venueType ? venueH1(place.name, place.venueType) : undefined}
-          beforeFooter={
-            <div className="space-y-6 pt-10">
-              <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
-              <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
-              <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
-
-              {/* CTA: persoonlijk Weerzone-account voor deze plaats */}
-              <Link
-                href={`/app/signup?city=${encodeURIComponent(place.name)}`}
-                className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-accent-orange text-slate-900 shadow-xl hover:scale-[1.02] transition-all text-center border border-white/20"
-              >
-                <span className="text-3xl mb-3">📬</span>
-                <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Je persoonlijke weerbericht</span>
-                <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest italic">Elke ochtend, gratis voor {place.name}</span>
-              </Link>
-
-              {/* Lokaal Karakter */}
-              <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">
-                <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <span className="text-accent-cyan">ℹ️</span> Weer in {place.name}: Lokaal karakter
-                </h2>
-                <div className="text-white/60 text-xs leading-relaxed italic mb-6" data-speakable>
-                  {hermesSEO?.geo_optimized_summary || locationProfile.summary || seoContent}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  {locationProfile.factors.map((factor) => (
-                    <div key={factor} className="rounded-2xl bg-white/8 border border-white/10 p-4">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-white/35 mb-1">Lokale factor</p>
-                      <p className="text-xs font-bold leading-relaxed text-white/70">{factor}</p>
+        {ctx ? (
+          <DayBriefing
+            ctx={ctx}
+            preferences={ALL_AGENT_PREFERENCES}
+            dayOffset={0}
+            airQuality={airQuality}
+            hideDayToggle
+            appendedContent={
+              <>
+                {/* Lokaal karakter — premium kaart, cohesief met de briefing */}
+                <section className="space-y-3">
+                  <div className="va-section-head px-1">
+                    <div>
+                      <span className="va-onsky va-micro">Waarom hier anders</span>
+                      <h2>Het weer in {place.name}</h2>
                     </div>
-                  ))}
-                </div>
-                <p className="text-[11px] font-semibold leading-relaxed text-white/45 mb-6">
-                  {locationProfile.marianaContext}
-                </p>
+                    <span className="va-section-number">04</span>
+                  </div>
+                  <article className="va-card p-5 sm:p-6">
+                    <p className="text-[15px] leading-relaxed text-slate-700" data-speakable>
+                      {hermesSEO?.geo_optimized_summary || locationProfile.summary || seoContent}
+                    </p>
+                    {locationProfile.factors.length > 0 && (
+                      <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                        {locationProfile.factors.map((factor) => (
+                          <div key={factor} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5">
+                            <p className="va-micro mb-1 text-slate-400">Lokale factor</p>
+                            <p className="text-[13px] font-semibold leading-snug text-slate-700">{factor}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {locationProfile.marianaContext && (
+                      <p className="mt-4 text-[12.5px] font-medium leading-relaxed text-slate-500">{locationProfile.marianaContext}</p>
+                    )}
+                    {initialWeather && (
+                      <div className="mt-5">
+                        <LocalComparison cityName={place.name} province={province} localTemp={initialWeather.current.temperature} />
+                      </div>
+                    )}
+                  </article>
+                </section>
 
-                {initialWeather && (
-                  <LocalComparison 
-                    cityName={place.name} 
-                    province={province} 
-                    localTemp={initialWeather.current.temperature} 
-                  />
-                )}
-              </div>
+                <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
+                <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
+                <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
 
-              <ProvinceTopCities province={province} currentCity={place.name} />
-              <NearbyLinks currentCity={place.name} places={nearby} />
+                {/* CTA: persoonlijk Weerzone-account voor deze plaats */}
+                <Link
+                  href={`/app/signup?city=${encodeURIComponent(place.name)}`}
+                  className="group flex items-center justify-between gap-4 rounded-3xl bg-[var(--wz-sun)] p-6 text-slate-900 shadow-[0_18px_42px_-22px_rgba(180,140,0,0.7)] transition-transform hover:scale-[1.01]"
+                >
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] opacity-60">Elke ochtend, gratis voor {place.name}</p>
+                    <p className="mt-1 text-lg font-black leading-tight tracking-tight">Je persoonlijke weerbericht →</p>
+                  </div>
+                  <span className="text-3xl" aria-hidden>📬</span>
+                </Link>
+
+                <ProvinceTopCities province={province} currentCity={place.name} />
+                <NearbyLinks currentCity={place.name} places={nearby} />
+              </>
+            }
+          />
+        ) : (
+          <div className="relative z-10 mx-auto max-w-[680px] px-4 py-14">
+            <div className="va-card p-8 text-center">
+              <h1 className="text-2xl font-extrabold text-slate-950">Het weer in {place.name} is even niet beschikbaar</h1>
+              <p className="mt-2 text-sm text-slate-600">Probeer het over een moment opnieuw.</p>
             </div>
-          }
-        />
+          </div>
+        )}
       </main>
     </>
   );

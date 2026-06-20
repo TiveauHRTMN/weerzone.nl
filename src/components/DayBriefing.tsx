@@ -24,6 +24,11 @@ interface DayBriefingProps {
   preferences: AgentPreferences;
   dayOffset: 0 | 1;
   airQuality: AirQualityData | null;
+  /** Verberg de globale Vandaag/Morgen-nav (bijv. op plaatspagina's die niet
+   *  weg willen navigeren van de locatiecontext). */
+  hideDayToggle?: boolean;
+  /** Extra inhoud onderaan de briefing (bijv. SEO-/geo-blokken op plaatspagina's). */
+  appendedContent?: React.ReactNode;
 }
 
 type WeatherAgent = "piet" | "reed" | "koos";
@@ -302,7 +307,7 @@ function pluimIntelligence(
   };
 }
 
-export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }: DayBriefingProps) {
+export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, hideDayToggle = false, appendedContent }: DayBriefingProps) {
   const daily = ctx.weather.daily[dayOffset];
   const date = daily.date;
   const hours = ctx.weather.hourly.filter((hour) => hour.time.slice(0, 10) === date);
@@ -339,12 +344,14 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
   return (
     <div className="va-stagger va-page relative z-10 mx-auto max-w-[820px] space-y-7 px-4 py-9 sm:px-6 sm:py-14">
       <header className="va-card va-hero p-6 sm:p-8">
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <nav className="va-day-toggle" aria-label="Vandaag of morgen">
-            <Link href="/vandaag" className={dayOffset === 0 ? "is-active" : ""}>Vandaag</Link>
-            <Link href="/morgen" className={dayOffset === 1 ? "is-active" : ""}>Morgen</Link>
-          </nav>
-        </div>
+        {!hideDayToggle && (
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <nav className="va-day-toggle" aria-label="Vandaag of morgen">
+              <Link href="/vandaag" className={dayOffset === 0 ? "is-active" : ""}>Vandaag</Link>
+              <Link href="/morgen" className={dayOffset === 1 ? "is-active" : ""}>Morgen</Link>
+            </nav>
+          </div>
+        )}
         <div className="va-micro text-slate-400">Weerzone · {label}</div>
         <div className="mt-4 flex items-center justify-between gap-5">
           <div className="min-w-0">
@@ -447,6 +454,8 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality }:
       </section>
 
       <WeatherVisuals weather={ctx.weather} lat={ctx.location.lat} lon={ctx.location.lon} locationName={ctx.location.name} dayOffset={dayOffset} reedEnabled={preferences.reed} pluim={pluim} />
+
+      {appendedContent}
     </div>
   );
 }
