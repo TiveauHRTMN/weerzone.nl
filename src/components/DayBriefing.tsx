@@ -16,7 +16,7 @@ import {
   type PluimIntelligence,
 } from "@/lib/model-blend";
 import HeroWeatherStory from "@/components/HeroWeatherStory";
-import RainMap from "@/components/RainMap";
+import KnmiRadarMap from "@/components/KnmiRadarMap";
 import WeatherVisuals from "@/components/WeatherVisuals";
 
 interface DayBriefingProps {
@@ -373,7 +373,7 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
         </div>
       </header>
 
-      {dayOffset === 0 && <RainMap lat={ctx.location.lat} lon={ctx.location.lon} />}
+      {dayOffset === 0 && <KnmiRadarMap lat={ctx.location.lat} lon={ctx.location.lon} />}
 
       <section className="space-y-3">
         <div className="va-section-head px-1">
