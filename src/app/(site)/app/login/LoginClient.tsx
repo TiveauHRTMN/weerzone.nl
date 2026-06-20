@@ -27,25 +27,65 @@ export default function LoginClient() {
   const locale = searchParams?.get("lang") === "de" ? "de" : detectLocale("/");
   const isDE = locale === "de";
 
+  const next = searchParams?.get("next") || "/app";
+  const linkError = searchParams?.get("error") === "link";
+
   const [step, setStep] = useState<LoginStep>("email");
   const [email, setEmail] = useState(searchParams?.get("email") || "");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [errors, setErrors] = useState<{ email?: string; pw?: string }>({});
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(
+    linkError
+      ? (isDE
+          ? "Dieser Login-Link ist abgelaufen oder wurde schon benutzt. Fordere unten einen neuen an."
+          : "Deze inloglink is verlopen of al gebruikt. Vraag hieronder een nieuwe aan.")
+      : null,
+  );
   const [loading, setLoading] = useState(false);
 
-  async function handleEmailNext(e: React.FormEvent) {
-    e.preventDefault();
+  function validateEmail(): boolean {
     if (!email.trim() || !/.+@.+\..+/.test(email)) {
       setErrors({ email: isDE ? "Gib eine gültige E-Mail-Adresse ein" : "Vul een geldig e-mailadres in" });
-      return;
+      return false;
     }
-
     setErrors({});
+    return true;
+  }
+
+  // Passwordless = hoofdroute. We sturen direct een inloglink. Bestaat het
+  // account nog niet, dan door naar signup (naam + persona). checkUserExists
+  // valt server-side terug op auth.users, dus dit kan niemand buitensluiten.
+  async function handleSendLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validateEmail()) return;
+
     setSubmitError(null);
     setLoading(true);
+    try {
+      const exists = await checkUserExists(email.trim());
+      if (!exists) {
+        router.push(`/app/signup?email=${encodeURIComponent(email.trim())}${isDE ? "&lang=de" : ""}`);
+        return;
+      }
+      await sendBrandedMagicLink(email.trim(), isDE ? "karl" : "piet", "", {
+        mode: "login",
+        next,
+      });
+      setStep("magic_link_sent");
+    } catch (err: any) {
+      setSubmitError(err?.message || (isDE ? "Konnte keinen Login-Link senden." : "Kon geen inloglink sturen."));
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  // Secundair: wie liever een wachtwoord gebruikt.
+  async function handleUsePassword() {
+    if (!validateEmail()) return;
+
+    setSubmitError(null);
+    setLoading(true);
     try {
       const exists = await checkUserExists(email.trim());
       if (exists) {
@@ -81,7 +121,6 @@ export default function LoginClient() {
       return;
     }
 
-    const next = searchParams?.get("next") || "/app";
     router.replace(next);
   }
 
@@ -90,7 +129,10 @@ export default function LoginClient() {
     setLoading(true);
 
     try {
-      await sendBrandedMagicLink(email.trim(), isDE ? "karl" : "piet", "");
+      await sendBrandedMagicLink(email.trim(), isDE ? "karl" : "piet", "", {
+        mode: "login",
+        next,
+      });
       setStep("magic_link_sent");
     } catch (err: any) {
       setSubmitError(err.message || (isDE ? "Konnte keinen Login-Link senden." : "Kon geen inloglink sturen."));
@@ -120,7 +162,7 @@ export default function LoginClient() {
       <WzDivider>oder mit E-Mail fortfahren</WzDivider>
       */}
 
-      <form onSubmit={handleEmailNext} noValidate>
+      <form onSubmit={handleSendLink} noValidate>
         <WzTextField
           label={isDE ? "E-Mail-Adresse" : "E-mailadres"}
           type="email"
@@ -135,9 +177,25 @@ export default function LoginClient() {
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary btn-block btn-lg mt-2 disabled:opacity-60"
+          className="btn btn-primary btn-block btn-lg mt-2 disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : isDE ? "Weiter" : "Doorgaan"}
+          {loading ? (
+            <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+          ) : (
+            <>
+              <Mail className="w-4 h-4" />
+              {isDE ? "Login-Link senden" : "Stuur mij een inloglink"}
+            </>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleUsePassword}
+          disabled={loading}
+          className="btn btn-link btn-block mt-3 disabled:opacity-60"
+        >
+          {isDE ? "Lieber mit Passwort anmelden" : "Liever met wachtwoord inloggen"}
         </button>
       </form>
     </div>

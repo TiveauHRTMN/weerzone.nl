@@ -474,16 +474,23 @@ export async function sendWelcomeEmail(email: string, tier: PersonaTier, city?: 
  * Genereert een Supabase inloglink en verstuurt deze in een branded WeerZone mail.
  * We dwingen 'email_confirm' af om te voorkomen dat Supabase zelf ook nog een mail stuurt.
  */
-export async function sendBrandedMagicLink(email: string, tier: PersonaTier, fullName: string) {
+export async function sendBrandedMagicLink(
+  email: string,
+  tier: PersonaTier,
+  fullName: string,
+  opts: { mode?: "signup" | "login"; next?: string } = {},
+) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error("RESEND_API_KEY is missing");
 
+  const mode = opts.mode ?? "signup";
   const admin = createSupabaseAdminClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://weerzone.nl";
-  const redirectTo = `${siteUrl}/auth/callback?next=/app/onboarding&tier=${tier}`;
+  // Login → terug naar het dashboard; activatie/signup → onboarding.
+  const next = opts.next ?? (mode === "login" ? "/app" : "/app/onboarding");
 
   // 1. Zorg dat de gebruiker bestaat en GEMARKEERD IS ALS BEVESTIGD.
-  // Dit is de truc: als de gebruiker al bevestigd is ("email_confirm: true"), 
+  // Dit is de truc: als de gebruiker al bevestigd is ("email_confirm: true"),
   // dan vindt Supabase het niet nodig om zelf nog een mail te sturen.
   const { error: userError } = await admin.auth.admin.createUser({
     email,
@@ -491,49 +498,55 @@ export async function sendBrandedMagicLink(email: string, tier: PersonaTier, ful
     user_metadata: { full_name: fullName, chosen_tier: tier },
   });
 
-  // Als de gebruiker al bestaat, updaten we hem alleen naar confirmed
-  // en zetten chosen_tier zodat de DB-trigger / metadata-fallback de juiste
-  // persona kent — ook als iemand eerder een andere persona koos.
+  // Als de gebruiker al bestaat, updaten we hem alleen naar confirmed.
+  // Bij LOGIN raken we chosen_tier/full_name niet aan — anders overschrijven we
+  // de bestaande persona-keuze van een terugkerende gebruiker.
   if (userError && userError.message.includes("already registered")) {
     const { data: list } = await admin.auth.admin.listUsers();
-    const existingUser = list.users.find(u => u.email === email);
+    const existingUser = list.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     if (existingUser) {
       await admin.auth.admin.updateUserById(existingUser.id, {
         email_confirm: true,
-        user_metadata: {
-          ...(existingUser.user_metadata ?? {}),
-          full_name: fullName,
-          chosen_tier: tier,
-        },
+        user_metadata: mode === "login"
+          ? (existingUser.user_metadata ?? {})
+          : { ...(existingUser.user_metadata ?? {}), full_name: fullName, chosen_tier: tier },
       });
     }
   }
 
-  // 2. Genereer de link (nu zal Supabase STIL blijven)
+  // 2. Genereer een OTP-token (nu zal Supabase zelf STIL blijven).
   const { data, error } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email,
-    options: { redirectTo },
   });
 
-  if (error) {
+  if (error || !data?.properties?.hashed_token) {
     console.error("Failed to generate magic link:", error);
-    throw new Error(`Inloglink genereren mislukt: ${error.message}`);
+    throw new Error(`Inloglink genereren mislukt: ${error?.message ?? "geen token"}`);
   }
 
-  // 3. Verstuur de branded mail via Resend
+  // 3. Bouw een link naar ONZE callback (token_hash + type). De callback wisselt
+  //    dit in met verifyOtp — robuust, geen PKCE-verifier nodig.
+  const actionLink =
+    `${siteUrl}/auth/callback` +
+    `?token_hash=${encodeURIComponent(data.properties.hashed_token)}` +
+    `&type=magiclink&next=${encodeURIComponent(next)}`;
+
+  // 4. Verstuur de branded mail via Resend.
   const resend = new Resend(apiKey);
-  const html = getBrandedMagicLinkHtml(tier, data.properties.action_link, fullName);
+  const html = getBrandedMagicLinkHtml(tier, actionLink, fullName, mode);
 
   await resend.emails.send({
     from: "WEERZONE <info@weerzone.nl>",
     to: email,
-    subject: `Activeer je WEERZONE account voor ${tier.toUpperCase()} 🚀`,
+    subject: mode === "login"
+      ? "Je WEERZONE inloglink 👋"
+      : `Activeer je WEERZONE account voor ${tier.toUpperCase()} 🚀`,
     html,
   });
 
   if (process.env.NODE_ENV !== "production") {
-    console.log(`Branded Magic Link sent (and Supabase silenced) for ${email}`);
+    console.log(`Branded Magic Link (${mode}) sent for ${email}`);
   }
 }
 
@@ -725,19 +738,34 @@ export async function pingSearchConsole() {
  */
 export async function checkUserExists(email: string): Promise<boolean> {
   const admin = createSupabaseAdminClient();
-  
-  // We checken de public.user_profile tabel omdat listUsers() traag is en limieten heeft.
-  // user_profile wordt altijd aangemaakt bij signup via de DB trigger.
+  const normalized = email.trim().toLowerCase();
+
+  // 1. Snelle weg: de user_profile-mirror. Goedkoop, maar kan achterlopen op
+  //    auth.users (de trigger heeft historisch niet elke gebruiker gespiegeld).
   const { data, error } = await admin
     .from("user_profile")
     .select("id")
-    .eq("email", email.toLowerCase())
+    .ilike("email", normalized)
     .maybeSingle();
-  
+
   if (error) {
-    console.error("checkUserExists error:", error);
+    console.error("checkUserExists (mirror) error:", error);
+  } else if (data) {
+    return true;
+  }
+
+  // 2. Bron van waarheid: auth.users. We vallen hier ALTIJD op terug bij een
+  //    mirror-miss, zodat een ontbrekende user_profile-rij nooit meer kan leiden
+  //    tot het "geen account → maak account → bestaat al"-slot.
+  try {
+    const { data: list, error: listErr } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    if (listErr) {
+      console.error("checkUserExists (auth) error:", listErr);
+      return false;
+    }
+    return list.users.some((u) => u.email?.toLowerCase() === normalized);
+  } catch (e) {
+    console.error("checkUserExists (auth) threw:", e);
     return false;
   }
-  
-  return !!data;
 }
