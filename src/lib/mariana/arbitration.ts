@@ -231,8 +231,8 @@ function interpretation(args: {
   const target = args.placeName ? `voor ${args.placeName}` : "voor deze locatie";
   const riskText = args.risks.length ? ` Aandachtspunt: ${args.risks.slice(0, 2).join(" en ")}.` : "";
   const memoryText = args.memorySamples >= 3
-    ? ` Mariana gebruikt ${args.memorySamples} lokale verificaties voor bijsturing.`
-    : " Mariana bouwt hier nog lokale verificatie op.";
+    ? ` We gebruiken ${args.memorySamples} lokale verificaties voor bijsturing.`
+    : " We bouwen hier nog lokale verificatie op.";
   const correctionText = args.correctionApplied
     ? " De verwachting is lokaal gecorrigeerd met historisch modelgedrag."
     : " De verwachting blijft dicht bij de ruwe modelblend.";

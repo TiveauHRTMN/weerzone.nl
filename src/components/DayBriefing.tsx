@@ -385,26 +385,21 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
             <article
               key={decision.agent}
               id={decision.agent}
-              className={`va-card va-agent-tile is-${decision.state} ${decision.enabled ? "" : "is-muted"} scroll-mt-24 p-4 sm:p-5`}
+              className={`va-card va-agent-tile is-${decision.state} ${decision.enabled ? "" : "is-muted"} scroll-mt-24`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="va-agent-mark" aria-hidden>{decision.icon}</span>
-                  <div className="min-w-0">
-                    <span className="va-chip"><span className={`va-dot ${decision.state === "urgent" ? "is-urgent" : ""}`} />{decision.label}</span>
-                    <h3>{decision.title}</h3>
-                  </div>
-                </div>
+              <header className="va-agent-head">
+                <span className="va-agent-mark" aria-hidden>{decision.icon}</span>
+                <span className="va-agent-name">{decision.label}</span>
                 <span className={`va-state-pill is-${decision.state}`}>
                   {decision.state === "quiet" ? "Rustig" : decision.state === "watching" ? "Let op" : decision.state === "urgent" ? "Urgent" : "Actief"}
                 </span>
-              </div>
+              </header>
+              <h3>{decision.title}</h3>
               <p>{decision.summary}</p>
-              <dl className="va-agent-ops">
-                <div><dt>Timing</dt><dd>{decision.timing}</dd></div>
-                <div><dt>Actie</dt><dd>{decision.action}</dd></div>
-                <div><dt>Zekerheid</dt><dd>{decision.confidence}</dd></div>
-              </dl>
+              <footer className="va-agent-foot">
+                <span className="va-agent-arrow" aria-hidden>→</span>
+                <span className="va-agent-action">{decision.action}</span>
+              </footer>
             </article>
           ))}
         </div>

@@ -50,11 +50,11 @@ export async function getMarianaLocalSEOIntelligence(place: Place): Promise<Mari
     localRisks: risks,
     sampleCount: memory.sampleCount,
     confidenceNote: models.length
-      ? `${topModel} heeft hier voorlopig de sterkste historische weging binnen Mariana.`
-      : "Mariana bouwt hier nog modelweging op.",
+      ? `${topModel} heeft hier voorlopig de sterkste historische weging.`
+      : "We bouwen hier nog modelweging op.",
     timingNote: risks.includes("neerslagtiming")
-      ? "Voor deze locatie let Mariana extra op verschuivingen in buienlijnen en neerslagstart."
-      : "Voor deze locatie bewaakt Mariana vooral timingverschuivingen tussen modelruns.",
-    summary: `Mariana herkent voor ${place.name} vooral het patroon "${regime}". De lokale memory gebruikt ${memory.sampleCount} verificaties om modelvertrouwen en correcties per weerregime bij te stellen.`,
+      ? "Voor deze locatie letten we extra op verschuivingen in buienlijnen en neerslagstart."
+      : "Voor deze locatie bewaken we vooral timingverschuivingen tussen modelruns.",
+    summary: `Voor ${place.name} herkennen we vooral het patroon "${regime}". We gebruiken ${memory.sampleCount} verificaties om modelvertrouwen en correcties per weerregime bij te stellen.`,
   };
 }

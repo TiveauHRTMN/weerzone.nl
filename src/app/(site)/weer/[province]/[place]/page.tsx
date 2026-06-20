@@ -79,8 +79,6 @@ import { getHermesSEO } from "@/lib/seo";
 import { hreflangSelf } from "@/lib/hreflang";
 import { buildCityGeoBlock } from "@/lib/geo-blocks";
 import CityGeoBlock from "@/components/CityGeoBlock";
-import MarianaSeoUpdate from "@/components/MarianaSeoUpdate";
-import OracleSeoUpdate from "@/components/OracleSeoUpdate";
 
 export const revalidate = 43200;
 export const dynamicParams = true;
@@ -275,8 +273,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
                 </section>
 
                 <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
-                <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
-                <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
 
                 {/* CTA: persoonlijk Weerzone-account voor deze plaats */}
                 <Link

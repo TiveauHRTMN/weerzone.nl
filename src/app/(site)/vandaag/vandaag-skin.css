@@ -370,21 +370,11 @@
   display: flex;
   min-height: 100%;
   flex-direction: column;
-  gap: 13px;
-  padding: 18px 18px 16px;
-  border-radius: 20px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-}
-
-/* Subtiele accent-gloed bovenin i.p.v. de oude harde 4px-rand. */
-.va-agent-tile::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 64px;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--agent-accent, #3b82f6) 16%, transparent), transparent 70%);
+  padding: 22px 22px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--agent-accent, #2f6bed) 5%, #fff) 0%, #fff 38%);
 }
 
 .va-agent-tile.is-active { --agent-accent: #2f6bed; }
@@ -394,61 +384,47 @@
 .va-agent-tile.is-muted { opacity: 0.72; }
 
 .va-agent-tile:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--agent-accent, #3b82f6) 36%, transparent);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--agent-accent, #2f6bed) 28%, transparent);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 10px 26px -14px rgba(2, 8, 23, 0.45),
-    0 26px 60px -34px color-mix(in srgb, var(--agent-accent, #2f6bed) 55%, rgba(2, 8, 23, 0.5));
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 12px 30px -16px rgba(2, 8, 23, 0.4),
+    0 30px 64px -38px color-mix(in srgb, var(--agent-accent, #2f6bed) 52%, rgba(2, 8, 23, 0.5));
+}
+
+/* ── Kop: avatar + naam + status ── */
+.va-agent-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .va-agent-mark {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   flex: none;
   place-items: center;
-  border-radius: 13px;
-  background: linear-gradient(152deg, var(--agent-accent, #2f6bed) 0%, color-mix(in srgb, var(--agent-accent, #2f6bed) 62%, #16233b) 100%);
+  border-radius: 50%;
+  background: linear-gradient(150deg, var(--agent-accent, #2f6bed) 0%, color-mix(in srgb, var(--agent-accent, #2f6bed) 58%, #16233b) 100%);
   color: #fff;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 900;
   letter-spacing: -0.02em;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 6px 14px -6px color-mix(in srgb, var(--agent-accent, #2f6bed) 70%, transparent);
+    0 0 0 4px color-mix(in srgb, var(--agent-accent, #2f6bed) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 8px 18px -8px color-mix(in srgb, var(--agent-accent, #2f6bed) 75%, transparent);
 }
 
-/* Naam-chip naast de badge: rustig en zonder dubbele stip (de state-pill heeft er al een). */
-.va-agent-tile .va-chip {
-  padding: 0;
-  background: transparent;
-  color: #6b7789;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.va-agent-tile .va-chip .va-dot { display: none; }
-
-.va-agent-tile h3 {
-  margin-top: 9px;
+.va-agent-name {
+  flex: 1;
+  min-width: 0;
   color: #0b1220;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1.14;
-}
-
-.va-agent-tile p {
-  display: -webkit-box;
-  overflow: hidden;
-  color: #4a5566;
-  font-size: 13.5px;
-  font-weight: 550;
-  line-height: 1.55;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
 }
 
 .va-state-pill {
@@ -457,53 +433,77 @@
   align-items: center;
   gap: 5px;
   border-radius: 999px;
-  padding: 5px 10px 5px 8px;
-  background: color-mix(in srgb, var(--agent-accent, #64748b) 13%, white);
-  color: color-mix(in srgb, var(--agent-accent, #64748b) 82%, #0b1220);
+  padding: 4px 10px 4px 8px;
+  background: color-mix(in srgb, var(--agent-accent, #64748b) 11%, white);
+  color: color-mix(in srgb, var(--agent-accent, #64748b) 80%, #0b1220);
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .va-state-pill::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 6px; height: 6px;
   border-radius: 999px;
   background: var(--agent-accent, #64748b);
 }
 .va-agent-tile.is-urgent .va-state-pill::before { animation: vaPulse 1.8s infinite; }
 
-.va-agent-ops {
-  display: grid;
-  gap: 0;
-  margin-top: auto;
+/* ── Inhoud ── */
+.va-agent-tile h3 {
+  color: #0a111e;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  margin-bottom: 8px;
 }
 
-.va-agent-ops div {
-  display: grid;
-  grid-template-columns: 70px minmax(0, 1fr);
+.va-agent-tile p {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #51607a;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.62;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  margin-bottom: 18px;
+}
+
+/* ── Voet: één heldere actie ── */
+.va-agent-foot {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  align-items: baseline;
-  padding: 9px 0;
+  margin-top: auto;
+  padding-top: 14px;
   border-top: 1px solid rgba(15, 23, 42, 0.07);
 }
-.va-agent-ops div:last-child { padding-bottom: 0; }
 
-.va-agent-ops dt {
-  color: #97a3b4;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.va-agent-action {
+  display: -webkit-box;
+  overflow: hidden;
+  min-width: 0;
+  color: #16233b;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.va-agent-ops dd {
-  min-width: 0;
-  color: #2c3848;
-  font-size: 12.5px;
-  font-weight: 650;
-  line-height: 1.4;
+.va-agent-arrow {
+  display: grid;
+  place-items: center;
+  width: 26px; height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--agent-accent, #2f6bed) 12%, white);
+  color: var(--agent-accent, #2f6bed);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .va-watch-row {

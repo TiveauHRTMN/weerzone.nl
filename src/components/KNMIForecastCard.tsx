@@ -152,7 +152,7 @@ export default function KNMIForecastCard({ lat, lon, city, initialWeather, varia
         ))}
       </div>
       <p className="text-[9px] text-slate-400 mt-4">
-        Gebaseerd op KNMI, Mariana en lokale data · {enhanced ? (variant === "compact" ? "beknopte versie" : "uitgebreide versie") : "snelle versie"} · elke 30 minuten bijgewerkt
+        Slim samengesteld · {enhanced ? (variant === "compact" ? "beknopte versie" : "uitgebreide versie") : "snelle versie"} · elke 30 minuten bijgewerkt
       </p>
     </div>
   );

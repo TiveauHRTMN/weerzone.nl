@@ -1,4 +1,11 @@
 const REPLACEMENTS: Array<[RegExp, string]> = [
+  // Interne engine-/bronnamen mogen NOOIT in de product-UI staan (attributie
+  // hoort centraal op /over). Mariana/Oracle/Tesla → Weerzone, zodat zinnen
+  // grammaticaal heel blijven. KNMI/DWD als losse bronvermelding eruit.
+  [/\bMariana(?:\s+(?:Oracle|Tesla|Local|Regions))?\b/gi, "Weerzone"],
+  [/\bOracle\b/gi, "Weerzone"],
+  [/\bTesla\b/gi, "Weerzone"],
+  [/\bWeerzone(?:\s+Weerzone)+\b/gi, "Weerzone"],
   [/\bExplore\b/gi, "Bekijk"],
   [/\bDiscover\b/gi, "Ontdek"],
   [/Verdieping van\s+/gi, "Meer over "],
