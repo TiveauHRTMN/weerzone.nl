@@ -145,7 +145,6 @@ export function buildStaticSitemap(): string {
     { url: `${BASE_URL}/contact`, lastmod: today, changefreq: "monthly", priority: 0.4 },
     { url: `${BASE_URL}/privacy`, lastmod: today, changefreq: "monthly", priority: 0.3 },
     { url: `${BASE_URL}/voorwaarden`, lastmod: today, changefreq: "monthly", priority: 0.3 },
-    { url: `${BASE_URL}/zakelijk`, lastmod: today, changefreq: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/steun`, lastmod: today, changefreq: "monthly", priority: 0.4 },
   ];
 

@@ -6,7 +6,6 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import NearbyLinks from "@/components/NearbyLinks";
 import ProvinceTopCities from "@/components/ProvinceTopCities";
 import LocalComparison from "@/components/LocalComparison";
-import ZakelijkCTA from "@/components/ZakelijkCTA";
 import { getLocationSEOContent } from "@/app/actions";
 import { fetchWeatherData } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
@@ -255,26 +254,15 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
               <MarianaSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
               <OracleSeoUpdate weather={initialWeather} placeName={place.name} locale="nl" />
 
-              {/* Action Grid: Piet & Zakelijk side-by-side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link 
-                  href={`/app/signup?tier=piet&city=${encodeURIComponent(place.name)}`}
-                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-accent-orange text-slate-900 shadow-xl hover:scale-[1.02] transition-all text-center border border-white/20"
-                >
-                  <span className="text-3xl mb-3">📬</span>
-                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Activeer Piet's brief</span>
-                  <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest italic">Gratis voor {place.name}</span>
-                </Link>
-
-                <Link 
-                  href="/zakelijk"
-                  className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-white/5 border border-white/10 text-white shadow-xl hover:scale-[1.02] transition-all text-center backdrop-blur-sm"
-                >
-                  <span className="text-3xl mb-3">💼</span>
-                  <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Zakelijk weerrapport</span>
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest italic">Planning voor bedrijven</span>
-                </Link>
-              </div>
+              {/* CTA: persoonlijk Weerzone-account voor deze plaats */}
+              <Link
+                href={`/app/signup?city=${encodeURIComponent(place.name)}`}
+                className="group flex flex-col items-center justify-center p-8 rounded-[32px] bg-accent-orange text-slate-900 shadow-xl hover:scale-[1.02] transition-all text-center border border-white/20"
+              >
+                <span className="text-3xl mb-3">📬</span>
+                <span className="font-black text-sm uppercase tracking-tight leading-none mb-1">Je persoonlijke weerbericht</span>
+                <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest italic">Elke ochtend, gratis voor {place.name}</span>
+              </Link>
 
               {/* Lokaal Karakter */}
               <div className="bg-white/5 backdrop-blur-md rounded-[40px] p-8 border border-white/10 shadow-2xl">

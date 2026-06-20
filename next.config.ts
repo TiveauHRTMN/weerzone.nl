@@ -71,6 +71,9 @@ const nextConfig: NextConfig = {
       { source: "/reed",            destination: "/vandaag#reed",   permanent: true },
       { source: "/koos",            destination: "/vandaag#koos",   permanent: true },
       { source: "/prijzen",         destination: "/",               permanent: true },
+      // /zakelijk (B2B-laag) verwijderd: geen commerciële laag tot KvK.
+      { source: "/zakelijk",         destination: "/",               permanent: true },
+      { source: "/zakelijk/:path*",  destination: "/",               permanent: true },
       { source: "/app/checkout/:path*", destination: "/mijn-weerzone", permanent: true },
       // Reiszone is verwijderd in v2 (agent-first relaunch). Alle Reiszone-URLs
       // worden hard naar de homepage gestuurd; voor crawlers is dat een 308.
