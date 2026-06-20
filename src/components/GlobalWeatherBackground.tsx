@@ -8,12 +8,14 @@
  * conditie en dag/nacht-status.
  */
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import WeatherBackground from "./WeatherBackground";
 import { readPersistedCity, persistCity } from "@/lib/persist-city";
 import { reverseGeocode } from "@/lib/types";
 import { useSession } from "@/lib/session-context";
-import { weatherTheme } from "@/lib/weather-theme";
+import { weatherTheme, horizonGlow } from "@/lib/weather-theme";
+import { resolveWxScenario, WX_QUERY_KEY } from "@/lib/wx-scenarios";
 
 type WeatherLocation = { name: string; lat: number; lon: number };
 
@@ -53,12 +55,17 @@ async function gpsLocationIfAlreadyAllowed(): Promise<WeatherLocation | null> {
 }
 
 function GradientBackground({ code, isDay }: { code: number; isDay: boolean }) {
-  const t = weatherTheme(code, isDay);
+  // Dev-override (?wx=) forceert ook de gradient, niet alleen de effecten.
+  const searchParams = useSearchParams();
+  const override = resolveWxScenario(searchParams?.get(WX_QUERY_KEY));
+  const c = override ? override.code : code;
+  const d = override ? override.isDay : isDay;
+  const t = weatherTheme(c, d);
   return (
     <div
       className="fixed inset-0 z-0 pointer-events-none"
       style={{
-        background: `linear-gradient(170deg, ${t.bg1} 0%, ${t.bg2} 100%)`,
+        background: `${horizonGlow(c, d)}, linear-gradient(176deg, ${t.bg1} 0%, ${t.bg2} 100%)`,
         transition: "background 1s ease-in-out",
       }}
       aria-hidden
@@ -125,7 +132,9 @@ export default function GlobalWeatherBackground() {
   const isDay = wx?.isDay ?? true;
   return (
     <>
-      <GradientBackground code={code} isDay={isDay} />
+      <Suspense fallback={null}>
+        <GradientBackground code={code} isDay={isDay} />
+      </Suspense>
       <WeatherBackground weatherCode={code} isDay={isDay} transparentBase />
     </>
   );

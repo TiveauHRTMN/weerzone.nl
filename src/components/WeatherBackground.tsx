@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { resolveWxScenario, WX_QUERY_KEY } from "@/lib/wx-scenarios";
+import { weatherTheme, horizonGlow } from "@/lib/weather-theme";
 
 interface Props {
   weatherCode: number;
@@ -11,30 +12,8 @@ interface Props {
   transparentBase?: boolean;
 }
 
-function getWeatherTheme(code: number, isDay: boolean) {
-  // Custom WMO+ codes voor luchtkwaliteit/stof
-  if (code === 200) return { bg1: "#9c8c7c", bg2: "#bba898" }; // Smog
-  if (code === 201) return { bg1: "#d99c4a", bg2: "#f0c890" }; // Sahara-zand
-
-  if (!isDay) {
-    if (code === 0) return { bg1: "#0b1026", bg2: "#162050" };
-    if (code === 1) return { bg1: "#0d1530", bg2: "#1a2658" };
-    if (code >= 95) return { bg1: "#10141e", bg2: "#1e2438" };
-    return { bg1: "#0f1828", bg2: "#1e3048" };
-  }
-  if (code === 0) return { bg1: "#3a9ae8", bg2: "#7ec4f6" };
-  if (code === 1) return { bg1: "#4ca0e0", bg2: "#86c2ec" }; // mainly clear
-  if (code === 2) return { bg1: "#5aa8e0", bg2: "#94c8ec" }; // partly cloudy
-  if (code === 3) return { bg1: "#7898ae", bg2: "#a0b8c8" }; // overcast
-  if (code <= 48) return { bg1: "#8898a5", bg2: "#b0bec5" };
-  if (code <= 57) return { bg1: "#607888", bg2: "#8098a8" };
-  if (code <= 67) return { bg1: "#4a6474", bg2: "#6a8898" };
-  if (code <= 77) return { bg1: "#a8b8c8", bg2: "#ccd8e2" };
-  if (code <= 82) return { bg1: "#455868", bg2: "#607888" };
-  if (code <= 86) return { bg1: "#98aab8", bg2: "#bcc8d4" };
-  if (code >= 95) return { bg1: "#2a3444", bg2: "#3e4e60" };
-  return { bg1: "#5a98c8", bg2: "#88b8dc" };
-}
+// Eén bron van waarheid: het kalme atmosfeer-thema uit lib/weather-theme.
+const getWeatherTheme = weatherTheme;
 
 export { getWeatherTheme };
 
@@ -146,10 +125,10 @@ function WeatherBackgroundInner({ weatherCode, isDay, transparentBase = false }:
       {!transparentBase && (
         <motion.div
           className="fixed inset-0 z-0"
-          initial={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
-          animate={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
-          style={{ background: `linear-gradient(170deg, ${theme.bg1} 0%, ${theme.bg2} 100%)` }}
+          style={{
+            background: `${horizonGlow(effectiveCode, effectiveIsDay)}, linear-gradient(176deg, ${theme.bg1} 0%, ${theme.bg2} 100%)`,
+            transition: "background 1.2s ease-in-out",
+          }}
         />
       )}
 
@@ -378,13 +357,13 @@ function WeatherBackgroundInner({ weatherCode, isDay, transparentBase = false }:
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}
             >
-              {/* Ambient bliksemflits — full-screen */}
+              {/* Ambient bliksemflits — subtiel, niet schreeuwerig over content */}
               <motion.div
-                className="absolute inset-0 bg-white z-40 mix-blend-overlay pointer-events-none"
+                className="absolute inset-0 bg-white z-40 mix-blend-soft-light pointer-events-none motion-reduce:hidden"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 1, 0, 0.8, 0, 0, 0, 0, 0, 0] }}
+                animate={{ opacity: [0, 0.45, 0, 0.3, 0, 0, 0, 0, 0, 0] }}
                 transition={{
-                  duration: 7.2,
+                  duration: 9,
                   repeat: Infinity,
                   repeatType: "loop",
                   ease: "linear",
