@@ -1188,3 +1188,9 @@ h1, h2, h3, h4, h5, h6 {
     linear-gradient(180deg, transparent 68%, rgba(240, 248, 255, 0.18) 88%, rgba(240, 248, 255, 0.42) 100%);
   mix-blend-mode: screen;
 }
+
+/* Auth: subtiele horizon-gloed die langzaam ademt */
+@keyframes wzGlow {
+  0%, 100% { opacity: 0.85; transform: translateY(0); }
+  50%      { opacity: 1;    transform: translateY(-1.5%); }
+}
