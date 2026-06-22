@@ -82,17 +82,52 @@ function regionAverages(ranked: Ranked[]): Record<Region, number> {
   return out;
 }
 
+/** Mariana-regimecode → gewone mensentaal (geen vakjargon in de post). */
+function humanRegime(regime: string): string {
+  const r = (regime || "").toLowerCase();
+  if (/hitte|hittekoepel/.test(r)) return "een hittekoepel boven Nederland";
+  if (/azoren|hogedruk|subsident/.test(r)) return "een stabiel hogedrukgebied";
+  if (/storm|zwaar.?weer/.test(r)) return "een stormachtig weertype";
+  if (/onweer|convect/.test(r)) return "een onweersgevoelige dag";
+  if (/regen|nat|front|laag/.test(r)) return "wisselvallig, nat weer";
+  return "wisselvallig weer";
+}
+
 async function generateWeerbericht(input: {
   warmst: Ranked; koelst: Ranked; spread: number; pollen: string; regime: string;
 }): Promise<string> {
-  const system = `Je bent Mariana, de stem van Weerzone. Schrijf een landelijk weerbericht voor een TikTok-post.
-STIJL: menselijk en warm, zoals een goede weervrouw — geen datasheet, geen jargon, geen modelnamen. 100% correct Nederlands.
-LENGTE: 4 tot 5 zinnen. Eén warme opening, het temperatuurverhaal (incl. het verschil tussen warmste en koelste plek), één concrete waarschuwing als die er is (bijv. pollen of hitte), en een korte vooruitblik. Geen emoji's, geen afsluiter/ondertekening.`;
-  const user = `Vandaag: warmste plek ${input.warmst.name} ${Math.round(input.warmst.max)}°, koelste plek ${input.koelst.name} ${Math.round(input.koelst.max)}° (${input.spread}° verschil). Pollen: ${input.pollen}. Landelijk regime: ${input.regime}.`;
+  const tw = Math.round(input.warmst.max);
+  const tk = Math.round(input.koelst.max);
+  const system = `Je bent Mariana, het weergezicht van Weerzone. Schrijf een KORT, pakkend landelijk weerbericht voor een virale TikTok-post.
+DOEL: mensen moeten meteen blijven hangen en het willen delen — open met een sterke hook (een verrassend contrast of een gewaagde uitspraak).
+STIJL: menselijk, energiek, spreektaal met een vleugje lef. 100% correct Nederlands — gewone mensentaal, géén Engelse woorden, géén vaktermen (zoals 'subsidentie'), geen modelnamen.
+LENGTE: 3 tot 4 korte zinnen.
+HARDE REGELS: gebruik de gegeven getallen en plaatsnamen EXACT — verander geen enkel cijfer en verzin geen extra plaatsen, dagen of harde weersclaims. Geen emoji, geen aanhef, geen ondertekening.`;
+  const user = `Cijfers van vandaag (exact overnemen):
+• Warmste plek: ${input.warmst.name} ${tw} graden
+• Koelste plek: ${input.koelst.name} ${tk} graden
+• Verschil: ${input.spread} graden
+• Graspollen: ${input.pollen}
+• Weertype: ${humanRegime(input.regime)}`;
   return (await hermesChat(
     [{ role: "system", content: system }, { role: "user", content: user }],
-    { model: "persona", temperature: 0.6, maxTokens: 320, nlGuard: true },
+    { model: "persona", temperature: 0.75, maxTokens: 260, nlGuard: true },
   )).trim();
+}
+
+/** Pakkende, gegarandeerd-correcte terugval als de LLM faalt of cijfers verbouwt.
+ *  Plaatsnamen als onderwerp (geen in/op-voorzetsel → altijd correct, ook bij
+ *  eilanden), en werkwoord/hook passen zich aan de temperatuur en het seizoen aan. */
+function catchyFallback(w: Ranked, k: Ranked, spread: number, pollen: string): string {
+  const tw = Math.round(w.max), tk = Math.round(k.max);
+  const pollenLine = /hoog/i.test(pollen) ? " Ga je naar buiten? De graspollen vliegen je om de oren." : "";
+  const hook = spread >= 10
+    ? `${spread} graden verschil — in hetzelfde land, op dezelfde dag.`
+    : tw >= 25
+      ? `Nederland zit in de zon, maar niet overal even fel.`
+      : `Nederland laat zich vandaag van twee kanten zien.`;
+  const warmVerb = tw >= 28 ? "kookt op" : tw >= 20 ? "warmt op tot" : "komt tot";
+  return `${hook} Terwijl ${w.name} ${warmVerb} ${tw} graden, blijft ${k.name} steken op ${tk}°.${pollenLine}`;
 }
 
 function esc(s: unknown): string {
@@ -100,8 +135,10 @@ function esc(s: unknown): string {
 }
 
 export async function GET(req: Request) {
+  // ?dry=1 → render de mail maar verstuur niet (voor preview/afstemmen).
+  const dry = new URL(req.url).searchParams.get("dry") === "1";
   const authHeader = req.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!dry && process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const resendKey = process.env.RESEND_API_KEY;
@@ -153,11 +190,17 @@ export async function GET(req: Request) {
   const pollen = regions.some((r) => /hoog/i.test(String(r.signal?.risk_summary?.pollen ?? ""))) ? "Hoog (gras)" : "Laag tot matig";
   const regime = oracle?.dominant_regime ?? "wisselvallig";
 
-  // 3. Menselijk weerbericht (Hermes, met fallback).
-  let weerbericht = `Het wordt vandaag ${koelst.max >= 25 ? "overal warm" : "wisselend"}: in ${warmst.name} de warmste plek met ${Math.round(warmst.max)} graden, terwijl het in ${koelst.name} met ${Math.round(koelst.max)} graden ${spread}° koeler blijft. Houd rekening met de pollen: ${pollen.toLowerCase()}.`;
+  // 3. Pakkend weerbericht (Hermes), met harde cijfer-validatie + terugval.
+  let weerbericht = catchyFallback(warmst, koelst, spread, pollen);
   try {
-    weerbericht = await generateWeerbericht({ warmst, koelst, spread, pollen, regime });
-  } catch { /* fallback blijft staan */ }
+    const gen = await generateWeerbericht({ warmst, koelst, spread, pollen, regime });
+    const tw = String(Math.round(warmst.max));
+    const tk = String(Math.round(koelst.max));
+    // Alleen overnemen als de LLM de exacte cijfers gebruikte (consistent met de
+    // ranglijst) én geen vakjargon of modelnaam lekte.
+    const cleanLang = !/subsidentie|convect|hpa|850|model|gateway|regime/i.test(gen);
+    if (gen.length > 20 && gen.includes(tw) && gen.includes(tk) && cleanLang) weerbericht = gen;
+  } catch { /* terugval blijft staan */ }
 
   // 4. E-mail HTML.
   const dateLabel = new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -228,8 +271,13 @@ export async function GET(req: Request) {
   <p style="text-align:center;margin:24px 0 0;font-size:11px;color:rgba(255,255,255,.5);">Mariana · Weerzone — automatisch elke ochtend</p>
 </div></body></html>`;
 
-  const resend = new Resend(resendKey);
   const subject = `🌤️ TikTok-brief ${dateLabel.split(" ").slice(0, 3).join(" ")} — ${warmst.name} ${Math.round(warmst.max)}° / ${koelst.name} ${Math.round(koelst.max)}°`;
+
+  if (dry) {
+    return new NextResponse(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+  }
+
+  const resend = new Resend(resendKey);
   const { error: sendErr } = await resend.emails.send({
     from: "Mariana van Weerzone <mariana@weerzone.nl>",
     to: RECIPIENT,
