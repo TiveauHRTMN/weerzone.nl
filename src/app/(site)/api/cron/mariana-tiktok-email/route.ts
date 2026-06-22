@@ -135,10 +135,11 @@ function esc(s: unknown): string {
 }
 
 export async function GET(req: Request) {
-  // ?dry=1 → render de mail maar verstuur niet (voor preview/afstemmen).
+  // ?dry=1 → render de mail maar verstuur niet (voor preview/afstemmen). Auth
+  // geldt óók voor dry in productie; lokaal (dev) is geen secret nodig.
   const dry = new URL(req.url).searchParams.get("dry") === "1";
   const authHeader = req.headers.get("authorization");
-  if (!dry && process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const resendKey = process.env.RESEND_API_KEY;
