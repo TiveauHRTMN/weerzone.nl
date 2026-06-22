@@ -45,30 +45,30 @@ const PLACES: Array<[string, number, number, Region]> = [
 
 interface Ranked { name: string; max: number; region: Region }
 
-async function fetchRanking(): Promise<Ranked[]> {
+async function fetchRanking(dayOffset = 0): Promise<Ranked[]> {
   const lat = PLACES.map((p) => p[1]).join(",");
   const lon = PLACES.map((p) => p[2]).join(",");
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&timezone=Europe%2FAmsterdam&forecast_days=1`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&timezone=Europe%2FAmsterdam&forecast_days=${dayOffset + 1}`;
   const res = await fetch(url, { next: { revalidate: 0 } });
   if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
   const data = await res.json();
   const rows = (Array.isArray(data) ? data : [data]) as Array<{ daily?: { temperature_2m_max?: number[] } }>;
   return PLACES
-    .map((p, i) => ({ name: p[0], region: p[3], max: rows[i]?.daily?.temperature_2m_max?.[0] }))
+    .map((p, i) => ({ name: p[0], region: p[3], max: rows[i]?.daily?.temperature_2m_max?.[dayOffset] }))
     .filter((r): r is Ranked => typeof r.max === "number")
     .sort((a, b) => b.max - a.max);
 }
 
-async function fetchDetails(): Promise<{ uv: number; sunHours: number; windBft: number }> {
+async function fetchDetails(dayOffset = 0): Promise<{ uv: number; sunHours: number; windBft: number }> {
   // De Bilt als landelijke referentie.
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=52.10&longitude=5.18&daily=uv_index_max,sunshine_duration,wind_speed_10m_max&timezone=Europe%2FAmsterdam&forecast_days=1`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=52.10&longitude=5.18&daily=uv_index_max,sunshine_duration,wind_speed_10m_max&timezone=Europe%2FAmsterdam&forecast_days=${dayOffset + 1}`;
   const res = await fetch(url, { next: { revalidate: 0 } });
   const d = await res.json().catch(() => null);
   const day = d?.daily ?? {};
   return {
-    uv: Math.round(day.uv_index_max?.[0] ?? 0),
-    sunHours: Math.round((day.sunshine_duration?.[0] ?? 0) / 3600),
-    windBft: getWindBeaufort(day.wind_speed_10m_max?.[0] ?? 0).scale,
+    uv: Math.round(day.uv_index_max?.[dayOffset] ?? 0),
+    sunHours: Math.round((day.sunshine_duration?.[dayOffset] ?? 0) / 3600),
+    windBft: getWindBeaufort(day.wind_speed_10m_max?.[dayOffset] ?? 0).scale,
   };
 }
 
@@ -94,16 +94,17 @@ function humanRegime(regime: string): string {
 }
 
 async function generateWeerbericht(input: {
-  warmst: Ranked; koelst: Ranked; spread: number; pollen: string; regime: string;
+  warmst: Ranked; koelst: Ranked; spread: number; pollen: string; regime: string; when: string;
 }): Promise<string> {
   const tw = Math.round(input.warmst.max);
   const tk = Math.round(input.koelst.max);
-  const system = `Je bent Mariana, het weergezicht van Weerzone. Schrijf een KORT, pakkend landelijk weerbericht voor een virale TikTok-post.
+  const system = `Je bent Mariana, het weergezicht van Weerzone. Schrijf een KORT, pakkend landelijk weerbericht voor ${input.when}, voor een virale TikTok-post.
 DOEL: mensen moeten meteen blijven hangen en het willen delen — open met een sterke hook (een verrassend contrast of een gewaagde uitspraak).
 STIJL: menselijk, energiek, spreektaal met een vleugje lef. 100% correct Nederlands — gewone mensentaal, géén Engelse woorden, géén vaktermen (zoals 'subsidentie'), geen modelnamen.
 LENGTE: 3 tot 4 korte zinnen.
+TEMPERATUUR schrijf je als "het wordt X graden" of gewoon "X graden" — nooit "het waait X graden" (waaien gaat over wind, niet over temperatuur).
 HARDE REGELS: gebruik de gegeven getallen en plaatsnamen EXACT — verander geen enkel cijfer en verzin geen extra plaatsen, dagen of harde weersclaims. Geen emoji, geen aanhef, geen ondertekening.`;
-  const user = `Cijfers van vandaag (exact overnemen):
+  const user = `Cijfers van ${input.when} (exact overnemen):
 • Warmste plek: ${input.warmst.name} ${tw} graden
 • Koelste plek: ${input.koelst.name} ${tk} graden
 • Verschil: ${input.spread} graden
@@ -137,7 +138,10 @@ function esc(s: unknown): string {
 export async function GET(req: Request) {
   // ?dry=1 → render de mail maar verstuur niet (voor preview/afstemmen). Auth
   // geldt óók voor dry in productie; lokaal (dev) is geen secret nodig.
-  const dry = new URL(req.url).searchParams.get("dry") === "1";
+  const params = new URL(req.url).searchParams;
+  const dry = params.get("dry") === "1";
+  const dayOffset = params.get("day") === "1" ? 1 : 0; // 0 = vandaag (cron), 1 = morgen (test)
+  const when = dayOffset === 1 ? "morgen" : "vandaag";
   const authHeader = req.headers.get("authorization");
   if (process.env.NODE_ENV === "production" && process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -175,7 +179,7 @@ export async function GET(req: Request) {
   let ranked: Ranked[] = [];
   let details = { uv: 0, sunHours: 0, windBft: 0 };
   try {
-    [ranked, details] = await Promise.all([fetchRanking(), fetchDetails()]);
+    [ranked, details] = await Promise.all([fetchRanking(dayOffset), fetchDetails(dayOffset)]);
   } catch (e) {
     return NextResponse.json({ error: `weatherfetch: ${e}` }, { status: 502 });
   }
@@ -194,17 +198,19 @@ export async function GET(req: Request) {
   // 3. Pakkend weerbericht (Hermes), met harde cijfer-validatie + terugval.
   let weerbericht = catchyFallback(warmst, koelst, spread, pollen);
   try {
-    const gen = await generateWeerbericht({ warmst, koelst, spread, pollen, regime });
+    const gen = await generateWeerbericht({ warmst, koelst, spread, pollen, regime, when });
     const tw = String(Math.round(warmst.max));
     const tk = String(Math.round(koelst.max));
     // Alleen overnemen als de LLM de exacte cijfers gebruikte (consistent met de
     // ranglijst) én geen vakjargon of modelnaam lekte.
-    const cleanLang = !/subsidentie|convect|hpa|850|model|gateway|regime/i.test(gen);
+    const cleanLang = !/subsidentie|convect|hpa|850|model|gateway|regime/i.test(gen)
+      && !/waait[^.!?]*graden/i.test(gen) // "het waait X graden" is fout (waaien = wind)
+      && !/het graspollen/i.test(gen);   // "de graspollen" (de-woord)
     if (gen.length > 20 && gen.includes(tw) && gen.includes(tk) && cleanLang) weerbericht = gen;
   } catch { /* terugval blijft staan */ }
 
   // 4. E-mail HTML.
-  const dateLabel = new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const dateLabel = new Date(Date.now() + dayOffset * 86400000).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const rankRow = (r: Ranked, i: number) => `<tr><td style="padding:3px 10px;color:#475569;">${i + 1}.</td><td style="padding:3px 10px;color:#0f172a;font-weight:600;">${esc(r.name)}</td><td style="padding:3px 10px;text-align:right;font-weight:800;color:#0f172a;">${Math.round(r.max)}°</td></tr>`;
   const regionRow = `${(["Zuid", "Oost", "Midden", "West", "Noord"] as Region[]).map((r) => `${r} ${regAvg[r]}°`).join("  ·  ")}`;
 
