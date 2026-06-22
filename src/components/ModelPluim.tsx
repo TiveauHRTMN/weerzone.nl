@@ -168,33 +168,23 @@ export default function ModelPluim({ hourly, sunrise, sunset, pluim }: Props) {
   });
 
   return (
-    <div className="card p-5 space-y-4">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-0.5">
-            {showBlend ? "Komende 48 uur · gewogen tot één lijn" : "Komende 48 uur"}
-          </p>
-          <h3 className="text-sm font-black text-slate-800 leading-none">
-            Temperatuurverwachting
-          </h3>
-        </div>
-        <div className="flex items-center gap-4 flex-wrap">
-          {showBlend && (
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-[3px] rounded-full" style={{ background: "#0f172a" }} />
-              <span className="text-[10px] font-bold text-slate-900">Weerzone-verwachting</span>
-            </div>
-          )}
-          {availableModels.map(m => (
-            <div key={m.key} className="flex items-center gap-1.5">
-              <div className="w-5 h-[3px] rounded-full" style={{ background: m.color }} />
-              <span className="text-[10px] font-bold" style={{ color: m.color }}>
-                {m.label}
-              </span>
-            </div>
-          ))}
-        </div>
+    <div className="va-card va-pluim p-5 sm:p-6 space-y-4">
+      {/* Legenda (de titel staat in de sectiekop erboven) */}
+      <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
+        {showBlend && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-[3px] rounded-full" style={{ background: "#0f172a" }} />
+            <span className="text-[10px] font-bold text-slate-900">Weerzone-verwachting</span>
+          </div>
+        )}
+        {availableModels.map(m => (
+          <div key={m.key} className="flex items-center gap-1.5">
+            <div className="w-5 h-[3px] rounded-full" style={{ background: m.color }} />
+            <span className="text-[10px] font-bold" style={{ color: m.color }}>
+              {m.label}
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* SVG chart */}

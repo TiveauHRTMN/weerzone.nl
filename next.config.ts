@@ -9,7 +9,7 @@ const cspReportOnly = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://*.posthog.com",
+  "connect-src 'self' https://*.supabase.co https://*.posthog.com https://api.rainviewer.com",
   "frame-src https://www.google.com https://*.youtube.com https://*.youtube-nocookie.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",

@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 
+/** Houd een vloeiend stukje van max ~4 zinnen aan, altijd eindigend op een hele
+ *  zin (geen afgekapte "..."-staart). */
 function compactStory(value: string): string {
   const sentences = value.match(/[^.!?]+[.!?]+/g)?.map((part) => part.trim()) ?? [value.trim()];
-  const compact = sentences.slice(0, 2).join(" ");
-  if (compact.length <= 240) return compact;
-  return `${compact.slice(0, 237).trimEnd()}...`;
+  let out = "";
+  for (const sentence of sentences.slice(0, 4)) {
+    if (out && out.length + 1 + sentence.length > 360) break;
+    out = out ? `${out} ${sentence}` : sentence;
+  }
+  return out || value.trim();
 }
 
 export default function HeroWeatherStory({

@@ -2,7 +2,8 @@ import type { AgentContext } from "@/lib/agents/context";
 import type { AgentPreferences } from "@/lib/agents/preferences";
 import type { AirQualityData, HourlyForecast } from "@/lib/types";
 import Link from "next/link";
-import { getPollenLevel, getWeatherDescription, getWeatherEmoji } from "@/lib/weather";
+import { getPollenLevel, getWeatherDescription } from "@/lib/weather";
+import WeatherGlyph, { glyphFromCode } from "@/components/WeatherGlyph";
 import { formatWindowLabel, SEVERITY_LABEL } from "@/lib/knmi-warnings";
 import { marianaKoosText } from "@/lib/mariana/agent-context";
 import { nlCopyGuard } from "@/lib/nl-copy-guard";
@@ -16,7 +17,8 @@ import {
   type PluimIntelligence,
 } from "@/lib/model-blend";
 import HeroWeatherStory from "@/components/HeroWeatherStory";
-import KnmiRadarMap from "@/components/KnmiRadarMap";
+import BuienradarRadar from "@/components/BuienradarRadar";
+import ModelPluim from "@/components/ModelPluim";
 import WeatherVisuals from "@/components/WeatherVisuals";
 
 interface DayBriefingProps {
@@ -56,6 +58,12 @@ const DAYPARTS = [
 
 function average(values: number[]): number {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+/** Windsnelheid (km/u) → windkracht in Beaufort (0–12). */
+function beaufort(kmh: number): number {
+  const thresholds = [1, 6, 12, 20, 29, 39, 50, 62, 75, 89, 103, 118];
+  return thresholds.reduce((bft, edge) => (kmh >= edge ? bft + 1 : bft), 0);
 }
 
 function hourNumber(time: string): number {
@@ -164,7 +172,7 @@ function riskForDay(ctx: AgentContext, hours: HourlyForecast[], date: string, ma
   }
   if (thunder) return { meaningful: true, title: "Onweer kan je planning raken", text: `Het duidelijkste onweerssignaal ligt rond ${timeLabel(thunder.time)}. De onzekerheid blijft aanwezig, dus controleer kort voor vertrek opnieuw.`, impact: "Vermijd open terrein en water zodra je donder hoort." };
   if (maxRain >= 5) return { meaningful: true, title: "Plaatselijk veel regen in korte tijd", text: `Rond het natste uur kan ongeveer ${maxRain.toFixed(1)} mm vallen. Daardoor kunnen zicht en reistijd tijdelijk verslechteren.`, impact: "Plan extra reistijd en kies waar mogelijk een droger uur." };
-  if (maxWind >= 55) return { meaningful: true, title: "Stevige wind vraagt aandacht", text: `De wind kan oplopen tot ongeveer ${Math.round(maxWind)} km/u. Vooral fietsen, open plekken en losse spullen kunnen daar last van hebben.`, impact: "Zet losse spullen vast en kies een beschutte route." };
+  if (maxWind >= 55) return { meaningful: true, title: "Stevige wind vraagt aandacht", text: `De wind kan oplopen tot windkracht ${beaufort(maxWind)}. Vooral fietsen, open plekken en losse spullen kunnen daar last van hebben.`, impact: "Zet losse spullen vast en kies een beschutte route." };
   if (fog) return { meaningful: true, title: "Mist kan het zicht beperken", text: `Rond ${timeLabel(fog.time)} kan het zicht plaatselijk minder zijn. Dat kan vooral onderweg extra tijd kosten.`, impact: "Vertrek rustiger en houd meer afstand." };
   if (ice) return { meaningful: true, title: "Kans op plaatselijke gladheid", text: `Rond ${timeLabel(ice.time)} komen kou en neerslag samen. Bruggen en fietspaden kunnen dan het eerst glad worden.`, impact: "Pas snelheid en vertrektijd aan." };
   if (maxTemp >= 30) return { meaningful: true, title: "Hitte is het belangrijkste risico", text: `Met ongeveer ${Math.round(maxTemp)} graden wordt zware inspanning midden op de dag minder verstandig.`, impact: "Plan inspanning vroeg of later en drink voldoende." };
@@ -248,7 +256,7 @@ function buildAgentDecisions(input: {
       label: "Reed",
       state: preferences.reed ? reedState : "quiet",
       title: preferences.reed ? risk.title : "Risicobewaking staat uit",
-      summary: preferences.reed ? risk.impact : "Reed kan onweer, wind, zware regen en gladheid voor je blijven volgen.",
+      summary: preferences.reed ? risk.text : "Reed kan onweer, wind, zware regen en gladheid voor je blijven volgen.",
       timing: preferences.reed ? shortTiming(risk.text, "geen bijzonder risicovenster") : "alleen na activeren",
       action: preferences.reed ? (risk.meaningful ? risk.impact : "Geen extra actie nodig; Weerzone blijft kijken.") : "Zet Reed aan voor risicosignalen.",
       confidence,
@@ -314,7 +322,6 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
   const label = dayOffset === 0 ? "Vandaag" : "Morgen";
   const condition = getWeatherDescription(daily.weatherCode);
   const maxWind = Math.max(daily.windSpeedMax, ...hours.map((hour) => hour.windSpeed));
-  const maxRain = Math.max(0, ...hours.map((hour) => hour.precipitation));
   const dayHours = hours.filter((hour) => hourNumber(hour.time) >= 9 && hourNumber(hour.time) <= 21);
   const feels = dayHours.length
     ? average(dayHours.map((hour) => hour.apparentTemperature))
@@ -322,24 +329,30 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
       ? average(hours.map((hour) => hour.apparentTemperature))
       : dayOffset === 0 ? ctx.weather.current.feelsLike : daily.tempMax;
   const risk = riskForDay(ctx, hours, date, daily.tempMax, dayOffset);
-  const choice = choiceForDay(ctx, hours, daily.tempMax);
   const pluim = pluimIntelligence(ctx, preferences, dayOffset, date);
   const rain = rainSummary(hours, daily.precipitationSum);
   const pollen = pollenForDay(airQuality, date);
   const defaultStory = `${condition} met temperaturen tussen ${Math.round(daily.tempMin)} en ${Math.round(daily.tempMax)} graden. ${rain}`;
-  const synthesisParts = [`${condition}, maximaal ${Math.round(daily.tempMax)} graden`];
-  if (preferences.reed && risk.meaningful) synthesisParts.push(risk.title.toLowerCase());
-  if (preferences.koos) synthesisParts.push(choice.title.toLowerCase());
-  const synthesis = `${synthesisParts.join("; ")}.`;
   const uvMax = daily.uvIndexMax ?? ctx.weather.uvIndex;
   const uvLabel = uvMax >= 6 ? "Hoog" : uvMax >= 3 ? "Matig" : "Laag";
-  const agreement = cascadeAgreement(ctx);
-  const pietAdvice = compactCopy(
-    ctx.mariana?.signal?.location_output_contract.best_action
-      || ctx.mariana?.signal?.agent_outputs.piet.text,
-    2,
-  ) ?? clothingAdvice(daily.tempMin, daily.tempMax, maxWind, daily.precipitationSum);
-  const agentDecisions = buildAgentDecisions({ preferences, label, pietAdvice, risk, choice, agreement });
+  // Eén waarschuwing — alleen als er écht iets te melden is. Geen agent-naam of
+  // -laag in beeld: het is de stem van Weerzone zelf.
+  const alert = preferences.reed && risk.meaningful ? risk : null;
+  const alertColor = !alert
+    ? null
+    : /rood|zwaar/i.test(alert.title) ? "#e23b34"
+      : /oranje/i.test(alert.title) ? "#e0701a"
+        : "#e08a08";
+  const visibleDayparts = DAYPARTS.flatMap((part) => {
+    const partHours = hours.filter((hour) => hourNumber(hour.time) >= part.start && hourNumber(hour.time) < part.end);
+    if (!partHours.length) return [];
+    return [{
+      part,
+      partHours,
+      wettest: Math.max(0, ...partHours.map((hour) => hour.precipitation)),
+      representative: partHours[Math.floor(partHours.length / 2)],
+    }];
+  });
 
   return (
     <div className="va-stagger va-page relative z-10 mx-auto max-w-[820px] space-y-7 px-4 py-9 sm:px-6 sm:py-14">
@@ -355,100 +368,82 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
         <div className="va-micro text-slate-400">Weerzone · {label}</div>
         <div className="mt-4 flex items-center justify-between gap-5">
           <div className="min-w-0">
-            <h1 className="text-[34px] font-extrabold leading-none tracking-[-0.035em] text-slate-950 sm:text-[46px]">
+            <h1 className="text-[34px] font-extrabold leading-none tracking-[-0.035em] tabular-nums text-slate-950 sm:text-[46px]">
               {dayOffset === 0 ? Math.round(ctx.weather.current.temperature) : Math.round(daily.tempMax)}° in {ctx.location.name}
             </h1>
             <p className="mt-2 text-sm font-bold text-slate-600">{condition} · {Math.round(daily.tempMin)}° tot {Math.round(daily.tempMax)}°</p>
           </div>
-          <span className="va-weather-orb shrink-0 text-5xl sm:text-6xl" aria-label={condition}>
-            {getWeatherEmoji(daily.weatherCode, true)}
+          <span className="va-weather-orb shrink-0" role="img" aria-label={condition}>
+            <WeatherGlyph name={glyphFromCode(daily.weatherCode, true)} size={54} />
           </span>
         </div>
-        <div className="va-one-line mt-5"><span>{label} in één zin</span><strong>{synthesis}</strong></div>
         <HeroWeatherStory initialStory={defaultStory} lat={ctx.location.lat} lon={ctx.location.lon} city={ctx.location.name} dayOffset={dayOffset} />
-        <div className="va-hero-metrics mt-6 grid grid-cols-3 gap-2 sm:gap-3">
-          <div><span>Regenpiek</span><strong>{maxRain.toFixed(1)} mm/u</strong></div>
-          <div><span>Wind</span><strong>{Math.round(maxWind)} km/u</strong></div>
-          <div><span>Zekerheid</span><strong>{agreement}%</strong></div>
-        </div>
       </header>
 
-      {dayOffset === 0 && <KnmiRadarMap lat={ctx.location.lat} lon={ctx.location.lon} />}
+      {alert && (
+        <section className="va-card va-alert" style={{ "--sev": alertColor } as React.CSSProperties}>
+          <div className="va-alert-head">
+            <WeatherGlyph name="alert" size={20} />
+            <strong>{alert.title}</strong>
+          </div>
+          <p>{alert.text}</p>
+          <p className="va-alert-do">{alert.impact}</p>
+        </section>
+      )}
+
+      {/* Temperatuurverwachting — direct onder de hero, altijd zichtbaar */}
+      <section className="space-y-3">
+        <div className="va-section-head px-1">
+          <div><span className="va-onsky va-micro">Komende 48 uur</span><h2>Temperatuurverwachting</h2></div>
+        </div>
+        <ModelPluim hourly={ctx.weather.hourly} sunrise={ctx.weather.sunrise} sunset={ctx.weather.sunset} pluim={pluim} />
+      </section>
 
       <section className="space-y-3">
         <div className="va-section-head px-1">
-          <div><span className="va-onsky va-micro">Drie blikken vooruit</span><h2>Piet, Reed en Koos</h2></div>
-          <span className="va-section-number">01</span>
+          <div><span className="va-onsky va-micro">De cijfers</span><h2>Details voor je planning</h2></div>
         </div>
-        <div className="va-agent-strip grid gap-3 lg:grid-cols-3">
-          {agentDecisions.map((decision) => (
-            <article
-              key={decision.agent}
-              id={decision.agent}
-              className={`va-card va-agent-tile is-${decision.state} ${decision.enabled ? "" : "is-muted"} scroll-mt-24`}
-            >
-              <header className="va-agent-head">
-                <span className="va-agent-mark" aria-hidden>{decision.icon}</span>
-                <span className="va-agent-name">{decision.label}</span>
-                <span className={`va-state-pill is-${decision.state}`}>
-                  {decision.state === "quiet" ? "Rustig" : decision.state === "watching" ? "Let op" : decision.state === "urgent" ? "Urgent" : "Actief"}
-                </span>
-              </header>
-              <h3>{decision.title}</h3>
-              <p>{decision.summary}</p>
-              <footer className="va-agent-foot">
-                <span className="va-agent-arrow" aria-hidden>→</span>
-                <span className="va-agent-action">{decision.action}</span>
-              </footer>
+        <article className="va-card va-facts-grid grid grid-cols-2 sm:grid-cols-3">
+          {([
+            ["wind", "Wind", `${beaufort(maxWind)} Bft`],
+            ["droplet", "Regen", `${daily.precipitationSum.toFixed(1)} mm`],
+            ["thermometer", "Gevoel", `${Math.round(feels)}°`],
+            ["uv", "UV", `${uvLabel} · ${Math.round(uvMax)}`],
+            ["pollen", "Pollen", pollen.replace(/\.$/, "")],
+            ["uv", "Zon", `${Math.round(daily.sunHours)} uur`],
+          ] as const).map(([icon, title, value]) => (
+            <div key={title}><span className="va-fact-glyph"><WeatherGlyph name={icon} size={22} /></span><small>{title}</small><strong>{value}</strong></div>
+          ))}
+        </article>
+      </section>
+
+      {dayOffset === 0 && (
+        <section className="space-y-3">
+          <div className="va-section-head px-1">
+            <div><span className="va-onsky va-micro">Live</span><h2>Regen op de kaart</h2></div>
+          </div>
+          <BuienradarRadar />
+        </section>
+      )}
+
+      <section className="space-y-3">
+        <div className="va-section-head px-1">
+          <div><span className="va-onsky va-micro">Van uur tot uur</span><h2>Zo verloopt je dag</h2></div>
+        </div>
+        <div className="va-daypart-grid" style={{ "--dp-cols": String(Math.min(visibleDayparts.length, 4)) } as React.CSSProperties}>
+          {visibleDayparts.map(({ part, partHours, wettest, representative }) => (
+            <article key={part.label} className="va-card va-daypart p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-2">
+                <div><div className="va-micro text-slate-400">{part.label}</div><strong>{Math.round(average(partHours.map((hour) => hour.temperature)))}°</strong></div>
+                <span className="va-daypart-glyph" aria-hidden><WeatherGlyph name={glyphFromCode(representative.weatherCode, part.start >= 6 && part.start < 18)} size={30} /></span>
+              </div>
+              <div className="va-daypart-foot"><span>{getWeatherDescription(representative.weatherCode)}</span>{wettest >= 0.2 ? <span className="va-wet"><WeatherGlyph name="droplet" size={12} />{timeLabel(partHours.find((hour) => hour.precipitation === wettest)?.time ?? representative.time)}</span> : <span>Droog</span>}</div>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="space-y-3">
-        <div className="va-section-head px-1">
-          <div><span className="va-onsky va-micro">Van uur tot uur</span><h2>Zo verloopt je dag</h2></div>
-          <span className="va-section-number">02</span>
-        </div>
-        <div className="va-daypart-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {DAYPARTS.map((part) => {
-            const partHours = hours.filter((hour) => hourNumber(hour.time) >= part.start && hourNumber(hour.time) < part.end);
-            if (!partHours.length) return null;
-            const wettest = Math.max(0, ...partHours.map((hour) => hour.precipitation));
-            const representative = partHours[Math.floor(partHours.length / 2)];
-            return (
-              <article key={part.label} className="va-card va-daypart p-4 sm:p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <div><div className="va-micro text-slate-400">{part.label}</div><strong>{Math.round(average(partHours.map((hour) => hour.temperature)))}°</strong></div>
-                  <span className="text-3xl" aria-hidden>{getWeatherEmoji(representative.weatherCode, part.start >= 6 && part.start < 18)}</span>
-                </div>
-                <div className="va-daypart-foot"><span>{getWeatherDescription(representative.weatherCode)}</span><span>{wettest >= 0.2 ? `🌧 ${timeLabel(partHours.find((hour) => hour.precipitation === wettest)?.time ?? representative.time)}` : "Droog"}</span></div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <div className="va-section-head px-1">
-          <div><span className="va-onsky va-micro">Nog even controleren</span><h2>Details voor je planning</h2></div>
-          <span className="va-section-number">03</span>
-        </div>
-        <article className="va-card va-facts-grid grid grid-cols-2 sm:grid-cols-3">
-          {[
-            ["💨", "Wind", `${Math.round(maxWind)} km/u`],
-            ["🌧️", "Regen", `${daily.precipitationSum.toFixed(1)} mm`],
-            ["🌡️", "Gevoel", `${Math.round(feels)}°`],
-            ["☀️", "UV", `${uvLabel} · ${Math.round(uvMax)}`],
-            ["🌿", "Pollen", pollen.replace(/\.$/, "")],
-            ["🎯", "Zekerheid", `${agreement}% · ${confidenceLabel(agreement)}`],
-          ].map(([icon, title, value]) => (
-            <div key={title}><span>{icon}</span><small>{title}</small><strong>{value}</strong></div>
-          ))}
-        </article>
-      </section>
-
-      <WeatherVisuals weather={ctx.weather} lat={ctx.location.lat} lon={ctx.location.lon} locationName={ctx.location.name} dayOffset={dayOffset} reedEnabled={preferences.reed} pluim={pluim} />
+      <WeatherVisuals weather={ctx.weather} lat={ctx.location.lat} lon={ctx.location.lon} locationName={ctx.location.name} dayOffset={dayOffset} reedEnabled={preferences.reed} />
 
       {appendedContent}
     </div>

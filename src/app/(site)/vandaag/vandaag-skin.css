@@ -125,6 +125,7 @@
   height: 92px;
   place-items: center;
   border-radius: 28px;
+  color: #0f172a;
   background: linear-gradient(145deg, #fff 0%, #f1f5f9 100%);
   box-shadow:
     inset 0 1px 0 #fff,
@@ -150,36 +151,41 @@
 .va-one-line span { color: #64748b; font-size: 9px; font-weight: 850; letter-spacing: 0.16em; text-transform: uppercase; }
 .va-one-line strong { margin-top: 5px; color: #0f172a; font-size: 15px; line-height: 1.4; }
 
-.va-hero-metrics > div {
-  min-width: 0;
-  padding: 13px 14px;
-  border: 1px solid rgba(148,163,184,0.16);
-  border-radius: 16px;
-  background: rgba(241,245,249,0.64);
+/* Waarschuwing — alleen zichtbaar als er écht iets te melden is. Geen agent-laag,
+   maar de stem van Weerzone. Kleur (--sev) komt uit de ernst van de melding. */
+.va-alert {
+  padding: 18px 20px 18px 22px;
+  border-radius: 20px;
+  border-left: 5px solid var(--sev, #e08a08);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sev, #e08a08) 9%, #fff) 0%, #fff 60%);
 }
 
-.va-hero-metrics span,
-.va-hero-metrics strong {
-  display: block;
+.va-alert-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--sev, #e08a08);
 }
 
-.va-hero-metrics span {
-  color: #64748b;
-  font-size: 9px;
-  font-weight: 850;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.va-hero-metrics strong {
-  margin-top: 5px;
-  overflow: hidden;
-  color: #0f172a;
-  font-size: 14px;
-  font-weight: 850;
+.va-alert-head strong {
+  color: #0a111e;
+  font-size: 16px;
+  font-weight: 900;
   letter-spacing: -0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.va-alert p {
+  margin-top: 8px;
+  color: #51607a;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.va-alert .va-alert-do {
+  margin-top: 6px;
+  color: #16233b;
+  font-weight: 750;
 }
 
 .va-synthesis {
@@ -234,9 +240,20 @@
   min-height: 100%;
 }
 
+/* Dagdelen passen zich aan het aantal resterende delen aan: 2-op-rij op mobiel,
+   en op desktop precies zoveel kolommen als er delen zijn (gecentreerd, gecapt)
+   zodat één resterend dagdeel 's avonds niet uitrekt of verweesd in een lege
+   4-koloms rij staat. --dp-cols wordt in de JSX gezet. */
+.va-daypart-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (min-width: 640px) {
-  .va-daypart-grid > .va-daypart:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
+  .va-daypart-grid {
+    justify-content: center;
+    grid-template-columns: repeat(var(--dp-cols, 4), minmax(150px, 220px));
   }
 }
 
@@ -247,6 +264,16 @@
   font-size: 26px;
   font-weight: 850;
   letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.va-daypart-glyph { color: #2f6bed; }
+
+.va-wet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #2f6bed;
 }
 
 .va-daypart-foot {
@@ -552,8 +579,9 @@
 .va-facts-grid small,
 .va-facts-grid strong { display: block; }
 .va-facts-grid span { font-size: 20px; }
+.va-fact-glyph { color: #334155; }
 .va-facts-grid small { margin-top: 8px; color: #94a3b8; font-size: 9px; font-weight: 850; letter-spacing: 0.15em; text-transform: uppercase; }
-.va-facts-grid strong { margin-top: 5px; overflow: hidden; color: #0f172a; font-size: 14px; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+.va-facts-grid strong { margin-top: 5px; overflow: hidden; color: #0f172a; font-size: 14px; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 .va-expert-disclosure summary {
   display: flex;
@@ -621,8 +649,6 @@
     height: 72px;
     border-radius: 22px;
   }
-  .va-hero-metrics > div { padding: 11px 9px; }
-  .va-hero-metrics strong { font-size: 12px; }
   .va-page { gap: 22px; }
   .va-section-head h2 { font-size: 23px; }
   .va-agent-ops div { grid-template-columns: 1fr; gap: 3px; }
