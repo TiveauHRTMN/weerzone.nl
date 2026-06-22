@@ -234,7 +234,7 @@ export async function GET(req: Request) {
 
   <!-- A. POST-KLAAR -->
   <div style="background:#fff;border-radius:18px;padding:22px;margin-bottom:14px;">
-    <p style="margin:0 0 10px;font-size:11px;font-weight:800;color:#2f6bed;text-transform:uppercase;letter-spacing:1.5px;">Post-klaar · landelijk</p>
+    <p style="margin:0 0 10px;font-size:11px;font-weight:800;color:#2f6bed;text-transform:uppercase;letter-spacing:1.5px;">Slide 1 · weerbericht + temperaturen + details</p>
     <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1e293b;">${esc(weerbericht)}</p>
     <p style="margin:0 0 4px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Temperatuur per regio</p>
     <p style="margin:0 0 14px;font-size:14px;font-weight:700;color:#0f172a;">${regionRow}</p>
@@ -244,6 +244,7 @@ export async function GET(req: Request) {
 
   <!-- Ranglijst -->
   <div style="background:#fff;border-radius:18px;padding:22px;margin-bottom:14px;">
+    <p style="margin:0 0 12px;font-size:11px;font-weight:800;color:#2f6bed;text-transform:uppercase;letter-spacing:1.5px;">Slide 2 · ranglijst + CTA</p>
     <table style="width:100%;border-collapse:collapse;font-size:13px;"><tr>
       <td style="vertical-align:top;width:50%;">
         <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:#e8632c;text-transform:uppercase;letter-spacing:1px;">🔥 Warmste plekken</p>
@@ -259,7 +260,7 @@ export async function GET(req: Request) {
 
   <!-- CTA-tekst -->
   <div style="background:#fff;border-radius:18px;padding:18px 22px;margin-bottom:22px;">
-    <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;"><strong>Slide 3 (CTA):</strong> Tussen ${esc(warmst.name)} en ${esc(koelst.name)} zit vandaag ${spread} graden. "Het" weer bestaat niet — jouw weer wel. Wat wordt het bij JOU? → weerzone.nl</p>
+    <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;"><strong>CTA (onder de ranglijst):</strong> Het weer op jouw locatie — vandaag en morgen. Wat is het weer bij JOU? → weerzone.nl</p>
   </div>
 
   <!-- B/C/D. MARIANA RAPPORT -->
