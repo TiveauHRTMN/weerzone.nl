@@ -242,10 +242,9 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
                 <section className="space-y-3">
                   <div className="va-section-head px-1">
                     <div>
-                      <span className="va-onsky va-micro">Waarom hier anders</span>
-                      <h2>Het weer in {place.name}</h2>
+                      <span className="va-onsky va-micro">In het kort</span>
+                      <h2>Wat maakt het weer in {place.name} anders?</h2>
                     </div>
-                    <span className="va-section-number">04</span>
                   </div>
                   <article className="va-card p-5 sm:p-6">
                     <p className="text-[15px] leading-relaxed text-slate-700" data-speakable>
@@ -260,9 +259,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
                           </div>
                         ))}
                       </div>
-                    )}
-                    {locationProfile.marianaContext && (
-                      <p className="mt-4 text-[12.5px] font-medium leading-relaxed text-slate-500">{locationProfile.marianaContext}</p>
                     )}
                     {initialWeather && (
                       <div className="mt-5">
