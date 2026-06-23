@@ -69,8 +69,8 @@ Schrijf voor ${name} (${provLabel}):
 100% correct Nederlands. Antwoord UITSLUITEND met JSON, geen uitleg:
 {"meta_description":"...","ai_strategy":"..."}`;
 
-  const raw = await hermesChat([{ role: "user", content: prompt }], { model: "seo", nlGuard: true });
   try {
+    const raw = await hermesChat([{ role: "user", content: prompt }], { model: "seo", nlGuard: true });
     const obj = JSON.parse(stripFences(raw));
     let meta = String(obj.meta_description ?? "").trim();
     const strat = String(obj.ai_strategy ?? "").trim();
@@ -79,7 +79,7 @@ Schrijf voor ${name} (${provLabel}):
     meta = trimWords(meta, 155);
     return { meta_description: meta, ai_strategy: strat };
   } catch {
-    return null;
+    return null; // LLM-/parse-fout: sla deze plaats over, run gaat door
   }
 }
 
