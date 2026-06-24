@@ -4,7 +4,7 @@ import ContactForm from "@/components/ContactForm";
 import { schemaContactPage, schemaBreadcrumb, schemaLd } from "@/lib/schema";
 import { hreflangCluster } from "@/lib/hreflang";
 
-const CONTACT_EMAIL = "contact@weerzone.nl";
+const CONTACT_EMAIL = "info@weerzone.nl";
 
 export const metadata: Metadata = {
   title: "Contact",

@@ -32,7 +32,7 @@ const COPY = {
     sending: "Bezig met versturen...",
     send: "Verstuur bericht",
     error:
-      "Er ging iets mis. Probeer het opnieuw of mail rechtstreeks naar contact@weerzone.nl.",
+      "Er ging iets mis. Probeer het opnieuw of mail rechtstreeks naar info@weerzone.nl.",
   },
   de: {
     receivedTag: "Empfangen",
@@ -57,7 +57,7 @@ const COPY = {
     sending: "Wird gesendet...",
     send: "Nachricht senden",
     error:
-      "Es ist etwas schiefgelaufen. Versuch es erneut oder mail direkt an contact@weerzone.nl.",
+      "Es ist etwas schiefgelaufen. Versuch es erneut oder mail direkt an info@weerzone.nl.",
   },
   fr: {
     receivedTag: "Recu",
@@ -82,7 +82,7 @@ const COPY = {
     sending: "Envoi en cours...",
     send: "Envoyer le message",
     error:
-      "Une erreur s'est produite. Reessayez ou ecrivez directement a contact@weerzone.nl.",
+      "Une erreur s'est produite. Reessayez ou ecrivez directement a info@weerzone.nl.",
   },
   es: {
     receivedTag: "Recibido",
@@ -107,7 +107,7 @@ const COPY = {
     sending: "Enviando...",
     send: "Enviar mensaje",
     error:
-      "Algo ha fallado. Intentalo de nuevo o escribe directamente a contact@weerzone.nl.",
+      "Algo ha fallado. Intentalo de nuevo o escribe directamente a info@weerzone.nl.",
   },
 } as const;
 
