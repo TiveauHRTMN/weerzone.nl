@@ -683,3 +683,30 @@
   .va-dot.is-urgent { animation: none; }
   .va-card { transition: none; }
 }
+
+/* ---- Reed meteogram (Expert-modus) ---- */
+.va-meteo { padding: 18px 18px 22px; }
+.va-meteo-readout {
+  display: flex; align-items: baseline; gap: 10px; min-height: 22px;
+  padding-bottom: 12px; border-bottom: 1px solid rgba(148,163,184,0.16);
+}
+.va-meteo-readout strong { color: #0f172a; font-size: 15px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.va-meteo-readout span { color: #51607a; font-size: 12px; font-weight: 650; }
+.va-meteo-hint { color: #94a3b8; font-weight: 650; }
+.va-meteo-moments { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+.va-meteo-moments li {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px 6px 9px;
+  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--mc) 30%, transparent);
+  background: color-mix(in srgb, var(--mc) 8%, #fff);
+}
+.va-meteo-moment-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--mc); flex: none; }
+.va-meteo-moments strong { color: #0f172a; font-size: 12px; font-weight: 800; }
+.va-meteo-moments li > span { color: color-mix(in srgb, var(--mc) 70%, #0b1220); font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.va-meteo-panels { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
+.va-meteo-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.va-meteo-title { color: #475569; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.va-meteo-phrase { font-size: 12px; font-weight: 750; text-align: right; }
+.va-meteo-svg { display: block; width: 100%; height: 86px; touch-action: none; cursor: crosshair; }
+.va-meteo-axis { position: relative; height: 14px; margin-top: 6px; }
+.va-meteo-axis span { position: absolute; transform: translateX(-50%); color: #94a3b8; font-size: 9px; font-weight: 800; }
+.va-meteo-axis span:first-child { color: #2f6bed; }
