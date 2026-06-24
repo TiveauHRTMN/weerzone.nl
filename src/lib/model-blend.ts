@@ -44,7 +44,7 @@ export const DISPLAY_MODEL_NUMBER: Record<DisplayModelKey, 1 | 2 | 3> = {
   arome: 3,
 };
 
-/** Plat contract DayBriefing → WeatherVisuals → ModelPluim. */
+/** Plat contract DayBriefing → ModelPluim. */
 export interface PluimIntelligence {
   /** Gewogen temperatuurlijn, zelfde index als de hourly-array. */
   blended: number[];

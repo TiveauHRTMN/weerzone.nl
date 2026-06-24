@@ -19,7 +19,8 @@ import {
 import HeroWeatherStory from "@/components/HeroWeatherStory";
 import BuienradarRadar from "@/components/BuienradarRadar";
 import ModelPluim from "@/components/ModelPluim";
-import WeatherVisuals from "@/components/WeatherVisuals";
+import ExpertMode from "@/components/ExpertMode";
+import { reedExpertReading } from "@/lib/reed-expert-reading";
 
 interface DayBriefingProps {
   ctx: AgentContext;
@@ -319,6 +320,7 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
   const daily = ctx.weather.daily[dayOffset];
   const date = daily.date;
   const hours = ctx.weather.hourly.filter((hour) => hour.time.slice(0, 10) === date);
+  const reading = reedExpertReading(hours, dayOffset === 0 ? "vandaag" : "morgen");
   const label = dayOffset === 0 ? "Vandaag" : "Morgen";
   const condition = getWeatherDescription(daily.weatherCode);
   const maxWind = Math.max(daily.windSpeedMax, ...hours.map((hour) => hour.windSpeed));
@@ -391,6 +393,7 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
         </section>
       )}
 
+      <ExpertMode reed={preferences.reed} reading={reading} lat={ctx.location.lat} lon={ctx.location.lon} dayOffset={dayOffset}>
       {/* Temperatuurverwachting — direct onder de hero, altijd zichtbaar */}
       <section className="space-y-3">
         <div className="va-section-head px-1">
@@ -442,8 +445,7 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
           ))}
         </div>
       </section>
-
-      <WeatherVisuals weather={ctx.weather} lat={ctx.location.lat} lon={ctx.location.lon} locationName={ctx.location.name} dayOffset={dayOffset} reedEnabled={preferences.reed} />
+      </ExpertMode>
 
       {appendedContent}
     </div>
