@@ -45,18 +45,52 @@ const PLACES: Array<[string, number, number, Region]> = [
 
 interface Ranked { name: string; max: number; region: Region }
 
+// Open-Meteo serveert kale modeloutput. Voor NL kiest 'best_match' HARMONIE
+// (knmi_seamless), en die loopt in hitte 2-3° boven de gecorrigeerde verwachting
+// van KNMI/Weerplaza. De mediaan over meerdere modellen negeert die ene hete
+// uitschieter en landt op het niveau dat de profs publiceren — zonder eigen
+// correctie-model. Zie docs/superpowers/specs/2026-06-24-tiktok-brief-multimodel-temp-design.md
+const BLEND_MODELS = ["knmi_seamless", "ecmwf_ifs025", "icon_eu", "gfs_seamless", "ukmo_seamless"];
+
+function median(values: number[]): number {
+  const s = [...values].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
 async function fetchRanking(dayOffset = 0): Promise<Ranked[]> {
   const lat = PLACES.map((p) => p[1]).join(",");
   const lon = PLACES.map((p) => p[2]).join(",");
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&timezone=Europe%2FAmsterdam&forecast_days=${dayOffset + 1}`;
-  const res = await fetch(url, { next: { revalidate: 0 } });
-  if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
-  const data = await res.json();
-  const rows = (Array.isArray(data) ? data : [data]) as Array<{ daily?: { temperature_2m_max?: number[] } }>;
-  return PLACES
-    .map((p, i) => ({ name: p[0], region: p[3], max: rows[i]?.daily?.temperature_2m_max?.[dayOffset] }))
-    .filter((r): r is Ranked => typeof r.max === "number")
-    .sort((a, b) => b.max - a.max);
+  const base = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&timezone=Europe%2FAmsterdam&forecast_days=${dayOffset + 1}`;
+
+  // Primair: multi-model-mediaan (1 batch-call, alle plekken).
+  try {
+    const res = await fetch(`${base}&models=${BLEND_MODELS.join(",")}`, { next: { revalidate: 0 } });
+    if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
+    const data = await res.json();
+    const rows = (Array.isArray(data) ? data : [data]) as Array<{ daily?: Record<string, (number | null)[]> }>;
+    const ranked = PLACES
+      .map((p, i) => {
+        const vals = BLEND_MODELS
+          .map((mdl) => rows[i]?.daily?.[`temperature_2m_max_${mdl}`]?.[dayOffset])
+          .filter((v): v is number => typeof v === "number");
+        return { name: p[0], region: p[3], max: vals.length ? median(vals) : undefined };
+      })
+      .filter((r): r is Ranked => typeof r.max === "number")
+      .sort((a, b) => b.max - a.max);
+    if (ranked.length) return ranked;
+    throw new Error("multi-model leverde geen bruikbare temperaturen");
+  } catch {
+    // Terugval: enkele (HARMONIE-)max, zodat de brief nooit stilvalt.
+    const res = await fetch(base, { next: { revalidate: 0 } });
+    if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
+    const data = await res.json();
+    const rows = (Array.isArray(data) ? data : [data]) as Array<{ daily?: { temperature_2m_max?: number[] } }>;
+    return PLACES
+      .map((p, i) => ({ name: p[0], region: p[3], max: rows[i]?.daily?.temperature_2m_max?.[dayOffset] }))
+      .filter((r): r is Ranked => typeof r.max === "number")
+      .sort((a, b) => b.max - a.max);
+  }
 }
 
 async function fetchDetails(dayOffset = 0): Promise<{ uv: number; sunHours: number; windBft: number }> {
