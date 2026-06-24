@@ -166,6 +166,66 @@ async function fetchUvIndexMaxByDate(lat: number, lon: number, timezone: string)
   }
 }
 
+// Kale Open-Meteo-output (= HARMONIE voor NL) loopt in hitte 2-3° boven de
+// gecorrigeerde KNMI/Weerplaza-verwachting. De mediaan over meerdere modellen
+// negeert die ene hete uitschieter en landt op het niveau dat de profs publiceren.
+// Aparte lichte call (parallel aan de lead-fetch): models= op de hoofd-call zou
+// élke variabele per model suffixen en de parsing breken.
+// Zie docs/superpowers/specs/2026-06-24-weather-multimodel-temp-design.md
+const BLEND_MODELS = ["knmi_seamless", "ecmwf_ifs025", "icon_eu", "gfs_seamless", "ukmo_seamless"];
+
+function median(values: number[]): number {
+  const s = [...values].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+interface MedianTemps {
+  hourlyTemp: Map<string, number>;
+  hourlyApparent: Map<string, number>;
+  dailyMax: Map<string, number>;
+  dailyMin: Map<string, number>;
+}
+
+async function fetchMedianTemps(lat: number, lon: number, timezone: string): Promise<MedianTemps> {
+  const out: MedianTemps = { hourlyTemp: new Map(), hourlyApparent: new Map(), dailyMax: new Map(), dailyMin: new Map() };
+  const params = new URLSearchParams({
+    latitude: lat.toString(),
+    longitude: lon.toString(),
+    hourly: "temperature_2m,apparent_temperature",
+    daily: "temperature_2m_max,temperature_2m_min",
+    timezone,
+    forecast_days: "4",
+    forecast_hours: "96",
+    models: BLEND_MODELS.join(","),
+  });
+  try {
+    const res = await fetch(`${OPEN_METEO_BASE}?${params}`, {
+      next: { revalidate: 600 },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return out;
+    const data = await res.json();
+    // Per tijdstap de mediaan over de modellen die dat veld leveren (filter null).
+    const fillMap = (block: any, field: string, target: Map<string, number>) => {
+      const times: string[] = block?.time ?? [];
+      times.forEach((t, i) => {
+        const vals = BLEND_MODELS
+          .map((mdl) => block?.[`${field}_${mdl}`]?.[i])
+          .filter((v: unknown): v is number => typeof v === "number");
+        if (vals.length) target.set(t, median(vals));
+      });
+    };
+    fillMap(data?.hourly, "temperature_2m", out.hourlyTemp);
+    fillMap(data?.hourly, "apparent_temperature", out.hourlyApparent);
+    fillMap(data?.daily, "temperature_2m_max", out.dailyMax);
+    fillMap(data?.daily, "temperature_2m_min", out.dailyMin);
+    return out;
+  } catch {
+    return out;
+  }
+}
+
 function windVector(speed: number, direction: number) {
   const radians = direction * Math.PI / 180;
   return { x: speed * Math.sin(radians), y: speed * Math.cos(radians) };
@@ -325,12 +385,14 @@ export async function fetchWeatherData(
         )
       : Promise.resolve(null);
 
-    const [leadRes, extraResults, externalAiData, convectiveData, uvByDate] = await Promise.all([
+    const medianPromise = fetchMedianTemps(lat, lon, timezone);
+    const [leadRes, extraResults, externalAiData, convectiveData, uvByDate, medianTemps] = await Promise.all([
       leadPromise,
       Promise.all(extraModelPromises),
       externalAiPromise,
       convectivePromise,
       uvPromise,
+      medianPromise,
     ]);
     const results = [leadRes, ...extraResults];
     const coreData = results[0];
@@ -430,8 +492,10 @@ export async function fetchWeatherData(
           ? (arome ?? icon) 
           : harmonie;
 
-      // Base values volgen altijd het land-specifieke leidende model.
-      const temperature = Math.round(data.hourly.temperature_2m[i] ?? 0);
+      // Base values volgen altijd het land-specifieke leidende model — behalve
+      // temperatuur: die komt uit de multi-model-mediaan (hittebias-correctie),
+      // met terugval op het leidende model als de mediaan ontbreekt.
+      const temperature = Math.round(medianTemps.hourlyTemp.get(time) ?? data.hourly.temperature_2m[i] ?? 0);
       const precipitation = data.hourly.precipitation?.[i] ?? 0;
       const weatherCode = data.hourly.weather_code?.[i] ?? 0;
       const windSpeed = Math.round(data.hourly.wind_speed_10m?.[i] ?? 0);
@@ -446,7 +510,7 @@ export async function fetchWeatherData(
       return {
         time,
         temperature,
-        apparentTemperature: Math.round(data.hourly.apparent_temperature?.[i] ?? temperature),
+        apparentTemperature: Math.round(medianTemps.hourlyApparent.get(time) ?? data.hourly.apparent_temperature?.[i] ?? temperature),
         weatherCode,
         precipitation,
         windSpeed,
@@ -540,8 +604,8 @@ export async function fetchWeatherData(
       hourly,
       daily: (data.daily?.time ?? []).map((date: string, i: number) => ({
         date,
-        tempMax: Math.round(data.daily.temperature_2m_max?.[i] ?? 0),
-        tempMin: Math.round(data.daily.temperature_2m_min?.[i] ?? 0),
+        tempMax: Math.round(medianTemps.dailyMax.get(date) ?? data.daily.temperature_2m_max?.[i] ?? 0),
+        tempMin: Math.round(medianTemps.dailyMin.get(date) ?? data.daily.temperature_2m_min?.[i] ?? 0),
         weatherCode: data.daily.weather_code?.[i] ?? 0,
         precipitationSum: data.daily.precipitation_sum?.[i] ?? 0,
         windSpeedMax: Math.round(data.daily.wind_speed_10m_max?.[i] ?? 0),
