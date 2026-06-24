@@ -320,7 +320,7 @@ export default function DayBriefing({ ctx, preferences, dayOffset, airQuality, h
   const daily = ctx.weather.daily[dayOffset];
   const date = daily.date;
   const hours = ctx.weather.hourly.filter((hour) => hour.time.slice(0, 10) === date);
-  const reading = reedExpertReading(hours, dayOffset === 0 ? "vandaag" : "morgen");
+  const reading = reedExpertReading(hours, dayOffset === 0 ? "vandaag" : "morgen", { tesla: ctx.tesla, warnings: ctx.knmi });
   const label = dayOffset === 0 ? "Vandaag" : "Morgen";
   const condition = getWeatherDescription(daily.weatherCode);
   const maxWind = Math.max(daily.windSpeedMax, ...hours.map((hour) => hour.windSpeed));

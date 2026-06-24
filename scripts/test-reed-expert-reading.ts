@@ -1,5 +1,6 @@
 import { reedExpertReading } from "../src/lib/reed-expert-reading";
 import type { HourlyForecast } from "../src/lib/types";
+import type { TeslaSignal } from "../src/lib/mariana/tesla/types";
 
 let failures = 0;
 function assert(name: string, cond: boolean) {
@@ -23,6 +24,21 @@ function makeHours(spec: Partial<Record<"cape" | "cin" | "liftedIndex" | "windSh
   })) as unknown as HourlyForecast[];
 }
 
+function teslaLevel(level: 1 | 2 | 3): TeslaSignal {
+  return {
+    module: "mariana_tesla", model: "opus_4_8", tesla_signal: level,
+    convective_regime: "", synoptic_setup: "", model_consensus: "",
+    model_conflict: { level: "low", type: [], summary: "" },
+    cape_assessment: "", cin_status: "", effective_cin_assessment: "",
+    trigger_alignment: "", timing_window: "15-19u", initiation_zone: "",
+    upstream_hijack_risk: false, seed_cell_watch: false, peak_corridor: "",
+    expected_mode: "", inflow_outflow_expectation: "", dutch_mesoscale_factors: [],
+    founder_input_assessment: "",
+    confidence: { initiation: 0.5, thunder: 0.5, severe: 0.5, upscale: 0.3, timing: 0.5, location: 0.5, model_agreement: 0.5, founder_signal_weight: 0 },
+    failure_modes: [], reed_action: "OBSERVE", mariana_summary: "", reasoning_chain: [],
+  };
+}
+
 // 1. Rustige dag → verdict "rustig", geen momenten.
 {
   const r = reedExpertReading(makeHours({ cape: Array(24).fill(50) }), "vandaag");
@@ -32,11 +48,15 @@ function makeHours(spec: Partial<Record<"cape" | "cin" | "liftedIndex" | "windSh
   assert("rustig: 6 lagen", r.layers.length === 6);
 }
 
-// 2. Hoge CAPE + sterk negatieve LI → verdict onrustig + onweerspiek-moment.
+// 2. Echte storm: hoge CAPE + sterk negatieve LI + LAGE CIN + neerslag-trigger
+//    → onweerskans hoog → onweerspiek-moment + verdict onrustig/code.
 {
   const cape = Array(24).fill(200); for (let h = 16; h <= 19; h++) cape[h] = 1800;
   const li = Array(24).fill(2); for (let h = 16; h <= 19; h++) li[h] = -7;
-  const r = reedExpertReading(makeHours({ cape, liftedIndex: li }), "vandaag");
+  const cin = Array(24).fill(5);
+  const precip = Array(24).fill(0); for (let h = 16; h <= 19; h++) precip[h] = 3;
+  const dew = Array(24).fill(17);
+  const r = reedExpertReading(makeHours({ cape, liftedIndex: li, cin, precipitation: precip, dewPoint: dew }), "vandaag");
   assert("storm: verdict onrustig+", r.verdict === "onrustig" || r.verdict === "code");
   assert("storm: onweerspiek-moment", r.moments.some((m) => m.kind === "onweerspiek"));
 }
@@ -63,6 +83,28 @@ function makeHours(spec: Partial<Record<"cape" | "cin" | "liftedIndex" | "windSh
   const r = reedExpertReading([], "morgen");
   assert("leeg: verdict rustig", r.verdict === "rustig");
   assert("leeg: geen lagen-crash", Array.isArray(r.layers));
+}
+
+// 6. DE KERNFIX: hoge CAPE onder een sterk CIN-deksel (De Bilt-scenario)
+//    → GEEN onweerspiek, verdict niet onrustig/code. CIN onderdrukt onweer.
+{
+  const cape = Array(24).fill(1140); for (let h = 12; h <= 19; h++) cape[h] = 2200;
+  const li = Array(24).fill(-2); for (let h = 12; h <= 19; h++) li[h] = -6;
+  const cin = Array(24).fill(140); // sterke deksel hele dag
+  const r = reedExpertReading(makeHours({ cape, liftedIndex: li, cin }), "vandaag");
+  assert("deksel-dicht: geen onweerspiek", !r.moments.some((m) => m.kind === "onweerspiek"));
+  assert("deksel-dicht: verdict niet onrustig/code", r.verdict !== "onrustig" && r.verdict !== "code");
+}
+
+// 7. Cascade-escalatie: matig signaal in de cijfers, maar Tesla geeft niveau 3
+//    → de cascade tilt het oordeel naar code.
+{
+  const cape = Array(24).fill(800); for (let h = 14; h <= 18; h++) cape[h] = 1200;
+  const li = Array(24).fill(-1); for (let h = 14; h <= 18; h++) li[h] = -3;
+  const cin = Array(24).fill(10);
+  const precip = Array(24).fill(0); for (let h = 14; h <= 18; h++) precip[h] = 1;
+  const r = reedExpertReading(makeHours({ cape, liftedIndex: li, cin, precipitation: precip }), "vandaag", { tesla: teslaLevel(3) });
+  assert("cascade: Tesla-3 → verdict code", r.verdict === "code");
 }
 
 if (failures > 0) { console.error(`\n${failures} test(s) gefaald`); process.exit(1); }

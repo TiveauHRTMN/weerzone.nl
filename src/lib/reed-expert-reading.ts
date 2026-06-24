@@ -1,4 +1,7 @@
 import type { HourlyForecast } from "@/lib/types";
+import type { TeslaSignal } from "@/lib/mariana/tesla/types";
+import type { KNMIWarning } from "@/lib/knmi-warnings";
+import { getThunderstormChance } from "@/lib/risk-analysis";
 
 export type ReedVerdict = "rustig" | "oplettend" | "onrustig" | "code";
 
@@ -40,11 +43,27 @@ export interface ReedExpertReading {
   hours: HourlyForecast[];
 }
 
+/** De cascade-laag: Tesla's severe-signaal (null = gate nooit geactiveerd = geen severe) + KNMI-waarschuwingen. */
+export interface ReedCascadeInput {
+  tesla?: TeslaSignal | null;
+  warnings?: KNMIWarning[];
+}
+
 const RANK: Record<ReedVerdict, number> = { rustig: 0, oplettend: 1, onrustig: 2, code: 3 };
 function worst(a: ReedVerdict, b: ReedVerdict): ReedVerdict { return RANK[a] >= RANK[b] ? a : b; }
 function hhmm(iso: string): string { return iso.slice(11, 16); }
 
-export function reedExpertReading(hours: HourlyForecast[], dayLabel: "vandaag" | "morgen"): ReedExpertReading {
+/** Tesla-niveau (1/2/3) → Reed-verdict. null = geen escalatie. */
+function teslaVerdict(tesla?: TeslaSignal | null): ReedVerdict | null {
+  if (!tesla) return null;
+  return tesla.tesla_signal === 3 ? "code" : tesla.tesla_signal === 2 ? "onrustig" : "oplettend";
+}
+
+export function reedExpertReading(
+  hours: HourlyForecast[],
+  dayLabel: "vandaag" | "morgen",
+  cascade: ReedCascadeInput = {},
+): ReedExpertReading {
   if (hours.length === 0) {
     return { verdict: "rustig", headline: `Geen uurdata beschikbaar voor ${dayLabel}.`, moments: [], layers: [], hours: [] };
   }
@@ -56,25 +75,31 @@ export function reedExpertReading(hours: HourlyForecast[], dayLabel: "vandaag" |
   const dew = hours.map((h) => h.dewPoint ?? 0);
   const wind = hours.map((h) => h.windSpeed ?? 0);
 
+  // De cascade beslist over onweer: CIN-bewuste, fysisch-consistente onweerskans
+  // (snoeit op deksel + droog profiel) i.p.v. kale CAPE/LI. Tesla escaleert later.
+  const thunder = hours.map((h) => getThunderstormChance(h, cascade.warnings));
+  const thunderPeak = Math.max(...thunder);
+
   const capeMax = Math.max(...cape);
   const moments: ReedMoment[] = [];
 
-  // Onweerspiek: CAPE > 1500 samen met LI < -6 (sterk), of CAPE > 1000 + LI < -2 (matig).
-  let peakStart = -1, peakEnd = -1, peakSev: ReedVerdict = "rustig";
-  for (let i = 0; i < hours.length; i++) {
-    const strong = cape[i] > 1500 && li[i] < -6;
-    const moderate = cape[i] > 1000 && li[i] < -2;
-    if (strong || moderate) {
-      if (peakStart === -1) peakStart = i;
-      peakEnd = i;
-      peakSev = worst(peakSev, strong ? "code" : "onrustig");
-    }
-  }
-  if (peakStart !== -1) {
+  // Onweerspiek: keyt op de échte onweerskans (deksel-bewust), niet op kale CAPE.
+  // Drempel 35% = lokaal een bui mogelijk; lager = ruis.
+  const STORM_THRESHOLD = 35;
+  const teslaSev = teslaVerdict(cascade.tesla);
+  if (thunderPeak >= STORM_THRESHOLD || teslaSev !== null) {
+    let start = thunder.findIndex((t) => t >= STORM_THRESHOLD);
+    let end = start;
+    for (let i = 0; i < thunder.length; i++) if (thunder[i] >= STORM_THRESHOLD) end = i;
+    if (start === -1) { start = thunder.indexOf(thunderPeak); end = start; }
+    // Severity uit de cijfers, daarna door de cascade (Tesla) omhoog getild.
+    const numericSev: ReedVerdict = thunderPeak >= 70 ? "onrustig" : thunderPeak >= 50 ? "oplettend" : thunderPeak >= STORM_THRESHOLD ? "oplettend" : "rustig";
+    const sev = teslaSev ? worst(numericSev, teslaSev) : numericSev;
     moments.push({
-      time: hours[peakStart].time, hourIndex: peakStart, kind: "onweerspiek",
-      label: "Piek onweerskans", detail: `${hhmm(hours[peakStart].time)}–${hhmm(hours[peakEnd].time)}`,
-      severity: peakSev,
+      time: hours[start].time, hourIndex: start, kind: "onweerspiek",
+      label: cascade.tesla?.tesla_signal === 3 ? "Hoog onweersrisico" : "Onweerskans",
+      detail: `${hhmm(hours[start].time)}–${hhmm(hours[end].time)}`,
+      severity: sev,
     });
   }
 
@@ -86,17 +111,17 @@ export function reedExpertReading(hours: HourlyForecast[], dayLabel: "vandaag" |
       if (cin[i] < 35 && cape[i] > 500) {
         moments.push({
           time: hours[i].time, hourIndex: i, kind: "deksel-breekt",
-          label: "Deksel breekt", detail: hhmm(hours[i].time), severity: "onrustig",
+          label: "Deksel breekt", detail: hhmm(hours[i].time), severity: "oplettend",
         });
         break;
       }
     }
   }
 
-  // Scheringpiek: hoogste windschering > 35 tijdens CAPE > 500.
+  // Scheringpiek: hoogste windschering > 35 tijdens een reële onweerskans.
   let shearIdx = -1, shearVal = 35;
   for (let i = 0; i < hours.length; i++) {
-    if (shear[i] > shearVal && cape[i] > 500) { shearVal = shear[i]; shearIdx = i; }
+    if (shear[i] > shearVal && thunder[i] >= STORM_THRESHOLD) { shearVal = shear[i]; shearIdx = i; }
   }
   if (shearIdx !== -1) {
     moments.push({
@@ -125,13 +150,22 @@ export function reedExpertReading(hours: HourlyForecast[], dayLabel: "vandaag" |
     });
   }
 
-  // Lagen.
-  const capeSev: ReedVerdict = capeMax > 1500 ? "onrustig" : capeMax > 500 ? "oplettend" : "rustig";
+  // Is er veel brandstof die door de deksel wordt tegengehouden? (verklaart het verschil
+  // tussen "veel CAPE" en "toch geen onweer" — precies de val die we wilden dichten.)
+  const cappedFuel = capeMax > 1000 && thunderPeak < STORM_THRESHOLD;
+
+  // Lagen — eigen display-severity voor de kleuren van het meteogram. Deze voeden
+  // bewust NIET het eindoordeel (anders tilt kale LI/CAPE het oordeel ten onrechte op).
+  const capeSev: ReedVerdict = thunderPeak >= 50 ? "onrustig" : thunderPeak >= STORM_THRESHOLD ? "oplettend" : "rustig";
   const layers: ReedLayer[] = [
     {
       key: "cape", title: "Onweerskans (CAPE)", type: "bar", unit: "", series: cape,
       max: Math.max(2000, capeMax), threshold: 1000, thresholdLabel: "Pas op", severity: capeSev,
-      phrase: capeMax > 1500 ? "Genoeg brandstof voor flinke buien." : capeMax > 500 ? "Wat opbouw, maar nog beheersbaar." : "Weinig opbouw — rustige lucht.",
+      phrase: cappedFuel
+        ? "Veel brandstof, maar de deksel (CIN) houdt het dicht."
+        : thunderPeak >= 50 ? "Genoeg brandstof én de deksel gaat eraf."
+        : thunderPeak >= STORM_THRESHOLD ? "Wat opbouw; lokaal kan een bui ontstaan."
+        : capeMax > 500 ? "Wat opbouw, maar geen trigger." : "Weinig opbouw — rustige lucht.",
     },
     {
       key: "dewPoint", title: "Vocht (dauwpunt)", type: "line", unit: "°C", series: dew,
@@ -140,14 +174,14 @@ export function reedExpertReading(hours: HourlyForecast[], dayLabel: "vandaag" |
     },
     {
       key: "cin", title: "Deksel (CIN)", type: "bar", unit: "J/kg", series: cin,
-      max: 150, threshold: 100, thresholdLabel: "Sterk deksel", severity: hadLid ? "oplettend" : "rustig",
-      phrase: hadLid ? "Een deksel houdt buien voorlopig tegen." : "Geen rem op de buienvorming.",
+      max: 150, threshold: 100, thresholdLabel: "Sterk deksel", severity: "rustig",
+      phrase: Math.max(...cin) > 100 ? "Een sterke deksel houdt buien tegen." : hadLid ? "Een deksel houdt buien voorlopig tegen." : "Geen rem op de buienvorming.",
     },
     {
       key: "liftedIndex", title: "Stabiliteit (Lifted Index)", type: "line", unit: "°C", series: li,
       min: -10, max: 15, threshold: 0, thresholdLabel: "Instabiel (< 0)",
       severity: Math.min(...li) <= -6 ? "onrustig" : Math.min(...li) < 0 ? "oplettend" : "rustig",
-      phrase: Math.min(...li) <= -6 ? "Zeer onstabiel — storm mogelijk." : Math.min(...li) < 0 ? "Licht onstabiel." : "Stabiele opbouw.",
+      phrase: Math.min(...li) <= -6 ? "De lucht zelf is zeer onstabiel." : Math.min(...li) < 0 ? "Licht onstabiel." : "Stabiele opbouw.",
     },
     {
       key: "windShear", title: "Windschering (0–80m)", type: "line", unit: "km/u", series: shear,
@@ -163,15 +197,21 @@ export function reedExpertReading(hours: HourlyForecast[], dayLabel: "vandaag" |
     },
   ];
 
-  const verdict = [...moments.map((m) => m.severity), ...layers.map((l) => l.severity)].reduce(worst, "rustig" as ReedVerdict);
+  // Eindoordeel: alleen de momenten (storm/wind/schering/broeierig/deksel) tellen,
+  // niet de kale expert-lagen. Zo blijft een gedekselde dag "rustig".
+  const verdict = moments.map((m) => m.severity).reduce(worst, "rustig" as ReedVerdict);
 
-  const deksel = moments.find((m) => m.kind === "deksel-breekt");
-  const peak = moments.find((m) => m.kind === "onweerspiek");
+  const storm = moments.find((m) => m.kind === "onweerspiek");
+  const broeierig = moments.find((m) => m.kind === "broeierig");
   let headline: string;
-  if (peak && deksel) {
-    headline = `Geduld tot een uur of ${parseInt(deksel.detail)} — daarna kan het in korte tijd flink tekeergaan.`;
-  } else if (peak) {
-    headline = `Vanaf ${peak.detail.split("–")[0]} staat de atmosfeer op scherp; korte, felle buien liggen op de loer.`;
+  if (storm && (storm.severity === "code" || storm.severity === "onrustig")) {
+    headline = `Vanaf ${storm.detail.split("–")[0]} staat de atmosfeer op scherp; korte, felle buien liggen op de loer.`;
+  } else if (storm) {
+    headline = `Rond ${storm.detail.split("–")[0]} kan lokaal een bui met onweer ontstaan.`;
+  } else if (cappedFuel) {
+    headline = `Er is genoeg brandstof in de lucht, maar een sterke deksel houdt het onweer tegen — droog en rustig.`;
+  } else if (broeierig && verdict === "oplettend") {
+    headline = `Rustig en stabiel, alleen wat broeierig.`;
   } else if (verdict === "oplettend") {
     headline = `Grotendeels rustig, maar houd de lucht in de gaten.`;
   } else {
