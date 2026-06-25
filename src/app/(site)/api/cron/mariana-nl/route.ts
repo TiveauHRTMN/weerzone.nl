@@ -7,6 +7,8 @@ import { saveTeslaRun } from "@/lib/mariana/tesla/storage";
 import { runMarianaRegion } from "@/lib/mariana/regions/engine";
 import { saveMarianaRun } from "@/lib/mariana/regions/storage";
 import { fetchWeatherData } from "@/lib/weather";
+import { runStudio } from "@/lib/mariana/studio/engine";
+import { saveStudioDay } from "@/lib/mariana/studio/storage";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -48,6 +50,7 @@ export async function GET(request: NextRequest) {
   const result = {
     oracle: { ok: false as boolean, gate: "" as string, persisted: false as boolean },
     regions: { processed: 0, saved: 0, convective: 0, teslaSaved: 0, errors: [] as string[] },
+    studio: { ok: false as boolean, persisted: false as boolean, headsUp: null as string | null },
   };
 
   // --- 1. Oracle: landelijk regime + gate. ---
@@ -97,6 +100,18 @@ export async function GET(request: NextRequest) {
     } catch (err) {
       result.regions.errors.push(`${region.slug}: ${err instanceof Error ? err.message : String(err)}`);
     }
+  }
+
+  // --- 3. Studio: dagelijkse TikTok-slide-inhoud (leest de zojuist gevulde cascade). ---
+  try {
+    const day = await runStudio({ dayOffset: 0 });
+    result.studio.ok = true;
+    result.studio.headsUp = day.slide4?.type ?? null;
+    const persisted = await saveStudioDay(day);
+    result.studio.persisted = persisted.ok;
+  } catch (e) {
+    // Studio mag de cascade-cron niet laten falen.
+    result.studio.ok = false;
   }
 
   return NextResponse.json({ ok: true, ...result });

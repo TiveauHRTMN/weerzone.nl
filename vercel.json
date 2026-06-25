@@ -21,10 +21,6 @@
       "schedule": "30 3 * * *"
     },
     {
-      "path": "/api/cron/mariana-tiktok-email",
-      "schedule": "0 4 * * *"
-    },
-    {
       "path": "/api/magnolia/cron",
       "schedule": "0 14 * * 1,3,5"
     },
