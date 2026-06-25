@@ -4,7 +4,7 @@
  * Geen bron- of modelnamen in de output (Global Constraints).
  */
 
-import { fetchKNMIWarnings, highestSeverity } from "@/lib/knmi-warnings";
+import { fetchKNMIWarnings, highestSeverity, type KNMIWarning } from "@/lib/knmi-warnings";
 import { hermesChat } from "@/lib/hermes";
 import type { HeadsUp, HeadsUpType, Ranked } from "./types";
 
@@ -12,6 +12,15 @@ export interface HeadsUpInput {
   morgenRanked: Ranked[];     // forecastRanking(1)
   oracleGateActive: boolean;  // oracle.convective_gate === "ACTIVATE" || run_tesla
   regionThunder: boolean;     // een regio meldt thunder/storm
+}
+
+/** True als het waarschuwingsvenster (deels) op de dag van morgen valt. Null-data = meenemen. */
+function overlapsTomorrow(w: KNMIWarning): boolean {
+  const start = new Date(Date.now() + 86400000); start.setHours(0, 0, 0, 0);
+  const end = new Date(Date.now() + 86400000); end.setHours(23, 59, 59, 999);
+  const from = w.validFrom ? new Date(w.validFrom).getTime() : -Infinity;
+  const until = w.validUntil ? new Date(w.validUntil).getTime() : Infinity;
+  return from <= end.getTime() && until >= start.getTime();
 }
 
 function morgenLabel(): string {
@@ -59,14 +68,17 @@ async function headsUpCopy(type: HeadsUpType, max: number): Promise<{ titel: str
 }
 
 export async function decideHeadsUp(input: HeadsUpInput): Promise<HeadsUp | null> {
+  if (!input.morgenRanked.length) return null;
+
   const morgenMax = input.morgenRanked[0]?.value ?? 0;
   const morgenMin = input.morgenRanked[input.morgenRanked.length - 1]?.value ?? 0;
 
-  // KNMI-severity voor morgen (landelijk hoogste).
+  // KNMI-severity voor morgen (landelijk hoogste, alleen waarschuwingen die morgen raken).
   let knmiYellowPlus = false;
   try {
     const warnings = await fetchKNMIWarnings();
-    const sev = highestSeverity(warnings);
+    const relevant = warnings.filter(overlapsTomorrow);
+    const sev = highestSeverity(relevant);
     knmiYellowPlus = sev === "YELLOW" || sev === "ORANGE" || sev === "RED";
   } catch { /* geen warnings → false */ }
 
