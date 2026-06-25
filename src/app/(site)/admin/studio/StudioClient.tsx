@@ -454,7 +454,7 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
                     </div>
                   </div>
                 </div>
-                <div style={cardStyle}>
+                <div style={{ ...cardStyle, padding: "40px 44px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 24 }}>
                     <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "#51607a" }}>Morgen</div>
                     <div className="num" style={{ fontSize: 38, fontWeight: 800, color: "#e8632c" }} contentEditable suppressContentEditableWarning>
