@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   const result = {
     oracle: { ok: false as boolean, gate: "" as string, persisted: false as boolean },
     regions: { processed: 0, saved: 0, convective: 0, teslaSaved: 0, errors: [] as string[] },
-    studio: { ok: false as boolean, persisted: false as boolean, headsUp: null as string | null },
+    studio: { ok: false as boolean, persisted: false as boolean, headsUp: null as string | null, error: null as string | null },
   };
 
   // --- 1. Oracle: landelijk regime + gate. ---
@@ -112,6 +112,8 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     // Studio mag de cascade-cron niet laten falen.
     result.studio.ok = false;
+    result.studio.error = e instanceof Error ? e.message : String(e);
+    console.error("studio:", e);
   }
 
   return NextResponse.json({ ok: true, ...result });

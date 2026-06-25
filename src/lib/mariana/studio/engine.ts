@@ -5,7 +5,7 @@
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { loadLatestOracleRun } from "@/lib/mariana/oracle/storage";
-import { forecastRanking, regionAverages, details } from "./temps";
+import { forecastRanking, regionAverages, details, daypartTemps } from "./temps";
 import { dagIntro, morgenAlinea } from "./narrative";
 import { decideHeadsUp } from "./headsup";
 import type { StudioDay, Region } from "./types";
@@ -44,12 +44,13 @@ async function readRegionsSignal(): Promise<{ pollenHoog: boolean; thunder: bool
 export async function runStudio(opts: { dayOffset?: number } = {}): Promise<StudioDay> {
   const dayOffset = opts.dayOffset ?? 0;
 
-  const [todayRanked, tomorrowRanked, det, oracle, regionsSig] = await Promise.all([
+  const [todayRanked, tomorrowRanked, det, oracle, regionsSig, realDayparts] = await Promise.all([
     forecastRanking(dayOffset),
     forecastRanking(dayOffset + 1),
     details(dayOffset),
     loadLatestOracleRun().catch(() => null),
     readRegionsSignal(),
+    daypartTemps(dayOffset),
   ]);
 
   if (!todayRanked.length) throw new Error("Studio: geen temperatuurdata");
@@ -63,12 +64,12 @@ export async function runStudio(opts: { dayOffset?: number } = {}): Promise<Stud
   const morgenMax = tomorrowRanked[0]?.value ?? warmst.value;
   const tendens = morgenMax < warmst.value - 1 ? "iets koeler" : morgenMax > warmst.value + 1 ? "iets warmer" : "vergelijkbaar";
 
-  // Dagdelen (De Bilt-referentie via uur-curve zou exact zijn; hier benadering uit regio-gemiddelde).
-  const middag = Math.round(warmst.value);
-  const dayparts = {
-    ochtend: Math.max(0, middag - 9),
-    middag,
-    avond: Math.max(0, middag - 4),
+  // Dagdelen: echte De Bilt-uurcurve; bij fetch-falen terugval op de oude benadering uit regio-gemiddelde.
+  const middagFallback = Math.round(warmst.value);
+  const dayparts = realDayparts ?? {
+    ochtend: Math.max(0, middagFallback - 9),
+    middag: middagFallback,
+    avond: Math.max(0, middagFallback - 4),
     nacht: Math.round(koelst.value) - 2,
   };
 

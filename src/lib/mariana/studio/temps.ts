@@ -116,3 +116,30 @@ export async function details(dayOffset = 0): Promise<{ uv: number; sunHours: nu
     windBft: getWindBeaufort(day.wind_speed_10m_max?.[dayOffset] ?? 0).scale,
   };
 }
+
+/** De Bilt-uurcurve → echte dagdeel-temps. nacht = laagste tussen 22:00 vandaag en 06:00 morgen.
+ *  Geeft null terug als de uurdata ontbreekt, zodat de engine kan terugvallen. */
+export async function daypartTemps(dayOffset = 0): Promise<{ ochtend: number; middag: number; avond: number; nacht: number } | null> {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=52.10&longitude=5.18&hourly=temperature_2m&timezone=Europe%2FAmsterdam&forecast_days=${dayOffset + 2}`;
+  try {
+    const res = await fetch(url, { next: { revalidate: 0 } });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const temps: (number | null)[] = d?.hourly?.temperature_2m ?? [];
+    const at = (day: number, hour: number) => {
+      const v = temps[day * 24 + hour];
+      return typeof v === "number" ? v : null;
+    };
+    const ochtend = at(dayOffset, 8);
+    const middag = at(dayOffset, 14);
+    const avond = at(dayOffset, 20);
+    const night: number[] = [];
+    for (let h = 22; h < 24; h++) { const v = temps[dayOffset * 24 + h]; if (typeof v === "number") night.push(v); }
+    for (let h = 0; h <= 6; h++) { const v = temps[(dayOffset + 1) * 24 + h]; if (typeof v === "number") night.push(v); }
+    const nacht = night.length ? Math.min(...night) : null;
+    if (ochtend === null || middag === null || avond === null || nacht === null) return null;
+    return { ochtend: Math.round(ochtend), middag: Math.round(middag), avond: Math.round(avond), nacht: Math.round(nacht) };
+  } catch {
+    return null;
+  }
+}
