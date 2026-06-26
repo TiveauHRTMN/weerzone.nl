@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { updateProfile } from "@/app/actions";
-import { Loader2, MapPin, Check, Lock } from "lucide-react";
+import { updateProfile, deleteAccount } from "@/app/actions";
+import { Loader2, MapPin, Check, Lock, Trash2, AlertTriangle } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { WzTextField } from "./WzForm";
 import Link from "next/link";
 import { reverseGeocode } from "@/lib/types";
@@ -24,6 +25,11 @@ export default function ProfileEditForm({ user, profile, onSuccess }: Props) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDanger, setShowDanger] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const emailMatches = confirmEmail.trim().toLowerCase() === user.email.toLowerCase();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,6 +98,25 @@ export default function ProfileEditForm({ user, profile, onSuccess }: Props) {
       },
       { timeout: 10000 }
     );
+  }
+
+  async function handleDelete() {
+    if (!emailMatches) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await deleteAccount({ confirmEmail });
+      if (res.ok) {
+        await createSupabaseBrowserClient().auth.signOut();
+        window.location.assign("/?deleted=1");
+      } else {
+        setDeleteError(res.error || "Verwijderen mislukt");
+        setDeleting(false);
+      }
+    } catch {
+      setDeleteError("Verwijderen mislukt");
+      setDeleting(false);
+    }
   }
 
   return (
@@ -164,6 +189,59 @@ export default function ProfileEditForm({ user, profile, onSuccess }: Props) {
           </div>
           <span className="text-[var(--ink-300)] group-hover:text-[var(--ink-900)] transition-colors">→</span>
         </Link>
+      </div>
+
+      <div className="pt-4 border-t border-[var(--wz-border)]">
+        <h3 className="text-xs font-black uppercase tracking-widest text-red-600 mb-3 flex items-center gap-2">
+          <AlertTriangle className="w-3 h-3" /> Gevarenzone
+        </h3>
+
+        {!showDanger ? (
+          <button
+            type="button"
+            onClick={() => setShowDanger(true)}
+            className="flex w-full items-center justify-between p-4 rounded-2xl border border-red-200 hover:bg-red-50 transition-all group"
+          >
+            <div className="text-left">
+              <p className="text-sm font-bold text-red-600">Account verwijderen</p>
+              <p className="text-[10px] text-[var(--ink-400)]">Onomkeerbaar — al je gegevens en agents verdwijnen</p>
+            </div>
+            <Trash2 className="w-4 h-4 text-red-400 group-hover:text-red-600 transition-colors" />
+          </button>
+        ) : (
+          <div className="p-4 rounded-2xl border border-red-200 bg-red-50 space-y-3">
+            <p className="text-xs text-[var(--ink-700)]">
+              Dit verwijdert je account, je locaties en je agents definitief. Dit kan niet
+              ongedaan worden gemaakt. Typ <span className="font-bold">{user.email}</span> om
+              te bevestigen.
+            </p>
+            <WzTextField
+              label="Bevestig je e-mailadres"
+              value={confirmEmail}
+              onChange={setConfirmEmail}
+              placeholder={user.email}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { setShowDanger(false); setConfirmEmail(""); setDeleteError(null); }}
+                className="flex-1 py-2.5 rounded-xl border border-[var(--wz-border)] text-sm font-bold text-[var(--ink-700)] hover:bg-white transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={!emailMatches || deleting}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? "Verwijderen..." : "Definitief verwijderen"}
+              </button>
+            </div>
+            {deleteError && <p className="text-xs text-red-600 text-center font-bold">{deleteError}</p>}
+          </div>
+        )}
       </div>
     </div>
   );
