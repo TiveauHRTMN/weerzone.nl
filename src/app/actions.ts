@@ -769,3 +769,44 @@ export async function checkUserExists(email: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Verwijdert het account van de INGELOGDE gebruiker, onomkeerbaar.
+ *
+ * Identiteit komt uitsluitend uit de sessie (getUser); confirmEmail is alleen
+ * een veiligheidsbevestiging die server-side opnieuw wordt gecheckt. De
+ * admin-client wist eerst de mirror-data en daarna het auth-account zelf.
+ */
+export async function deleteAccount(
+  args: { confirmEmail: string },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Niet ingelogd" };
+
+  const typed = (args.confirmEmail ?? "").trim().toLowerCase();
+  if (!typed || typed !== (user.email ?? "").toLowerCase()) {
+    return { ok: false, error: "E-mailadres komt niet overeen" };
+  }
+
+  const admin = createSupabaseAdminClient();
+
+  // Mirror-data best-effort opruimen (een FK-cascade dekt dit mogelijk al).
+  const cleanups = [
+    admin.from("user_locations").delete().eq("user_id", user.id),
+    admin.from("subscriptions").delete().eq("user_id", user.id),
+    admin.from("user_profile").delete().eq("id", user.id),
+  ];
+  for (const c of cleanups) {
+    const { error } = await c;
+    if (error) console.warn("deleteAccount mirror-cleanup:", error.message);
+  }
+
+  const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
+  if (delErr) {
+    console.error("deleteAccount deleteUser error:", delErr.message);
+    return { ok: false, error: "Account verwijderen mislukt. Probeer het later opnieuw." };
+  }
+
+  return { ok: true };
+}
