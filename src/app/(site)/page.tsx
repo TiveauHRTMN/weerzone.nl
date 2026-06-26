@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import HomeOnboarding from "@/components/HomeOnboarding";
 import HomeWeatherTeaser from "@/components/HomeWeatherTeaser";
+import AccountDeletedToast from "@/components/AccountDeletedToast";
 import { schemaWebSite, schemaLd } from "@/lib/schema";
 import { hreflangLanguages } from "@/lib/hreflang";
 
@@ -38,6 +39,9 @@ export default function Home() {
       <script
         {...schemaLd(schemaWebSite())}
       />
+      <Suspense fallback={null}>
+        <AccountDeletedToast />
+      </Suspense>
       <HomeOnboarding
         teaser={
           <Suspense
