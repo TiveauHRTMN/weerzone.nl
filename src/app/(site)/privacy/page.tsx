@@ -102,8 +102,9 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-bold text-gray-900">Je rechten</h2>
             <p className="text-sm text-gray-700">
               Je kunt je cookie-voorkeur altijd wijzigen door je browserdata te
-              wissen. Heb je een account, dan kun je je gegevens inzien of laten
-              verwijderen: mail naar{" "}
+              wissen. Heb je een account, dan kun je het zelf verwijderen via je
+              profiel (Mijn Weerzone → Gevarenzone): dat wist je gegevens
+              onomkeerbaar. Inzage of hulp nodig? Mail naar{" "}
               <a
                 href="mailto:info@weerzone.nl"
                 className="text-accent-orange hover:underline font-medium"
