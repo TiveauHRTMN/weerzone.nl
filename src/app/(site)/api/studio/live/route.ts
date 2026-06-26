@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { currentRanking, regionAverages } from "@/lib/mariana/studio/temps";
 import { loadLatestStudioDay } from "@/lib/mariana/studio/storage";
-import { studioGateOk } from "@/lib/mariana/studio/gate";
+import { studioAccessOk } from "@/lib/mariana/studio/gate";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  if (!studioGateOk(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await studioAccessOk(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const ranked = await currentRanking();
     if (!ranked.length) throw new Error("geen current data");

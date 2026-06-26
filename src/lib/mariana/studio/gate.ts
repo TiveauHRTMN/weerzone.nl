@@ -1,8 +1,12 @@
 /**
- * Mariana Studio — lichte secret-gate. /admin is niet afgeschermd; deze gate
- * beschermt de Studio-pagina + endpoints met een cookie tegen STUDIO_SECRET.
+ * Mariana Studio — toegang. Twee paden:
+ *  1) secret-gate via STUDIO_SECRET (?key=… of cookie) — voor automatisering;
+ *  2) founder-sessie — eigenaren zien Studio gewoon op hun ingelogde account.
  * Lokaal (dev) altijd open.
  */
+
+import { isFounderEmail } from "@/lib/founders";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const STUDIO_COOKIE = "studio_key";
 
@@ -14,4 +18,20 @@ export function studioGateOk(req: Request): boolean {
   if (url.searchParams.get("key") === secret) return true;
   const cookie = req.headers.get("cookie") ?? "";
   return cookie.split(";").some((c) => c.trim() === `${STUDIO_COOKIE}=${secret}`);
+}
+
+/**
+ * Volledige toegangscheck: secret-gate OF ingelogde founder.
+ * Founders hoeven dus geen ?key= mee te slepen — sessie-gebaseerd, blijft
+ * werken bij navigeren binnen de app.
+ */
+export async function studioAccessOk(req: Request): Promise<boolean> {
+  if (studioGateOk(req)) return true;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase.auth.getUser();
+    return isFounderEmail(data.user?.email);
+  } catch {
+    return false;
+  }
 }

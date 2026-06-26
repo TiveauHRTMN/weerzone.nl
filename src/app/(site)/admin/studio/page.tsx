@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { studioGateOk } from "@/lib/mariana/studio/gate";
+import { studioAccessOk } from "@/lib/mariana/studio/gate";
 import StudioClient from "./StudioClient";
 
 export const dynamic = "force-dynamic";
@@ -13,11 +13,11 @@ export default async function StudioPage({ searchParams }: { searchParams: Promi
   const fakeReq = new Request(`https://x/admin/studio?key=${sp.key ?? ""}`, {
     headers: { cookie: h.get("cookie") ?? "" },
   });
-  if (!studioGateOk(fakeReq)) {
+  if (!(await studioAccessOk(fakeReq))) {
     return (
       <div style={{ padding: 48, fontFamily: "sans-serif", color: "#fff", background: "#0c1838", minHeight: "100vh" }}>
         <h1>Studio — afgeschermd</h1>
-        <p>Voeg <code>?key=…</code> toe aan de URL om toegang te krijgen.</p>
+        <p>Log in als founder, of voeg <code>?key=…</code> toe aan de URL.</p>
       </div>
     );
   }
