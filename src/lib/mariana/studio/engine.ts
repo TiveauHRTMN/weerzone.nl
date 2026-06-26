@@ -5,10 +5,10 @@
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { loadLatestOracleRun } from "@/lib/mariana/oracle/storage";
-import { forecastRanking, regionAverages, details, daypartTemps } from "./temps";
+import { forecastRanking, currentRanking, regionAverages, details, daypartTemps } from "./temps";
 import { dagIntro, morgenAlinea } from "./narrative";
 import { decideHeadsUp } from "./headsup";
-import type { StudioDay, Region } from "./types";
+import type { StudioDay, Region, Ranked } from "./types";
 
 function capDate(offset: number): string {
   return new Date(Date.now() + offset * 86400000).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
@@ -44,21 +44,36 @@ async function readRegionsSignal(): Promise<{ pollenHoog: boolean; thunder: bool
 export async function runStudio(opts: { dayOffset?: number } = {}): Promise<StudioDay> {
   const dayOffset = opts.dayOffset ?? 0;
 
-  const [todayRanked, tomorrowRanked, det, oracle, regionsSig, realDayparts] = await Promise.all([
+  const [todayRanked, tomorrowRanked, det, oracle, regionsSig, realDayparts, currentObs] = await Promise.all([
     forecastRanking(dayOffset),
     forecastRanking(dayOffset + 1),
     details(dayOffset),
     loadLatestOracleRun().catch(() => null),
     readRegionsSignal(),
     daypartTemps(dayOffset),
+    dayOffset === 0 ? currentRanking().catch(() => [] as Ranked[]) : Promise.resolve([] as Ranked[]),
   ]);
 
   if (!todayRanked.length) throw new Error("Studio: geen temperatuurdata");
 
-  const warmst = todayRanked[0];
-  const koelst = todayRanked[todayRanked.length - 1];
+  // Observatie-floor: een dagmax kan niet onder de nú gemeten temp liggen. Op
+  // uitersten-dagen (grote modelspreiding) tilt de meting de mediaan omhoog —
+  // actueel verslaat elk model. Alleen vandaag (dayOffset 0).
+  let ranked = todayRanked;
+  if (currentObs.length) {
+    const nowByName = new Map(currentObs.map((r) => [r.name, r.value]));
+    ranked = todayRanked
+      .map((r) => {
+        const now = nowByName.get(r.name);
+        return typeof now === "number" && now > r.value ? { ...r, value: now } : r;
+      })
+      .sort((a, b) => b.value - a.value);
+  }
+
+  const warmst = ranked[0];
+  const koelst = ranked[ranked.length - 1];
   const spread = Math.round(warmst.value - koelst.value);
-  const regAvg = regionAverages(todayRanked);
+  const regAvg = regionAverages(ranked);
   const pollen = regionsSig.pollenHoog ? "Hoog (gras)" : "Laag tot matig";
   const regime = oracle?.signal?.dominant_regime ?? "wisselvallig";
   const morgenMax = tomorrowRanked[0]?.value ?? warmst.value;
