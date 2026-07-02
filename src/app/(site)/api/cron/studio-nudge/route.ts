@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 
   try {
     const { error } = await resend.emails.send({
-      from: "Weerzone Studio <mariana@weerzone.nl>",
+      from: "Weerzone Studio <info@weerzone.nl>",
       to: "info@weerzone.nl",
       subject: `Studio ${meta.time} · ${meta.label} klaar om te plaatsen`,
       html,
