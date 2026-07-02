@@ -76,8 +76,12 @@ export async function uploadSlidePng(
       .from(BUCKET)
       .upload(path, png, { contentType: "image/png", upsert: true });
     if (error) return null;
-    const { data } = db.storage.from(BUCKET).getPublicUrl(path);
-    return data?.publicUrl ?? null;
+    // Publiek via weerzone.nl (proxy-route), niet de rauwe *.supabase.co-URL:
+    // TikTok's PULL_FROM_URL vereist een bron-domein dat bij Buffer's TikTok-app
+    // geverifieerd is — dat is weerzone.nl (bewezen door een oudere, wél werkende
+    // Buffer-pipeline), *.supabase.co niet.
+    const base = process.env.NEXT_PUBLIC_BASE_URL || "https://weerzone.nl";
+    return `${base}/api/studio/image?date=${forecastDate}&slot=${slot}`;
   } catch {
     return null;
   }
