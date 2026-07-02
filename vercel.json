@@ -43,6 +43,22 @@
     {
       "path": "/api/cron/hartmanwk-sync",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/studio-nudge?slot=slide1",
+      "schedule": "45 5 * * *"
+    },
+    {
+      "path": "/api/cron/studio-nudge?slot=slide2",
+      "schedule": "45 11 * * *"
+    },
+    {
+      "path": "/api/cron/studio-nudge?slot=slide3",
+      "schedule": "45 17 * * *"
+    },
+    {
+      "path": "/api/cron/studio-nudge?slot=slide4",
+      "schedule": "45 19 * * *"
     }
   ]
 }
