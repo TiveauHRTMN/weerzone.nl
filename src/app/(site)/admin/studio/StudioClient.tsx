@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { toPng } from "html-to-image";
 import type { StudioDay, RegionTemps } from "@/lib/mariana/studio/types";
+import { defaultCaption } from "@/lib/mariana/studio/caption";
+import { STUDIO_SLOTS, type StudioSlot } from "@/lib/mariana/studio/slots";
 
 const SLIDES: Array<[string, string]> = [
   ["slide1", "0800-dagverwachting"],
@@ -71,17 +73,79 @@ const badgeDotStyle: React.CSSProperties = {
 
 const logoStyle: React.CSSProperties = { height: 78, width: "auto", alignSelf: "flex-end", display: "block" };
 
+function SlideActions({
+  slot, slideId, caption, onCaption, posted, posting, onApprove,
+}: {
+  slot: StudioSlot; slideId: string; caption: string;
+  onCaption: (v: string) => void; posted?: { posted_at: string };
+  posting: boolean; onApprove: () => void;
+}) {
+  const time = posted ? new Date(posted.posted_at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }) : null;
+  return (
+    <div style={{ width: "min(420px, 90vw)", display: "flex", flexDirection: "column", gap: 12 }}>
+      <textarea
+        value={caption}
+        onChange={(e) => onCaption(e.target.value)}
+        disabled={Boolean(posted)}
+        rows={4}
+        placeholder="TikTok-caption…"
+        style={{ width: "100%", resize: "vertical", borderRadius: 12, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.06)", color: "#fff", fontSize: 14, lineHeight: 1.5, padding: "12px 14px", fontFamily: "inherit" }}
+      />
+      {posted ? (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "12px 18px", borderRadius: 999, background: "rgba(46,204,113,.16)", border: "1px solid rgba(46,204,113,.5)", color: "#7Cf5a8", fontWeight: 800, fontSize: 14 }}>
+          ✓ Geplaatst om {time}
+        </div>
+      ) : (
+        <button
+          onClick={onApprove}
+          disabled={posting || !caption.trim()}
+          style={{ padding: "14px 18px", borderRadius: 999, border: "none", cursor: posting ? "wait" : "pointer", fontWeight: 800, fontSize: 15, background: "#ffd21a", color: "#0a111e", opacity: posting || !caption.trim() ? 0.55 : 1 }}
+        >
+          {posting ? "Bezig met plaatsen…" : "✓ Bekeken & akkoord — plaats op TikTok"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function StudioClient({ unlockKey }: { unlockKey: string }) {
   const [day, setDay] = useState<StudioDay | null>(null);
   const [live, setLive] = useState<{ regionTempsNow: RegionTemps; warmstePlek: { naam: string; temp: number } } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [captions, setCaptions] = useState<Record<string, string>>({});
+  const [posted, setPosted] = useState<Record<string, { posted_at: string } | undefined>>({});
+  const [postingSlot, setPostingSlot] = useState<string | null>(null);
+  const [postError, setPostError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Zet de cookie zodat verversen zonder ?key blijft werken.
     if (unlockKey) document.cookie = `studio_key=${unlockKey}; path=/; max-age=86400`;
     fetch("/api/studio/today").then((r) => r.json()).then((d) => setDay(d.day ?? null)).catch(() => {});
     fetch("/api/studio/live").then((r) => r.json()).then(setLive).catch(() => {});
+    fetch("/api/studio/publish").then((r) => r.json()).then((d) => setPosted(d.posted ?? {})).catch(() => {});
   }, [unlockKey]);
+
+  // Pre-fill captions zodra de Studio-dag binnen is (alleen lege velden).
+  useEffect(() => {
+    if (!day) return;
+    setCaptions((prev) => {
+      const next = { ...prev };
+      for (const { key } of STUDIO_SLOTS) {
+        if (next[key] === undefined && (key !== "slide4" || day.slide4)) {
+          next[key] = defaultCaption(day, key as StudioSlot);
+        }
+      }
+      return next;
+    });
+  }, [day]);
+
+  // Deeplink ?slot=slideN → scroll naar de kaart.
+  useEffect(() => {
+    const slot = new URLSearchParams(window.location.search).get("slot");
+    if (slot && day) {
+      const el = document.getElementById(`slot-${slot}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [day]);
 
   async function exportSlide(id: string, label: string) {
     const node = document.getElementById(id);
@@ -110,6 +174,28 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
       alert("Export mislukt: " + (e as Error).message);
     }
     setBusy(false);
+  }
+
+  async function approveAndPost(slot: StudioSlot, slideId: string) {
+    setPostError(null);
+    setPostingSlot(slot);
+    try {
+      const node = document.getElementById(slideId);
+      if (!node) throw new Error("slide niet gevonden");
+      const pngDataUrl = await toPng(node, { width: 1080, height: 1920, pixelRatio: 2, cacheBust: true, style: { transform: "none" } });
+      const resp = await fetch("/api/studio/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot, pngDataUrl, caption: captions[slot] ?? "" }),
+      });
+      const json = await resp.json();
+      if (!resp.ok) throw new Error(json.error ?? `HTTP ${resp.status}`);
+      setPosted((p) => ({ ...p, [slot]: { posted_at: json.postedAt } }));
+    } catch (e) {
+      setPostError(`${slot}: ${(e as Error).message}`);
+    } finally {
+      setPostingSlot(null);
+    }
   }
 
   const s1 = day?.slide1;
@@ -188,6 +274,7 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
       <div className="bar">
         <h1>Weerzone Studio</h1>
         <span className="hint">Klik op een tekst om te wijzigen. Download elke template als PNG (1080×1920).</span>
+        {postError ? <span style={{ color: "#ff8a80", fontSize: 13, fontWeight: 700, flexBasis: "100%" }}>⚠ {postError}</span> : null}
         <button className="btn" disabled={busy} onClick={() => download("slide1")}>↓ 08:00</button>
         <button className="btn" disabled={busy} onClick={() => download("slide2")}>↓ 14:00</button>
         <button className="btn" disabled={busy} onClick={() => download("slide3")}>↓ 20:00</button>
@@ -202,7 +289,7 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
         {/* ============================================================ */}
         {/* TEMPLATE 1 — 08:00 DAGVERWACHTING */}
         {/* ============================================================ */}
-        <div className="slot">
+        <div className="slot" id="slot-slide1">
           <div className="cap">08:00 — Dagverwachting</div>
           <div className="scaler">
             <div className="slide" id="slide1">
@@ -326,12 +413,18 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
               </div>
             </div>
           </div>
+          <SlideActions
+            slot="slide1" slideId="slide1"
+            caption={captions.slide1 ?? ""} onCaption={(v) => setCaptions((c) => ({ ...c, slide1: v }))}
+            posted={posted.slide1} posting={postingSlot === "slide1"}
+            onApprove={() => approveAndPost("slide1", "slide1")}
+          />
         </div>
 
         {/* ============================================================ */}
         {/* TEMPLATE 2 — 14:00 ACTUEEL WEER */}
         {/* ============================================================ */}
-        <div className="slot">
+        <div className="slot" id="slot-slide2">
           <div className="cap">14:00 — Actueel weer</div>
           <div className="scaler">
             <div className="slide" id="slide2">
@@ -405,12 +498,18 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
               </div>
             </div>
           </div>
+          <SlideActions
+            slot="slide2" slideId="slide2"
+            caption={captions.slide2 ?? ""} onCaption={(v) => setCaptions((c) => ({ ...c, slide2: v }))}
+            posted={posted.slide2} posting={postingSlot === "slide2"}
+            onApprove={() => approveAndPost("slide2", "slide2")}
+          />
         </div>
 
         {/* ============================================================ */}
         {/* TEMPLATE 3 — 20:00 VANDAAG & MORGEN */}
         {/* ============================================================ */}
-        <div className="slot">
+        <div className="slot" id="slot-slide3">
           <div className="cap">20:00 — Vandaag &amp; Morgen</div>
           <div className="scaler">
             <div className="slide" id="slide3">
@@ -472,13 +571,19 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
               </div>
             </div>
           </div>
+          <SlideActions
+            slot="slide3" slideId="slide3"
+            caption={captions.slide3 ?? ""} onCaption={(v) => setCaptions((c) => ({ ...c, slide3: v }))}
+            posted={posted.slide3} posting={postingSlot === "slide3"}
+            onApprove={() => approveAndPost("slide3", "slide3")}
+          />
         </div>
 
         {/* ============================================================ */}
         {/* TEMPLATE 4 — 22:00 HEADS-UP (alleen wanneer nodig) */}
         {/* ============================================================ */}
         {s4 ? (
-          <div className="slot">
+          <div className="slot" id="slot-slide4">
             <div className="cap">22:00 — Heads-up <span style={{ opacity: 0.6 }}>(alleen wanneer nodig)</span></div>
             <div className="scaler">
               <div className="slide" id="slide4">
@@ -531,6 +636,12 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
                 </div>
               </div>
             </div>
+            <SlideActions
+              slot="slide4" slideId="slide4"
+              caption={captions.slide4 ?? ""} onCaption={(v) => setCaptions((c) => ({ ...c, slide4: v }))}
+              posted={posted.slide4} posting={postingSlot === "slide4"}
+              onApprove={() => approveAndPost("slide4", "slide4")}
+            />
           </div>
         ) : null}
 
