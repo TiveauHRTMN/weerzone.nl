@@ -48,8 +48,12 @@ export async function POST(req: Request) {
   const imageUrl = await uploadSlidePng(forecastDate, slot, image);
   if (!imageUrl) return NextResponse.json({ error: "Upload mislukt (service-role/bucket?)" }, { status: 500 });
 
-  // Publiceer via Buffer
-  const result = await postToTikTok({ imageUrl, caption });
+  // Publiceer via Buffer. mode:"draft" i.p.v. live-publiceren: Buffer's beta
+  // GraphQL-API laat ons TikTok's verplichte privacy_level (nodig voor DIRECT_POST)
+  // niet meesturen — elke live-poging faalt bij TikTok met een generieke fout.
+  // Draft-mode werkt wél (geverifieerd) en zet 'm klaar in Buffer; de eigenaar
+  // tikt zelf op Publish in Buffer's eigen dashboard, waar dat veld wél gezet wordt.
+  const result = await postToTikTok({ imageUrl, caption, mode: "draft" });
   if (!result.ok) {
     await recordPost({ forecastDate, slot, status: "failed", bufferId: null, imageUrl, caption });
     return NextResponse.json({ error: `Buffer: ${result.error}` }, { status: 502 });

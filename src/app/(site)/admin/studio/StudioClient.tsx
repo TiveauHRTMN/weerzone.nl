@@ -93,7 +93,7 @@ function SlideActions({
       />
       {posted ? (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "12px 18px", borderRadius: 999, background: "rgba(46,204,113,.16)", border: "1px solid rgba(46,204,113,.5)", color: "#7Cf5a8", fontWeight: 800, fontSize: 14 }}>
-          ✓ Geplaatst om {time}
+          ✓ Klaar in Buffer om {time} — tik Publish in Buffer
         </div>
       ) : (
         <button
@@ -101,7 +101,7 @@ function SlideActions({
           disabled={posting || !caption.trim()}
           style={{ padding: "14px 18px", borderRadius: 999, border: "none", cursor: posting ? "wait" : "pointer", fontWeight: 800, fontSize: 15, background: "#ffd21a", color: "#0a111e", opacity: posting || !caption.trim() ? 0.55 : 1 }}
         >
-          {posting ? "Bezig met plaatsen…" : "✓ Bekeken & akkoord — plaats op TikTok"}
+          {posting ? "Bezig met versturen…" : "✓ Bekeken & akkoord — klaarzetten in Buffer"}
         </button>
       )}
     </div>
