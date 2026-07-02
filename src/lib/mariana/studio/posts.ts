@@ -66,17 +66,15 @@ export async function recordPost(rec: {
 export async function uploadSlidePng(
   forecastDate: string,
   slot: StudioSlot,
-  pngDataUrl: string
+  png: Blob
 ): Promise<string | null> {
   if (!hasServiceRole()) return null;
   try {
-    const base64 = pngDataUrl.replace(/^data:image\/png;base64,/, "");
-    const bytes = Buffer.from(base64, "base64");
     const path = `${forecastDate}/${slot}.png`;
     const db = adminDb();
     const { error } = await db.storage
       .from(BUCKET)
-      .upload(path, bytes, { contentType: "image/png", upsert: true });
+      .upload(path, png, { contentType: "image/png", upsert: true });
     if (error) return null;
     const { data } = db.storage.from(BUCKET).getPublicUrl(path);
     return data?.publicUrl ?? null;

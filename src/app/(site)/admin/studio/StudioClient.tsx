@@ -182,17 +182,24 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
     try {
       const node = document.getElementById(slideId);
       if (!node) throw new Error("slide niet gevonden");
-      // pixelRatio:1 (niet 2, zoals de download-export) — een 2x-PNG als base64 in de JSON-body
-      // kan Vercel's ~4.5MB request-limiet overschrijden; 1080x1920 is al TikTok's native resolutie.
+      // pixelRatio:1 (niet 2, zoals de download-export) — 1080x1920 is al TikTok's native resolutie.
       const pngDataUrl = await toPng(node, { width: 1080, height: 1920, pixelRatio: 1, cacheBust: true, style: { transform: "none" } });
-      const resp = await fetch("/api/studio/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slot, pngDataUrl, caption: captions[slot] ?? "" }),
-      });
-      const json = await resp.json();
+      // FormData i.p.v. base64-in-JSON: ruwe bytes i.p.v. +33% base64-overhead,
+      // scheelt genoeg marge onder Vercel's request-bodylimiet (zag een 413 in productie).
+      const pngBlob = await (await fetch(pngDataUrl)).blob();
+      const form = new FormData();
+      form.append("slot", slot);
+      form.append("caption", captions[slot] ?? "");
+      form.append("image", pngBlob, `${slot}.png`);
+      const resp = await fetch("/api/studio/publish", { method: "POST", body: form });
+      let json: { error?: string; postedAt?: string };
+      try {
+        json = await resp.json();
+      } catch {
+        throw new Error(`server gaf geen geldig antwoord (HTTP ${resp.status}) — mogelijk te groot bestand`);
+      }
       if (!resp.ok) throw new Error(json.error ?? `HTTP ${resp.status}`);
-      setPosted((p) => ({ ...p, [slot]: { posted_at: json.postedAt } }));
+      setPosted((p) => ({ ...p, [slot]: { posted_at: json.postedAt! } }));
     } catch (e) {
       setPostError(`${slot}: ${(e as Error).message}`);
     } finally {

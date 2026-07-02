@@ -14,7 +14,7 @@ function assert(cond: boolean, msg: string) {
   const rec = await recordPost({ forecastDate: "2026-06-29", slot: "slide1", status: "posted", bufferId: "x", imageUrl: "u", caption: "c" });
   assert(rec.ok === false, "recordPost → {ok:false} zonder service role");
 
-  const url = await uploadSlidePng("2026-06-29", "slide1", "data:image/png;base64,AAAA");
+  const url = await uploadSlidePng("2026-06-29", "slide1", new Blob([new Uint8Array([0, 1, 2])], { type: "image/png" }));
   assert(url === null, "uploadSlidePng → null zonder service role");
 
   console.log("ALL PASS");
