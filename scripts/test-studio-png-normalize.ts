@@ -1,4 +1,4 @@
-import { deflateSync } from "zlib";
+import { deflateSync, inflateSync } from "zlib";
 import { normalizePng } from "../src/lib/mariana/studio/png-normalize";
 
 function assert(cond: boolean, msg: string) {
@@ -28,52 +28,89 @@ function chunk(type: string, data: Buffer): Buffer {
   crc.writeUInt32BE(crc32(Buffer.concat([typeBuf, data])), 0);
   return Buffer.concat([len, typeBuf, data, crc]);
 }
-// Build a small multi-IDAT-chunk RGBA PNG using adaptive (non-zero) filter types,
-// mirroring the structural shape of a browser canvas export, to exercise the
-// defilter logic for filter types 1-4 (not just the common "None" case).
-function buildAdaptivePng(width: number, height: number): Buffer {
+
+function paethPredictor(a: number, b: number, c: number): number {
+  const p = a + b - c;
+  const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+  return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+}
+
+/**
+ * Builds a genuine adaptively-filtered PNG (real PNG-spec filter ENCODING per row,
+ * cycling through all 5 filter types), split across many small IDAT chunks like a
+ * browser canvas export. Ground-truth pixels are known (a deterministic pattern),
+ * so decoding the normalized output can be checked against them exactly, for every
+ * row/filter type — not just filter type 0.
+ */
+function buildAdaptivePng(width: number, height: number, bpp: 3 | 4) {
+  const rowBytes = width * bpp;
+  const groundTruth = Buffer.alloc(rowBytes * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const px = y * rowBytes + x * bpp;
+      groundTruth[px] = (x * 7 + y * 3) & 0xff;
+      groundTruth[px + 1] = (x * 11 + y * 5) & 0xff;
+      groundTruth[px + 2] = (x * 3 + y * 17) & 0xff;
+      if (bpp === 4) groundTruth[px + 3] = (x + y * 2 + 30) & 0xff;
+    }
+  }
+
+  const raw = Buffer.alloc((1 + rowBytes) * height);
+  for (let y = 0; y < height; y++) {
+    const filterType = y % 5; // cycle through None/Sub/Up/Average/Paeth
+    const rowStart = y * (rowBytes + 1);
+    raw[rowStart] = filterType;
+    for (let x = 0; x < rowBytes; x++) {
+      const raw_x = groundTruth[y * rowBytes + x];
+      const a = x >= bpp ? groundTruth[y * rowBytes + x - bpp] : 0; // left
+      const b = y > 0 ? groundTruth[(y - 1) * rowBytes + x] : 0; // above
+      const c = y > 0 && x >= bpp ? groundTruth[(y - 1) * rowBytes + x - bpp] : 0; // above-left
+      let filtered: number;
+      if (filterType === 0) filtered = raw_x;
+      else if (filterType === 1) filtered = (raw_x - a) & 0xff;
+      else if (filterType === 2) filtered = (raw_x - b) & 0xff;
+      else if (filterType === 3) filtered = (raw_x - ((a + b) >> 1)) & 0xff;
+      else filtered = (raw_x - paethPredictor(a, b, c)) & 0xff;
+      raw[rowStart + 1 + x] = filtered;
+    }
+  }
+
   const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   const ihdrData = Buffer.alloc(13);
   ihdrData.writeUInt32BE(width, 0);
   ihdrData.writeUInt32BE(height, 4);
   ihdrData.writeUInt8(8, 8);
-  ihdrData.writeUInt8(6, 9); // RGBA
-  const bpp = 4;
-  const rowBytes = width * bpp;
-  const raw = Buffer.alloc((1 + rowBytes) * height);
-  for (let y = 0; y < height; y++) {
-    const filterType = y % 5; // cycle through all 5 filter types across rows
-    raw[y * (rowBytes + 1)] = filterType;
-    for (let x = 0; x < width; x++) {
-      const px = y * (rowBytes + 1) + 1 + x * bpp;
-      // Encode filter type 0 (None) values directly for simplicity of ground truth,
-      // then only row 0 (guaranteed filterType 0) is checked pixel-exact below.
-      raw[px] = (x * 7 + y * 3) & 0xff;
-      raw[px + 1] = (x * 11) & 0xff;
-      raw[px + 2] = (y * 13) & 0xff;
-      raw[px + 3] = 255;
-    }
-  }
-  // Split into multiple small IDAT chunks (like a browser export) instead of one.
+  ihdrData.writeUInt8(bpp === 4 ? 6 : 2, 9);
   const compressed = deflateSync(raw, { level: 6 });
+  // Split into many small IDAT chunks, mirroring a browser canvas export's shape.
   const idatChunks: Buffer[] = [];
   const chunkSize = 20;
   for (let i = 0; i < compressed.length; i += chunkSize) {
     idatChunks.push(chunk("IDAT", compressed.subarray(i, i + chunkSize)));
   }
-  const iend = chunk("IEND", Buffer.alloc(0));
-  return Buffer.concat([sig, chunk("IHDR", ihdrData), ...idatChunks, iend]);
+  const png = Buffer.concat([sig, chunk("IHDR", ihdrData), ...idatChunks, chunk("IEND", Buffer.alloc(0))]);
+  return { png, groundTruth, rowBytes };
+}
+
+function decodeSingleIdatPixels(png: Buffer): Buffer {
+  let offset = 8;
+  const idatParts: Buffer[] = [];
+  while (offset < png.length) {
+    const len = png.readUInt32BE(offset);
+    const type = png.toString("ascii", offset + 4, offset + 8);
+    if (type === "IDAT") idatParts.push(png.subarray(offset + 8, offset + 8 + len));
+    offset += 8 + len + 4;
+    if (type === "IEND") break;
+  }
+  const raw = inflateSync(Buffer.concat(idatParts));
+  // Normalized output is always filter type 0 (None), so pixel bytes are the raw bytes verbatim.
+  return raw;
 }
 
 (async () => {
-  // 1. Multi-chunk PNG with filterType 0 on row 0 round-trips exactly on that row.
   const W = 16, H = 10;
-  const input = buildAdaptivePng(W, H);
-  const output = normalizePng(input);
+  const { png: input, groundTruth, rowBytes } = buildAdaptivePng(W, H, 4);
 
-  assert(output.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), "output has valid PNG signature");
-
-  // Count IDAT chunks in output — should be exactly 1 (normalized), vs many in input.
   function countIdat(buf: Buffer): number {
     let offset = 8, count = 0;
     while (offset < buf.length) {
@@ -86,39 +123,47 @@ function buildAdaptivePng(width: number, height: number): Buffer {
     return count;
   }
   assert(countIdat(input) > 1, "input PNG has multiple IDAT chunks (mirrors browser export)");
+
+  const output = normalizePng(input);
+  assert(output.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])), "output has valid PNG signature");
   assert(countIdat(output) === 1, "normalized output has exactly one IDAT chunk");
 
-  // Round-trip: normalize twice should be idempotent (re-normalizing an already-clean PNG works).
+  // Pixel-exact fidelity across ALL rows/filter types (0=None,1=Sub,2=Up,3=Average,4=Paeth),
+  // not just the trivial filter-type-0 case.
+  const decodedRaw = decodeSingleIdatPixels(output);
+  let allRowsMatch = true;
+  let firstMismatchRow = -1;
+  for (let y = 0; y < H; y++) {
+    const rowStart = y * (rowBytes + 1);
+    assert(decodedRaw[rowStart] === 0, `row ${y}: normalized output uses filter type None`);
+    const pixelBytes = decodedRaw.subarray(rowStart + 1, rowStart + 1 + rowBytes);
+    const expected = groundTruth.subarray(y * rowBytes, (y + 1) * rowBytes);
+    if (!pixelBytes.equals(expected)) {
+      allRowsMatch = false;
+      firstMismatchRow = y;
+      break;
+    }
+  }
+  assert(allRowsMatch, `pixel-exact fidelity for every row/filter type (0-4)${firstMismatchRow >= 0 ? `, first mismatch at row ${firstMismatchRow} (filter type ${firstMismatchRow % 5})` : ""}`);
+
+  // Idempotency: re-normalizing an already-clean PNG produces byte-identical output.
   const output2 = normalizePng(output);
   assert(output2.equals(output), "normalizing an already-normalized PNG is idempotent");
 
-  // 2. Pixel fidelity: decode the normalized output ourselves and check row 0 (filterType 0, known values).
-  {
-    const zlib = require("zlib");
-    let offset = 8;
-    const idatParts: Buffer[] = [];
-    while (offset < output.length) {
-      const len = output.readUInt32BE(offset);
-      const type = output.toString("ascii", offset + 4, offset + 8);
-      if (type === "IDAT") idatParts.push(output.subarray(offset + 8, offset + 8 + len));
-      offset += 8 + len + 4;
-      if (type === "IEND") break;
-    }
-    const raw = zlib.inflateSync(Buffer.concat(idatParts));
-    const rowBytes = W * 4;
-    // row 0 in the input used filterType 0, so its pixel values are exactly what we wrote.
-    let pixelsMatch = true;
-    for (let x = 0; x < W; x++) {
-      const px = 1 + x * 4; // filter byte + offset
-      if (raw[px] !== ((x * 7 + 0 * 3) & 0xff) || raw[px + 1] !== ((x * 11) & 0xff) || raw[px + 2] !== 0 || raw[px + 3] !== 255) {
-        pixelsMatch = false;
-        break;
-      }
-    }
-    assert(pixelsMatch, "row 0 pixel values preserved exactly through normalize");
+  // RGB (no alpha, colorType 2) path — same defilter logic, different bpp.
+  const { png: rgbInput, groundTruth: rgbTruth, rowBytes: rgbRowBytes } = buildAdaptivePng(12, 7, 3);
+  const rgbOutput = normalizePng(rgbInput);
+  const rgbDecoded = decodeSingleIdatPixels(rgbOutput);
+  let rgbMatch = true;
+  for (let y = 0; y < 7; y++) {
+    const rowStart = y * (rgbRowBytes + 1);
+    const pixelBytes = rgbDecoded.subarray(rowStart + 1, rowStart + 1 + rgbRowBytes);
+    const expected = rgbTruth.subarray(y * rgbRowBytes, (y + 1) * rgbRowBytes);
+    if (!pixelBytes.equals(expected)) { rgbMatch = false; break; }
   }
+  assert(rgbMatch, "RGB (colorType 2, no alpha) pixel-exact fidelity across all filter types");
 
-  // 3. Invalid input falls back cleanly (throws, doesn't hang or crash the process).
+  // Invalid input falls back cleanly (throws, doesn't hang or crash the process).
   let threw = false;
   try {
     normalizePng(Buffer.from("not a png"));
