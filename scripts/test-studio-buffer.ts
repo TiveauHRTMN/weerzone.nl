@@ -7,59 +7,78 @@ function assert(cond: boolean, msg: string) {
 
 (async () => {
   process.env.BUFFER_ACCESS_TOKEN = "tok123";
-  process.env.BUFFER_TIKTOK_PROFILE_ID = "prof456";
+  process.env.BUFFER_TIKTOK_CHANNEL_ID = "chan456";
 
-  let captured: { url: string; body: string; auth: string | null } | null = null;
+  let captured: { url: string; body: any; auth: string | null } | null = null;
   const fakeFetch = (async (url: any, init: any) => {
-    captured = { url: String(url), body: String(init?.body ?? ""), auth: init?.headers?.Authorization ?? null };
-    return { ok: true, status: 200, json: async () => ({ success: true, updates: [{ id: "upd789" }] }) } as any;
+    captured = { url: String(url), body: JSON.parse(String(init?.body ?? "{}")), auth: init?.headers?.Authorization ?? null };
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ data: { createPost: { post: { id: "post789", status: "buffer" } } } }),
+    } as any;
   }) as unknown as typeof fetch;
 
   const res = await postToTikTok({ imageUrl: "https://x/y.png", caption: "Hallo", mode: "now", fetchImpl: fakeFetch });
-  assert(res.ok === true && (res as any).bufferId === "upd789", "succes → bufferId uit updates[0].id");
-  assert(captured!.url.includes("api.bufferapp.com/1/updates/create.json"), "juiste endpoint");
-  assert(captured!.body.includes("profile_ids%5B%5D=prof456"), "profile_ids[] form-encoded");
-  assert(captured!.body.includes("text=Hallo"), "caption als text");
-  assert(decodeURIComponent(captured!.body).includes("media[photo]=https://x/y.png"), "media[photo]=imageUrl");
-  assert(decodeURIComponent(captured!.body).includes("media[thumbnail]=https://x/y.png"), "media[thumbnail]=imageUrl");
-  assert(captured!.body.includes("now=true"), "now=true bij mode now");
+  assert(res.ok === true && (res as any).bufferId === "post789", "succes → bufferId uit createPost.post.id");
+  assert(captured!.url === "https://api.buffer.com", "juiste endpoint (GraphQL API)");
+  assert(captured!.auth === "Bearer tok123", "Bearer-token in Authorization-header");
+  assert(captured!.body.variables.input.channelId === "chan456", "channelId uit BUFFER_TIKTOK_CHANNEL_ID");
+  assert(captured!.body.variables.input.text === "Hallo", "caption als text");
+  assert(captured!.body.variables.input.assets[0].image.url === "https://x/y.png", "assets[0].image.url = imageUrl");
+  assert(captured!.body.variables.input.mode === "shareNow", "mode = shareNow");
+  assert(captured!.body.variables.input.schedulingType === "automatic", "schedulingType = automatic");
+  assert(captured!.body.variables.input.saveToDraft === false, "saveToDraft:false bij mode now");
 
   // draft mode
   const resDraft = await postToTikTok({ imageUrl: "https://x/y.png", caption: "Draft", mode: "draft", fetchImpl: fakeFetch });
   assert(resDraft.ok === true, "draft mode → ok:true");
-  assert(captured!.body.includes("now=false"), "now=false bij mode draft");
+  assert(captured!.body.variables.input.saveToDraft === true, "saveToDraft:true bij mode draft");
 
-  // foutpad
-  const errFetch = (async () => ({ ok: false, status: 403, json: async () => ({ success: false, message: "denied" }) } as any)) as unknown as typeof fetch;
+  // foutpad: GraphQL top-level errors array
+  const errFetch = (async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ errors: [{ message: "Unauthorized" }] }),
+  } as any)) as unknown as typeof fetch;
   const res2 = await postToTikTok({ imageUrl: "u", caption: "c", fetchImpl: errFetch });
-  assert(res2.ok === false && (res2 as any).error.includes("denied"), "HTTP-fout → {ok:false,error}");
+  assert(res2.ok === false && (res2 as any).error.includes("Unauthorized"), "GraphQL errors[] → {ok:false,error}");
+
+  // foutpad: PostActionPayload union error member (bv. InvalidInputError)
+  const unionErrFetch = (async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ data: { createPost: { message: "Channel not found" } } }),
+  } as any)) as unknown as typeof fetch;
+  const res2b = await postToTikTok({ imageUrl: "u", caption: "c", fetchImpl: unionErrFetch });
+  assert(res2b.ok === false && (res2b as any).error === "Channel not found", "union error-member zonder post → {ok:false,error}");
 
   // ontbrekende token
   delete process.env.BUFFER_ACCESS_TOKEN;
   const res3 = await postToTikTok({ imageUrl: "u", caption: "c", fetchImpl: fakeFetch });
   assert(res3.ok === false, "ontbrekend token → {ok:false}");
 
-  // ontbrekend profile_id (token herstellen, profile_id verwijderen)
+  // ontbrekend channel_id (token herstellen, channel_id verwijderen)
   process.env.BUFFER_ACCESS_TOKEN = "tok123";
-  delete process.env.BUFFER_TIKTOK_PROFILE_ID;
+  delete process.env.BUFFER_TIKTOK_CHANNEL_ID;
   const res4 = await postToTikTok({ imageUrl: "u", caption: "c", fetchImpl: fakeFetch });
-  assert(res4.ok === false, "ontbrekend profile_id → {ok:false}");
+  assert(res4.ok === false, "ontbrekend channel_id → {ok:false}");
 
   // netwerk-throw
-  process.env.BUFFER_TIKTOK_PROFILE_ID = "prof456";
+  process.env.BUFFER_TIKTOK_CHANNEL_ID = "chan456";
   const throwFetch = (async () => { throw new Error("network down"); }) as unknown as typeof fetch;
   const res5 = await postToTikTok({ imageUrl: "u", caption: "c", fetchImpl: throwFetch });
   assert(res5.ok === false, "netwerk-throw → {ok:false}");
   assert((res5 as any).error.includes("network down"), "netwerk-throw → error bevat bericht");
 
-  // bufferId: null wanneer updates ontbreekt
-  const noUpdatesFetch = (async (url: any, init: any) => {
-    captured = { url: String(url), body: String(init?.body ?? ""), auth: init?.headers?.Authorization ?? null };
-    return { ok: true, status: 200, json: async () => ({ success: true }) } as any;
-  }) as unknown as typeof fetch;
-  const res6 = await postToTikTok({ imageUrl: "https://x/y.png", caption: "No updates", fetchImpl: noUpdatesFetch });
-  assert(res6.ok === true, "geen updates array → ok:true");
-  assert((res6 as any).bufferId === null, "geen updates array → bufferId null");
+  // HTTP-fout (non-ok response zonder errors[])
+  const httpErrFetch = (async () => ({
+    ok: false,
+    status: 500,
+    json: async () => ({}),
+  } as any)) as unknown as typeof fetch;
+  const res6 = await postToTikTok({ imageUrl: "u", caption: "c", fetchImpl: httpErrFetch });
+  assert(res6.ok === false && (res6 as any).error.includes("500"), "non-ok HTTP zonder errors[] → status in error");
 
   console.log("ALL PASS");
 })();
