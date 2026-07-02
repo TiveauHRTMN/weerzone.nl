@@ -4,6 +4,7 @@
  */
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { StudioSlot } from "./slots";
+import { normalizePng } from "./png-normalize";
 
 const TABLE = "studio_posts";
 const BUCKET = "studio-posts";
@@ -70,11 +71,23 @@ export async function uploadSlidePng(
 ): Promise<string | null> {
   if (!hasServiceRole()) return null;
   try {
+    const original = Buffer.from(await png.arrayBuffer());
+    // html-to-image's browser-canvas PNG-export is geldig maar structureel
+    // "vreemd" (honderden IDAT-chunks, adaptieve filters) — geverifieerd live
+    // dat Buffer/TikTok's PULL_FROM_URL daar consistent op struikelt, terwijl
+    // dezelfde pixels via één schone IDAT-chunk wél publiceren. Val terug op
+    // de originele bytes als normaliseren om wat voor reden dan ook faalt.
+    let bytes: Buffer;
+    try {
+      bytes = normalizePng(original);
+    } catch {
+      bytes = original;
+    }
     const path = `${forecastDate}/${slot}.png`;
     const db = adminDb();
     const { error } = await db.storage
       .from(BUCKET)
-      .upload(path, png, { contentType: "image/png", upsert: true });
+      .upload(path, bytes, { contentType: "image/png", upsert: true });
     if (error) return null;
     // Publiek via weerzone.nl (proxy-route), niet de rauwe *.supabase.co-URL:
     // TikTok's PULL_FROM_URL vereist een bron-domein dat bij Buffer's TikTok-app
