@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   // GraphQL-API laat ons TikTok's verplichte privacy_level (nodig voor DIRECT_POST)
   // niet meesturen — elke live-poging faalt bij TikTok met een generieke fout.
   // Draft-mode werkt wél (geverifieerd) en zet 'm klaar in Buffer; de eigenaar
-  // tikt zelf op Publish in Buffer's eigen dashboard, waar dat veld wél gezet wordt.
+  // tikt zelf op Publish in Buffer's eigen dashboard, waar dat veld vermoedelijk wél gezet wordt.
   const result = await postToTikTok({ imageUrl, caption, mode: "draft" });
   if (!result.ok) {
     await recordPost({ forecastDate, slot, status: "failed", bufferId: null, imageUrl, caption });
