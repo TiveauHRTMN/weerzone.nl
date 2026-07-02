@@ -182,7 +182,9 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
     try {
       const node = document.getElementById(slideId);
       if (!node) throw new Error("slide niet gevonden");
-      const pngDataUrl = await toPng(node, { width: 1080, height: 1920, pixelRatio: 2, cacheBust: true, style: { transform: "none" } });
+      // pixelRatio:1 (niet 2, zoals de download-export) — een 2x-PNG als base64 in de JSON-body
+      // kan Vercel's ~4.5MB request-limiet overschrijden; 1080x1920 is al TikTok's native resolutie.
+      const pngDataUrl = await toPng(node, { width: 1080, height: 1920, pixelRatio: 1, cacheBust: true, style: { transform: "none" } });
       const resp = await fetch("/api/studio/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
