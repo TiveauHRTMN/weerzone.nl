@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentRanking, regionAverages } from "@/lib/mariana/studio/temps";
+import { currentRanking, observedRanking, regionMaxima } from "@/lib/mariana/studio/temps";
 import { loadLatestStudioDay } from "@/lib/mariana/studio/storage";
 import { studioAccessOk } from "@/lib/mariana/studio/gate";
 
@@ -8,13 +8,17 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   if (!(await studioAccessOk(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const ranked = await currentRanking();
+    // Echte KNMI-metingen eerst; model-nowcast alleen als de stations niet
+    // alle regio's dekken. Een "nu"-kaart hoort metingen te tonen, geen model.
+    const observed = await observedRanking().catch((): Awaited<ReturnType<typeof observedRanking>> => []);
+    const regionsCovered = new Set(observed.map((r) => r.region)).size;
+    const ranked = regionsCovered === 5 ? observed : await currentRanking();
     if (!ranked.length) throw new Error("geen current data");
     const warmst = ranked[0];
     return NextResponse.json({
       ok: true,
       stale: false,
-      regionTempsNow: regionAverages(ranked),
+      regionTempsNow: regionMaxima(ranked),
       warmstePlek: { naam: warmst.name, temp: Math.round(warmst.value) },
     });
   } catch {

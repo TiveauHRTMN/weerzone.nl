@@ -5,7 +5,7 @@
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { loadLatestOracleRun } from "@/lib/mariana/oracle/storage";
-import { forecastRanking, currentRanking, regionAverages, details, daypartTemps } from "./temps";
+import { forecastRanking, currentRanking, regionMaxima, details, daypartTemps } from "./temps";
 import { dagIntro, morgenAlinea } from "./narrative";
 import { decideHeadsUp } from "./headsup";
 import type { StudioDay, Region, Ranked } from "./types";
@@ -73,7 +73,8 @@ export async function runStudio(opts: { dayOffset?: number } = {}): Promise<Stud
   const warmst = ranked[0];
   const koelst = ranked[ranked.length - 1];
   const spread = Math.round(warmst.value - koelst.value);
-  const regAvg = regionAverages(ranked);
+  // Regio-max i.p.v. gemiddelde: "tot X graden" per kaartvak (zie regionMaxima).
+  const regMax = regionMaxima(ranked);
   const pollen = regionsSig.pollenHoog ? "Hoog (gras)" : "Laag tot matig";
   const regime = oracle?.signal?.dominant_regime ?? "wisselvallig";
   const morgenMax = tomorrowRanked[0]?.value ?? warmst.value;
@@ -106,7 +107,7 @@ export async function runStudio(opts: { dayOffset?: number } = {}): Promise<Stud
       badge: `${cap(capDate(dayOffset))} · 08:00`,
       titel: "Vandaag",
       intro,
-      regionTemps: regAvg,
+      regionTemps: regMax,
       dayparts,
       metrics: { uvIndex: det.uv, hooikoorts, windBft: det.windBft, fietsweer },
       tagline: "Lokale verschillen kunnen groot zijn — bekijk het weer op jouw locatie.",

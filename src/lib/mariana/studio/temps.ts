@@ -8,6 +8,7 @@
  */
 
 import { getWindBeaufort } from "@/lib/weather";
+import { fetchNearestStationObservation } from "@/lib/knmi-edr";
 import type { Region, RegionTemps, Ranked } from "./types";
 
 export type { Ranked } from "./types";
@@ -95,13 +96,47 @@ export async function currentRanking(): Promise<Ranked[]> {
 
 const ORDER: Region[] = ["Noord", "Oost", "Midden", "West", "Zuid"];
 
-export function regionAverages(ranked: Ranked[]): RegionTemps {
+/**
+ * Regio-maximum per kaartvak. Het gemiddelde vlakt af: Zuid = gem(Zeeland 20 …
+ * Limburg 24) = 22 terwijl KNMI "tot 25 in het zuidoosten" communiceert — de
+ * kaart oogde daardoor structureel 2-3° te koud t.o.v. wat mensen elders zien.
+ * "Tot X graden" per regio matcht hoe weerberichten regiotemps benoemen.
+ */
+export function regionMaxima(ranked: Ranked[]): RegionTemps {
   const out = {} as Record<Region, number>;
   for (const region of ORDER) {
     const vals = ranked.filter((r) => r.region === region).map((r) => r.value);
-    out[region] = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+    out[region] = vals.length ? Math.round(Math.max(...vals)) : 0;
   }
   return { noord: out.Noord, oost: out.Oost, midden: out.Midden, west: out.West, zuid: out.Zuid };
+}
+
+/**
+ * Nu ECHT gemeten per plek — KNMI 10-minuten-stationsdata i.p.v. Open-Meteo
+ * model-nowcast (observatie verslaat elk model; nowcast wijkt in extremen
+ * 2-3° af). Bewust een subset van PLACES met goede stationsdekking: elke
+ * plek resolvet naar het dichtstbijzijnde KNMI-station, parallel opgehaald.
+ */
+const OBS_PLACES: Array<[string, number, number, Region]> = [
+  ["Texel", 53.15, 4.88, "Noord"], ["Groningen", 53.22, 6.57, "Noord"], ["Leeuwarden", 53.20, 5.79, "Noord"],
+  ["Enschede", 52.22, 6.90, "Oost"], ["Zwolle", 52.51, 6.09, "Oost"], ["Arnhem", 51.98, 5.91, "Oost"],
+  ["De Bilt", 52.10, 5.18, "Midden"], ["Amersfoort", 52.16, 5.39, "Midden"],
+  ["Amsterdam", 52.37, 4.90, "West"], ["Rotterdam", 51.92, 4.48, "West"], ["Den Helder", 52.96, 4.76, "West"],
+  ["Vlissingen", 51.44, 3.57, "Zuid"], ["Eindhoven", 51.44, 5.48, "Zuid"], ["Roermond", 51.19, 5.99, "Zuid"], ["Maastricht", 50.85, 5.69, "Zuid"],
+];
+
+export async function observedRanking(): Promise<Ranked[]> {
+  const results = await Promise.all(
+    OBS_PLACES.map(async ([name, lat, lon, region]) => {
+      try {
+        const obs = await fetchNearestStationObservation(lat, lon);
+        return typeof obs?.temperature === "number" ? { name, region, value: obs.temperature } : null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  return results.filter((r): r is Ranked => r !== null).sort((a, b) => b.value - a.value);
 }
 
 /** De Bilt als landelijke referentie voor de detail-metrics. */
