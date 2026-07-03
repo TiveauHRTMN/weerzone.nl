@@ -567,8 +567,11 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
                 <div style={{ ...cardStyle, padding: "40px 44px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 24 }}>
                     <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "#51607a" }}>Morgen</div>
-                    <div className="num" style={{ fontSize: 38, fontWeight: 800, color: "#e8632c" }} contentEditable suppressContentEditableWarning>
-                      {s3 ? `${s3.morgen.temp}°` : "29°"}
+                    <div style={{ textAlign: "right" }}>
+                      <div className="num" style={{ fontSize: 38, fontWeight: 800, color: "#e8632c", lineHeight: 1.1 }} contentEditable suppressContentEditableWarning>
+                        {s3 ? `${s3.morgen.temp}°` : "29°"}
+                      </div>
+                      <div style={{ fontSize: 17, fontWeight: 600, color: "#8a97ad" }}>verwacht, hele land</div>
                     </div>
                   </div>
                   <p style={{ fontSize: 33, lineHeight: 1.5, fontWeight: 500, color: "#0a111e", textWrap: "pretty" }} contentEditable suppressContentEditableWarning>

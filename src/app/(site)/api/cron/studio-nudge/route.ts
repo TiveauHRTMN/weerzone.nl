@@ -32,12 +32,24 @@ export async function GET(req: Request) {
     return NextResponse.json({ sent: false, skipped: true, reason: "geen heads-up" });
   }
 
+  // Kaart moet van vandaag zijn — anders staat er straks een oude dag te posten.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const stale = !day || day.forecastDate !== todayIso;
+
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return NextResponse.json({ error: "RESEND_API_KEY missing" }, { status: 500 });
   const resend = new Resend(resendKey);
 
   const link = `https://weerzone.nl/admin/studio?slot=${slot}`;
-  const html = `<!DOCTYPE html><html lang="nl"><body style="margin:0;background:#0c1838;font-family:-apple-system,Segoe UI,Roboto,sans-serif;">
+  const html = stale
+    ? `<!DOCTYPE html><html lang="nl"><body style="margin:0;background:#3a0c0c;font-family:-apple-system,Segoe UI,Roboto,sans-serif;">
+    <div style="max-width:480px;margin:0 auto;padding:40px 24px;color:#fff;text-align:center;">
+      <p style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#ff6b6b;font-weight:800;margin:0 0 8px;">Weerzone Studio · niet ververst</p>
+      <h1 style="font-size:26px;margin:0 0 8px;">Slot van ${meta.time} staat nog op ${day?.forecastDate ?? "onbekende datum"}</h1>
+      <p style="font-size:15px;color:rgba(255,255,255,.78);line-height:1.5;margin:0 0 28px;">De generatie voor vandaag (${todayIso}) is niet aangekomen — waarschijnlijk is mariana-nl of studio-generate mislukt. Trigger handmatig of controleer de cron-logs vóór je post.</p>
+      <a href="${link}" style="display:inline-block;padding:16px 36px;background:#ff6b6b;color:#0a111e;font-weight:800;font-size:15px;border-radius:14px;text-decoration:none;">Bekijk Studio →</a>
+    </div></body></html>`
+    : `<!DOCTYPE html><html lang="nl"><body style="margin:0;background:#0c1838;font-family:-apple-system,Segoe UI,Roboto,sans-serif;">
     <div style="max-width:480px;margin:0 auto;padding:40px 24px;color:#fff;text-align:center;">
       <p style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#ffd21a;font-weight:800;margin:0 0 8px;">Weerzone Studio</p>
       <h1 style="font-size:26px;margin:0 0 8px;">Slot van ${meta.time} klaar om te reviewen</h1>
@@ -49,12 +61,14 @@ export async function GET(req: Request) {
     const { error } = await resend.emails.send({
       from: "Weerzone Studio <info@weerzone.nl>",
       to: "info@weerzone.nl",
-      subject: `Studio ${meta.time} · ${meta.label} klaar om te plaatsen`,
+      subject: stale
+        ? `⚠️ Studio ${meta.time} niet ververst — nog op ${day?.forecastDate ?? "?"}`
+        : `Studio ${meta.time} · ${meta.label} klaar om te plaatsen`,
       html,
     });
     if (error) return NextResponse.json({ sent: false, error: error.message }, { status: 502 });
   } catch (e) {
     return NextResponse.json({ sent: false, error: (e as Error).message }, { status: 502 });
   }
-  return NextResponse.json({ sent: true, slot });
+  return NextResponse.json({ sent: true, slot, stale, forecastDate: day?.forecastDate ?? null });
 }
