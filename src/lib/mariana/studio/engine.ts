@@ -19,7 +19,7 @@ function isoDate(offset: number): string {
 function cap(s: string): string { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 /** Leest de nieuwste regions-rijen om pollen + onweer-hazard af te leiden. */
-async function readRegionsSignal(): Promise<{ pollenHoog: boolean; thunder: boolean }> {
+async function readRegionsSignal(): Promise<{ pollenHoog: boolean }> {
   try {
     const admin = createSupabaseAdminClient();
     const { data } = await admin.from("mariana_regions").select("*").order("run_at", { ascending: false }).limit(30);
@@ -31,13 +31,9 @@ async function readRegionsSignal(): Promise<{ pollenHoog: boolean; thunder: bool
       if (slug && !seen.has(slug)) { seen.add(slug); regions.push(r); }
     }
     const pollenHoog = regions.some((r) => /hoog/i.test(String(r.signal?.risk_summary?.pollen ?? "")));
-    const thunder = regions.some((r) => {
-      const flags = (r.local_feed?.hazardFlags ?? []) as string[];
-      return flags.includes("thunder") || flags.includes("storm");
-    });
-    return { pollenHoog, thunder };
+    return { pollenHoog };
   } catch {
-    return { pollenHoog: false, thunder: false };
+    return { pollenHoog: false };
   }
 }
 
@@ -91,11 +87,9 @@ export async function runStudio(opts: { dayOffset?: number } = {}): Promise<Stud
 
   const intro = await dagIntro({ warmst, koelst, spread, pollen, regime });
   const morgenTekst = await morgenAlinea({ morgenMax, tendens, regime });
-  const headsUp = await decideHeadsUp({
-    morgenRanked: tomorrowRanked,
-    oracleGateActive: oracle?.signal?.convective_gate === "ACTIVATE" || oracle?.signal?.run_tesla === true,
-    regionThunder: regionsSig.thunder,
-  });
+  // Slide 4 alleen bij een echt Tesla-severe-signaal voor morgen — Oracle's
+  // gate of een losse thunder-vlag is geen aankondiging waard (zie headsup.ts).
+  const headsUp = await decideHeadsUp();
 
   const fietsweer = det.windBft >= 6 ? "Matig" : warmst.value >= 30 ? "Warm" : "Goed";
   const hooikoorts = pollen.startsWith("Hoog") ? "Hoog" : "Laag";
