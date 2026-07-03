@@ -26,6 +26,7 @@ function assert(cond: boolean, msg: string) {
   assert(captured!.body.variables.input.channelId === "chan456", "channelId uit BUFFER_TIKTOK_CHANNEL_ID");
   assert(captured!.body.variables.input.text === "Hallo", "caption als text");
   assert(captured!.body.variables.input.assets[0].image.url === "https://x/y.png", "assets[0].image.url = imageUrl");
+  assert(!("metadata" in captured!.body.variables.input), "géén metadata.tiktok (title >90 tekens breekt TikTok's foto-post)");
   assert(captured!.body.variables.input.mode === "shareNow", "mode = shareNow");
   assert(captured!.body.variables.input.schedulingType === "automatic", "schedulingType = automatic");
   assert(captured!.body.variables.input.saveToDraft === false, "saveToDraft:false bij mode now");

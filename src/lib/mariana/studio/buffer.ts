@@ -42,6 +42,12 @@ export async function postToTikTok(args: {
   if (!channelId) return { ok: false, error: "BUFFER_TIKTOK_CHANNEL_ID ontbreekt" };
 
   const f = args.fetchImpl ?? fetch;
+  // Géén metadata.tiktok.title meesturen. TikTok's foto-post-API begrenst title
+  // op 90 tekens; onze captions zijn langer, en dat gaf de generieke "unknown
+  // error" bij publiceren. Geverifieerd tegen de live post-historie van dit
+  // kanaal: élke ooit succesvol verzonden post (oude pipeline én handmatige,
+  // met captions tot 475 tekens) heeft title:null — alleen de post mét title
+  // faalde. Buffer leidt de TikTok-velden zelf correct af uit `text`.
   const variables = {
     input: {
       channelId,
@@ -50,7 +56,6 @@ export async function postToTikTok(args: {
       mode: "shareNow",
       saveToDraft: args.mode === "draft",
       assets: [{ image: { url: args.imageUrl, metadata: { altText: "Weerzone TikTok-slide" } } }],
-      metadata: { tiktok: { title: args.caption } },
     },
   };
 
