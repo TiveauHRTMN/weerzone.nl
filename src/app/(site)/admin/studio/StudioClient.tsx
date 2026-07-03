@@ -192,7 +192,7 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
       form.append("caption", captions[slot] ?? "");
       form.append("image", pngBlob, `${slot}.png`);
       const resp = await fetch("/api/studio/publish", { method: "POST", body: form });
-      let json: { error?: string; postedAt?: string };
+      let json: { error?: string; postedAt?: string; warning?: string };
       try {
         json = await resp.json();
       } catch {
@@ -200,6 +200,8 @@ export default function StudioClient({ unlockKey }: { unlockKey: string }) {
       }
       if (!resp.ok) throw new Error(json.error ?? `HTTP ${resp.status}`);
       setPosted((p) => ({ ...p, [slot]: { posted_at: json.postedAt! } }));
+      // Deels gelukt (bijv. TikTok wél, X niet): slot is geplaatst maar toon de waarschuwing.
+      if (json.warning) setPostError(`${slot}: ${json.warning}`);
     } catch (e) {
       setPostError(`${slot}: ${(e as Error).message}`);
     } finally {

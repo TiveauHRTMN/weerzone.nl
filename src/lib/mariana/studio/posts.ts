@@ -43,7 +43,9 @@ export async function getPostedSlots(
 export async function recordPost(rec: {
   forecastDate: string;
   slot: StudioSlot;
-  status: "posted" | "failed";
+  // x_posted/x_failed = de meeliftende X-post; aparte status zodat de unieke
+  // 'posted'-lock (per dag+slot) en getPostedSlots TikTok-only blijven.
+  status: "posted" | "failed" | "x_posted" | "x_failed";
   bufferId: string | null;
   imageUrl: string;
   caption: string;

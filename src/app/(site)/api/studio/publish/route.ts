@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { studioAccessOk } from "@/lib/mariana/studio/gate";
 import { loadLatestStudioDay } from "@/lib/mariana/studio/storage";
 import { getPostedSlots, recordPost, uploadSlidePng } from "@/lib/mariana/studio/posts";
-import { postToTikTok } from "@/lib/mariana/studio/buffer";
+import { postToTikTok, postToX } from "@/lib/mariana/studio/buffer";
+import { xCaption } from "@/lib/mariana/studio/caption";
 import { isStudioSlot } from "@/lib/mariana/studio/slots";
 
 export const dynamic = "force-dynamic";
@@ -61,9 +62,29 @@ export async function POST(req: Request) {
   }
 
   const rec = await recordPost({ forecastDate, slot, status: "posted", bufferId: result.bufferId, imageUrl, caption });
-  if (!rec.ok) {
-    // Post is geplaatst maar lock niet geschreven — meld het zodat de UI niet stilletjes dubbelpost.
-    return NextResponse.json({ ok: true, postedAt: new Date().toISOString(), warning: "Geplaatst, maar log niet opgeslagen" });
-  }
-  return NextResponse.json({ ok: true, postedAt: new Date().toISOString() });
+
+  // X liftet mee op dezelfde approve: best-effort — TikTok is de primaire post
+  // én de dedupe-lock; een X-fout blokkeert niets maar wordt gelogd en teruggemeld.
+  const captionX = xCaption(caption);
+  const x = await postToX({ imageUrl, caption: captionX, mode: "now" });
+  await recordPost({
+    forecastDate,
+    slot,
+    status: x.ok ? "x_posted" : "x_failed",
+    bufferId: x.ok ? x.bufferId : null,
+    imageUrl,
+    caption: captionX,
+  });
+
+  const warnings = [
+    // Lock niet geschreven — meld het zodat de UI niet stilletjes dubbelpost.
+    rec.ok ? null : "Geplaatst, maar log niet opgeslagen",
+    x.ok ? null : `X mislukt: ${x.error}`,
+  ].filter(Boolean);
+  return NextResponse.json({
+    ok: true,
+    postedAt: new Date().toISOString(),
+    x: x.ok,
+    ...(warnings.length ? { warning: warnings.join("; ") } : {}),
+  });
 }

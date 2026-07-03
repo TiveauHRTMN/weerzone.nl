@@ -1,6 +1,6 @@
 /**
- * Mariana Studio — Buffer-client (GraphQL API, api.buffer.com) om een foto naar het
- * TikTok-kanaal te publiceren.
+ * Mariana Studio — Buffer-client (GraphQL API, api.buffer.com) om een foto naar de
+ * social-kanalen (TikTok, X) te publiceren.
  *
  * Buffer's klassieke REST-API (api.bufferapp.com/1) is sinds 2019 dicht voor iedereen —
  * elk token (welk type dan ook) krijgt daar een harde 401 "Public API tokens are not
@@ -30,24 +30,25 @@ const CREATE_POST_MUTATION = `
   }
 `;
 
-export async function postToTikTok(args: {
+type PostArgs = {
   imageUrl: string;
   caption: string;
   mode?: "now" | "draft";
   fetchImpl?: typeof fetch;
-}): Promise<BufferResult> {
+};
+
+async function createPost(channelId: string, args: PostArgs): Promise<BufferResult> {
   const token = process.env.BUFFER_ACCESS_TOKEN;
-  const channelId = process.env.BUFFER_TIKTOK_CHANNEL_ID;
   if (!token) return { ok: false, error: "BUFFER_ACCESS_TOKEN ontbreekt" };
-  if (!channelId) return { ok: false, error: "BUFFER_TIKTOK_CHANNEL_ID ontbreekt" };
 
   const f = args.fetchImpl ?? fetch;
-  // Géén metadata.tiktok.title meesturen. TikTok's foto-post-API begrenst title
-  // op 90 tekens; onze captions zijn langer, en dat gaf de generieke "unknown
-  // error" bij publiceren. Geverifieerd tegen de live post-historie van dit
-  // kanaal: élke ooit succesvol verzonden post (oude pipeline én handmatige,
-  // met captions tot 475 tekens) heeft title:null — alleen de post mét title
-  // faalde. Buffer leidt de TikTok-velden zelf correct af uit `text`.
+  // Géén per-service metadata meesturen. TikTok's foto-post-API begrenst
+  // metadata.tiktok.title op 90 tekens; onze captions zijn langer, en dat gaf de
+  // generieke "unknown error" bij publiceren. Geverifieerd tegen de live
+  // post-historie van dit kanaal: élke ooit succesvol verzonden post (oude
+  // pipeline én handmatige, met captions tot 475 tekens) heeft title:null —
+  // alleen de post mét title faalde. Buffer leidt de servicevelden zelf correct
+  // af uit `text`.
   const variables = {
     input: {
       channelId,
@@ -55,7 +56,7 @@ export async function postToTikTok(args: {
       schedulingType: "automatic",
       mode: "shareNow",
       saveToDraft: args.mode === "draft",
-      assets: [{ image: { url: args.imageUrl, metadata: { altText: "Weerzone TikTok-slide" } } }],
+      assets: [{ image: { url: args.imageUrl, metadata: { altText: "Weerzone weerbericht-slide" } } }],
     },
   };
 
@@ -80,4 +81,19 @@ export async function postToTikTok(args: {
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
+}
+
+export async function postToTikTok(args: PostArgs): Promise<BufferResult> {
+  const channelId = process.env.BUFFER_TIKTOK_CHANNEL_ID;
+  if (!channelId) return { ok: false, error: "BUFFER_TIKTOK_CHANNEL_ID ontbreekt" };
+  return createPost(channelId, args);
+}
+
+// Kanaal-ID's zijn geen geheimen (ze staan in de Buffer-dashboard-URL); de default
+// hardcoden scheelt een Vercel-env-write bij deploy. Env-override blijft mogelijk.
+const X_CHANNEL_ID_DEFAULT = "6a47cfd25ab6d2f1069e6fe7"; // @weerzone op X, service "twitter"
+
+export async function postToX(args: PostArgs): Promise<BufferResult> {
+  const channelId = process.env.BUFFER_X_CHANNEL_ID || X_CHANNEL_ID_DEFAULT;
+  return createPost(channelId, args);
 }
