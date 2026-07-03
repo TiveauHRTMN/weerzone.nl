@@ -1,5 +1,6 @@
 /**
- * STUDIO GENERATE — eigen, vroege cron voor de dagelijkse Studio-data.
+ * STUDIO GENERATE — eigen cron voor de dagelijkse Studio-data, 2x geregistreerd
+ * in vercel.json (04:15 en 05:30 UTC).
  *
  * mariana-nl draait Oracle + 11 regio's + Studio sequentieel in ÉÉN
  * Vercel-functie (maxDuration 300s); de Oracle-client alleen al heeft een
@@ -8,11 +9,14 @@
  * dan blijft de kaart op de vorige dag staan (gebeurde 2026-07-03).
  *
  * Studio heeft geen verse Oracle/regio-data uit DEZELFDE run nodig (leest
- * altijd de laatst opgeslagen rij, met eigen fallbacks — zie engine.ts), dus
- * een losse, vroege cron met eigen budget garandeert dat de dag-kaart er
- * ruim vóór de 08:00-post staat, ongeacht hoe de cascade verloopt.
- * mariana-nl's eigen Studio-stap blijft daarnaast draaien als tweede,
- * verse(re) poging zodra de cascade klaar is.
+ * altijd de laatst opgeslagen rij, met eigen fallbacks — zie engine.ts). De
+ * cijfers zelf (temps.ts) zijn wel altijd live Open-Meteo/KNMI, dus twee runs:
+ *   - 04:15 UTC: vroege veiligheidsnet-run, ruim vóór 08:00 als er iets misgaat.
+ *   - 05:30 UTC: late ververs-run, 15 min vóór de studio-nudge (05:45 UTC) —
+ *     zodat de kaart die Rowan om 08:00 reviewt de nieuwste modelrun heeft,
+ *     niet een snapshot van anderhalf uur eerder.
+ * mariana-nl's eigen Studio-stap blijft daarnaast draaien als extra poging
+ * zodra de cascade klaar is.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { isMarianaAuthorized, marianaUnauthorized } from "@/lib/mariana/http";
