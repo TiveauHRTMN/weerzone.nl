@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { hreflangSelf } from "@/lib/hreflang";
+import { ogFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Steve — je zakelijke heads-up",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
     canonical: "https://weerzone.nl/steve",
     languages: hreflangSelf("nl", "/steve"),
   },
-  // Coming-soon: niet indexeren tot Steve live is.
+  openGraph: ogFor("/steve", "Steve — je zakelijke heads-up", "Steve vertaalt weer, timing en locatie naar zakelijke kansen. Binnenkort beschikbaar."),
+  // Coming-soon: niet indexeren tot Steve live is. Staat daarom óók niet in de
+  // sitemap (sitemap-data.ts) — beide tegelijk terugdraaien bij launch.
   robots: { index: false, follow: true },
 };
 

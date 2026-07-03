@@ -25,7 +25,9 @@ export const metadata: Metadata = {
     description: "Helder weerbericht voor concrete keuzes in de komende 48 uur.",
     type: "website",
     locale: "nl_NL",
-    url: "https://weerzone.nl",
+    // Bewust géén url hier: dit default-object geldt voor élke pagina zonder
+    // eigen openGraph, en een hardcoded homepage-url maakte og:url overal fout
+    // (SEO-audit 2026-07-03). Pagina's zetten hun eigen url via ogFor() in lib/seo.
     siteName: "WEERZONE",
     images: [
       {

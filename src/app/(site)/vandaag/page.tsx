@@ -8,6 +8,7 @@ import { buildAgentContext } from "@/lib/agents/context";
 import { getAgentPreferences } from "@/lib/agents/preferences-server";
 import { fetchAirQuality } from "@/lib/weather";
 import { hreflangSelf } from "@/lib/hreflang";
+import { ogFor } from "@/lib/seo";
 import { schemaLd, schemaWebPage } from "@/lib/schema";
 import "./vandaag-skin.css";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   title: "Vandaag - het weer voor jouw locatie",
   description: "Het lokale weer van vandaag, met een praktisch dagverloop, risico's en het beste moment voor je plannen.",
   alternates: { canonical: "https://weerzone.nl/vandaag", languages: hreflangSelf("nl", "/vandaag") },
+  openGraph: ogFor("/vandaag", "Vandaag - het weer voor jouw locatie", "Het lokale weer van vandaag, met een praktisch dagverloop, risico's en het beste moment voor je plannen."),
 };
 
 function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

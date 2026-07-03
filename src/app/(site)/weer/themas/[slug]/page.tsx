@@ -156,9 +156,10 @@ const THEMES: Record<string, Theme> = {
   },
 };
 
-export async function generateStaticParams() {
-  return Object.keys(THEMES).map((slug) => ({ slug }));
-}
+// Bewust géén generateStaticParams: fetchWeatherData is tijdens `next build`
+// uitgeschakeld (weather.ts, NEXT_PHASE-check), dus prerender leverde altijd de
+// lege fallback op (SEO-audit 2026-07-03). On-demand ISR genereert mét data;
+// onbekende slugs vangt de THEMES-lookup + notFound() af.
 
 // Revalidate hourly zodat dateModified actueel blijft (anders blijft 'ie staan op de build-time).
 export const revalidate = 3600;
@@ -188,7 +189,10 @@ export default async function ThemePage({ params }: { params: Promise<{ slug: st
   const weather = await fetchWeatherData(deBilt.lat, deBilt.lon);
 
   if (!weather) {
-    return <div>Data tijdelijk niet beschikbaar...</div>;
+    // Throw i.p.v. fallback-div: bij ISR-revalidatie blijft de laatste goede
+    // versie staan; de oude fallback werd als 200 gecachet en geïndexeerd
+    // (SEO-audit 2026-07-03). Zonder eerdere versie vangt weer/error.tsx dit op.
+    throw new Error(`Weerdata voor themapagina ${slug} tijdelijk niet beschikbaar`);
   }
 
   // Freshness signal: ronde af op uur zodat AI/Google ziet dat de pagina recent is.

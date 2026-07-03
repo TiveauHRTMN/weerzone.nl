@@ -8,6 +8,7 @@ import { getSavedLocationServer } from "@/lib/location-cookies";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchAirQuality } from "@/lib/weather";
 import { hreflangSelf } from "@/lib/hreflang";
+import { ogFor } from "@/lib/seo";
 import { schemaLd, schemaWebPage } from "@/lib/schema";
 import "../vandaag/vandaag-skin.css";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   title: "Morgen - het weer voor jouw locatie",
   description: "Het lokale weer van morgen, met een praktisch dagverloop, risico's en het beste moment voor je plannen.",
   alternates: { canonical: "https://weerzone.nl/morgen", languages: hreflangSelf("nl", "/morgen") },
+  openGraph: ogFor("/morgen", "Morgen - het weer voor jouw locatie", "Het lokale weer van morgen, met een praktisch dagverloop, risico's en het beste moment voor je plannen."),
 };
 
 function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

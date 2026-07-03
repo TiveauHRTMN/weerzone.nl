@@ -3,7 +3,6 @@ import WeatherDashboard from "@/components/WeatherDashboard";
 import { DUTCH_CITIES } from "@/lib/types";
 import { fetchWeatherData } from "@/lib/weather";
 import {
-  NL_PROVINCE_SLUGS,
   PROVINCE_LABELS,
   isNLProvince,
   nlPlacesByProvince,
@@ -15,11 +14,12 @@ import Link from "next/link";
 import { hreflangSelf } from "@/lib/hreflang";
 
 export const revalidate = 43200;
-export const dynamicParams = false;
-
-export async function generateStaticParams() {
-  return NL_PROVINCE_SLUGS.map((province) => ({ province }));
-}
+// Bewust géén generateStaticParams: fetchWeatherData slaat de API over tijdens
+// `next build` (weather.ts, NEXT_PHASE-check), dus build-time prerender bakte
+// bij élke deploy de lege fallback in de ISR-cache — tot 12u zichtbaar voor
+// Google (SEO-audit 2026-07-03). On-demand ISR genereert mét echte data;
+// ongeldige provincies vangt isNLProvince() + notFound() af.
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: { params: Promise<{ province: string }> }): Promise<Metadata> {
   const { province } = await params;
@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ province:
     openGraph: {
       title: `Weer in provincie ${label} — Live Updates`,
       description: `Actueel weerbericht voor de hele provincie ${label}. Mis geen enkele regenbui.`,
+      url: `https://weerzone.nl/weer/${province}`,
       images: [`https://weerzone.nl/api/og?province=${province}`],
     }
   };
@@ -68,7 +69,12 @@ export default async function ProvincePage({ params }: { params: Promise<{ provi
   const weather = await fetchWeatherData(refCity.lat, refCity.lon);
 
   if (!weather) {
-    return <div>Data tijdelijk niet beschikbaar...</div>;
+    // Gooi i.p.v. een kale fallback-div renderen: een throw tijdens ISR-
+    // revalidatie laat Next de laatste góede versie serveren (en retry't bij
+    // de volgende request); de oude fallback werd als HTTP 200 tot 12 uur
+    // gecachet en geïndexeerd (SEO-audit 2026-07-03, echt gebeurd die dag).
+    // Zonder eerdere goede versie vangt weer/error.tsx dit op (5xx, niet 200).
+    throw new Error(`Weerdata voor provincie ${label} tijdelijk niet beschikbaar`);
   }
 
   // Structured Data

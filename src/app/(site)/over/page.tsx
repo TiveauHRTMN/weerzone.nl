@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { hreflangCluster } from "@/lib/hreflang";
+import { ogFor } from "@/lib/seo";
 import { schemaAboutPage, schemaFAQ, schemaLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: { absolute: "Over Weerzone - zo werkt het" },
   description: "Lees hoe Mariana, Piet, Reed en Koos het lokale weer voor vandaag en morgen bruikbaar maken.",
   alternates: { canonical: "https://weerzone.nl/over", languages: hreflangCluster({ nl: "/over" }) },
+  openGraph: ogFor("/over", "Over Weerzone - zo werkt het", "Lees hoe Mariana, Piet, Reed en Koos het lokale weer voor vandaag en morgen bruikbaar maken."),
 };
 
 const MARIANA_PARTS = [

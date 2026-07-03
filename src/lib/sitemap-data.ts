@@ -137,7 +137,9 @@ export function buildStaticSitemap(): string {
     { url: `${BASE_URL}/vandaag`, lastmod: today, changefreq: "hourly", priority: 0.95 },
     { url: `${BASE_URL}/morgen`, lastmod: today, changefreq: "hourly", priority: 0.9 },
     { url: `${BASE_URL}/weer`, lastmod: today, changefreq: "hourly", priority: 0.9 },
-    { url: `${BASE_URL}/steve`, lastmod: today, changefreq: "weekly", priority: 0.7 },
+    // /steve bewust NIET in de sitemap: de pagina staat op noindex tot Steve
+    // live is (steve/page.tsx) — sitemap + noindex tegelijk is een tegenspraak
+    // richting Google. Terugzetten zodra de noindex eraf gaat.
     { url: `${BASE_URL}/over`, lastmod: today, changefreq: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/weer/48-uur`, lastmod: today, changefreq: "hourly", priority: 0.7 },
     { url: `${BASE_URL}/weer/onweer`, lastmod: today, changefreq: "hourly", priority: 0.6 },

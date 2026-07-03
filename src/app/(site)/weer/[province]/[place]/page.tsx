@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { NL_PLACES, findPlace, isNLProvince, nearbyPlaces, placeRouteSlug, PROVINCE_LABELS, type Province } from "@/lib/places-data";
+import { findPlace, isNLProvince, nearbyPlaces, PROVINCE_LABELS, type Province } from "@/lib/places-data";
 import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset } from "@/lib/schema";
 import DayBriefing from "@/components/DayBriefing";
 import NearbyLinks from "@/components/NearbyLinks";
@@ -24,56 +24,12 @@ interface PageProps {
   params: Promise<{ province: string; place: string }>;
 }
 
-const KOOS_PRERENDERED_PLACE_NAMES = new Set([
-  "Amsterdam",
-  "Rotterdam",
-  "Utrecht",
-  "Den Haag",
-  "Eindhoven",
-  "Groningen",
-  "Tilburg",
-  "Almere",
-  "Breda",
-  "Nijmegen",
-  "Texel",
-  "Vlieland",
-  "Terschelling",
-  "Ameland",
-  "Schiermonnikoog",
-  "Griend",
-  "Giethoorn",
-  "Zandvoort",
-  "Maastricht",
-  "Middelburg",
-  "Leiden Centraal",
-  "Den Haag Centraal",
-  "Arnhem Centraal",
-  "Nationaal Park Veluwezoom",
-  "Nationaal Park De Hoge Veluwe",
-  "Nationaal Park De Biesbosch",
-  "Camping De Lakens",
-  "Camping Bakkum",
-  "Camping De Krim",
-  "Camping Stortemelk",
-  "Camping Lauwersoog",
-  "Camping Beerze Bulten",
-  "Camping De Leistert",
-]);
-
-/** 
- * We laten deze leeg zodat we niet 7000+ pagina's tijdens de build hoeven te fetchen. 
- * Next.js genereert ze on-demand (ISR) zodra Google ze crawlt via de sitemap.
- */
-export function generateStaticParams() {
-  return NL_PLACES
-    .filter((p) => KOOS_PRERENDERED_PLACE_NAMES.has(p.name) || (p.population ?? 0) >= 100_000)
-    .map((p) => ({
-      province: p.province,
-      place: placeRouteSlug(p),
-    }));
-  // We pre-renderen de belangrijkste steden (pop > 10.000) voor razendsnelle initiële indexering.
-  // De overige 10.000+ worden on-demand (ISR) gegenereerd.
-}
+// Bewust géén generateStaticParams meer (verwijderd 2026-07-04): de weer-fetch
+// is tijdens `next build` uitgeschakeld (weather.ts, NEXT_PHASE-check), dus de
+// prerender van de grote steden bakte bij elke deploy juist dáár de lege
+// "even niet beschikbaar"-kaart in de ISR-cache (SEO-audit 2026-07-03: Venlo,
+// Camping De Lakens). Alle ~10K pagina's worden on-demand (ISR) gegenereerd,
+// mét echte data; onbekende plaatsen vangt findPlace() + notFound() af.
 
 import { getHermesSEO } from "@/lib/seo";
 import { hreflangSelf } from "@/lib/hreflang";
@@ -178,7 +134,15 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
     getHermesSEO(place.name, province).catch(() => null),
     getLocationSEOContent(place.name, provLabel, place.character, place.venueType).catch(() => ""),
   ]);
-  const initialWeather = ctx?.weather;
+  if (!ctx) {
+    // Throw i.p.v. de "even niet beschikbaar"-kaart renderen: bij ISR-
+    // revalidatie blijft de laatste goede versie staan (Next retry't daarna);
+    // de oude kaart werd als HTTP 200 tot 12 uur gecachet en geïndexeerd
+    // (SEO-audit 2026-07-03, die dag echt op Venlo gebeurd). Zonder eerdere
+    // goede versie vangt weer/error.tsx dit op met een 5xx.
+    throw new Error(`Weerdata voor ${place.name} tijdelijk niet beschikbaar`);
+  }
+  const initialWeather = ctx.weather;
   const provinceWarnings = warningsForProvince(allWarnings, province);
 
   // Freshness signal for Google: rounded to the current hour
@@ -229,8 +193,7 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
       <main className={`va-skin ${manrope.className}`}>
         <KnmiWarningBanner warnings={provinceWarnings} />
 
-        {ctx ? (
-          <DayBriefing
+        <DayBriefing
             ctx={ctx}
             preferences={ALL_AGENT_PREFERENCES}
             dayOffset={0}
@@ -287,14 +250,6 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
               </>
             }
           />
-        ) : (
-          <div className="relative z-10 mx-auto max-w-[680px] px-4 py-14">
-            <div className="va-card p-8 text-center">
-              <h1 className="text-2xl font-extrabold text-slate-950">Het weer in {place.name} is even niet beschikbaar</h1>
-              <p className="mt-2 text-sm text-slate-600">Probeer het over een moment opnieuw.</p>
-            </div>
-          </div>
-        )}
       </main>
     </>
   );

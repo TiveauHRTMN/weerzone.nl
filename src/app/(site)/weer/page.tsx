@@ -1,4 +1,5 @@
 import { NL_PROVINCE_SLUGS, PROVINCE_LABELS, placeSlug, type Province } from "@/lib/places-data";
+import { ogFor } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock3, MapPin, Navigation, Search } from "lucide-react";
@@ -8,6 +9,11 @@ export const metadata: Metadata = {
   description:
     "Bekijk het actuele weer per provincie en plaats in Nederland. Een heldere verwachting voor de komende 48 uur, met regen, wind en temperatuur per locatie.",
   alternates: { canonical: "https://weerzone.nl/weer" },
+  openGraph: ogFor(
+    "/weer",
+    "Weer in Nederland - 48 uur vooruit per provincie en stad",
+    "Bekijk het actuele weer per provincie en plaats in Nederland. Een heldere verwachting voor de komende 48 uur, met regen, wind en temperatuur per locatie."
+  ),
 };
 
 export const revalidate = 43200;
