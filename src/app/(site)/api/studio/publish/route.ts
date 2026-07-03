@@ -48,12 +48,13 @@ export async function POST(req: Request) {
   const imageUrl = await uploadSlidePng(forecastDate, slot, image);
   if (!imageUrl) return NextResponse.json({ error: "Upload mislukt (service-role/bucket?)" }, { status: 500 });
 
-  // Publiceer via Buffer. mode:"draft" i.p.v. live-publiceren: Buffer's beta
-  // GraphQL-API laat ons TikTok's verplichte privacy_level (nodig voor DIRECT_POST)
-  // niet meesturen — elke live-poging faalt bij TikTok met een generieke fout.
-  // Draft-mode werkt wél (geverifieerd) en zet 'm klaar in Buffer; de eigenaar
-  // tikt zelf op Publish in Buffer's eigen dashboard, waar dat veld vermoedelijk wél gezet wordt.
-  const result = await postToTikTok({ imageUrl, caption, mode: "draft" });
+  // Publiceer direct live via Buffer. De eerdere fouten lagen niet aan een
+  // ontbrekende privacy_level maar aan metadata.tiktok.title >90 tekens (zie
+  // buffer.ts); zonder title publiceert dezelfde image+caption gewoon — op
+  // 2026-07-03 e2e bevestigd op het echte TikTok-kanaal. De approve-knop in
+  // /admin/studio is de menselijke gate; een extra draft-stap in Buffer is dan
+  // alleen maar een tweede tik zonder extra controle.
+  const result = await postToTikTok({ imageUrl, caption, mode: "now" });
   if (!result.ok) {
     await recordPost({ forecastDate, slot, status: "failed", bufferId: null, imageUrl, caption });
     return NextResponse.json({ error: `Buffer: ${result.error}` }, { status: 502 });
