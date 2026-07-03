@@ -14,12 +14,17 @@ import Link from "next/link";
 import { hreflangSelf } from "@/lib/hreflang";
 
 export const revalidate = 43200;
-// Bewust géén generateStaticParams: fetchWeatherData slaat de API over tijdens
-// `next build` (weather.ts, NEXT_PHASE-check), dus build-time prerender bakte
-// bij élke deploy de lege fallback in de ISR-cache — tot 12u zichtbaar voor
-// Google (SEO-audit 2026-07-03). On-demand ISR genereert mét echte data;
-// ongeldige provincies vangt isNLProvince() + notFound() af.
 export const dynamicParams = true;
+
+// Leeg [] i.p.v. alle provincies: fetchWeatherData slaat de API over tijdens
+// `next build` (weather.ts, NEXT_PHASE-check), dus build-time prerender bakte
+// bij élke deploy de lege fallback 12u in de ISR-cache (SEO-audit 2026-07-03).
+// Een lege lijst prerendert niets maar houdt on-demand ISR-caching intact
+// (helemaal weglaten maakt de route volledig dynamisch — live geverifieerd).
+// Ongeldige provincies vangt isNLProvince() + notFound() af.
+export async function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ province: string }> }): Promise<Metadata> {
   const { province } = await params;

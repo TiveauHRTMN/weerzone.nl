@@ -156,10 +156,13 @@ const THEMES: Record<string, Theme> = {
   },
 };
 
-// Bewust géén generateStaticParams: fetchWeatherData is tijdens `next build`
+// Leeg [] i.p.v. alle thema's: fetchWeatherData is tijdens `next build`
 // uitgeschakeld (weather.ts, NEXT_PHASE-check), dus prerender leverde altijd de
-// lege fallback op (SEO-audit 2026-07-03). On-demand ISR genereert mét data;
-// onbekende slugs vangt de THEMES-lookup + notFound() af.
+// lege fallback op (SEO-audit 2026-07-03). Leeg = niets prerenderen maar
+// on-demand ISR-caching intact; onbekende slugs vangt THEMES + notFound() af.
+export async function generateStaticParams() {
+  return [];
+}
 
 // Revalidate hourly zodat dateModified actueel blijft (anders blijft 'ie staan op de build-time).
 export const revalidate = 3600;

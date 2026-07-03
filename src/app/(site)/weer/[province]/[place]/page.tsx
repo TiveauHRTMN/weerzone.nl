@@ -24,12 +24,17 @@ interface PageProps {
   params: Promise<{ province: string; place: string }>;
 }
 
-// Bewust géén generateStaticParams meer (verwijderd 2026-07-04): de weer-fetch
-// is tijdens `next build` uitgeschakeld (weather.ts, NEXT_PHASE-check), dus de
-// prerender van de grote steden bakte bij elke deploy juist dáár de lege
-// "even niet beschikbaar"-kaart in de ISR-cache (SEO-audit 2026-07-03: Venlo,
-// Camping De Lakens). Alle ~10K pagina's worden on-demand (ISR) gegenereerd,
-// mét echte data; onbekende plaatsen vangt findPlace() + notFound() af.
+// Leeg [] i.p.v. de grote steden (2026-07-04): de weer-fetch is tijdens
+// `next build` uitgeschakeld (weather.ts, NEXT_PHASE-check), dus de prerender
+// bakte bij elke deploy juist op de belangrijkste pagina's de lege "even niet
+// beschikbaar"-kaart in de ISR-cache (SEO-audit 2026-07-03: Venlo, Camping De
+// Lakens). Leeg = niets prerenderen; alle ~10K pagina's genereren on-demand
+// mét echte data en blijven ISR-gecachet (generateStaticParams helemaal
+// weglaten maakt de route volledig dynamisch — live geverifieerd). Onbekende
+// plaatsen vangt findPlace() + notFound() af.
+export function generateStaticParams() {
+  return [];
+}
 
 import { getHermesSEO } from "@/lib/seo";
 import { hreflangSelf } from "@/lib/hreflang";
