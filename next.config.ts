@@ -14,6 +14,8 @@ const cspReportOnly = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
+  "report-uri /api/csp-report",
+  "report-to csp-endpoint",
 ].join("; ");
 
 // Standaard set met robuuste security headers
@@ -45,6 +47,12 @@ const securityHeaders = [
   {
     key: "Content-Security-Policy-Report-Only",
     value: cspReportOnly,
+  },
+  {
+    // Koppelt de report-to-groep "csp-endpoint" uit de CSP hierboven aan
+    // een concrete URL — vereist voor de Reporting API in Chrome/Edge.
+    key: "Reporting-Endpoints",
+    value: 'csp-endpoint="https://weerzone.nl/api/csp-report"',
   },
 ];
 
