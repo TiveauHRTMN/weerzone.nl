@@ -13,6 +13,7 @@ import {
   parseTimingWindow,
   timingAppliesToDay,
   safeInsight,
+  displayModelSpread,
   DISPLAY_MODEL_NUMBER,
   type PluimIntelligence,
 } from "@/lib/model-blend";
@@ -288,17 +289,32 @@ function pluimIntelligence(
   const blended = blendedTemperatureSeries(ctx.weather.hourly, weights);
   const leadModel = topWeightedDisplayModel(ctx.weather.hourly, weights);
 
-  const baseInsight = safeInsight(compactCopy(
-    ctx.mariana?.signal?.model_blend_summary || ctx.mariana?.signal?.local_forecast_logic,
-    2,
-  ));
+  // model_blend_summary is voor bezoekers; local_forecast_logic is Mariana's
+  // interne redenering en hoort hier niet meer als terugval (jargon). Als de
+  // blend-zin sneuvelt op de naam-/jargonfilters, probeer dan het veld dat
+  // Regions specifiek voor locatiepagina's schrijft.
+  const baseInsight =
+    safeInsight(compactCopy(ctx.mariana?.signal?.model_blend_summary, 2)) ??
+    safeInsight(compactCopy(ctx.mariana?.signal?.location_output_contract?.summary, 2));
+
+  // Hyperlokale zin: hoe ver de getoonde verwachtingen voor déze plaats en
+  // déze dag uiteenlopen — wiskunde uit de eigen uurdata, geen regiotekst.
+  const dayLabel = dayOffset === 0 ? "vandaag" : "morgen";
+  const dayHours = ctx.weather.hourly.filter((hour) => hour.time.slice(0, 10) === date);
+  const spread = displayModelSpread(dayHours);
+  const spreadSentence = spread === null
+    ? null
+    : spread >= 2
+      ? `De verwachtingen voor ${ctx.location.name} lopen ${dayLabel} tot ${Math.round(spread)} graden uiteen.`
+      : `De verwachtingen voor ${ctx.location.name} liggen ${dayLabel} vrijwel op één lijn.`;
+
   const leadSentence = leadModel
     ? `De doorgetrokken lijn leunt ${dayOffset === 0 ? "vandaag" : "voor morgen"} het meest op verwachting ${DISPLAY_MODEL_NUMBER[leadModel]}.`
     : null;
   // LLM-tekst eindigt niet altijd op een leesteken; zonder punt plakken de
   // twee zinnen aan elkaar.
   const normalizedBase = baseInsight ? baseInsight.trimEnd().replace(/([^.!?])$/, "$1.") : null;
-  const insight = [normalizedBase, leadSentence].filter(Boolean).join(" ") || null;
+  const insight = [normalizedBase, spreadSentence, leadSentence].filter(Boolean).join(" ") || null;
 
   const tesla = ctx.tesla;
   const teslaRisk = Boolean(

@@ -81,6 +81,20 @@ GEDRAGSREGELS
 - Timing en lokale afwijkingen zijn belangrijker dan brede regiozinnen.
 - Output kort genoeg voor schaalbare locatiepagina's.
 
+ZICHTBAARHEID EN TOON PER VELD
+Bezoekers van de locatiepagina's zien "model_blend_summary" en alles in
+"location_output_contract" letterlijk op de pagina staan. Schrijf die velden
+daarom als publiekstekst:
+- Net Nederlands, gewone spreektaal — leg het uit zoals op een verjaardag.
+- GEEN meteorologisch vakjargon: geen T850, CAPE, CIN, advectie, zonaal,
+  meridionaal, rugas, regime, convectie, shear, ensemble, hPa of "hi-res".
+- GEEN modelnamen of afkortingen (HARMONIE, AROME, ICON, ECMWF, GFS).
+- Wél concreet: wat voor weer wordt het, wanneer slaat het om, waar zit de
+  twijfel ("de berekeningen lopen voor de middag uiteen") en hoe zeker ben je.
+- "model_blend_summary": maximaal 2 korte zinnen.
+De velden "dominant_short_term_regime", "local_forecast_logic" en
+"mariana_summary" zijn intern (beslislaag/logging) — daar mag vakinhoud in.
+
 OUTPUTFORMAT
 Geef UITSLUITEND dit JSON-object terug, geen tekst eromheen:
 

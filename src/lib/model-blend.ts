@@ -158,9 +158,36 @@ export function timingAppliesToDay(timingWindow: string, dayOffset: 0 | 1): bool
 const BANNED_NAMES =
   /(?<![a-zA-Z])(mariana|knmi|dwd|estofex|harmonie|arome|icon|ecmwf|gfs|aifs|open[\s-]?meteo|m[ée]t[ée]o[\s-]?france|noaa|tesla|oracle)(?![a-zA-Z])/i;
 
+/**
+ * Meteorologisch vakjargon hoort net zomin in de product-UI als bronnamen
+ * (toonregel: geen meteo-jargon in user-facing copy). De prompt verbiedt het
+ * inmiddels bij de bron, maar oudere Regions-runs bevatten nog termen als
+ * "T850" of "CAPE-spreiding" — zelfde filosofie: dan liever gén regel.
+ */
+const JARGON_TERMS =
+  /(?<![a-zA-Z])(t850|t2m|cape|cin|advec\w*|zona(?:al|le)|meridiona\w*|rugas|geopotenti\w*|isobar\w*|hpa|convectie\w*|convectief|shear|ensemble\w*|hi-?res|regimes?)(?![a-zA-Z])/i;
+
 export function safeInsight(text: string | null | undefined): string | null {
   const trimmed = text?.trim();
   if (!trimmed) return null;
   if (BANNED_NAMES.test(trimmed)) return null;
+  if (JARGON_TERMS.test(trimmed)) return null;
   return trimmed;
+}
+
+/**
+ * Hoe ver de GETOONDE modelverwachtingen (dagmaxima) voor deze uren uiteenlopen,
+ * in graden. Null bij minder dan 2 getoonde modellen — dan valt er niets te
+ * vergelijken. Voedt de hyperlokale pluim-zin ("lopen voor <plaats> X° uiteen").
+ */
+export function displayModelSpread(hours: HourlyForecast[]): number | null {
+  const maxima: number[] = [];
+  for (const key of DISPLAY_MODELS) {
+    const temps = hours
+      .map((hour) => hour.models?.[key]?.temperature)
+      .filter((t): t is number => typeof t === "number" && Number.isFinite(t));
+    if (temps.length) maxima.push(Math.max(...temps));
+  }
+  if (maxima.length < 2) return null;
+  return Math.max(...maxima) - Math.min(...maxima);
 }
