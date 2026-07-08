@@ -60,10 +60,10 @@ function isSitemapPlace(p: Place): boolean {
   if (p.name.length > 60) return false;
   const slug = placeRouteSlug(p);
   if (!slug || slug.includes("--")) return false;
-  // Start met plaatsen met aantoonbare zoekvraag en alle echte venues. Dit
-  // houdt de index beheersbaar voor een jong domein zonder nuttige locaties
-  // uit de WaaS-laag te verwijderen.
-  return Boolean(p.venueType) || (p.population ?? 0) >= 1_000;
+  // Mariana Local voedt inmiddels elke plaatspagina met een eigen hyperlokale
+  // verwachting, dus de volledige WaaS-laag mag de index in (~10,4K URL's,
+  // ruim binnen de 50k-limiet). Alleen niet-routebare plaatsen blijven buiten.
+  return true;
 }
 
 function placePriority(pop?: number): number {
