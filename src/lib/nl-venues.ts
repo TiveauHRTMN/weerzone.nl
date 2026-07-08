@@ -42,7 +42,7 @@ export const NL_VENUE_PLACES: Place[] = [
   { name: "Oud Valkeveen", province: "noord-holland", lat: 52.3061, lon: 5.1916, slug: "oud-valkeveen", venueType: "attractiepark" },
   { name: "Mondo Verde", province: "limburg", lat: 50.8857, lon: 6.0306, slug: "mondo-verde", venueType: "attractiepark" },
   { name: "Sybrandy's Speelpark", province: "friesland", lat: 52.8345, lon: 5.5456, slug: "sybrandy-s-speelpark", venueType: "attractiepark" },
-  { name: "Familiepark Nienoord", province: "drenthe", lat: 53.1694, lon: 6.3965, slug: "familiepark-nienoord", venueType: "attractiepark" },
+  { name: "Familiepark Nienoord", province: "groningen", lat: 53.1694, lon: 6.3965, slug: "familiepark-nienoord", venueType: "attractiepark" },
   { name: "Pukkemuk", province: "noord-brabant", lat: 51.627, lon: 4.9839, slug: "pukkemuk", venueType: "attractiepark" },
   { name: "Hullie", province: "noord-brabant", lat: 51.6717, lon: 5.5813, slug: "hullie", venueType: "attractiepark" },
   { name: "De Waarbeek", province: "overijssel", lat: 52.2442, lon: 6.8089, slug: "de-waarbeek", venueType: "attractiepark" },

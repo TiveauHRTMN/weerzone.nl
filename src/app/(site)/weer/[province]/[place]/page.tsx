@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { findPlace, isNLProvince, nearbyPlaces, PROVINCE_LABELS, type Province } from "@/lib/places-data";
+import { findPlace, isNLProvince, nearbyPlaces, NL_PLACES, placeRouteSlug, PROVINCE_LABELS, type Province } from "@/lib/places-data";
 import { schemaCityWeatherPage, schemaBreadcrumb, schemaLd, schemaCityDataset } from "@/lib/schema";
 import DayBriefing from "@/components/DayBriefing";
 import NearbyLinks from "@/components/NearbyLinks";
@@ -93,6 +93,19 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   const { province, place: slug } = await params;
   if (!isNLProvince(province)) notFound();
   let place = findPlace(province, slug);
+
+  // Provincie-opschoning 2026-07-09: 1.666 plaatsen zijn naar hun echte
+  // provincie verhuisd. Oude URL's (en externe links/Google-index) komen hier
+  // binnen onder de foute provincie — stuur ze met een 308 naar de canonical
+  // zolang de slug maar in precies één andere provincie bestaat.
+  if (!place) {
+    const elsewhere = new Set(
+      NL_PLACES.filter((p) => placeRouteSlug(p) === slug).map((p) => p.province),
+    );
+    if (elsewhere.size === 1) {
+      permanentRedirect(`/weer/${[...elsewhere][0]}/${slug}`);
+    }
+  }
 
   // Bot-detectie via headers() is weggehaald — was dynamisch-renderen forceren
   // zonder echt effect. fetchWeatherData hieronder geeft forceHighRes=false,

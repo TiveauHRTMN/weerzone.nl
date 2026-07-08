@@ -5,7 +5,7 @@ import type { Place } from "./places-data";
 export const KOOS_NL_CAMPING_PLACES: Place[] = [
   {
     "name": "Attractie- & Vakantiepark Slagharen",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.62005,
     "lon": 6.57192,
     "slug": "attractie-en-vakantiepark-slagharen",
@@ -53,7 +53,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Campererf De Beetse",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.92992,
     "lon": 7.08157,
     "slug": "campererf-de-beetse",
@@ -101,7 +101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Bembom Hoeve",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.61748,
     "lon": 6.56702,
     "slug": "camperplaats-bembom-hoeve",
@@ -109,7 +109,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Camerplaats Spoordok",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.927,
     "lon": 7.01417,
     "slug": "camperplaats-camerplaats-spoordok",
@@ -165,7 +165,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Langs de Esch",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.6202,
     "lon": 6.60438,
     "slug": "camperplaats-langs-de-esch",
@@ -245,7 +245,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Nije Hof",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.99008,
     "lon": 6.94019,
     "slug": "camping-t-nije-hof",
@@ -300,7 +300,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping \u00c1MOI Gieterveen",
+    "name": "Camping ÁMOI Gieterveen",
     "province": "drenthe",
     "lat": 53.02495,
     "lon": 6.83219,
@@ -341,7 +341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boerenbont",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 53.04602,
     "lon": 7.09803,
     "slug": "camping-boerenbont",
@@ -405,7 +405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Buitengoed Het Achterdiep",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.89404,
     "lon": 7.04521,
     "slug": "camping-buitengoed-het-achterdiep",
@@ -476,8 +476,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping De Boergondi\u00ebr",
-    "province": "drenthe",
+    "name": "Camping De Boergondiër",
+    "province": "overijssel",
     "lat": 52.65358,
     "lon": 6.62618,
     "slug": "camping-de-boergondier",
@@ -605,7 +605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Kapschuur",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 53.00573,
     "lon": 6.9527,
     "slug": "camping-de-kapschuur",
@@ -765,7 +765,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vechtkamp",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.60656,
     "lon": 6.71754,
     "slug": "camping-de-vechtkamp",
@@ -781,7 +781,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Veentjes",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.65011,
     "lon": 6.31307,
     "slug": "camping-de-veentjes",
@@ -805,7 +805,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vossenburcht",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.65734,
     "lon": 6.30247,
     "slug": "camping-de-vossenburcht",
@@ -845,7 +845,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Dedemsvaart",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.60959,
     "lon": 6.5159,
     "slug": "camping-dedemsvaart",
@@ -917,7 +917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Glamping area",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.65139,
     "lon": 6.31005,
     "slug": "camping-glamping-area",
@@ -973,7 +973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Vlieg-tuig",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.99612,
     "lon": 7.02404,
     "slug": "camping-het-vlieg-tuig",
@@ -981,7 +981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Wiel",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.63957,
     "lon": 6.5491,
     "slug": "camping-het-wiel",
@@ -1069,7 +1069,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kloosterhoeve",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.8764,
     "lon": 7.0481,
     "slug": "camping-kloosterhoeve",
@@ -1101,14 +1101,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Labelterrein Davy Crockett Hoeve",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 53.02184,
     "lon": 7.07391,
     "slug": "camping-labelterrein-davy-crockett-hoeve",
     "character": "coastal"
   },
   {
-    "name": "Camping Landgoed B\u00f6rkerheide",
+    "name": "Camping Landgoed Börkerheide",
     "province": "drenthe",
     "lat": 52.85017,
     "lon": 6.58983,
@@ -1149,7 +1149,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Moekesgat",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.88483,
     "lon": 7.05727,
     "slug": "camping-moekesgat",
@@ -1181,7 +1181,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Musselkanaal",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.94767,
     "lon": 6.99886,
     "slug": "camping-musselkanaal",
@@ -1221,7 +1221,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oltenbarg",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.70372,
     "lon": 6.12828,
     "slug": "camping-oltenbarg",
@@ -1261,7 +1261,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Prenger",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.60096,
     "lon": 6.69553,
     "slug": "camping-prenger",
@@ -1277,7 +1277,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Roelage",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.89263,
     "lon": 7.09911,
     "slug": "camping-roelage",
@@ -1285,7 +1285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Si-Es-An",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.60842,
     "lon": 6.36826,
     "slug": "camping-si-es-an",
@@ -1389,7 +1389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zomerlicht",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.61058,
     "lon": 6.36814,
     "slug": "camping-zomerlicht",
@@ -1477,7 +1477,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kanokampeerplek Giethoorn-Oost",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.74673,
     "lon": 6.10378,
     "slug": "kanokampeerplek-giethoorn-oost",
@@ -1509,7 +1509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini camping De Kleine Weide",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.62346,
     "lon": 6.6469,
     "slug": "mini-camping-de-kleine-weide",
@@ -1525,7 +1525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini camping Het Rheezerend",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.61046,
     "lon": 6.51095,
     "slug": "mini-camping-het-rheezerend",
@@ -1581,7 +1581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Eikenzoom",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.63414,
     "lon": 6.66547,
     "slug": "minicamping-de-eikenzoom",
@@ -1596,7 +1596,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Minicamping De Mor\u00e9ne Hoeve",
+    "name": "Minicamping De Moréne Hoeve",
     "province": "drenthe",
     "lat": 52.69736,
     "lon": 6.35705,
@@ -1701,7 +1701,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Rollecate",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.60259,
     "lon": 6.25161,
     "slug": "minicamping-rollecate",
@@ -1741,7 +1741,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Dassenburcht",
-    "province": "drenthe",
+    "province": "overijssel",
     "lat": 52.61823,
     "lon": 6.26673,
     "slug": "natuurkampeerterrein-de-dassenburcht",
@@ -1765,7 +1765,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "natuurkampeerterrein De Linden",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 52.97761,
     "lon": 7.04425,
     "slug": "natuurkampeerterrein-de-linden",
@@ -1829,7 +1829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark De Sikkenberg",
-    "province": "drenthe",
+    "province": "groningen",
     "lat": 53.01064,
     "lon": 7.00035,
     "slug": "vakantiepark-de-sikkenberg",
@@ -1877,7 +1877,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Buitenplaats de Hierdense Beek",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.35048,
     "lon": 5.70287,
     "slug": "buitenplaats-de-hierdense-beek",
@@ -1917,7 +1917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Doornekamp",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.34777,
     "lon": 5.66806,
     "slug": "camperplaats-de-doornekamp",
@@ -1925,7 +1925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Grashaven",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.63376,
     "lon": 5.05809,
     "slug": "camperplaats-de-grashaven",
@@ -1933,7 +1933,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Leembrug",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.25156,
     "lon": 5.53728,
     "slug": "camperplaats-de-leembrug",
@@ -1941,7 +1941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Droomparken Enkhuizer Strand",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.7174,
     "lon": 5.28759,
     "slug": "camperplaats-droomparken-enkhuizer-strand",
@@ -1957,7 +1957,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Jachthaven en Watersport Andijk",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.74651,
     "lon": 5.18496,
     "slug": "camperplaats-jachthaven-en-watersport-andijk",
@@ -1965,7 +1965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Jachthaven Naarden",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.30856,
     "lon": 5.14617,
     "slug": "camperplaats-jachthaven-naarden",
@@ -1973,7 +1973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Kaasboerderij Simonehoeve",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.48762,
     "lon": 5.03481,
     "slug": "camperplaats-kaasboerderij-simonehoeve",
@@ -1981,7 +1981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Marina Park Volendam",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.48945,
     "lon": 5.06001,
     "slug": "camperplaats-marina-park-volendam",
@@ -1989,7 +1989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Nijkerk aan Zee",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.25638,
     "lon": 5.46328,
     "slug": "camperplaats-nijkerk-aan-zee",
@@ -1997,7 +1997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats P2 Lelykade Harderwijk",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.35228,
     "lon": 5.62564,
     "slug": "camperplaats-p2-lelykade-harderwijk",
@@ -2013,7 +2013,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Putten",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.26256,
     "lon": 5.6077,
     "slug": "camperplaats-putten",
@@ -2021,7 +2021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "camperplaats Stal Hiensch",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.20205,
     "lon": 5.46675,
     "slug": "camperplaats-stal-hiensch",
@@ -2029,7 +2029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats van Huizen",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.30872,
     "lon": 5.23973,
     "slug": "camperplaats-van-huizen",
@@ -2037,7 +2037,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Vecht & Weide",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.28663,
     "lon": 5.07254,
     "slug": "camperplaats-vecht-en-weide",
@@ -2053,7 +2053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Wijngaard Saalhof",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.68429,
     "lon": 5.03938,
     "slug": "camperplaats-wijngaard-saalhof",
@@ -2069,7 +2069,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 'T Hofje",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.35211,
     "lon": 5.65139,
     "slug": "camping-t-hofje",
@@ -2085,7 +2085,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Ravenest",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.24604,
     "lon": 5.61947,
     "slug": "camping-t-ravenest",
@@ -2093,7 +2093,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Venhop",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.63327,
     "lon": 5.01095,
     "slug": "camping-t-venhop",
@@ -2109,7 +2109,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Zevenbosch",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.20481,
     "lon": 5.65007,
     "slug": "camping-t-zevenbosch",
@@ -2117,7 +2117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Amsterdamse Lichtbond Naturistenvereniging Dagrecreatie",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.27525,
     "lon": 5.09945,
     "slug": "camping-amsterdamse-lichtbond-naturistenvereniging-dagrecreatie",
@@ -2132,8 +2132,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Ari\u00ebnstocht",
-    "province": "flevoland",
+    "name": "Camping Ariënstocht",
+    "province": "noord-holland",
     "lat": 52.73618,
     "lon": 5.12997,
     "slug": "camping-arienstocht",
@@ -2141,7 +2141,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bij BlokVis",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.72957,
     "lon": 5.18695,
     "slug": "camping-bij-blokvis",
@@ -2157,7 +2157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boslust",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.24674,
     "lon": 5.6193,
     "slug": "camping-boslust",
@@ -2165,7 +2165,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Brem en Den",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.27881,
     "lon": 5.60361,
     "slug": "camping-brem-en-den",
@@ -2173,7 +2173,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Buitenlust",
-    "province": "flevoland",
+    "province": "utrecht",
     "lat": 52.24317,
     "lon": 5.31466,
     "slug": "camping-buitenlust",
@@ -2181,7 +2181,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bungalowpark Kastelenhof",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.2428,
     "lon": 5.70919,
     "slug": "camping-bungalowpark-kastelenhof",
@@ -2213,7 +2213,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Caravanpark Beekzicht",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.352,
     "lon": 5.70062,
     "slug": "camping-caravanpark-beekzicht",
@@ -2221,7 +2221,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Coterlet",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.2169,
     "lon": 5.44361,
     "slug": "camping-coterlet",
@@ -2229,7 +2229,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Appelhoek",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.62414,
     "lon": 5.14419,
     "slug": "camping-de-appelhoek",
@@ -2237,7 +2237,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Badhoeve",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.38562,
     "lon": 5.01212,
     "slug": "camping-de-badhoeve",
@@ -2245,7 +2245,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Berkebomen",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.31313,
     "lon": 5.57278,
     "slug": "camping-de-berkebomen",
@@ -2253,7 +2253,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Boerenzwaluw",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.22914,
     "lon": 5.72848,
     "slug": "camping-de-boerenzwaluw",
@@ -2269,7 +2269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Dijk",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.5225,
     "lon": 5.06522,
     "slug": "camping-de-dijk",
@@ -2277,7 +2277,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Duunnen",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.34832,
     "lon": 5.68109,
     "slug": "camping-de-duunnen",
@@ -2285,7 +2285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Elzenhoeve",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.21244,
     "lon": 5.53571,
     "slug": "camping-de-elzenhoeve",
@@ -2293,7 +2293,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Fransche Kamp",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.25686,
     "lon": 5.14715,
     "slug": "camping-de-fransche-kamp",
@@ -2301,7 +2301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Gouwe Stek",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.7079,
     "lon": 5.25405,
     "slug": "camping-de-gouwe-stek",
@@ -2309,7 +2309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Haeghehorst",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.31339,
     "lon": 5.63196,
     "slug": "camping-de-haeghehorst",
@@ -2317,7 +2317,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hanenburg",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.31836,
     "lon": 5.60533,
     "slug": "camping-de-hanenburg",
@@ -2325,7 +2325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Kalverhoeve",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.23265,
     "lon": 5.70791,
     "slug": "camping-de-kalverhoeve",
@@ -2333,7 +2333,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Kriemelberg",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.28537,
     "lon": 5.64618,
     "slug": "camping-de-kriemelberg",
@@ -2341,7 +2341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Molenwurf",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.68693,
     "lon": 5.04737,
     "slug": "camping-de-molenwurf",
@@ -2357,7 +2357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Peperkamp",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.34967,
     "lon": 5.68448,
     "slug": "camping-de-peperkamp",
@@ -2365,7 +2365,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Solse Berg",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.23624,
     "lon": 5.72787,
     "slug": "camping-de-solse-berg",
@@ -2373,7 +2373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Strokel",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.32289,
     "lon": 5.62914,
     "slug": "camping-de-strokel",
@@ -2381,7 +2381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vest",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.70856,
     "lon": 5.286,
     "slug": "camping-de-vest",
@@ -2397,7 +2397,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Waterlelie",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.35443,
     "lon": 5.70204,
     "slug": "camping-de-waterlelie",
@@ -2405,7 +2405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Wijde Blik",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.23757,
     "lon": 5.6919,
     "slug": "camping-de-wijde-blik",
@@ -2413,7 +2413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zanderij",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.20213,
     "lon": 5.65349,
     "slug": "camping-de-zanderij",
@@ -2421,7 +2421,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Eemlandhoeve",
-    "province": "flevoland",
+    "province": "utrecht",
     "lat": 52.22629,
     "lon": 5.35618,
     "slug": "camping-eemlandhoeve",
@@ -2429,7 +2429,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Elzenhof",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.32064,
     "lon": 5.59541,
     "slug": "camping-elzenhof",
@@ -2445,7 +2445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Enkhuizer Strand",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.71759,
     "lon": 5.28796,
     "slug": "camping-enkhuizer-strand",
@@ -2461,7 +2461,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Fort Spion",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.20103,
     "lon": 5.0432,
     "slug": "camping-fort-spion",
@@ -2485,7 +2485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping het Speulderbos",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.23792,
     "lon": 5.69428,
     "slug": "camping-het-speulderbos",
@@ -2493,7 +2493,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Twiskerveld",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.72888,
     "lon": 5.03214,
     "slug": "camping-het-twiskerveld",
@@ -2501,7 +2501,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Vossenhol",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.2885,
     "lon": 5.64169,
     "slug": "camping-het-vossenhol",
@@ -2509,7 +2509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping In de Rimboe",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.29206,
     "lon": 5.65134,
     "slug": "camping-in-de-rimboe",
@@ -2517,7 +2517,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Katwoude",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.47153,
     "lon": 5.02023,
     "slug": "camping-katwoude",
@@ -2525,7 +2525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Klarenbeek",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.28188,
     "lon": 5.58211,
     "slug": "camping-klarenbeek",
@@ -2533,7 +2533,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kleine Weel Edam",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.52693,
     "lon": 5.06277,
     "slug": "camping-kleine-weel-edam",
@@ -2541,7 +2541,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lieuwendaal",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.35435,
     "lon": 5.71713,
     "slug": "camping-lieuwendaal",
@@ -2549,7 +2549,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Mariahoeve",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.28181,
     "lon": 5.57131,
     "slug": "camping-mariahoeve",
@@ -2565,7 +2565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping MarinaPark Bad Markermeer",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.59296,
     "lon": 5.02067,
     "slug": "camping-marinapark-bad-markermeer",
@@ -2597,7 +2597,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Naturistenvereniging 'De Vrije Vogels'",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.7032,
     "lon": 5.06231,
     "slug": "camping-naturistenvereniging-de-vrije-vogels",
@@ -2621,7 +2621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Nieuwboer",
-    "province": "flevoland",
+    "province": "utrecht",
     "lat": 52.26201,
     "lon": 5.37248,
     "slug": "camping-nieuwboer",
@@ -2629,7 +2629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC Huizen",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.30889,
     "lon": 5.22095,
     "slug": "camping-ntkc-huizen",
@@ -2637,7 +2637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Polsmaten",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.39426,
     "lon": 5.73643,
     "slug": "camping-polsmaten",
@@ -2652,8 +2652,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping R\u00e9sidence Markermeer",
-    "province": "flevoland",
+    "name": "Camping Résidence Markermeer",
+    "province": "noord-holland",
     "lat": 52.63166,
     "lon": 5.00877,
     "slug": "camping-residence-markermeer",
@@ -2661,7 +2661,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Resort Markermeer",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.68646,
     "lon": 5.2518,
     "slug": "camping-resort-markermeer",
@@ -2669,7 +2669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Rovers",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.72328,
     "lon": 5.02251,
     "slug": "camping-rovers",
@@ -2677,7 +2677,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ruimzicht",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.71226,
     "lon": 5.06498,
     "slug": "camping-ruimzicht",
@@ -2685,7 +2685,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Rusthoeve",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.23315,
     "lon": 5.67156,
     "slug": "camping-rusthoeve",
@@ -2693,7 +2693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Scoutcentrum Buitenzorg",
-    "province": "flevoland",
+    "province": "utrecht",
     "lat": 52.21332,
     "lon": 5.26299,
     "slug": "camping-scoutcentrum-buitenzorg",
@@ -2717,7 +2717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Stal Baco",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.42432,
     "lon": 5.0183,
     "slug": "camping-stal-baco",
@@ -2733,7 +2733,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Strand Horst",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.31312,
     "lon": 5.56627,
     "slug": "camping-strand-horst",
@@ -2741,7 +2741,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Strandbad Edam",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.51865,
     "lon": 5.07212,
     "slug": "camping-strandbad-edam",
@@ -2749,7 +2749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Strandparc Nulde",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.27249,
     "lon": 5.53686,
     "slug": "camping-strandparc-nulde",
@@ -2765,15 +2765,15 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Trailerveld",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.3845,
     "lon": 5.71012,
     "slug": "camping-trailerveld",
     "character": "inland"
   },
   {
-    "name": "Camping TuinGoed Bonat\u00e8r",
-    "province": "flevoland",
+    "name": "Camping TuinGoed Bonatèr",
+    "province": "noord-holland",
     "lat": 52.66546,
     "lon": 5.23014,
     "slug": "camping-tuingoed-bonater",
@@ -2781,7 +2781,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Uitdam",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.42668,
     "lon": 5.07409,
     "slug": "camping-uitdam",
@@ -2789,7 +2789,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Valkenhof",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.7269,
     "lon": 5.06504,
     "slug": "camping-valkenhof",
@@ -2797,7 +2797,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Veerhof",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.72804,
     "lon": 5.09643,
     "slug": "camping-veerhof",
@@ -2805,7 +2805,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Voor Anker",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.5944,
     "lon": 5.01921,
     "slug": "camping-voor-anker",
@@ -2813,7 +2813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping VRK",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.38517,
     "lon": 5.01626,
     "slug": "camping-vrk",
@@ -2821,7 +2821,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Vuurkuil",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.34746,
     "lon": 5.70678,
     "slug": "camping-vuurkuil",
@@ -2845,7 +2845,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zeevangshoeve",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.52502,
     "lon": 5.06402,
     "slug": "camping-zeevangshoeve",
@@ -2853,7 +2853,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zwaluwenhof",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.34801,
     "lon": 5.71484,
     "slug": "camping-zwaluwenhof",
@@ -2861,7 +2861,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping/Jachthaven \"de Oude Pol\"",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.39058,
     "lon": 5.72751,
     "slug": "camping-jachthaven-de-oude-pol",
@@ -2869,7 +2869,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "De Kampeertuin",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.65473,
     "lon": 5.15816,
     "slug": "de-kampeertuin",
@@ -2885,7 +2885,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "EuroParcs Vakantiepark Enkhuizer Strand",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.70956,
     "lon": 5.29435,
     "slug": "europarcs-vakantiepark-enkhuizer-strand",
@@ -2901,7 +2901,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerboerderij De Spochthoorn",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.23148,
     "lon": 5.51405,
     "slug": "kampeerboerderij-de-spochthoorn",
@@ -2909,7 +2909,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerboerderij de Zandkamp",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.2934,
     "lon": 5.59207,
     "slug": "kampeerboerderij-de-zandkamp",
@@ -2917,7 +2917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeervereniging Licht & Lucht",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.20762,
     "lon": 5.14338,
     "slug": "kampeervereniging-licht-en-lucht",
@@ -2925,7 +2925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini-Camping Huize Blokland",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.67362,
     "lon": 5.18017,
     "slug": "mini-camping-huize-blokland",
@@ -2933,7 +2933,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Reebok",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.22801,
     "lon": 5.72758,
     "slug": "minicamping-de-reebok",
@@ -2941,7 +2941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "minicamping Gervense Heide",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.21286,
     "lon": 5.57033,
     "slug": "minicamping-gervense-heide",
@@ -2965,7 +2965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Drie",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.26195,
     "lon": 5.67778,
     "slug": "natuurkampeerterrein-drie",
@@ -2973,7 +2973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark De Bosrand",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.25936,
     "lon": 5.71032,
     "slug": "recreatiepark-de-bosrand",
@@ -2981,7 +2981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark De Paalberg",
-    "province": "flevoland",
+    "province": "gelderland",
     "lat": 52.28784,
     "lon": 5.66095,
     "slug": "recreatiepark-de-paalberg",
@@ -2989,7 +2989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Seizoencamping Kampgenot",
-    "province": "flevoland",
+    "province": "noord-holland",
     "lat": 52.28579,
     "lon": 5.22502,
     "slug": "seizoencamping-kampgenot",
@@ -3013,7 +3013,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping Doortenshof",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.83374,
     "lon": 6.38419,
     "slug": "boerderijcamping-doortenshof",
@@ -3029,7 +3029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerencamping 't Hoogje",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.11812,
     "lon": 6.24017,
     "slug": "boerencamping-t-hoogje",
@@ -3061,7 +3061,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperparc Stee in Lhee",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.82846,
     "lon": 6.39001,
     "slug": "camperparc-stee-in-lhee",
@@ -3093,14 +3093,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats 't groentje",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.79156,
     "lon": 4.90036,
     "slug": "camperplaats-t-groentje",
     "character": "coastal"
   },
   {
-    "name": "Camperplaats \u201cNij Beets\u201d",
+    "name": "Camperplaats “Nij Beets”",
     "province": "friesland",
     "lat": 53.07161,
     "lon": 5.96968,
@@ -3116,7 +3116,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camperplaats & Jachthaven Suw\u00e2ld",
+    "name": "Camperplaats & Jachthaven Suwâld",
     "province": "friesland",
     "lat": 53.17118,
     "lon": 5.93343,
@@ -3181,7 +3181,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats de Tulpentuin",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.85619,
     "lon": 5.01034,
     "slug": "camperplaats-de-tulpentuin",
@@ -3252,7 +3252,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camperplaats Hemisfeer \u2013 Nachttuin Westhoek",
+    "name": "Camperplaats Hemisfeer – Nachttuin Westhoek",
     "province": "friesland",
     "lat": 53.27222,
     "lon": 5.55752,
@@ -3276,7 +3276,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camperplaats It T\u00fan H\u00fbs",
+    "name": "Camperplaats It Tún Hûs",
     "province": "friesland",
     "lat": 53.37754,
     "lon": 6.13081,
@@ -3300,7 +3300,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camperplaats jachthaven Earnew\u00e2ld",
+    "name": "Camperplaats jachthaven Earnewâld",
     "province": "friesland",
     "lat": 53.1296,
     "lon": 5.93609,
@@ -3317,14 +3317,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "camperplaats Jachthaven Middenmeer",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.81214,
     "lon": 4.99145,
     "slug": "camperplaats-jachthaven-middenmeer",
     "character": "coastal"
   },
   {
-    "name": "Camperplaats Jachthaven WSV \u201cBergumermeer\u201d",
+    "name": "Camperplaats Jachthaven WSV “Bergumermeer”",
     "province": "friesland",
     "lat": 53.18709,
     "lon": 5.99333,
@@ -3373,7 +3373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Lauwersmeerplezier",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.40545,
     "lon": 6.20022,
     "slug": "camperplaats-lauwersmeerplezier",
@@ -3413,7 +3413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Marnic Hoeve",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.78802,
     "lon": 4.91951,
     "slug": "camperplaats-marnic-hoeve",
@@ -3445,7 +3445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Oostkade - Den Oever",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.93434,
     "lon": 5.04026,
     "slug": "camperplaats-oostkade-den-oever",
@@ -3485,7 +3485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Regatta Centrum Medemblik",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.76918,
     "lon": 5.11677,
     "slug": "camperplaats-regatta-centrum-medemblik",
@@ -3556,8 +3556,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camperplaatsen \u200c Pekelharinghaven - Medemblik",
-    "province": "friesland",
+    "name": "Camperplaatsen ‌ Pekelharinghaven - Medemblik",
+    "province": "noord-holland",
     "lat": 52.77161,
     "lon": 5.11354,
     "slug": "camperplaatsen-pekelharinghaven-medemblik",
@@ -3581,7 +3581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Boerenland",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.86325,
     "lon": 6.26448,
     "slug": "camping-t-boerenland",
@@ -3589,7 +3589,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Eeser Heideveld",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.82578,
     "lon": 6.09152,
     "slug": "camping-t-eeser-heideveld",
@@ -3605,7 +3605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Holtingerzand",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.79636,
     "lon": 6.25025,
     "slug": "camping-t-holtingerzand",
@@ -3629,7 +3629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Kappie",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81417,
     "lon": 6.10594,
     "slug": "camping-t-kappie",
@@ -3637,7 +3637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Kolhornerdiep",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.79323,
     "lon": 4.90873,
     "slug": "camping-t-kolhornerdiep",
@@ -3653,14 +3653,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Oude Willemsveldt",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.89762,
     "lon": 6.31172,
     "slug": "camping-t-oude-willemsveldt",
     "character": "coastal"
   },
   {
-    "name": "Camping 't S\u00e9leantsje",
+    "name": "Camping 't Séleantsje",
     "province": "friesland",
     "lat": 52.90395,
     "lon": 5.39681,
@@ -3677,7 +3677,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Strandheem",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.15299,
     "lon": 6.18732,
     "slug": "camping-t-strandheem",
@@ -3685,7 +3685,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Veentje",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.82283,
     "lon": 6.07511,
     "slug": "camping-t-veentje",
@@ -3708,8 +3708,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping \u201cOnder\u201d de Heerenbrug",
-    "province": "friesland",
+    "name": "Camping “Onder” de Heerenbrug",
+    "province": "overijssel",
     "lat": 52.77152,
     "lon": 6.0854,
     "slug": "camping-onder-de-heerenbrug",
@@ -3725,7 +3725,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Adelhof",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.85066,
     "lon": 6.20304,
     "slug": "camping-adelhof",
@@ -3733,7 +3733,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Alberthoeve",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.91312,
     "lon": 6.27965,
     "slug": "camping-alberthoeve",
@@ -3749,7 +3749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping An 't Pad",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81753,
     "lon": 6.07779,
     "slug": "camping-an-t-pad",
@@ -3757,7 +3757,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping An't Waeter",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.76785,
     "lon": 5.98848,
     "slug": "camping-an-t-waeter",
@@ -3789,7 +3789,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bij het Ven",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.87847,
     "lon": 6.1886,
     "slug": "camping-bij-het-ven",
@@ -3797,7 +3797,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bij Sijm",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.80518,
     "lon": 5.02035,
     "slug": "camping-bij-sijm",
@@ -3829,7 +3829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boerdam",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.79963,
     "lon": 6.29019,
     "slug": "camping-boerdam",
@@ -3853,7 +3853,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boerengroen",
-    "province": "friesland",
+    "province": "flevoland",
     "lat": 52.81551,
     "lon": 5.6669,
     "slug": "camping-boerengroen",
@@ -3884,7 +3884,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping Br\u00eageham",
+    "name": "Camping Brêgeham",
     "province": "friesland",
     "lat": 53.10668,
     "lon": 5.96269,
@@ -3917,7 +3917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Catharina Hoeve",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.88984,
     "lon": 5.04701,
     "slug": "camping-catharina-hoeve",
@@ -3941,7 +3941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping d'Olde Kamp",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.78961,
     "lon": 6.33946,
     "slug": "camping-d-olde-kamp",
@@ -3981,7 +3981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Berghoeve",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.76139,
     "lon": 6.38479,
     "slug": "camping-de-berghoeve",
@@ -3989,7 +3989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Blauwe Haan",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.8045,
     "lon": 6.27392,
     "slug": "camping-de-blauwe-haan",
@@ -3997,7 +3997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Blauwe Lantaarn",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.91482,
     "lon": 6.26545,
     "slug": "camping-de-blauwe-lantaarn",
@@ -4029,7 +4029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Boskamp",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.81831,
     "lon": 6.19116,
     "slug": "camping-de-boskamp",
@@ -4045,7 +4045,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Bosrand",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.8255,
     "lon": 6.08429,
     "slug": "camping-de-bosrand-way-376985040",
@@ -4053,7 +4053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Bosrand",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.81943,
     "lon": 6.3727,
     "slug": "camping-de-bosrand-way-957036926",
@@ -4093,7 +4093,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Drentse Patrijs",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.77264,
     "lon": 6.26137,
     "slug": "camping-de-drentse-patrijs",
@@ -4101,7 +4101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Eikenhof",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81544,
     "lon": 5.9971,
     "slug": "camping-de-eikenhof",
@@ -4116,7 +4116,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping De Flintert\u00fan",
+    "name": "Camping De Flintertún",
     "province": "friesland",
     "lat": 53.21568,
     "lon": 6.05403,
@@ -4141,7 +4141,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Goede Weide",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.89907,
     "lon": 6.30679,
     "slug": "camping-de-goede-weide",
@@ -4149,14 +4149,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Gouden Ribben",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.7837,
     "lon": 5.87627,
     "slug": "camping-de-gouden-ribben",
     "character": "coastal"
   },
   {
-    "name": "Camping de Greidp\u00f4lle",
+    "name": "Camping de Greidpôlle",
     "province": "friesland",
     "lat": 53.28784,
     "lon": 6.08765,
@@ -4164,7 +4164,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping De Greidp\u00f4lle",
+    "name": "Camping De Greidpôlle",
     "province": "friesland",
     "lat": 53.28746,
     "lon": 6.08918,
@@ -4197,7 +4197,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Haarsluis",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.86867,
     "lon": 6.36459,
     "slug": "camping-de-haarsluis",
@@ -4221,7 +4221,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Hertenweide",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.91666,
     "lon": 6.24861,
     "slug": "camping-de-hertenweide",
@@ -4261,7 +4261,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De klaverkampen",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.76191,
     "lon": 6.22733,
     "slug": "camping-de-klaverkampen",
@@ -4325,7 +4325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Landerije",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.80247,
     "lon": 6.03251,
     "slug": "camping-de-landerije",
@@ -4381,7 +4381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Meppelerweg",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.77861,
     "lon": 6.15082,
     "slug": "camping-de-meppelerweg",
@@ -4389,7 +4389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Moesberg",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.84316,
     "lon": 6.17394,
     "slug": "camping-de-moesberg",
@@ -4404,8 +4404,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping De Olde B\u00e2rgen",
-    "province": "friesland",
+    "name": "Camping De Olde Bârgen",
+    "province": "drenthe",
     "lat": 52.82092,
     "lon": 6.39149,
     "slug": "camping-de-olde-bargen",
@@ -4437,7 +4437,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Poel",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.16451,
     "lon": 6.18707,
     "slug": "camping-de-poel",
@@ -4452,8 +4452,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping de Ree\u00ebnwissel",
-    "province": "friesland",
+    "name": "Camping de Reeënwissel",
+    "province": "drenthe",
     "lat": 52.9033,
     "lon": 6.37741,
     "slug": "camping-de-reeenwissel",
@@ -4493,7 +4493,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Slamme",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.8155,
     "lon": 5.95402,
     "slug": "camping-de-slamme",
@@ -4509,7 +4509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Snippenwei",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.88902,
     "lon": 5.07151,
     "slug": "camping-de-snippenwei",
@@ -4517,7 +4517,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Stille Verkwikking",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.80471,
     "lon": 5.90824,
     "slug": "camping-de-stille-verkwikking",
@@ -4557,7 +4557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Thijenkaampe",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.79067,
     "lon": 6.06947,
     "slug": "camping-de-thijenkaampe",
@@ -4581,7 +4581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Turftente",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.77933,
     "lon": 5.98223,
     "slug": "camping-de-turftente",
@@ -4589,14 +4589,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de twee provincien",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.92737,
     "lon": 6.25907,
     "slug": "camping-de-twee-provincien",
     "character": "coastal"
   },
   {
-    "name": "Camping De Twee Provinci\u00ebn",
+    "name": "Camping De Twee Provinciën",
     "province": "friesland",
     "lat": 53.26662,
     "lon": 6.24297,
@@ -4653,7 +4653,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Waterbuffelfarm",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81614,
     "lon": 5.97467,
     "slug": "camping-de-waterbuffelfarm",
@@ -4661,7 +4661,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Watermolen",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.16549,
     "lon": 6.2234,
     "slug": "camping-de-watermolen",
@@ -4717,7 +4717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Wielewaal",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.8143,
     "lon": 6.12918,
     "slug": "camping-de-wielewaal",
@@ -4733,7 +4733,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wilgenhof",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.75432,
     "lon": 5.99477,
     "slug": "camping-de-wilgenhof",
@@ -4749,7 +4749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wiltzangh",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.78385,
     "lon": 6.36851,
     "slug": "camping-de-wiltzangh",
@@ -4805,7 +4805,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Diever",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.86541,
     "lon": 6.3234,
     "slug": "camping-diever",
@@ -4813,7 +4813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Dijk & Meer",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.75139,
     "lon": 5.19486,
     "slug": "camping-dijk-en-meer",
@@ -4829,7 +4829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Drift",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.82709,
     "lon": 6.3684,
     "slug": "camping-drift",
@@ -4877,7 +4877,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Eigen Wijze",
-    "province": "friesland",
+    "province": "flevoland",
     "lat": 52.78754,
     "lon": 5.77329,
     "slug": "camping-eigen-wijze",
@@ -4909,7 +4909,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping EuroParcs Ruinen",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.77465,
     "lon": 6.36852,
     "slug": "camping-europarcs-ruinen",
@@ -4932,7 +4932,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping F\u00fbgelfrij",
+    "name": "Camping Fûgelfrij",
     "province": "friesland",
     "lat": 53.07801,
     "lon": 5.5251,
@@ -4957,7 +4957,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Haarsterveld",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.12078,
     "lon": 6.20978,
     "slug": "camping-haarsterveld",
@@ -5021,7 +5021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping het Noordenveld",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.85947,
     "lon": 6.25612,
     "slug": "camping-het-noordenveld",
@@ -5077,7 +5077,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hoeve aan den weg",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.89005,
     "lon": 6.31468,
     "slug": "camping-hoeve-aan-den-weg",
@@ -5085,7 +5085,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hoeve Erica",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.84658,
     "lon": 6.19413,
     "slug": "camping-hoeve-erica",
@@ -5093,7 +5093,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hoeve Montigny",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.76176,
     "lon": 6.08037,
     "slug": "camping-hoeve-montigny",
@@ -5101,14 +5101,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Huis in 't Veld",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81874,
     "lon": 5.99375,
     "slug": "camping-huis-in-t-veld",
     "character": "coastal"
   },
   {
-    "name": "Camping H\u00fasternoard",
+    "name": "Camping Hústernoard",
     "province": "friesland",
     "lat": 53.27752,
     "lon": 6.10683,
@@ -5148,7 +5148,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping it Dreaml\u00e2n",
+    "name": "Camping it Dreamlân",
     "province": "friesland",
     "lat": 53.30198,
     "lon": 6.16278,
@@ -5156,7 +5156,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping It Hellingsl\u00e2n",
+    "name": "Camping It Hellingslân",
     "province": "friesland",
     "lat": 53.15562,
     "lon": 5.84516,
@@ -5229,7 +5229,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Jelly's Hoeve",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.76832,
     "lon": 6.25135,
     "slug": "camping-jelly-s-hoeve",
@@ -5237,7 +5237,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Jiltdijksheide",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.15344,
     "lon": 6.21329,
     "slug": "camping-jiltdijksheide",
@@ -5253,7 +5253,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Johanna's Bos",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.87141,
     "lon": 4.9001,
     "slug": "camping-johanna-s-bos",
@@ -5285,7 +5285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kemperhoeve",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.78945,
     "lon": 6.01697,
     "slug": "camping-kemperhoeve",
@@ -5301,7 +5301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Krolsbergen",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81577,
     "lon": 6.00654,
     "slug": "camping-krolsbergen",
@@ -5316,7 +5316,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping L\u00e2n & Mar",
+    "name": "Camping Lân & Mar",
     "province": "friesland",
     "lat": 52.96425,
     "lon": 5.58584,
@@ -5325,7 +5325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Land uit Zee",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.85791,
     "lon": 5.02482,
     "slug": "camping-land-uit-zee",
@@ -5341,7 +5341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Landgoed 't Wildryck",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.86504,
     "lon": 6.35141,
     "slug": "camping-landgoed-t-wildryck",
@@ -5389,7 +5389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lodge 61",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.75805,
     "lon": 5.10923,
     "slug": "camping-lodge-61",
@@ -5404,7 +5404,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping Lyts mar Sm\u00fbk",
+    "name": "Camping Lyts mar Smûk",
     "province": "friesland",
     "lat": 52.99241,
     "lon": 5.86529,
@@ -5469,7 +5469,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Midzomer",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.86666,
     "lon": 6.29871,
     "slug": "camping-midzomer",
@@ -5485,7 +5485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molecaten Park Het Landschap",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.92266,
     "lon": 6.26959,
     "slug": "camping-molecaten-park-het-landschap",
@@ -5500,7 +5500,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping M\u00fbnehiem",
+    "name": "Camping Mûnehiem",
     "province": "friesland",
     "lat": 53.29663,
     "lon": 5.8822,
@@ -5533,7 +5533,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Nieuw Leven",
-    "province": "friesland",
+    "province": "flevoland",
     "lat": 52.82176,
     "lon": 5.72509,
     "slug": "camping-nieuw-leven",
@@ -5557,7 +5557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC De Hertenweide",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.91604,
     "lon": 6.24728,
     "slug": "camping-ntkc-de-hertenweide",
@@ -5597,7 +5597,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oldendiever",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.84835,
     "lon": 6.3128,
     "slug": "camping-oldendiever",
@@ -5605,7 +5605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Onder De Dam",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.84251,
     "lon": 4.95277,
     "slug": "camping-onder-de-dam",
@@ -5613,7 +5613,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Op Het Erf",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.85613,
     "lon": 6.28827,
     "slug": "camping-op-het-erf",
@@ -5621,7 +5621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Padjelanta",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.8609,
     "lon": 6.192,
     "slug": "camping-padjelanta",
@@ -5637,7 +5637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Park Drentheland",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.92487,
     "lon": 6.25261,
     "slug": "camping-park-drentheland",
@@ -5693,7 +5693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping RCN De Noordster",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.81438,
     "lon": 6.37788,
     "slug": "camping-rcn-de-noordster",
@@ -5725,14 +5725,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Recreatiecentrum De Kluft",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.80645,
     "lon": 5.92773,
     "slug": "camping-recreatiecentrum-de-kluft",
     "character": "coastal"
   },
   {
-    "name": "Camping Recreatiecentrum De W\u00e2ldsang",
+    "name": "Camping Recreatiecentrum De Wâldsang",
     "province": "friesland",
     "lat": 53.08391,
     "lon": 6.24647,
@@ -5741,7 +5741,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Recreatiecentrum Hesselte",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.77855,
     "lon": 6.24664,
     "slug": "camping-recreatiecentrum-hesselte",
@@ -5749,14 +5749,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Residence de Eese",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81344,
     "lon": 6.11981,
     "slug": "camping-residence-de-eese",
     "character": "coastal"
   },
   {
-    "name": "Camping R\u00east mei Romte",
+    "name": "Camping Rêst mei Romte",
     "province": "friesland",
     "lat": 53.15096,
     "lon": 6.13015,
@@ -5813,7 +5813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Schotererf",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81084,
     "lon": 5.806,
     "slug": "camping-schotererf",
@@ -5837,7 +5837,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Scouting Labelterrein Dwingeloo",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.81571,
     "lon": 6.36629,
     "slug": "camping-scouting-labelterrein-dwingeloo",
@@ -5885,7 +5885,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Steenwijkerkamp",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.77918,
     "lon": 6.14393,
     "slug": "camping-steenwijkerkamp",
@@ -5908,7 +5908,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping S\u00f9dermeer",
+    "name": "Camping Sùdermeer",
     "province": "friesland",
     "lat": 52.87771,
     "lon": 5.36957,
@@ -5916,7 +5916,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping Suders\u00e9",
+    "name": "Camping Sudersé",
     "province": "friesland",
     "lat": 52.97255,
     "lon": 5.42641,
@@ -5965,7 +5965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Terra Incognito",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.89479,
     "lon": 4.9138,
     "slug": "camping-terra-incognito",
@@ -5997,7 +5997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Torentjeshoek",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.81824,
     "lon": 6.36002,
     "slug": "camping-torentjeshoek",
@@ -6029,7 +6029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Uelenspieghel",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.80289,
     "lon": 6.28523,
     "slug": "camping-uelenspieghel",
@@ -6077,7 +6077,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Waddenzee",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.88835,
     "lon": 4.921,
     "slug": "camping-waddenzee",
@@ -6109,7 +6109,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Wijemaheerd",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.1615,
     "lon": 6.19863,
     "slug": "camping-wijemaheerd",
@@ -6157,7 +6157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zonnekamp",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.91424,
     "lon": 6.24432,
     "slug": "camping-zonnekamp",
@@ -6293,7 +6293,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini-Camping 't Neuvertje",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.77838,
     "lon": 6.33656,
     "slug": "mini-camping-t-neuvertje",
@@ -6324,7 +6324,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Minicamping De \u00c2lde Stjelp",
+    "name": "Minicamping De Âlde Stjelp",
     "province": "friesland",
     "lat": 53.1212,
     "lon": 5.84638,
@@ -6332,7 +6332,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Minicamping De Beamw\u00e2l",
+    "name": "Minicamping De Beamwâl",
     "province": "friesland",
     "lat": 53.09208,
     "lon": 6.2133,
@@ -6357,7 +6357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Houtwal",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81723,
     "lon": 6.01552,
     "slug": "minicamping-de-houtwal",
@@ -6413,7 +6413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Watertoren",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.80017,
     "lon": 6.08147,
     "slug": "minicamping-de-watertoren",
@@ -6453,7 +6453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Het Doevehuis",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.77608,
     "lon": 5.95748,
     "slug": "minicamping-het-doevehuis",
@@ -6525,7 +6525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minimacamping Polemonium",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.17044,
     "lon": 6.23033,
     "slug": "minimacamping-polemonium",
@@ -6541,7 +6541,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "MTB Camping Fiederels",
-    "province": "friesland",
+    "province": "flevoland",
     "lat": 52.76504,
     "lon": 5.74805,
     "slug": "mtb-camping-fiederels",
@@ -6549,7 +6549,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurcamping De Hoogte",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.82811,
     "lon": 6.12379,
     "slug": "natuurcamping-de-hoogte",
@@ -6581,7 +6581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Groene Hen",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.80247,
     "lon": 6.27339,
     "slug": "natuurkampeerterrein-de-groene-hen",
@@ -6604,7 +6604,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Natuurkampeerterrein De Reidpl\u00fbm",
+    "name": "Natuurkampeerterrein De Reidplûm",
     "province": "friesland",
     "lat": 53.13791,
     "lon": 5.93699,
@@ -6613,7 +6613,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Veenkuil",
-    "province": "friesland",
+    "province": "flevoland",
     "lat": 52.78832,
     "lon": 5.79852,
     "slug": "natuurkampeerterrein-de-veenkuil",
@@ -6621,7 +6621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Woldberg",
-    "province": "friesland",
+    "province": "overijssel",
     "lat": 52.81284,
     "lon": 6.10311,
     "slug": "natuurkampeerterrein-de-woldberg",
@@ -6629,7 +6629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Het Bos Roept",
-    "province": "friesland",
+    "province": "noord-holland",
     "lat": 52.89922,
     "lon": 5.01964,
     "slug": "natuurkampeerterrein-het-bos-roept",
@@ -6637,7 +6637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Het Hunehuis",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.79244,
     "lon": 6.22697,
     "slug": "natuurkampeerterrein-het-hunehuis",
@@ -6677,7 +6677,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Oude Willem",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.88786,
     "lon": 6.31833,
     "slug": "natuurkampeerterrein-oude-willem",
@@ -6709,7 +6709,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Pure Camping Happy Glamping",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.82623,
     "lon": 6.31753,
     "slug": "pure-camping-happy-glamping",
@@ -6725,7 +6725,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Siblu Camping Lauwersoog",
-    "province": "friesland",
+    "province": "groningen",
     "lat": 53.40385,
     "lon": 6.21159,
     "slug": "siblu-camping-lauwersoog",
@@ -6773,7 +6773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark Drentse Weelde",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.91161,
     "lon": 6.38811,
     "slug": "vakantiepark-drentse-weelde",
@@ -6789,7 +6789,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark Mooi Oavelt",
-    "province": "friesland",
+    "province": "drenthe",
     "lat": 52.78118,
     "lon": 6.2265,
     "slug": "vakantiepark-mooi-oavelt",
@@ -6821,7 +6821,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping de Beek",
-    "province": "gelderland",
+    "province": "overijssel",
     "lat": 52.1353,
     "lon": 6.80741,
     "slug": "boerderijcamping-de-beek",
@@ -6853,7 +6853,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping Hofstede de Twaalfgaarden",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.15332,
     "lon": 5.15086,
     "slug": "boerderijcamping-hofstede-de-twaalfgaarden",
@@ -6869,7 +6869,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerencamping de Bossewaard",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 51.99572,
     "lon": 5.29716,
     "slug": "boerencamping-de-bossewaard",
@@ -6941,7 +6941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats \"De Bronkhorst\"",
-    "province": "gelderland",
+    "province": "noord-brabant",
     "lat": 51.76128,
     "lon": 5.71269,
     "slug": "camperplaats-de-bronkhorst",
@@ -6949,7 +6949,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Aan het Dorp",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.01748,
     "lon": 5.24292,
     "slug": "camperplaats-aan-het-dorp",
@@ -7061,7 +7061,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats de Kersenpit",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.03464,
     "lon": 5.24062,
     "slug": "camperplaats-de-kersenpit",
@@ -7301,7 +7301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaatsen Eemhaven",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.16207,
     "lon": 5.37838,
     "slug": "camperplaatsen-eemhaven",
@@ -7309,7 +7309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaatsen Insteekhaven",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.16781,
     "lon": 5.36449,
     "slug": "camperplaatsen-insteekhaven",
@@ -7341,7 +7341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Boerenerf",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.08085,
     "lon": 5.38457,
     "slug": "camping-t-boerenerf",
@@ -7349,7 +7349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Boomgaardje",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 51.9803,
     "lon": 5.29937,
     "slug": "camping-t-boomgaardje",
@@ -7452,7 +7452,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping 't Meyb\u00f6ske",
+    "name": "Camping 't Meyböske",
     "province": "gelderland",
     "lat": 51.90959,
     "lon": 6.41534,
@@ -7461,14 +7461,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Monnickenbosch",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.15109,
     "lon": 5.33102,
     "slug": "camping-t-monnickenbosch",
     "character": "inland"
   },
   {
-    "name": "Camping 'T Olde Ba\u00f4ten",
+    "name": "Camping 'T Olde Baôten",
     "province": "gelderland",
     "lat": 51.94384,
     "lon": 6.59563,
@@ -7597,7 +7597,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Allurepark De Krakeling",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.09326,
     "lon": 5.28508,
     "slug": "camping-allurepark-de-krakeling",
@@ -7605,7 +7605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Allurepark de Zeven Linden",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.19676,
     "lon": 5.24515,
     "slug": "camping-allurepark-de-zeven-linden",
@@ -7645,7 +7645,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bergsehaak",
-    "province": "gelderland",
+    "province": "overijssel",
     "lat": 52.13966,
     "lon": 6.72516,
     "slug": "camping-bergsehaak",
@@ -7709,7 +7709,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bos Park Bilthoven",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.13033,
     "lon": 5.2241,
     "slug": "camping-bos-park-bilthoven",
@@ -7717,7 +7717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boschlust",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.03852,
     "lon": 5.30141,
     "slug": "camping-boschlust",
@@ -7781,7 +7781,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Caravanpark Prinsenburg",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.16145,
     "lon": 5.23712,
     "slug": "camping-caravanpark-prinsenburg",
@@ -7813,7 +7813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Darthuizen",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.01131,
     "lon": 5.38554,
     "slug": "camping-darthuizen",
@@ -7893,14 +7893,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De biologische boer Tom Verkerk",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.01018,
     "lon": 5.33027,
     "slug": "camping-de-biologische-boer-tom-verkerk",
     "character": "inland"
   },
   {
-    "name": "Camping De Bl\u00f6kke",
+    "name": "Camping De Blökke",
     "province": "gelderland",
     "lat": 51.88273,
     "lon": 6.50941,
@@ -7941,7 +7941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Boomgaard",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.05709,
     "lon": 5.20007,
     "slug": "camping-de-boomgaard-way-390194245",
@@ -7997,7 +7997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Boterbloem",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.00136,
     "lon": 5.42777,
     "slug": "camping-de-boterbloem",
@@ -8117,7 +8117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Grebbelinie",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.08405,
     "lon": 5.55348,
     "slug": "camping-de-grebbelinie",
@@ -8189,7 +8189,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Heihoek",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.02527,
     "lon": 5.38214,
     "slug": "camping-de-heihoek",
@@ -8301,7 +8301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Kleine Weide",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.06257,
     "lon": 5.51914,
     "slug": "camping-de-kleine-weide",
@@ -8333,7 +8333,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Leughte Resort Renswoude",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.10227,
     "lon": 5.5371,
     "slug": "camping-de-leughte-resort-renswoude",
@@ -8397,7 +8397,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Meene",
-    "province": "gelderland",
+    "province": "overijssel",
     "lat": 52.13798,
     "lon": 6.8576,
     "slug": "camping-de-meene",
@@ -8428,7 +8428,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping De M\u00f6llenhook",
+    "name": "Camping De Möllenhook",
     "province": "gelderland",
     "lat": 51.92302,
     "lon": 6.51686,
@@ -8533,7 +8533,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De ReCreatie",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.11383,
     "lon": 5.36533,
     "slug": "camping-de-recreatie",
@@ -8541,7 +8541,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Reiger",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.05258,
     "lon": 5.50957,
     "slug": "camping-de-reiger",
@@ -8693,7 +8693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Vliert",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.0478,
     "lon": 5.18823,
     "slug": "camping-de-vliert",
@@ -8805,7 +8805,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Duynparc Soest",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.15819,
     "lon": 5.33519,
     "slug": "camping-duynparc-soest",
@@ -8813,7 +8813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Eijckelenburg",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.07356,
     "lon": 5.38968,
     "slug": "camping-eijckelenburg",
@@ -8885,7 +8885,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping fort Everdingen",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 51.9616,
     "lon": 5.17395,
     "slug": "camping-fort-everdingen",
@@ -9013,7 +9013,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Grote Bos",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.05528,
     "lon": 5.3177,
     "slug": "camping-het-grote-bos",
@@ -9037,7 +9037,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Leersumse Veld",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.04151,
     "lon": 5.44849,
     "slug": "camping-het-leersumse-veld",
@@ -9309,7 +9309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Larik's Hoeve",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.1128,
     "lon": 5.44191,
     "slug": "camping-larik-s-hoeve",
@@ -9349,7 +9349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Maaspark De Lithse Ham",
-    "province": "gelderland",
+    "province": "noord-brabant",
     "lat": 51.81022,
     "lon": 5.41311,
     "slug": "camping-maaspark-de-lithse-ham",
@@ -9357,7 +9357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Maaspark recreatie",
-    "province": "gelderland",
+    "province": "noord-brabant",
     "lat": 51.81659,
     "lon": 5.61917,
     "slug": "camping-maaspark-recreatie",
@@ -9381,7 +9381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Meck",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.05154,
     "lon": 5.41965,
     "slug": "camping-meck",
@@ -9389,7 +9389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molecaten Park Landgoed Ginkelduin",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.03037,
     "lon": 5.46027,
     "slug": "camping-molecaten-park-landgoed-ginkelduin",
@@ -9405,7 +9405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Naturistenterrein De Birk",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.15434,
     "lon": 5.33005,
     "slug": "camping-naturistenterrein-de-birk",
@@ -9453,7 +9453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC Austerlitz",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.07904,
     "lon": 5.32141,
     "slug": "camping-ntkc-austerlitz",
@@ -9461,7 +9461,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC Den Treek",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.11517,
     "lon": 5.37806,
     "slug": "camping-ntkc-den-treek",
@@ -9509,7 +9509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Op de Heuvelrug",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.03788,
     "lon": 5.47286,
     "slug": "camping-op-de-heuvelrug",
@@ -9541,7 +9541,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oud Meijenhorst",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.05579,
     "lon": 5.42543,
     "slug": "camping-oud-meijenhorst",
@@ -9581,7 +9581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping PBC Austerlitz",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.09301,
     "lon": 5.30289,
     "slug": "camping-pbc-austerlitz",
@@ -9605,7 +9605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Prinsenhof",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.03872,
     "lon": 5.22971,
     "slug": "camping-prinsenhof",
@@ -9652,7 +9652,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Ree\u00ebndal",
+    "name": "Camping Reeëndal",
     "province": "gelderland",
     "lat": 52.1193,
     "lon": 6.00815,
@@ -9741,7 +9741,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Scholtenhagen",
-    "province": "gelderland",
+    "province": "overijssel",
     "lat": 52.14414,
     "lon": 6.72274,
     "slug": "camping-scholtenhagen",
@@ -9829,7 +9829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Strosteeg",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.03392,
     "lon": 5.26565,
     "slug": "camping-strosteeg",
@@ -9885,7 +9885,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Vakantiecentrum De Halm",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.0544,
     "lon": 5.37771,
     "slug": "camping-vakantiecentrum-de-halm",
@@ -9917,7 +9917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Veldscholte",
-    "province": "gelderland",
+    "province": "overijssel",
     "lat": 52.14972,
     "lon": 6.8246,
     "slug": "camping-veldscholte",
@@ -10021,7 +10021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zonnehoek",
-    "province": "gelderland",
+    "province": "noord-holland",
     "lat": 52.19402,
     "lon": 5.15599,
     "slug": "camping-zonnehoek",
@@ -10052,7 +10052,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "De Br\u00f6mmels Camping en Geitenkaasboerderij",
+    "name": "De Brömmels Camping en Geitenkaasboerderij",
     "province": "gelderland",
     "lat": 51.92158,
     "lon": 6.71923,
@@ -10117,7 +10117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerterrein ATKV",
-    "province": "gelderland",
+    "province": "noord-holland",
     "lat": 52.19371,
     "lon": 5.15818,
     "slug": "kampeerterrein-atkv",
@@ -10309,7 +10309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Groeperkade",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.05685,
     "lon": 5.50717,
     "slug": "minicamping-groeperkade",
@@ -10453,7 +10453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurcamping Fazantenhof",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.178,
     "lon": 5.20009,
     "slug": "natuurcamping-fazantenhof",
@@ -10461,7 +10461,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurcamping Fort WKU",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 51.986,
     "lon": 5.15978,
     "slug": "natuurcamping-fort-wku",
@@ -10517,7 +10517,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Maasakker",
-    "province": "gelderland",
+    "province": "noord-brabant",
     "lat": 51.82278,
     "lon": 5.57537,
     "slug": "natuurkampeerterrein-de-maasakker",
@@ -10573,14 +10573,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Klein Groenbergen",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.00669,
     "lon": 5.42478,
     "slug": "natuurkampeerterrein-klein-groenbergen",
     "character": "inland"
   },
   {
-    "name": "Natuurkampeerterrein Lutje K\u00f6ssink",
+    "name": "Natuurkampeerterrein Lutje Kössink",
     "province": "gelderland",
     "lat": 51.98924,
     "lon": 6.77939,
@@ -10645,7 +10645,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark Dijnselburg",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.10723,
     "lon": 5.23964,
     "slug": "recreatiepark-dijnselburg",
@@ -10677,7 +10677,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Scoutingkampeerterrein 't Herrendal",
-    "province": "gelderland",
+    "province": "limburg",
     "lat": 51.7538,
     "lon": 5.89462,
     "slug": "scoutingkampeerterrein-t-herrendal",
@@ -10701,7 +10701,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark Bonte Vlucht",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.0279,
     "lon": 5.38495,
     "slug": "vakantiepark-bonte-vlucht",
@@ -10717,7 +10717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark De Heigraaf",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.07773,
     "lon": 5.38902,
     "slug": "vakantiepark-de-heigraaf",
@@ -10733,7 +10733,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark De Maarnse Berg",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.06277,
     "lon": 5.33345,
     "slug": "vakantiepark-de-maarnse-berg",
@@ -10773,7 +10773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark Herperduin",
-    "province": "gelderland",
+    "province": "noord-brabant",
     "lat": 51.76246,
     "lon": 5.624,
     "slug": "vakantiepark-herperduin",
@@ -10821,7 +10821,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Watersportcamping 't Loo",
-    "province": "gelderland",
+    "province": "noord-brabant",
     "lat": 51.75111,
     "lon": 5.82867,
     "slug": "watersportcamping-t-loo",
@@ -10837,7 +10837,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Zorgcamping De Ruif",
-    "province": "gelderland",
+    "province": "utrecht",
     "lat": 52.15631,
     "lon": 5.44221,
     "slug": "zorgcamping-de-ruif",
@@ -10981,7 +10981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Norgerberg",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07393,
     "lon": 6.44729,
     "slug": "camperplaats-norgerberg",
@@ -11117,7 +11117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Annerveenschekanaal",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07482,
     "lon": 6.80557,
     "slug": "camping-annerveenschekanaal",
@@ -11157,15 +11157,15 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boschlust",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.05324,
     "lon": 6.44565,
     "slug": "camping-boschlust",
     "character": "coastal"
   },
   {
-    "name": "Camping Bospark Langelo\u00ebrduinen",
-    "province": "groningen",
+    "name": "Camping Bospark Langeloërduinen",
+    "province": "drenthe",
     "lat": 53.07395,
     "lon": 6.45818,
     "slug": "camping-bospark-langeloerduinen",
@@ -11197,7 +11197,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Cnossen Leekstermeer",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.177,
     "lon": 6.41949,
     "slug": "camping-cnossen-leekstermeer",
@@ -11244,8 +11244,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping De Drie Provinci\u00ebn",
-    "province": "groningen",
+    "name": "Camping De Drie Provinciën",
+    "province": "drenthe",
     "lat": 53.08616,
     "lon": 6.30992,
     "slug": "camping-de-drie-provincien",
@@ -11253,7 +11253,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Eswal",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.0825,
     "lon": 6.56188,
     "slug": "camping-de-eswal",
@@ -11269,7 +11269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Groene Valk",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07256,
     "lon": 6.64508,
     "slug": "camping-de-groene-valk",
@@ -11285,7 +11285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Holbargen",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.15367,
     "lon": 6.41235,
     "slug": "camping-de-holbargen",
@@ -11301,7 +11301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hoppenhof",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.14533,
     "lon": 6.48511,
     "slug": "camping-de-hoppenhof",
@@ -11381,7 +11381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Norgerberg",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07747,
     "lon": 6.44592,
     "slug": "camping-de-norgerberg",
@@ -11405,7 +11405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Timp",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.09724,
     "lon": 6.66085,
     "slug": "camping-de-timp",
@@ -11429,15 +11429,15 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vledders",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07849,
     "lon": 6.66329,
     "slug": "camping-de-vledders",
     "character": "coastal"
   },
   {
-    "name": "Camping De W\u00e2ldrane",
-    "province": "groningen",
+    "name": "Camping De Wâldrane",
+    "province": "friesland",
     "lat": 53.09899,
     "lon": 6.27423,
     "slug": "camping-de-waldrane",
@@ -11453,7 +11453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Dorado",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.12404,
     "lon": 6.4271,
     "slug": "camping-dorado",
@@ -11493,7 +11493,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Evensterk",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.10059,
     "lon": 6.36848,
     "slug": "camping-evensterk",
@@ -11501,7 +11501,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Fraai",
-    "province": "groningen",
+    "province": "friesland",
     "lat": 53.06717,
     "lon": 6.32302,
     "slug": "camping-fraai",
@@ -11525,7 +11525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Centrum Norg",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.06704,
     "lon": 6.45577,
     "slug": "camping-het-centrum-norg",
@@ -11565,7 +11565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hunze Bulten",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.06442,
     "lon": 6.75741,
     "slug": "camping-hunze-bulten",
@@ -11573,7 +11573,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping It Kroese Beamke",
-    "province": "groningen",
+    "province": "friesland",
     "lat": 53.07842,
     "lon": 6.28164,
     "slug": "camping-it-kroese-beamke",
@@ -11685,7 +11685,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molecaten Park 't Hout",
-    "province": "groningen",
+    "province": "friesland",
     "lat": 53.07663,
     "lon": 6.25376,
     "slug": "camping-molecaten-park-t-hout",
@@ -11725,7 +11725,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ommelanden",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.15371,
     "lon": 6.39979,
     "slug": "camping-ommelanden",
@@ -11741,7 +11741,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping op Struun",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.11389,
     "lon": 6.40484,
     "slug": "camping-op-struun",
@@ -11749,7 +11749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Op1",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.08037,
     "lon": 6.33519,
     "slug": "camping-op1",
@@ -11765,7 +11765,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ot en Sien",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.13286,
     "lon": 6.43426,
     "slug": "camping-ot-en-sien",
@@ -11781,7 +11781,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Pool",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.1943,
     "lon": 6.4486,
     "slug": "camping-pool",
@@ -11813,7 +11813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ronostrand",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.09841,
     "lon": 6.37355,
     "slug": "camping-ronostrand",
@@ -11821,7 +11821,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Scheepstra",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.1573,
     "lon": 6.46003,
     "slug": "camping-scheepstra",
@@ -11845,7 +11845,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Tienelsheem",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.09893,
     "lon": 6.65899,
     "slug": "camping-tienelsheem",
@@ -11853,7 +11853,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Veenmeer",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.08395,
     "lon": 6.63939,
     "slug": "camping-veenmeer",
@@ -11965,7 +11965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini-camping De Eshoeve",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07605,
     "lon": 6.39126,
     "slug": "mini-camping-de-eshoeve",
@@ -11973,7 +11973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini-camping De Hofstee",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.10378,
     "lon": 6.74999,
     "slug": "mini-camping-de-hofstee",
@@ -11989,7 +11989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping 't Groene Veld",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07082,
     "lon": 6.62034,
     "slug": "minicamping-t-groene-veld",
@@ -12005,7 +12005,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Appelhof",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.1091,
     "lon": 6.67656,
     "slug": "minicamping-de-appelhof",
@@ -12013,7 +12013,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Huifkar",
-    "province": "groningen",
+    "province": "friesland",
     "lat": 53.06734,
     "lon": 6.27108,
     "slug": "minicamping-de-huifkar",
@@ -12037,7 +12037,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Kivafarm",
-    "province": "groningen",
+    "province": "friesland",
     "lat": 53.06452,
     "lon": 6.26664,
     "slug": "minicamping-kivafarm",
@@ -12045,7 +12045,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping UtSicht",
-    "province": "groningen",
+    "province": "friesland",
     "lat": 53.05847,
     "lon": 6.25709,
     "slug": "minicamping-utsicht",
@@ -12053,7 +12053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Naturistencamping De Mierenhoop",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.10861,
     "lon": 6.52999,
     "slug": "naturistencamping-de-mierenhoop",
@@ -12069,7 +12069,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein de Jarden",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.17536,
     "lon": 6.41856,
     "slug": "natuurkampeerterrein-de-jarden",
@@ -12101,7 +12101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Receptie Camping De Norgerberg",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.07757,
     "lon": 6.44797,
     "slug": "receptie-camping-de-norgerberg",
@@ -12117,7 +12117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "SVR Camping de Lindehoeve",
-    "province": "groningen",
+    "province": "drenthe",
     "lat": 53.11034,
     "lon": 6.60174,
     "slug": "svr-camping-de-lindehoeve",
@@ -12388,7 +12388,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "highland"
   },
   {
-    "name": "Camping B\u00f6hmerwald",
+    "name": "Camping Böhmerwald",
     "province": "limburg",
     "lat": 51.06256,
     "lon": 5.93977,
@@ -12617,14 +12617,6 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "lat": 51.39991,
     "lon": 6.16633,
     "slug": "camping-de-weerd",
-    "character": "highland"
-  },
-  {
-    "name": "Camping du Vieux Moulin",
-    "province": "limburg",
-    "lat": 50.75632,
-    "lon": 5.93885,
-    "slug": "camping-du-vieux-moulin",
     "character": "highland"
   },
   {
@@ -13332,7 +13324,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Boerderijcamping \u201cHet Boltsebroek\u201d",
+    "name": "Boerderijcamping “Het Boltsebroek”",
     "province": "noord-brabant",
     "lat": 51.73204,
     "lon": 5.7318,
@@ -13365,7 +13357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerencamping 't Rouweelse veld",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.41521,
     "lon": 6.01445,
     "slug": "boerencamping-t-rouweelse-veld",
@@ -13373,7 +13365,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camp F Camperranch Otje",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.27611,
     "lon": 6.00737,
     "slug": "camp-f-camperranch-otje",
@@ -13421,7 +13413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Anselberg",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.32372,
     "lon": 5.81544,
     "slug": "camperplaats-anselberg",
@@ -13453,7 +13445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Bos & Heide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.58961,
     "lon": 6.07315,
     "slug": "camperplaats-bos-en-heide",
@@ -13477,7 +13469,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Diepen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.73829,
     "lon": 5.95696,
     "slug": "camperplaats-de-diepen",
@@ -13573,7 +13565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Zandberg",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.45699,
     "lon": 6.00015,
     "slug": "camperplaats-de-zandberg",
@@ -13629,7 +13621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Hoeve Lieshout",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.23817,
     "lon": 5.74697,
     "slug": "camperplaats-hoeve-lieshout",
@@ -13637,7 +13629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Hoeve Twente",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.27147,
     "lon": 5.87495,
     "slug": "camperplaats-hoeve-twente",
@@ -13645,7 +13637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Houbenhof",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.24736,
     "lon": 5.84345,
     "slug": "camperplaats-houbenhof",
@@ -13653,7 +13645,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Jachthaven 't Leuken",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.57271,
     "lon": 6.07105,
     "slug": "camperplaats-jachthaven-t-leuken",
@@ -13661,7 +13653,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Jachthaven WSV Hanssum Overnachtingsplaatsen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.25755,
     "lon": 6.0045,
     "slug": "camperplaats-jachthaven-wsv-hanssum-overnachtingsplaatsen",
@@ -13669,7 +13661,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Kesse;-Eik aan de Maas",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.27308,
     "lon": 6.02512,
     "slug": "camperplaats-kesse-eik-aan-de-maas",
@@ -13677,7 +13669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Kessel",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.29832,
     "lon": 6.04949,
     "slug": "camperplaats-kessel",
@@ -13701,7 +13693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Leudal / Aspergeboerderij Oppe Haes",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.25325,
     "lon": 5.92309,
     "slug": "camperplaats-leudal-aspergeboerderij-oppe-haes",
@@ -13717,7 +13709,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Maas Camp",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.70388,
     "lon": 5.96644,
     "slug": "camperplaats-maas-camp",
@@ -13725,7 +13717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Martinushof Gennep",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.70002,
     "lon": 5.974,
     "slug": "camperplaats-martinushof-gennep",
@@ -13741,7 +13733,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Mook Starthoeve",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.74333,
     "lon": 5.89747,
     "slug": "camperplaats-mook-starthoeve",
@@ -13773,7 +13765,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Onder En Eindt",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.32555,
     "lon": 6.0118,
     "slug": "camperplaats-onder-en-eindt",
@@ -13813,7 +13805,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Seurenheide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.56714,
     "lon": 6.07837,
     "slug": "camperplaats-seurenheide",
@@ -13829,7 +13821,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Weert",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.25479,
     "lon": 5.69265,
     "slug": "camperplaats-weert",
@@ -13837,7 +13829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplats Old Inn-Bar & Kitchen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.68928,
     "lon": 6.00738,
     "slug": "camperplats-old-inn-bar-en-kitchen",
@@ -13965,7 +13957,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Zwammetje",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.71618,
     "lon": 5.95338,
     "slug": "camping-t-zwammetje",
@@ -14005,7 +13997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Aan de Grens",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.23137,
     "lon": 6.07987,
     "slug": "camping-aan-de-grens",
@@ -14036,7 +14028,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Ald\u00f6rrum",
+    "name": "Camping Aldörrum",
     "province": "noord-brabant",
     "lat": 51.51279,
     "lon": 5.68224,
@@ -14085,7 +14077,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Barbizon",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.32963,
     "lon": 6.07743,
     "slug": "camping-barbizon",
@@ -14101,7 +14093,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bergerhof Slapen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.39748,
     "lon": 6.00998,
     "slug": "camping-bergerhof-slapen",
@@ -14109,7 +14101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Beringerzand",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.35009,
     "lon": 5.96175,
     "slug": "camping-beringerzand",
@@ -14141,7 +14133,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boezeven",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.30279,
     "lon": 6.0431,
     "slug": "camping-boezeven",
@@ -14149,7 +14141,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boschheide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.24347,
     "lon": 6.06083,
     "slug": "camping-boschheide",
@@ -14181,7 +14173,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bovensbos",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.30298,
     "lon": 6.00203,
     "slug": "camping-bovensbos",
@@ -14284,7 +14276,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping D\u00e4neborg",
+    "name": "Camping Däneborg",
     "province": "noord-brabant",
     "lat": 51.50865,
     "lon": 4.33038,
@@ -14325,7 +14317,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Berkhorst",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.48021,
     "lon": 5.88398,
     "slug": "camping-de-berkhorst",
@@ -14333,7 +14325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Beukenhof",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.57912,
     "lon": 6.06834,
     "slug": "camping-de-beukenhof",
@@ -14341,7 +14333,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Bloksberg",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.68301,
     "lon": 5.9963,
     "slug": "camping-de-bloksberg",
@@ -14365,7 +14357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Bosrand",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.67551,
     "lon": 6.00978,
     "slug": "camping-de-bosrand",
@@ -14381,7 +14373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Breukerheide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.34553,
     "lon": 6.05939,
     "slug": "camping-de-breukerheide",
@@ -14429,7 +14421,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Deyel",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.20822,
     "lon": 5.69203,
     "slug": "camping-de-deyel",
@@ -14453,7 +14445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Eendekooi",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.46242,
     "lon": 6.07578,
     "slug": "camping-de-eendekooi",
@@ -14461,7 +14453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Eendenkooi",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.46262,
     "lon": 6.07572,
     "slug": "camping-de-eendenkooi",
@@ -14493,7 +14485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Geuldert",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.73568,
     "lon": 5.93071,
     "slug": "camping-de-geuldert",
@@ -14549,7 +14541,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hazenakker",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.30093,
     "lon": 6.04782,
     "slug": "camping-de-hazenakker",
@@ -14589,7 +14581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Heldense Bossen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.31696,
     "lon": 6.02325,
     "slug": "camping-de-heldense-bossen",
@@ -14645,7 +14637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Kasteelse Bossen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.46098,
     "lon": 6.07311,
     "slug": "camping-de-kasteelse-bossen",
@@ -14877,7 +14869,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Oude Barrier",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.55592,
     "lon": 6.00168,
     "slug": "camping-de-oude-barrier",
@@ -14909,7 +14901,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Peelfluiter",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.31993,
     "lon": 5.85397,
     "slug": "camping-de-peelfluiter",
@@ -14933,7 +14925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Peelweide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.37558,
     "lon": 5.93315,
     "slug": "camping-de-peelweide",
@@ -14981,7 +14973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Rietschoof",
-    "province": "noord-brabant",
+    "province": "gelderland",
     "lat": 51.77712,
     "lon": 5.12966,
     "slug": "camping-de-rietschoof",
@@ -15005,7 +14997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Schatberg",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.38628,
     "lon": 5.9729,
     "slug": "camping-de-schatberg",
@@ -15021,7 +15013,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Sleng",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.43562,
     "lon": 5.959,
     "slug": "camping-de-sleng",
@@ -15029,7 +15021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Smal",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.61177,
     "lon": 6.05256,
     "slug": "camping-de-smal",
@@ -15093,7 +15085,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Torenvalk",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.35813,
     "lon": 5.92784,
     "slug": "camping-de-torenvalk",
@@ -15125,7 +15117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Ulend",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.30948,
     "lon": 6.07473,
     "slug": "camping-de-ulend",
@@ -15205,7 +15197,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zwaan",
-    "province": "noord-brabant",
+    "province": "gelderland",
     "lat": 51.81853,
     "lon": 5.12493,
     "slug": "camping-de-zwaan",
@@ -15237,7 +15229,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Den Aenstoot",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.30902,
     "lon": 6.06306,
     "slug": "camping-den-aenstoot",
@@ -15253,7 +15245,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Den Tiel",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.53462,
     "lon": 5.93242,
     "slug": "camping-den-tiel",
@@ -15277,7 +15269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Eldorado",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.73393,
     "lon": 5.91301,
     "slug": "camping-eldorado",
@@ -15301,7 +15293,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Frerichsoord",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.32753,
     "lon": 5.90383,
     "slug": "camping-frerichsoord",
@@ -15309,7 +15301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Geelenhoof",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.20891,
     "lon": 5.82774,
     "slug": "camping-geelenhoof",
@@ -15325,7 +15317,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Halve Maan",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.5797,
     "lon": 6.0731,
     "slug": "camping-halve-maan",
@@ -15333,7 +15325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hanssenhof Recreatieboerderij",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.31403,
     "lon": 6.00289,
     "slug": "camping-hanssenhof-recreatieboerderij",
@@ -15373,7 +15365,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hengeland",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.6418,
     "lon": 6.00409,
     "slug": "camping-hengeland",
@@ -15381,7 +15373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hermans",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.20583,
     "lon": 5.9761,
     "slug": "camping-hermans",
@@ -15477,7 +15469,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hoeve de Schaaf",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.66524,
     "lon": 6.00794,
     "slug": "camping-hoeve-de-schaaf",
@@ -15517,7 +15509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kastanjehoeve",
-    "province": "noord-brabant",
+    "province": "zuid-holland",
     "lat": 51.67608,
     "lon": 4.30236,
     "slug": "camping-kastanjehoeve",
@@ -15533,7 +15525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Klein Canada",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.64002,
     "lon": 6.00356,
     "slug": "camping-klein-canada",
@@ -15549,7 +15541,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Klein Schoor",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.26027,
     "lon": 5.77059,
     "slug": "camping-klein-schoor",
@@ -15573,7 +15565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Knienseerd",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.21966,
     "lon": 5.85104,
     "slug": "camping-knienseerd",
@@ -15605,7 +15597,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Landgoed De Gortmeule",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.47052,
     "lon": 6.03776,
     "slug": "camping-landgoed-de-gortmeule",
@@ -15629,7 +15621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lanterdhoeve",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.28802,
     "lon": 6.00788,
     "slug": "camping-lanterdhoeve",
@@ -15661,15 +15653,15 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lemmenhof",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.22586,
     "lon": 5.79962,
     "slug": "camping-lemmenhof",
     "character": "highland"
   },
   {
-    "name": "Camping Lempkes Ho\u00f4f",
-    "province": "noord-brabant",
+    "name": "Camping Lempkes Hoôf",
+    "province": "limburg",
     "lat": 51.2349,
     "lon": 5.68889,
     "slug": "camping-lempkes-hoof",
@@ -15677,7 +15669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Leukermeer",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.56795,
     "lon": 6.06013,
     "slug": "camping-leukermeer",
@@ -15701,7 +15693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Maasterras",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.23084,
     "lon": 6.01321,
     "slug": "camping-maasterras",
@@ -15716,7 +15708,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Mari\u00ebndreef",
+    "name": "Camping Mariëndreef",
     "province": "noord-brabant",
     "lat": 51.64344,
     "lon": 4.41967,
@@ -15837,7 +15829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Odahoeve",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.29871,
     "lon": 6.03755,
     "slug": "camping-odahoeve",
@@ -15861,7 +15853,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Op den Boender",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.49121,
     "lon": 6.05697,
     "slug": "camping-op-den-boender",
@@ -15885,7 +15877,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Paluda naturistenterrein",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.21617,
     "lon": 5.7156,
     "slug": "camping-paluda-naturistenterrein",
@@ -15893,7 +15885,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Parc de Witte Vennen",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.52193,
     "lon": 6.03522,
     "slug": "camping-parc-de-witte-vennen",
@@ -15925,7 +15917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Petrushoeve",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.25347,
     "lon": 6.07284,
     "slug": "camping-petrushoeve",
@@ -15965,7 +15957,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Roland",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.63667,
     "lon": 6.0344,
     "slug": "camping-roland",
@@ -16013,7 +16005,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Simonshoek",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.34041,
     "lon": 5.86932,
     "slug": "camping-simonshoek",
@@ -16037,7 +16029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping t'Vossenveld",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.29879,
     "lon": 5.96872,
     "slug": "camping-t-vossenveld",
@@ -16109,7 +16101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ut Tumpke",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.3092,
     "lon": 6.05696,
     "slug": "camping-ut-tumpke",
@@ -16117,7 +16109,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Valkenberg",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.49248,
     "lon": 6.05926,
     "slug": "camping-valkenberg",
@@ -16133,7 +16125,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping van Ass Roermond",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.20749,
     "lon": 5.97466,
     "slug": "camping-van-ass-roermond",
@@ -16149,7 +16141,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Velmans",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.20914,
     "lon": 5.97545,
     "slug": "camping-velmans",
@@ -16341,7 +16333,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerboerderij de Zwaluw",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.49709,
     "lon": 5.90142,
     "slug": "kampeerboerderij-de-zwaluw",
@@ -16357,7 +16349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerderij De Kaaiewaaier",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.29537,
     "lon": 5.79165,
     "slug": "kampeerderij-de-kaaiewaaier",
@@ -16372,7 +16364,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Mini Camping 't Sk\u00f4nste Plekske",
+    "name": "Mini Camping 't Skônste Plekske",
     "province": "noord-brabant",
     "lat": 51.60376,
     "lon": 5.43146,
@@ -16421,7 +16413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini Camping The Turnery",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.65588,
     "lon": 6.01447,
     "slug": "mini-camping-the-turnery",
@@ -16485,7 +16477,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping 't Haasje",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.35522,
     "lon": 5.94893,
     "slug": "minicamping-t-haasje",
@@ -16573,7 +16565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Linde",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.51492,
     "lon": 5.91029,
     "slug": "minicamping-de-linde",
@@ -16581,7 +16573,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping de Niers",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.70987,
     "lon": 6.02286,
     "slug": "minicamping-de-niers",
@@ -16597,15 +16589,15 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Riet",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.2826,
     "lon": 5.7982,
     "slug": "minicamping-de-riet",
     "character": "highland"
   },
   {
-    "name": "Minicamping De Roe\u00ebjbes",
-    "province": "noord-brabant",
+    "name": "Minicamping De Roeëjbes",
+    "province": "limburg",
     "lat": 51.27068,
     "lon": 5.96207,
     "slug": "minicamping-de-roeejbes",
@@ -16645,7 +16637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Heide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.51232,
     "lon": 5.9458,
     "slug": "minicamping-heide",
@@ -16701,7 +16693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Looierheide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.69398,
     "lon": 6.00043,
     "slug": "minicamping-looierheide",
@@ -16765,7 +16757,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurcamping Den Buizerd",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.54137,
     "lon": 6.04517,
     "slug": "natuurcamping-den-buizerd",
@@ -16789,7 +16781,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Cokse Heide",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.64109,
     "lon": 6.03978,
     "slug": "natuurkampeerterrein-de-cokse-heide",
@@ -16861,7 +16853,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Wega",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.23803,
     "lon": 5.67066,
     "slug": "natuurkampeerterrein-wega",
@@ -16917,7 +16909,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark de Leistert",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.27737,
     "lon": 5.93278,
     "slug": "recreatiepark-de-leistert",
@@ -16997,7 +16989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "SVR Camping Scheyvenhof",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.25072,
     "lon": 5.85776,
     "slug": "svr-camping-scheyvenhof",
@@ -17005,7 +16997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark BreeBronne",
-    "province": "noord-brabant",
+    "province": "limburg",
     "lat": 51.37767,
     "lon": 6.06111,
     "slug": "vakantiepark-breebronne",
@@ -17053,7 +17045,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderij camping Kaag",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20998,
     "lon": 4.55921,
     "slug": "boerderij-camping-kaag",
@@ -17149,7 +17141,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Alphen aan den Rijn - Oudshoorn",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.15156,
     "lon": 4.7033,
     "slug": "camperplaats-alphen-aan-den-rijn-oudshoorn",
@@ -17157,7 +17149,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Boerhaaveplaats",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.16904,
     "lon": 4.48217,
     "slug": "camperplaats-boerhaaveplaats",
@@ -17165,7 +17157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Caravanpark The Relaxing Crow",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.27451,
     "lon": 4.47548,
     "slug": "camperplaats-caravanpark-the-relaxing-crow",
@@ -17173,7 +17165,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Guldenroede",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.27308,
     "lon": 4.4805,
     "slug": "camperplaats-de-guldenroede",
@@ -17253,7 +17245,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Stacaravanpark Rik van Soeren",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.27221,
     "lon": 4.47703,
     "slug": "camperplaats-stacaravanpark-rik-van-soeren",
@@ -17261,7 +17253,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Stadsparkeerrerein Haagweg Leiden",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.15708,
     "lon": 4.47913,
     "slug": "camperplaats-stadsparkeerrerein-haagweg-leiden",
@@ -17301,7 +17293,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Haasje",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.19852,
     "lon": 4.55485,
     "slug": "camping-t-haasje",
@@ -17324,7 +17316,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping \u201cDe Rietkraag\u201d",
+    "name": "Camping “De Rietkraag”",
     "province": "noord-holland",
     "lat": 52.74093,
     "lon": 4.83711,
@@ -17333,7 +17325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping aan de Wijde Aa",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.17442,
     "lon": 4.6233,
     "slug": "camping-aan-de-wijde-aa",
@@ -17380,7 +17372,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping Anemoon\u00e8",
+    "name": "Camping Anemoonè",
     "province": "noord-holland",
     "lat": 53.09733,
     "lon": 4.7836,
@@ -17445,7 +17437,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bungalow- en Caravanpark De Wijde Blick",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.26648,
     "lon": 4.47467,
     "slug": "camping-bungalow-en-caravanpark-de-wijde-blick",
@@ -17541,7 +17533,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Boekhorst",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.19842,
     "lon": 4.55604,
     "slug": "camping-de-boekhorst",
@@ -17573,7 +17565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Carlton",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.27155,
     "lon": 4.47589,
     "slug": "camping-de-carlton",
@@ -17589,7 +17581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Drecht",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.21804,
     "lon": 4.71125,
     "slug": "camping-de-drecht",
@@ -17613,7 +17605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Duinpan",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.26863,
     "lon": 4.47144,
     "slug": "camping-de-duinpan",
@@ -17637,7 +17629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Freek",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.17033,
     "lon": 4.58702,
     "slug": "camping-de-freek",
@@ -17677,7 +17669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hof van Eeden",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.22075,
     "lon": 4.55442,
     "slug": "camping-de-hof-van-eeden",
@@ -17701,7 +17693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Horizon",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20038,
     "lon": 4.55079,
     "slug": "camping-de-horizon-way-531011339",
@@ -17797,7 +17789,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Nachtzwaluw",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.15815,
     "lon": 4.72251,
     "slug": "camping-de-nachtzwaluw",
@@ -17933,7 +17925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Veense Bukker",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.19378,
     "lon": 4.6164,
     "slug": "camping-de-veense-bukker",
@@ -17997,7 +17989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wasbeek",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20821,
     "lon": 4.51637,
     "slug": "camping-de-wasbeek",
@@ -18029,7 +18021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Wulp",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.27328,
     "lon": 4.47757,
     "slug": "camping-de-wulp",
@@ -18077,7 +18069,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Dukdalf",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20723,
     "lon": 4.51715,
     "slug": "camping-dukdalf",
@@ -18125,7 +18117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping EuroParcs Noordwijkse Duinen",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.28886,
     "lon": 4.48762,
     "slug": "camping-europarcs-noordwijkse-duinen",
@@ -18221,7 +18213,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Engeltje",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.23577,
     "lon": 4.53921,
     "slug": "camping-het-engeltje",
@@ -18357,7 +18349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Jachtlust",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.23665,
     "lon": 4.49961,
     "slug": "camping-jachtlust",
@@ -18381,7 +18373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kagerzoom",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20638,
     "lon": 4.5162,
     "slug": "camping-kagerzoom",
@@ -18469,7 +18461,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Le Parage",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.28148,
     "lon": 4.48468,
     "slug": "camping-le-parage",
@@ -18493,7 +18485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Maaldrift Wassenaar",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.1526,
     "lon": 4.43351,
     "slug": "camping-maaldrift-wassenaar",
@@ -18533,7 +18525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molecaten Park Noordduinen",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.2114,
     "lon": 4.40831,
     "slug": "camping-molecaten-park-noordduinen",
@@ -18557,7 +18549,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molenzicht",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.26569,
     "lon": 4.52179,
     "slug": "camping-molenzicht-way-1466189547",
@@ -18645,7 +18637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ons Wijland",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.16767,
     "lon": 4.54857,
     "slug": "camping-ons-wijland",
@@ -18653,7 +18645,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oosterwoud",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20858,
     "lon": 4.51366,
     "slug": "camping-oosterwoud",
@@ -18661,7 +18653,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Op Hoop van Zegen",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.24925,
     "lon": 4.46258,
     "slug": "camping-op-hoop-van-zegen",
@@ -18677,7 +18669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Over 't Bruggetje",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.28164,
     "lon": 4.49108,
     "slug": "camping-over-t-bruggetje",
@@ -18733,7 +18725,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Sollasi",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.2847,
     "lon": 4.50596,
     "slug": "camping-sollasi",
@@ -18909,7 +18901,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zeeverkennerscentrum Kagerplassen",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.18779,
     "lon": 4.52274,
     "slug": "camping-zeeverkennerscentrum-kagerplassen",
@@ -18949,7 +18941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zonnekamp",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20593,
     "lon": 4.51442,
     "slug": "camping-zonnekamp",
@@ -18957,7 +18949,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zuidduinen",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.19298,
     "lon": 4.3865,
     "slug": "camping-zuidduinen",
@@ -19005,7 +18997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Jachthaven Jonkman Camperplaats",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.2205,
     "lon": 4.54604,
     "slug": "jachthaven-jonkman-camperplaats",
@@ -19141,7 +19133,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Ruigenhoek",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.29448,
     "lon": 4.51521,
     "slug": "natuurkampeerterrein-ruigenhoek",
@@ -19189,7 +19181,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Straat-Hof Boerderijcamping",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.21258,
     "lon": 4.66735,
     "slug": "straat-hof-boerderijcamping",
@@ -19221,7 +19213,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark Koningshof",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.20025,
     "lon": 4.45873,
     "slug": "vakantiepark-koningshof",
@@ -19229,7 +19221,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Wijngaard Camping Naescas",
-    "province": "noord-holland",
+    "province": "zuid-holland",
     "lat": 52.15446,
     "lon": 4.70442,
     "slug": "wijngaard-camping-naescas",
@@ -19245,7 +19237,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderij Camping Hietkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20007,
     "lon": 6.37496,
     "slug": "boerderij-camping-hietkamp",
@@ -19301,7 +19293,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping Den Hoek",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20702,
     "lon": 6.06475,
     "slug": "boerderijcamping-den-hoek",
@@ -19309,7 +19301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping Heeterveen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.4701,
     "lon": 5.975,
     "slug": "boerderijcamping-heeterveen",
@@ -19349,7 +19341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperpark Achterhoek - Den Blanken",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.18122,
     "lon": 6.58584,
     "slug": "camperpark-achterhoek-den-blanken",
@@ -19436,8 +19428,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camperplaats An de b\u00e8ke",
-    "province": "overijssel",
+    "name": "Camperplaats An de bèke",
+    "province": "gelderland",
     "lat": 52.16208,
     "lon": 6.03498,
     "slug": "camperplaats-an-de-beke",
@@ -19533,7 +19525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Oude Vos Elburg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.44908,
     "lon": 5.82783,
     "slug": "camperplaats-de-oude-vos-elburg",
@@ -19565,7 +19557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Zwaan",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.37974,
     "lon": 5.75321,
     "slug": "camperplaats-de-zwaan",
@@ -19589,7 +19581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Emmeloord",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.74008,
     "lon": 5.77218,
     "slug": "camperplaats-emmeloord",
@@ -19597,7 +19589,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats en melkveebedrijf De Grote Leigraaf",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.18862,
     "lon": 6.04611,
     "slug": "camperplaats-en-melkveebedrijf-de-grote-leigraaf",
@@ -19717,7 +19709,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats IJsseldelta Marina Hattem",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.47791,
     "lon": 6.06994,
     "slug": "camperplaats-ijsseldelta-marina-hattem",
@@ -19781,7 +19773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Noordijkerveld",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16296,
     "lon": 6.59001,
     "slug": "camperplaats-noordijkerveld",
@@ -19797,7 +19789,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Ouwediek",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.26352,
     "lon": 5.75521,
     "slug": "camperplaats-ouwediek",
@@ -19933,7 +19925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Voorst",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.15166,
     "lon": 6.09362,
     "slug": "camperplaats-voorst",
@@ -19973,7 +19965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaatsen Scheer's Hoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.42379,
     "lon": 6.0869,
     "slug": "camperplaatsen-scheer-s-hoeve",
@@ -19997,7 +19989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Campertuin CP Veluwe Noord",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.42363,
     "lon": 5.90449,
     "slug": "campertuin-cp-veluwe-noord",
@@ -20061,7 +20053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Hinkel",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.31358,
     "lon": 6.01257,
     "slug": "camping-t-hinkel",
@@ -20085,7 +20077,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Klooster",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.4446,
     "lon": 6.07818,
     "slug": "camping-t-klooster",
@@ -20125,7 +20117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Vemdebroek",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.36364,
     "lon": 6.01715,
     "slug": "camping-t-vemdebroek",
@@ -20197,7 +20189,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Beans-Hill",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32553,
     "lon": 5.82229,
     "slug": "camping-beans-hill",
@@ -20261,7 +20253,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bloemenboerderij Aperloo",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.42516,
     "lon": 5.86107,
     "slug": "camping-bloemenboerderij-aperloo",
@@ -20277,7 +20269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boerderij de IJsselhoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.50315,
     "lon": 6.02692,
     "slug": "camping-boerderij-de-ijsselhoeve",
@@ -20285,7 +20277,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Bomhofshoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.26115,
     "lon": 5.99756,
     "slug": "camping-bomhofshoeve",
@@ -20309,7 +20301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Braakhekke",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.19281,
     "lon": 6.29717,
     "slug": "camping-braakhekke",
@@ -20317,7 +20309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Buitenpost",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.24645,
     "lon": 6.12719,
     "slug": "camping-buitenpost",
@@ -20333,7 +20325,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Caitwickerzand",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.21218,
     "lon": 5.76723,
     "slug": "camping-caitwickerzand",
@@ -20389,7 +20381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Abbert",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.50664,
     "lon": 5.84611,
     "slug": "camping-de-abbert",
@@ -20405,7 +20397,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Baankreis",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16356,
     "lon": 6.31723,
     "slug": "camping-de-baankreis",
@@ -20413,7 +20405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Bankenburg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.40792,
     "lon": 6.06152,
     "slug": "camping-de-bankenburg",
@@ -20477,7 +20469,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Bosrand",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.21346,
     "lon": 6.4193,
     "slug": "camping-de-bosrand",
@@ -20565,7 +20557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Glindehoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.40863,
     "lon": 5.8103,
     "slug": "camping-de-glindehoeve",
@@ -20581,7 +20573,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Grote Bremen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.35446,
     "lon": 6.05419,
     "slug": "camping-de-grote-bremen",
@@ -20597,7 +20589,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Haerhagen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.40952,
     "lon": 5.84577,
     "slug": "camping-de-haerhagen",
@@ -20613,7 +20605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Heidehoek",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.44892,
     "lon": 5.98718,
     "slug": "camping-de-heidehoek",
@@ -20621,7 +20613,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Helfterkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.29073,
     "lon": 5.94585,
     "slug": "camping-de-helfterkamp",
@@ -20629,14 +20621,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hinde",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.51872,
     "lon": 5.83807,
     "slug": "camping-de-hinde",
     "character": "inland"
   },
   {
-    "name": "Camping De Hoge Mo\u00e2t",
+    "name": "Camping De Hoge Moât",
     "province": "overijssel",
     "lat": 52.23198,
     "lon": 6.32033,
@@ -20677,7 +20669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Kamperklippen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.40128,
     "lon": 6.0353,
     "slug": "camping-de-kamperklippen",
@@ -20757,7 +20749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Klippen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.37795,
     "lon": 6.00502,
     "slug": "camping-de-klippen",
@@ -20773,7 +20765,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Kolk",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.17361,
     "lon": 6.38394,
     "slug": "camping-de-kolk",
@@ -20821,7 +20813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Lijsterbes",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.43313,
     "lon": 5.89713,
     "slug": "camping-de-lijsterbes",
@@ -20869,7 +20861,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Meulebarg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.28742,
     "lon": 5.78014,
     "slug": "camping-de-meulebarg",
@@ -20892,7 +20884,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping De M\u00f6lnh\u00f6fte",
+    "name": "Camping De Mölnhöfte",
     "province": "overijssel",
     "lat": 52.1913,
     "lon": 6.57401,
@@ -20949,7 +20941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Paasheuvel",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.33059,
     "lon": 5.8209,
     "slug": "camping-de-paasheuvel",
@@ -20981,7 +20973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Plaats",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.41491,
     "lon": 5.8496,
     "slug": "camping-de-plaats",
@@ -20989,7 +20981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Plagge",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.33621,
     "lon": 5.82335,
     "slug": "camping-de-plagge",
@@ -20997,7 +20989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Plakken",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.39376,
     "lon": 6.0717,
     "slug": "camping-de-plakken",
@@ -21005,7 +20997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Pollen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32106,
     "lon": 5.925,
     "slug": "camping-de-pollen",
@@ -21013,7 +21005,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Polmate",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.26407,
     "lon": 6.11731,
     "slug": "camping-de-polmate",
@@ -21044,7 +21036,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping De R\u00eake",
+    "name": "Camping De Rêke",
     "province": "overijssel",
     "lat": 52.42649,
     "lon": 6.88453,
@@ -21053,7 +21045,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Revehof",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.5334,
     "lon": 5.83828,
     "slug": "camping-de-revehof",
@@ -21061,7 +21053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Rollekoot",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.29278,
     "lon": 5.93896,
     "slug": "camping-de-rollekoot",
@@ -21077,7 +21069,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "camping de Rozehoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.4232,
     "lon": 5.86542,
     "slug": "camping-de-rozehoeve",
@@ -21085,7 +21077,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Ruimte",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.49564,
     "lon": 5.83739,
     "slug": "camping-de-ruimte",
@@ -21109,7 +21101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Scheepsbel",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.38742,
     "lon": 5.83278,
     "slug": "camping-de-scheepsbel",
@@ -21141,7 +21133,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Sprengen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.18777,
     "lon": 5.90573,
     "slug": "camping-de-sprengen",
@@ -21173,7 +21165,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Tesseplekke",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.3817,
     "lon": 6.09538,
     "slug": "camping-de-tesseplekke",
@@ -21181,7 +21173,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Tol",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.35623,
     "lon": 5.79017,
     "slug": "camping-de-tol",
@@ -21205,7 +21197,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Veldkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.34167,
     "lon": 5.94025,
     "slug": "camping-de-veldkamp",
@@ -21221,7 +21213,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Veluwse Wagen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32147,
     "lon": 5.95694,
     "slug": "camping-de-veluwse-wagen",
@@ -21229,7 +21221,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vetweide",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16455,
     "lon": 6.29844,
     "slug": "camping-de-vetweide",
@@ -21237,7 +21229,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vinkenkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.15084,
     "lon": 6.02312,
     "slug": "camping-de-vinkenkamp",
@@ -21261,7 +21253,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vrolijk",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.21763,
     "lon": 6.34668,
     "slug": "camping-de-vrolijk",
@@ -21269,7 +21261,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wapenberg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.17188,
     "lon": 5.91402,
     "slug": "camping-de-wapenberg",
@@ -21277,7 +21269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Waterjuffer",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20976,
     "lon": 6.28602,
     "slug": "camping-de-waterjuffer",
@@ -21285,7 +21277,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Weeltenkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.24951,
     "lon": 6.05668,
     "slug": "camping-de-weeltenkamp",
@@ -21293,7 +21285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Weerd",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.28716,
     "lon": 6.06954,
     "slug": "camping-de-weerd",
@@ -21309,7 +21301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wijte",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.17168,
     "lon": 6.24306,
     "slug": "camping-de-wijte",
@@ -21317,7 +21309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Wildernis",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.23249,
     "lon": 6.13311,
     "slug": "camping-de-wildernis",
@@ -21325,7 +21317,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wildhoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.31469,
     "lon": 5.92807,
     "slug": "camping-de-wildhoeve",
@@ -21349,7 +21341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Witte Wieven",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.38124,
     "lon": 5.81492,
     "slug": "camping-de-witte-wieven",
@@ -21365,7 +21357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wolfskuil",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.17401,
     "lon": 5.98424,
     "slug": "camping-de-wolfskuil-way-800450606",
@@ -21373,7 +21365,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zandhegge",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.33165,
     "lon": 5.96259,
     "slug": "camping-de-zandhegge",
@@ -21381,7 +21373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zandkuil",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.41097,
     "lon": 6.04066,
     "slug": "camping-de-zandkuil",
@@ -21413,7 +21405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Den Blanken",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.18069,
     "lon": 6.58701,
     "slug": "camping-den-blanken",
@@ -21421,7 +21413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Domein Groot Besselink",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.15153,
     "lon": 6.28953,
     "slug": "camping-domein-groot-besselink",
@@ -21429,7 +21421,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Doornekamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.26522,
     "lon": 5.98072,
     "slug": "camping-doornekamp",
@@ -21453,7 +21445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Efkes-Lins",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.69138,
     "lon": 5.94651,
     "slug": "camping-efkes-lins",
@@ -21493,7 +21485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Erve Harkink",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.15094,
     "lon": 6.43125,
     "slug": "camping-erve-harkink",
@@ -21508,7 +21500,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Erve M\u00f6lman",
+    "name": "Camping Erve Mölman",
     "province": "overijssel",
     "lat": 52.35543,
     "lon": 6.82896,
@@ -21525,7 +21517,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Erve Scherpzicht",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16143,
     "lon": 6.49234,
     "slug": "camping-erve-scherpzicht",
@@ -21581,7 +21573,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Frusselt",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32576,
     "lon": 5.82018,
     "slug": "camping-frusselt",
@@ -21589,7 +21581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Gelders Laren",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.2085,
     "lon": 6.37633,
     "slug": "camping-gelders-laren",
@@ -21613,7 +21605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Groot Grobbenhorst",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.39356,
     "lon": 5.78043,
     "slug": "camping-groot-grobbenhorst",
@@ -21637,7 +21629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Heidepark Veluwsch Karakter",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32805,
     "lon": 5.82261,
     "slug": "camping-heidepark-veluwsch-karakter",
@@ -21677,7 +21669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Abbertsbos",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.5052,
     "lon": 5.83895,
     "slug": "camping-het-abbertsbos",
@@ -21685,7 +21677,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping het Bosbad",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.71943,
     "lon": 5.75549,
     "slug": "camping-het-bosbad",
@@ -21709,7 +21701,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Kleine Schaap",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.21536,
     "lon": 6.027,
     "slug": "camping-het-kleine-schaap",
@@ -21733,7 +21725,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Oever",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.4394,
     "lon": 6.09983,
     "slug": "camping-het-oever",
@@ -21781,7 +21773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Zwarte Veldje",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.36249,
     "lon": 5.79482,
     "slug": "camping-het-zwarte-veldje",
@@ -21837,7 +21829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Jong Amelte",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.19841,
     "lon": 6.21574,
     "slug": "camping-jong-amelte",
@@ -21845,7 +21837,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kallumaan",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.68423,
     "lon": 5.87949,
     "slug": "camping-kallumaan",
@@ -21877,7 +21869,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Klein Emelaar",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.23357,
     "lon": 5.76878,
     "slug": "camping-klein-emelaar",
@@ -21885,7 +21877,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Klein Hanenveld",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.31451,
     "lon": 5.95788,
     "slug": "camping-klein-hanenveld",
@@ -21901,7 +21893,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kostverloren",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.38456,
     "lon": 5.76788,
     "slug": "camping-kostverloren",
@@ -21933,7 +21925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Landal Rabbit Hill",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.2183,
     "lon": 5.78801,
     "slug": "camping-landal-rabbit-hill",
@@ -21941,7 +21933,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Landgoed de Ploeg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.25465,
     "lon": 5.92524,
     "slug": "camping-landgoed-de-ploeg",
@@ -21965,7 +21957,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Landgoed Molecaten",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.46607,
     "lon": 6.05712,
     "slug": "camping-landgoed-molecaten",
@@ -21973,7 +21965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Landgoed Old Putten",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.4415,
     "lon": 5.84343,
     "slug": "camping-landgoed-old-putten",
@@ -21997,7 +21989,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lieftink",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.18215,
     "lon": 6.39633,
     "slug": "camping-lieftink",
@@ -22005,7 +21997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Livonia",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.35566,
     "lon": 5.94632,
     "slug": "camping-livonia",
@@ -22013,7 +22005,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lolotte",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16398,
     "lon": 6.60057,
     "slug": "camping-lolotte",
@@ -22045,7 +22037,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Meerveld",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.23177,
     "lon": 5.75178,
     "slug": "camping-meerveld",
@@ -22053,7 +22045,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Mennorode",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.27804,
     "lon": 5.80931,
     "slug": "camping-mennorode",
@@ -22061,7 +22053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molecaten - De Leemcule",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.45587,
     "lon": 6.03824,
     "slug": "camping-molecaten-de-leemcule",
@@ -22069,14 +22061,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Molecaten Park De Koerberg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.4086,
     "lon": 6.04817,
     "slug": "camping-molecaten-park-de-koerberg",
     "character": "inland"
   },
   {
-    "name": "Camping M\u00f6lke",
+    "name": "Camping Mölke",
     "province": "overijssel",
     "lat": 52.32695,
     "lon": 6.52082,
@@ -22108,7 +22100,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Motorstop caf\u00e9 Calluna",
+    "name": "Camping Motorstop café Calluna",
     "province": "overijssel",
     "lat": 52.53561,
     "lon": 6.35646,
@@ -22125,7 +22117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Mussenkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.37745,
     "lon": 6.00871,
     "slug": "camping-mussenkamp",
@@ -22141,7 +22133,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Nijveld",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20303,
     "lon": 6.3567,
     "slug": "camping-nijveld",
@@ -22165,7 +22157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC de Kooiberg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.17417,
     "lon": 5.8937,
     "slug": "camping-ntkc-de-kooiberg",
@@ -22173,7 +22165,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC Roggebot",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.55152,
     "lon": 5.81621,
     "slug": "camping-ntkc-roggebot",
@@ -22229,7 +22221,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Park Nieuw Grapendaal",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.3065,
     "lon": 6.0774,
     "slug": "camping-park-nieuw-grapendaal",
@@ -22237,7 +22229,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping RCN de Jagerstee",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.36516,
     "lon": 5.95894,
     "slug": "camping-rcn-de-jagerstee",
@@ -22253,7 +22245,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Reina's hoeve",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32519,
     "lon": 5.95466,
     "slug": "camping-reina-s-hoeve",
@@ -22285,7 +22277,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Samoza",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.34689,
     "lon": 5.82533,
     "slug": "camping-samoza",
@@ -22301,7 +22293,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Scouting N.S. Rambonnet",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.46816,
     "lon": 5.82731,
     "slug": "camping-scouting-n-s-rambonnet",
@@ -22396,8 +22388,8 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Camping Ut Gr\u00fbne Veld",
-    "province": "overijssel",
+    "name": "Camping Ut Grûne Veld",
+    "province": "gelderland",
     "lat": 52.15968,
     "lon": 6.03584,
     "slug": "camping-ut-grune-veld",
@@ -22437,7 +22429,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Veluwemeer",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.45471,
     "lon": 5.82135,
     "slug": "camping-veluwemeer",
@@ -22445,7 +22437,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Vossenberg",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.34044,
     "lon": 5.93835,
     "slug": "camping-vossenberg",
@@ -22453,7 +22445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Vrijland",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.18028,
     "lon": 6.46633,
     "slug": "camping-vrijland",
@@ -22461,7 +22453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Waldhoorn",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16382,
     "lon": 6.25028,
     "slug": "camping-waldhoorn",
@@ -22469,7 +22461,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Weijdehorst",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.26804,
     "lon": 5.77668,
     "slug": "camping-weijdehorst",
@@ -22477,7 +22469,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Wildzoom",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.2426,
     "lon": 5.77673,
     "slug": "camping-wildzoom",
@@ -22557,7 +22549,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerhoeve Bussloo",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20875,
     "lon": 6.10943,
     "slug": "kampeerhoeve-bussloo",
@@ -22597,7 +22589,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Landgoedcamping De Lathmer",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.21363,
     "lon": 6.14367,
     "slug": "landgoedcamping-de-lathmer",
@@ -22605,7 +22597,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Landgoedcamping Westerwolde",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.19922,
     "lon": 5.84258,
     "slug": "landgoedcamping-westerwolde",
@@ -22621,7 +22613,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini camping de Hanze",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.53334,
     "lon": 5.81652,
     "slug": "mini-camping-de-hanze",
@@ -22629,7 +22621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini camping Haarman",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.19382,
     "lon": 6.38184,
     "slug": "mini-camping-haarman",
@@ -22637,7 +22629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini Camping Hello Twello",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.25171,
     "lon": 6.11651,
     "slug": "mini-camping-hello-twello",
@@ -22677,7 +22669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping 't Oegenbos",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.24835,
     "lon": 6.04887,
     "slug": "minicamping-t-oegenbos",
@@ -22685,7 +22677,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "minicamping de Adelaar",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.17774,
     "lon": 6.14211,
     "slug": "minicamping-de-adelaar",
@@ -22709,7 +22701,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Hane",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20659,
     "lon": 6.09213,
     "slug": "minicamping-de-hane",
@@ -22724,7 +22716,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Minicamping De K\u00f6ller",
+    "name": "Minicamping De Köller",
     "province": "overijssel",
     "lat": 52.32732,
     "lon": 6.75836,
@@ -22757,7 +22749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Roseboom",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.15901,
     "lon": 5.98955,
     "slug": "minicamping-de-roseboom",
@@ -22781,7 +22773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping P90",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.48583,
     "lon": 5.83023,
     "slug": "minicamping-p90",
@@ -22796,7 +22788,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "inland"
   },
   {
-    "name": "Minicamping Sch\u00f6ttinck",
+    "name": "Minicamping Schöttinck",
     "province": "overijssel",
     "lat": 52.52999,
     "lon": 6.59117,
@@ -22805,7 +22797,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping t Hietbrink",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.20001,
     "lon": 6.25431,
     "slug": "minicamping-t-hietbrink",
@@ -22845,7 +22837,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurcamping De Dellen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.39118,
     "lon": 5.96851,
     "slug": "natuurcamping-de-dellen",
@@ -22877,7 +22869,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Haverkamp",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.16709,
     "lon": 6.12266,
     "slug": "natuurkampeerterrein-de-haverkamp",
@@ -22917,7 +22909,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Toekomst",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.32988,
     "lon": 5.95407,
     "slug": "natuurkampeerterrein-de-toekomst",
@@ -22925,7 +22917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Vrolijk",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.21623,
     "lon": 6.34637,
     "slug": "natuurkampeerterrein-de-vrolijk",
@@ -22949,7 +22941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Nieuw Soerel",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.36459,
     "lon": 5.84327,
     "slug": "natuurkampeerterrein-nieuw-soerel",
@@ -22965,7 +22957,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Zanderdennen",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.1775,
     "lon": 5.76418,
     "slug": "natuurkampeerterrein-zanderdennen",
@@ -23029,7 +23021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark De Voorst",
-    "province": "overijssel",
+    "province": "flevoland",
     "lat": 52.67637,
     "lon": 5.89483,
     "slug": "recreatiepark-de-voorst",
@@ -23037,7 +23029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark Het Eperwoud",
-    "province": "overijssel",
+    "province": "gelderland",
     "lat": 52.35292,
     "lon": 5.96388,
     "slug": "recreatiepark-het-eperwoud",
@@ -23093,7 +23085,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperpark Amsterdam",
-    "province": "utrecht",
+    "province": "noord-holland",
     "lat": 52.31235,
     "lon": 4.99187,
     "slug": "camperpark-amsterdam",
@@ -23101,7 +23093,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Aantjes-Blokhuis",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.00179,
     "lon": 4.78906,
     "slug": "camperplaats-aantjes-blokhuis",
@@ -23117,7 +23109,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Vlisterhoeve",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.96173,
     "lon": 4.84537,
     "slug": "camperplaats-de-vlisterhoeve",
@@ -23125,7 +23117,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Hofstede Kloosterstein",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.00429,
     "lon": 4.76451,
     "slug": "camperplaats-hofstede-kloosterstein",
@@ -23133,7 +23125,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Klaase Bos",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.18767,
     "lon": 4.81024,
     "slug": "camperplaats-klaase-bos",
@@ -23165,7 +23157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Zevenhoven",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.19509,
     "lon": 4.77371,
     "slug": "camperplaats-zevenhoven",
@@ -23181,7 +23173,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Aemestellehoeve",
-    "province": "utrecht",
+    "province": "noord-holland",
     "lat": 52.27449,
     "lon": 4.883,
     "slug": "camping-aemestellehoeve",
@@ -23221,7 +23213,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Boerin Marie",
-    "province": "utrecht",
+    "province": "noord-holland",
     "lat": 52.2641,
     "lon": 4.87223,
     "slug": "camping-boerin-marie",
@@ -23277,7 +23269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Bovenstad",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.93634,
     "lon": 4.81974,
     "slug": "camping-de-bovenstad",
@@ -23293,7 +23285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hollandse Boerderij",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.11199,
     "lon": 4.77065,
     "slug": "camping-de-hollandse-boerderij",
@@ -23317,7 +23309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Vier Elementen",
-    "province": "utrecht",
+    "province": "noord-holland",
     "lat": 52.17909,
     "lon": 5.0433,
     "slug": "camping-de-vier-elementen",
@@ -23357,7 +23349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping EuroParcs Het Amsterdamse Bos",
-    "province": "utrecht",
+    "province": "noord-holland",
     "lat": 52.29532,
     "lon": 4.82161,
     "slug": "camping-europarcs-het-amsterdamse-bos",
@@ -23373,7 +23365,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Farmcamps de Stolkse Weide",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.97415,
     "lon": 4.78189,
     "slug": "camping-farmcamps-de-stolkse-weide",
@@ -23389,7 +23381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Groene Hart",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.20488,
     "lon": 4.75455,
     "slug": "camping-het-groene-hart",
@@ -23397,7 +23389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping HollandMenCamp",
-    "province": "utrecht",
+    "province": "noord-holland",
     "lat": 52.19356,
     "lon": 5.12944,
     "slug": "camping-hollandmencamp",
@@ -23421,7 +23413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping NTKC De Ronde Hoek",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.99184,
     "lon": 4.79693,
     "slug": "camping-ntkc-de-ronde-hoek",
@@ -23453,7 +23445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Rekreatiepark De Kooi",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.9723,
     "lon": 4.76095,
     "slug": "camping-rekreatiepark-de-kooi",
@@ -23461,7 +23453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Streefland",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.999,
     "lon": 4.7566,
     "slug": "camping-streefland",
@@ -23517,7 +23509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Kampeerhoeve Koole",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.1649,
     "lon": 4.81803,
     "slug": "kampeerhoeve-koole",
@@ -23525,7 +23517,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini Camping/Camperplaats Nooitgedacht",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 52.00211,
     "lon": 4.82979,
     "slug": "mini-camping-camperplaats-nooitgedacht",
@@ -23565,7 +23557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Stadscamping Schoonhoven",
-    "province": "utrecht",
+    "province": "zuid-holland",
     "lat": 51.94206,
     "lon": 4.86402,
     "slug": "stadscamping-schoonhoven",
@@ -23669,7 +23661,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Bergen op Zoom De Boulevard",
-    "province": "zeeland",
+    "province": "noord-brabant",
     "lat": 51.484,
     "lon": 4.27951,
     "slug": "camperplaats-bergen-op-zoom-de-boulevard",
@@ -23677,7 +23669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Bergen op Zoom De Boulevard Noord",
-    "province": "zeeland",
+    "province": "noord-brabant",
     "lat": 51.48719,
     "lon": 4.27706,
     "slug": "camperplaats-bergen-op-zoom-de-boulevard-noord",
@@ -24068,7 +24060,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping Co\u00f6peratieve Vereniging \u201cIrenehoeve\u201d U.A.",
+    "name": "Camping Coöperatieve Vereniging “Irenehoeve” U.A.",
     "province": "zeeland",
     "lat": 51.60024,
     "lon": 4.0343,
@@ -24605,7 +24597,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Uitwijk",
-    "province": "zeeland",
+    "province": "noord-brabant",
     "lat": 51.60864,
     "lon": 4.27296,
     "slug": "camping-de-uitwijk",
@@ -25701,7 +25693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping The Hive",
-    "province": "zeeland",
+    "province": "noord-brabant",
     "lat": 51.58578,
     "lon": 4.21504,
     "slug": "camping-the-hive",
@@ -26517,7 +26509,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Kreek",
-    "province": "zeeland",
+    "province": "noord-brabant",
     "lat": 51.57542,
     "lon": 4.23907,
     "slug": "natuurkampeerterrein-de-kreek",
@@ -26581,7 +26573,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping de Kleine Schorre",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68324,
     "lon": 3.98219,
     "slug": "boerderijcamping-de-kleine-schorre",
@@ -26589,7 +26581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping Dorpzicht",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70222,
     "lon": 3.81716,
     "slug": "boerderijcamping-dorpzicht",
@@ -26597,7 +26589,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boerderijcamping Van Bergeijk",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.75125,
     "lon": 4.84071,
     "slug": "boerderijcamping-van-bergeijk",
@@ -26613,7 +26605,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Boeren camping",
-    "province": "zuid-holland",
+    "province": "gelderland",
     "lat": 51.791,
     "lon": 5.09271,
     "slug": "boeren-camping",
@@ -26629,7 +26621,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Buitenplaats De Oorsprong",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73097,
     "lon": 3.89003,
     "slug": "buitenplaats-de-oorsprong",
@@ -26637,7 +26629,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camper Park Jachthaven Biesbosch",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.70752,
     "lon": 4.81293,
     "slug": "camper-park-jachthaven-biesbosch",
@@ -26660,7 +26652,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camperpark Marina Port Z\u00e9lande",
+    "name": "Camperpark Marina Port Zélande",
     "province": "zuid-holland",
     "lat": 51.75849,
     "lon": 3.85315,
@@ -26677,7 +26669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Brouwersdam",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73656,
     "lon": 3.82832,
     "slug": "camperplaats-brouwersdam",
@@ -26709,7 +26701,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats De Vrolijke Molen",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72809,
     "lon": 3.82873,
     "slug": "camperplaats-de-vrolijke-molen",
@@ -26725,7 +26717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Hoeve Batenburg",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73009,
     "lon": 3.80724,
     "slug": "camperplaats-hoeve-batenburg",
@@ -26773,7 +26765,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Landgoed Clootwijck",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.78162,
     "lon": 4.96512,
     "slug": "camperplaats-landgoed-clootwijck",
@@ -26781,7 +26773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Loevestein",
-    "province": "zuid-holland",
+    "province": "gelderland",
     "lat": 51.81438,
     "lon": 5.02747,
     "slug": "camperplaats-loevestein",
@@ -26797,7 +26789,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Parking Glasmuseum Leerdam",
-    "province": "zuid-holland",
+    "province": "utrecht",
     "lat": 51.88288,
     "lon": 5.08676,
     "slug": "camperplaats-parking-glasmuseum-leerdam",
@@ -26805,7 +26797,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats Parking Lingedijk",
-    "province": "zuid-holland",
+    "province": "utrecht",
     "lat": 51.88654,
     "lon": 5.08702,
     "slug": "camperplaats-parking-lingedijk",
@@ -26837,7 +26829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camperplaats WSV Geertruidenberg",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.70329,
     "lon": 4.86407,
     "slug": "camperplaats-wsv-geertruidenberg",
@@ -26901,7 +26893,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Hulpgat",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.78426,
     "lon": 4.93892,
     "slug": "camping-t-hulpgat",
@@ -26925,7 +26917,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Weeltje",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.70919,
     "lon": 4.69024,
     "slug": "camping-t-weeltje",
@@ -26933,7 +26925,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping 't Wekken",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68421,
     "lon": 3.90089,
     "slug": "camping-t-wekken",
@@ -26949,7 +26941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Agri-Nova",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71694,
     "lon": 3.77175,
     "slug": "camping-agri-nova",
@@ -26957,7 +26949,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Akkerleven",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71093,
     "lon": 3.95745,
     "slug": "camping-akkerleven",
@@ -26981,7 +26973,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Beverburcht",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.70979,
     "lon": 4.80443,
     "slug": "camping-beverburcht",
@@ -26989,7 +26981,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Biesboschhoeve",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.7357,
     "lon": 4.75754,
     "slug": "camping-biesboschhoeve",
@@ -27005,7 +26997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Brabers",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68672,
     "lon": 3.76721,
     "slug": "camping-brabers",
@@ -27037,7 +27029,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Corneliahoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.728,
     "lon": 3.86423,
     "slug": "camping-corneliahoeve",
@@ -27045,7 +27037,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping d'Ouwe Weie",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73562,
     "lon": 3.88378,
     "slug": "camping-d-ouwe-weie",
@@ -27061,7 +27053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Bloemhoek",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.69067,
     "lon": 3.85086,
     "slug": "camping-de-bloemhoek",
@@ -27069,7 +27061,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Brem",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72476,
     "lon": 3.75017,
     "slug": "camping-de-brem",
@@ -27085,7 +27077,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Eschdoorn",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72074,
     "lon": 3.76935,
     "slug": "camping-de-eschdoorn",
@@ -27093,7 +27085,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Fruitgaard",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70064,
     "lon": 3.75189,
     "slug": "camping-de-fruitgaard",
@@ -27109,7 +27101,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Grienduil",
-    "province": "zuid-holland",
+    "province": "utrecht",
     "lat": 51.90077,
     "lon": 5.02664,
     "slug": "camping-de-grienduil",
@@ -27117,7 +27109,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Groene Geer",
-    "province": "zuid-holland",
+    "province": "utrecht",
     "lat": 51.89954,
     "lon": 5.02955,
     "slug": "camping-de-groene-geer",
@@ -27141,7 +27133,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Groene Weide",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.7095,
     "lon": 3.84809,
     "slug": "camping-de-groene-weide",
@@ -27157,7 +27149,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Herberg",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.78214,
     "lon": 5.10716,
     "slug": "camping-de-herberg",
@@ -27165,7 +27157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Heuvel",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68542,
     "lon": 3.90649,
     "slug": "camping-de-heuvel",
@@ -27173,7 +27165,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hoge Waard",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.77811,
     "lon": 5.07997,
     "slug": "camping-de-hoge-waard",
@@ -27181,7 +27173,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Hooge Meet",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.69674,
     "lon": 3.87903,
     "slug": "camping-de-hooge-meet",
@@ -27189,7 +27181,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Hoogte",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68597,
     "lon": 3.8879,
     "slug": "camping-de-hoogte",
@@ -27197,7 +27189,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Kaaie Paole",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.78023,
     "lon": 5.09398,
     "slug": "camping-de-kaaie-paole",
@@ -27205,7 +27197,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Kempe",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73883,
     "lon": 3.79235,
     "slug": "camping-de-kempe",
@@ -27253,7 +27245,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de la rue",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.81152,
     "lon": 4.94176,
     "slug": "camping-de-la-rue",
@@ -27285,7 +27277,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Lievelinge",
-    "province": "zuid-holland",
+    "province": "gelderland",
     "lat": 51.84555,
     "lon": 5.04017,
     "slug": "camping-de-lievelinge",
@@ -27293,7 +27285,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Linde",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.72319,
     "lon": 5.08856,
     "slug": "camping-de-linde",
@@ -27317,7 +27309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Mosterdpot",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.81734,
     "lon": 4.99765,
     "slug": "camping-de-mosterdpot",
@@ -27325,7 +27317,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Oase",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72597,
     "lon": 3.77459,
     "slug": "camping-de-oase",
@@ -27341,7 +27333,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Schelphoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71735,
     "lon": 3.82241,
     "slug": "camping-de-schelphoeve",
@@ -27349,7 +27341,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Strandloper",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73717,
     "lon": 3.83256,
     "slug": "camping-de-strandloper",
@@ -27357,7 +27349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Strohalm",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70535,
     "lon": 3.88866,
     "slug": "camping-de-strohalm",
@@ -27365,7 +27357,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Toekomst",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72244,
     "lon": 3.7617,
     "slug": "camping-de-toekomst",
@@ -27373,7 +27365,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Wijde Blick",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71852,
     "lon": 3.76701,
     "slug": "camping-de-wijde-blick",
@@ -27381,7 +27373,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping de Zeester",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70069,
     "lon": 3.88478,
     "slug": "camping-de-zeester",
@@ -27389,7 +27381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zeeuwse Kust",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73584,
     "lon": 3.80637,
     "slug": "camping-de-zeeuwse-kust",
@@ -27397,7 +27389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zeeuwse Vlag",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.6996,
     "lon": 3.9416,
     "slug": "camping-de-zeeuwse-vlag",
@@ -27405,7 +27397,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zonnehoek",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71072,
     "lon": 3.88944,
     "slug": "camping-de-zonnehoek",
@@ -27413,7 +27405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zonnehoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72689,
     "lon": 3.94838,
     "slug": "camping-de-zonnehoeve",
@@ -27421,7 +27413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping De Zwenk",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70973,
     "lon": 3.83675,
     "slug": "camping-de-zwenk",
@@ -27437,7 +27429,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Den Engelsman",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71779,
     "lon": 3.85824,
     "slug": "camping-den-engelsman",
@@ -27445,7 +27437,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Den Osse",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73881,
     "lon": 3.88755,
     "slug": "camping-den-osse",
@@ -27453,7 +27445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Duin en Strand",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73578,
     "lon": 3.82648,
     "slug": "camping-duin-en-strand",
@@ -27461,7 +27453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Duin En Strand",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73477,
     "lon": 3.82676,
     "slug": "camping-duin-en-strand-way-1335186928",
@@ -27469,7 +27461,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Duinhoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73966,
     "lon": 3.77946,
     "slug": "camping-duinhoeve",
@@ -27493,7 +27485,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Duivendijke",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71276,
     "lon": 3.89891,
     "slug": "camping-duivendijke",
@@ -27533,7 +27525,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Fort Vuren",
-    "province": "zuid-holland",
+    "province": "gelderland",
     "lat": 51.82216,
     "lon": 5.03045,
     "slug": "camping-fort-vuren",
@@ -27541,7 +27533,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Geitenbrij",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.75004,
     "lon": 4.90755,
     "slug": "camping-geitenbrij",
@@ -27557,7 +27549,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Groenhil",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73,
     "lon": 3.85887,
     "slug": "camping-groenhil",
@@ -27565,7 +27557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hakehoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.718,
     "lon": 3.80695,
     "slug": "camping-hakehoeve",
@@ -27573,7 +27565,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Helleweg",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73203,
     "lon": 3.79476,
     "slug": "camping-helleweg",
@@ -27581,7 +27573,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Brieden",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71929,
     "lon": 3.87576,
     "slug": "camping-het-brieden",
@@ -27589,7 +27581,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Het Eiland",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70227,
     "lon": 3.75499,
     "slug": "camping-het-eiland",
@@ -27645,7 +27637,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hoeve De Bonte Kraai",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.68667,
     "lon": 4.92185,
     "slug": "camping-hoeve-de-bonte-kraai",
@@ -27669,7 +27661,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hof van Renesse",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71496,
     "lon": 3.78835,
     "slug": "camping-hof-van-renesse",
@@ -27677,7 +27669,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Hoge Heul",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71453,
     "lon": 3.88271,
     "slug": "camping-hoge-heul",
@@ -27701,7 +27693,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping International",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73963,
     "lon": 3.79027,
     "slug": "camping-international",
@@ -27709,7 +27701,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Jachthaven Crezee",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.71447,
     "lon": 4.69744,
     "slug": "camping-jachthaven-crezee",
@@ -27725,7 +27717,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kijkuit",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73136,
     "lon": 3.94773,
     "slug": "camping-kijkuit",
@@ -27757,7 +27749,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kristalmaire",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70666,
     "lon": 3.93614,
     "slug": "camping-kristalmaire",
@@ -27765,7 +27757,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Kurenpolder",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.72783,
     "lon": 4.88733,
     "slug": "camping-kurenpolder",
@@ -27781,7 +27773,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping La Ferme",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71509,
     "lon": 3.88884,
     "slug": "camping-la-ferme",
@@ -27789,7 +27781,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Land & Zee",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73686,
     "lon": 3.81851,
     "slug": "camping-land-en-zee",
@@ -27805,7 +27797,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Lopswekken",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71947,
     "lon": 3.85699,
     "slug": "camping-lopswekken",
@@ -27821,7 +27813,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Mol",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.69483,
     "lon": 3.85954,
     "slug": "camping-mol",
@@ -27829,7 +27821,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Muralt",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73154,
     "lon": 3.83901,
     "slug": "camping-muralt",
@@ -27837,7 +27829,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Noordernieuwland",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73086,
     "lon": 3.90907,
     "slug": "camping-noordernieuwland",
@@ -27845,7 +27837,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Nova Cura",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70469,
     "lon": 3.86562,
     "slug": "camping-nova-cura",
@@ -27877,7 +27869,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Olden Hoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72538,
     "lon": 3.84237,
     "slug": "camping-olden-hoeve",
@@ -27885,7 +27877,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oldershof",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.7571,
     "lon": 5.01943,
     "slug": "camping-oldershof",
@@ -27901,7 +27893,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oud Bommenede",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72605,
     "lon": 3.93657,
     "slug": "camping-oud-bommenede",
@@ -27909,7 +27901,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Oud-Brabers",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68214,
     "lon": 3.75742,
     "slug": "camping-oud-brabers",
@@ -27932,7 +27924,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Camping Port Z\u00e9lande",
+    "name": "Camping Port Zélande",
     "province": "zuid-holland",
     "lat": 51.75654,
     "lon": 3.86586,
@@ -27949,7 +27941,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Recreatiebedrijf Boot",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71505,
     "lon": 3.79822,
     "slug": "camping-recreatiebedrijf-boot",
@@ -27957,7 +27949,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Residence Waterweelde",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.70806,
     "lon": 4.62726,
     "slug": "camping-residence-waterweelde",
@@ -27973,7 +27965,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ruimzicht",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.70189,
     "lon": 3.91391,
     "slug": "camping-ruimzicht",
@@ -28005,7 +27997,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Selevia Hoeve",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.7852,
     "lon": 4.86954,
     "slug": "camping-selevia-hoeve",
@@ -28013,7 +28005,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Slagershof",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.6914,
     "lon": 3.88823,
     "slug": "camping-slagershof",
@@ -28029,7 +28021,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Smallegange's Dijk",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.69013,
     "lon": 3.78192,
     "slug": "camping-smallegange-s-dijk",
@@ -28053,7 +28045,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping TellersHoeve",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.69022,
     "lon": 3.87996,
     "slug": "camping-tellershoeve",
@@ -28061,7 +28053,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Ter Leede",
-    "province": "zuid-holland",
+    "province": "utrecht",
     "lat": 51.90576,
     "lon": 5.06262,
     "slug": "camping-ter-leede",
@@ -28069,7 +28061,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Terra Promessa",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72337,
     "lon": 3.84431,
     "slug": "camping-terra-promessa",
@@ -28093,7 +28085,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Veerhoek",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71677,
     "lon": 3.97594,
     "slug": "camping-veerhoek",
@@ -28141,7 +28133,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Veldvreugd",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68654,
     "lon": 3.76649,
     "slug": "camping-veldvreugd",
@@ -28165,7 +28157,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Waleuk",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.71486,
     "lon": 5.08896,
     "slug": "camping-waleuk",
@@ -28197,7 +28189,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zilt bij Zee",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73548,
     "lon": 3.85628,
     "slug": "camping-zilt-bij-zee",
@@ -28205,7 +28197,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zonnedorp",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.74001,
     "lon": 3.78741,
     "slug": "camping-zonnedorp",
@@ -28221,7 +28213,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Camping Zonnemaire",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71193,
     "lon": 3.95342,
     "slug": "camping-zonnemaire",
@@ -28269,7 +28261,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Groene Camping in de Polder",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.69634,
     "lon": 4.70171,
     "slug": "groene-camping-in-de-polder",
@@ -28277,7 +28269,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "inicamping De Zeester",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68229,
     "lon": 3.89192,
     "slug": "inicamping-de-zeester",
@@ -28292,7 +28284,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
     "character": "coastal"
   },
   {
-    "name": "Kampeerboerderij aan\u2019t Bentwoud",
+    "name": "Kampeerboerderij aan’t Bentwoud",
     "province": "zuid-holland",
     "lat": 52.06554,
     "lon": 4.63581,
@@ -28309,7 +28301,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Landschapscamping Claeskinderen",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73373,
     "lon": 3.87604,
     "slug": "landschapscamping-claeskinderen",
@@ -28317,7 +28309,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Landschapscamping Claeskinderen",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73431,
     "lon": 3.87623,
     "slug": "landschapscamping-claeskinderen-way-1320094580",
@@ -28357,7 +28349,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Mini-Camping \"De Witboom\"",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.78725,
     "lon": 4.79424,
     "slug": "mini-camping-de-witboom",
@@ -28373,15 +28365,15 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping 't Rond'oekje",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.68974,
     "lon": 3.8995,
     "slug": "minicamping-t-rond-oekje",
     "character": "coastal"
   },
   {
-    "name": "Minicamping 't W\u00e0i-ke",
-    "province": "zuid-holland",
+    "name": "Minicamping 't Wài-ke",
+    "province": "noord-brabant",
     "lat": 51.77444,
     "lon": 5.06571,
     "slug": "minicamping-t-wai-ke",
@@ -28389,7 +28381,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Beachclub Puur",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.70608,
     "lon": 4.82159,
     "slug": "minicamping-beachclub-puur",
@@ -28397,7 +28389,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping De Welle",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.71668,
     "lon": 3.7918,
     "slug": "minicamping-de-welle",
@@ -28413,7 +28405,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Manege Grol",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.7303,
     "lon": 3.77648,
     "slug": "minicamping-manege-grol",
@@ -28421,7 +28413,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Minicamping Oud Drimmelen",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.69732,
     "lon": 4.77471,
     "slug": "minicamping-oud-drimmelen",
@@ -28453,7 +28445,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein De Knotwilg",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.79012,
     "lon": 4.79276,
     "slug": "natuurkampeerterrein-de-knotwilg",
@@ -28461,7 +28453,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "natuurkampeerterrein Hoeve Batenburg",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72613,
     "lon": 3.79686,
     "slug": "natuurkampeerterrein-hoeve-batenburg",
@@ -28469,14 +28461,14 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Natuurkampeerterrein Kampeerbosje Leerdam",
-    "province": "zuid-holland",
+    "province": "utrecht",
     "lat": 51.90211,
     "lon": 5.07329,
     "slug": "natuurkampeerterrein-kampeerbosje-leerdam",
     "character": "inland"
   },
   {
-    "name": "Natuurkampeerterrein Ta F\u00eate",
+    "name": "Natuurkampeerterrein Ta Fête",
     "province": "zuid-holland",
     "lat": 51.95886,
     "lon": 4.35314,
@@ -28485,7 +28477,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "paal kampeerplaats Jonge Deen",
-    "province": "zuid-holland",
+    "province": "noord-brabant",
     "lat": 51.73895,
     "lon": 4.74251,
     "slug": "paal-kampeerplaats-jonge-deen",
@@ -28509,7 +28501,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Recreatiepark Klaverweide",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73173,
     "lon": 3.82144,
     "slug": "recreatiepark-klaverweide",
@@ -28557,7 +28549,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Vakantiepark Schouwen",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.72861,
     "lon": 3.76163,
     "slug": "vakantiepark-schouwen",
@@ -28565,7 +28557,7 @@ export const KOOS_NL_CAMPING_PLACES: Place[] = [
   },
   {
     "name": "Zeeland Camping",
-    "province": "zuid-holland",
+    "province": "zeeland",
     "lat": 51.73358,
     "lon": 3.8668,
     "slug": "zeeland-camping",
