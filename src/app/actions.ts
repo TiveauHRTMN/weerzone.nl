@@ -710,29 +710,6 @@ export async function getProvinceVerdict(provinceLabel: string): Promise<string>
 }
 
 /**
- * Best-effort ping voor de sitemap-index. De index verwijst naar alle child-sitemaps.
- */
-export async function pingSearchConsole() {
-  const sitemapUrl = `${BASE_URL}/sitemap.xml`;
-
-  try {
-    const googlePing = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
-    const res = await fetch(googlePing);
-
-    if (res.ok) {
-      if (process.env.NODE_ENV !== "production") {
-        console.log("Google gepind voor sitemap update.");
-      }
-      return { success: true };
-    }
-    throw new Error(`Ping failed with status ${res.status}`);
-  } catch (error) {
-    console.error("Google ping mislukt:", error);
-    return { success: false };
-  }
-}
-
-/**
  * Checkt veilig of een gebruiker al een account heeft via de Admin API.
  * Gebruikt in de Smart Login flow.
  */
