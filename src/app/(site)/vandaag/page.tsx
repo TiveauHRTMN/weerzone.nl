@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Manrope } from "next/font/google";
 import DayBriefing from "@/components/DayBriefing";
+import AgentSubscribeCard from "@/components/AgentSubscribeCard";
 import { getSavedLocationServer } from "@/lib/location-cookies";
+import { nearestSettlement, placeRouteSlug } from "@/lib/places-data";
 import { DUTCH_CITIES } from "@/lib/types";
 import { buildAgentContext } from "@/lib/agents/context";
 import { getAgentPreferences } from "@/lib/agents/preferences-server";
@@ -41,7 +43,26 @@ async function VandaagFlow({ name, lat, lon }: { name: string; lat: number; lon:
     withDeadline(fetchAirQuality(lat, lon), 1200, null),
   ]);
   if (!ctx) return <div className="relative z-10 mx-auto max-w-[680px] px-4 py-14"><div className="va-card p-8 text-center"><h1 className="text-2xl font-extrabold text-slate-950">De weergegevens zijn even niet beschikbaar</h1><p className="mt-2 text-sm text-slate-600">Probeer het over een moment opnieuw.</p></div></div>;
-  return <DayBriefing ctx={ctx} preferences={preferences} dayOffset={0} airQuality={airQuality} />;
+  // Abonnement hangt aan een plaats (agent + plaats + kanaal) — resolveer de
+  // dichtstbijzijnde woonplaats bij de getoonde locatie voor het inschrijfblok.
+  const subscribePlace = nearestSettlement(lat, lon);
+  return (
+    <DayBriefing
+      ctx={ctx}
+      preferences={preferences}
+      dayOffset={0}
+      airQuality={airQuality}
+      appendedContent={
+        subscribePlace ? (
+          <AgentSubscribeCard
+            placeName={subscribePlace.name}
+            province={subscribePlace.province}
+            placeSlug={placeRouteSlug(subscribePlace)}
+          />
+        ) : undefined
+      }
+    />
+  );
 }
 
 async function VandaagContent() {

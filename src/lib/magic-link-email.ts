@@ -13,6 +13,60 @@ export type MagicLinkMode = "signup" | "login";
  * gebruiken — dat suggereert dat de gebruiker een nieuw account maakt en
  * verklaart de support-vraag "ik moest opnieuw een account aanmaken".
  */
+/**
+ * Magic-link mail voor het abonnement op Piets ochtendbericht per plaats.
+ * Eén klik = inloggen + abonnement bevestigen (de link wijst via /auth/callback
+ * naar /api/agents/subscribe/confirm). Copy in Piets stem, geen jargon.
+ */
+export function getAgentSubscribeMagicLinkHtml(placeName: string, actionLink: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piet staat klaar voor ${placeName}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:20px auto;background-color:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid #e2e8f0;">
+
+    <!-- HEADER -->
+    <div style="background:linear-gradient(135deg, #3b7ff0 0%, #1e293b 100%);padding:40px 30px;text-align:center;">
+      <div style="font-size:12px;font-weight:900;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">WEERZONE · PIET</div>
+      <h1 style="color:#ffffff;font-size:26px;font-weight:900;margin:0;letter-spacing:-0.5px;">Piet staat klaar voor ${placeName}</h1>
+    </div>
+
+    <!-- CONTENT -->
+    <div style="padding:40px 30px;text-align:center;">
+      <p style="font-size:18px;color:#1e293b;font-weight:700;margin:0 0 16px;">Goedemorgen alvast,</p>
+      <p style="font-size:15px;color:#475569;line-height:1.6;margin:0 0 32px;">
+        Je hebt je aangemeld voor Piets ochtendbericht voor <strong>${placeName}</strong>.
+        E&eacute;n klik op de knop en het is geregeld: elke ochtend het weer voor ${placeName}
+        in je mail — van uur tot uur, 48 uur vooruit. Gratis.
+      </p>
+
+      <!-- CTA BUTTON -->
+      <a href="${actionLink}" style="display:inline-block;background-color:#3b7ff0;color:#ffffff;padding:18px 40px;border-radius:100px;text-decoration:none;font-weight:900;font-size:16px;box-shadow:0 8px 20px rgba(59,127,240,0.25);">
+        Zet Piet aan voor ${placeName} →
+      </a>
+
+      <p style="font-size:12px;color:#94a3b8;margin-top:32px;line-height:1.5;">
+        Werkt de knop niet? Kopieer en plak deze link in je browser:<br>
+        <a href="${actionLink}" style="color:#3b7ff0;text-decoration:underline;">${actionLink}</a>
+      </p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="background-color:#f8fafc;padding:30px;text-align:center;border-top:1px solid #f1f5f9;">
+      <p style="margin:0;font-size:13px;color:#1e293b;font-weight:800;text-transform:uppercase;letter-spacing:1px;">48 uur vooruit. De rest is ruis.</p>
+      <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;">Je ontvangt deze mail omdat dit adres is ingevuld op weerzone.nl. Niet jij geweest? Negeer deze mail — zonder klik gebeurt er niets.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
 export function getBrandedMagicLinkHtml(
   tier: PersonaTier,
   actionLink: string,

@@ -477,6 +477,25 @@ export function findPlace(province: string, slug: string): Place | undefined {
     return ALL_PLACES.find(p => p.province === province && placeRouteSlug(p) === slug);
 }
 
+/**
+ * Dichtstbijzijnde échte NL-woonplaats bij een coördinaat. Voor surfaces zonder
+ * provincie/slug in de URL (zoals /vandaag) die toch een abonnement-per-plaats
+ * moeten kunnen aanbieden: een abonnement hangt aan een plaats, niet aan GPS.
+ */
+export function nearestSettlement(lat: number, lon: number): Place | undefined {
+  let best: Place | undefined;
+  let bestDist = Infinity;
+  for (const place of SETTLEMENT_PLACES) {
+    if (!isNLProvince(place.province)) continue;
+    const dist = (place.lat - lat) ** 2 + (place.lon - lon) ** 2;
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = place;
+    }
+  }
+  return best;
+}
+
 export function nearbyPlaces(base: Place, limit = 10): Place[] {
     const dist = (p: Place) => (p.lat - base.lat) ** 2 + (p.lon - base.lon) ** 2;
     return ALL_PLACES

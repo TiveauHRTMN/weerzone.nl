@@ -1,19 +1,27 @@
 /**
  * PIET MORNING EMAIL
- * Dagelijkse 48-uurs weerupdate voor Piet- en Reed-abonnees.
+ * Dagelijkse 48-uurs weerupdate voor Piet-abonnees.
  * Vercel cron: 0 6 * * *  (06:00 UTC = 07:00/08:00 NL)
  *
- * Volgorde per abonnee:
- *  1. Haal weersdata op voor primary_lat/lon (gegroepeerd per ~1km-grid)
- *  2. Genereer Piet-dagdeel-verhaal via Gemini (ochtend/middag/avond/nacht/morgen)
- *  3. Stuur HTML-email via Resend
+ * Schaalprincipe (handoff 2026-07-10): LLM-duiding per régio (1x/dag via de
+ * Mariana-cascade), wiskunde per plaats/abonnee — NUL LLM-calls in deze cron.
+ *
+ * Volgorde:
+ *  1. Abonnementen-per-plaats uit agent_subscriptions (subscription-first);
+ *     account-toggles + primary_lat/lon blijven de fallback zonder plaats.
+ *  2. Per unieke plaats/locatie: weersdata (wiskunde) + de opgeslagen
+ *     regio-duiding uit mariana_regions (agent_outputs.piet.text).
+ *  3. HTML-mail per abonnee via Resend, met per-abonnement uitschrijflink.
  */
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { hermesChat } from "@/lib/hermes";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { enabledAgentAccounts } from "@/lib/agents/email-recipients";
+import { activeAgentPlaceSubscriptions, enabledAgentAccounts } from "@/lib/agents/email-recipients";
+import { findPlace } from "@/lib/places-data";
+import { nearestTeslaRegion } from "@/lib/mariana/regions/nearest-region";
+import { loadRegionRow } from "@/lib/mariana/regions/storage";
+import type { MarianaSignal } from "@/lib/mariana/regions/types";
 import { getWeatherEmoji, getWeatherDescription, getWindBeaufort } from "@/lib/weather";
 
 export const dynamic = "force-dynamic";
@@ -51,35 +59,42 @@ async function fetchWeather48h(lat: number, lon: number) {
   return res.json();
 }
 
-async function generateNarrative(city: string, weatherJson: string): Promise<string> {
-  const systemInstruction = `
-Je bent Piet — de stem van de 'Meteorological Truth' bij Weerzone. 
-Jouw unique selling point: extreme precisie. Wij gissen niet, wij rekenen op de kilometer nauwkeurig.
+/** Vers genoeg = van vandaag(achtig); de Regions-run draait 1x/dag (03:30 UTC). */
+const REGION_FRESH_MS = 20 * 3600 * 1000;
 
-STIJL & TOON:
-- Gebruik exacte tijdstippen (bv. "Om 14:15 begint het te regenen" ipv "In de middag").
-- Gebruik specifieke metrics (bv. "Windstoten tot 64 km/u" ipv "Het waait hard").
-- Geen fluff: Geen vage weerspraatjes. Wees de architect van de dagplanning van de lezer.
-- Nuchter & Scherp: De waarheid is belangrijker dan een vrolijk verhaal.
+interface RegionDuiding {
+  signal: MarianaSignal | null;
+  runAt: string | null;
+}
 
-STRUCTUUR:
-SCHRIJF een krachtig verhaal voor de komende 48 uur met deze headers:
-**Ochtend** (6:00 - 12:00), **Middag** (12:00 - 18:00), **Avond** (18:00 - 0:00), **Nacht** (0:00 - 6:00), **Morgen** (prognose voor de hele dag).
+/**
+ * Piets verhaal — pure samenstelling, geen LLM. De regio-duiding komt uit de
+ * dagelijkse Mariana Regions-run (al in Piets stem, jargonvrij); de lokale
+ * openingszin is wiskunde over de plaats zelf.
+ */
+function buildNarrative(city: string, data: Record<string, unknown>, region: RegionDuiding | null): string {
+  const daily = data.daily as Record<string, number[]>;
+  const maxToday = Math.round(daily.temperature_2m_max[0]);
+  const rainToday = daily.precipitation_sum[0];
 
-GRENZEN:
-- 200–300 woorden. 
-- Max 1 emoji. 
-- Geen modelnamen noemen. 
-- 100% correct Nederlands.
-- Afsluiter: "— Piet, voor Weerzone".`.trim();
+  const parts: string[] = [];
+  parts.push(
+    rainToday > 0.1
+      ? `Vandaag in ${city}: maximaal ${maxToday}°, met bij elkaar zo'n ${rainToday.toFixed(1)} mm regen. In de dagdelen hieronder zie je precies wanneer je droog blijft.`
+      : `Vandaag in ${city}: droog, met maximaal ${maxToday}°. De dagdelen hieronder laten zien hoe de dag precies loopt.`,
+  );
 
-  return (await hermesChat(
-    [
-      { role: "system", content: systemInstruction },
-      { role: "user", content: `Stad: ${city}\n\nWeerdata (48u):\n${weatherJson}` },
-    ],
-    { model: "persona", temperature: 0.6, maxTokens: 600, nlGuard: true }
-  )).trim();
+  const fresh =
+    region?.runAt != null && Date.now() - new Date(region.runAt).getTime() < REGION_FRESH_MS;
+  const piet = fresh ? region?.signal?.agent_outputs?.piet : null;
+  const regionText = piet?.text?.trim();
+  if (regionText) parts.push(regionText);
+  if (piet?.refer_to_reed && piet.referral_reason) {
+    parts.push(`Nog even dit: ${piet.referral_reason}. Reed houdt het voor je in de gaten op weerzone.nl/reed.`);
+  }
+
+  if (!parts.some((part) => part.includes("— Piet"))) parts.push("— Piet, voor Weerzone");
+  return parts.join("\n\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -299,43 +314,70 @@ export async function GET(req: Request) {
   const resend = new Resend(resendKey);
   const admin = createSupabaseAdminClient();
 
-  // 1. Accountvoorkeuren staan in auth metadata; locatie blijft in user_profile.
+  // 1. Subscription-first: abonnementen-per-plaats uit agent_subscriptions.
+  //    De account-toggles (user_profile/auth-metadata) blijven de fallback
+  //    zonder plaats — die abonnees draaien op hun primary_lat/lon, behalve
+  //    als ze inmiddels óók een plaats-abonnement hebben (dat wint).
+  const placeSubs = await activeAgentPlaceSubscriptions(admin, "piet");
+  const subscribedUserIds = new Set(placeSubs.map((sub) => sub.userId));
+
   const pietAccounts = await enabledAgentAccounts(admin, "piet");
-  const { data: subsRaw } = await admin
+  const { data: profilesRaw } = await admin
     .from("user_profile")
     .select("id, email, primary_lat, primary_lon")
     .not("primary_lat", "is", null)
     .not("primary_lon", "is", null);
-  const subs = ((subsRaw ?? []) as { id: string; email: string | null; primary_lat: number; primary_lon: number }[])
-    .filter((profile) => pietAccounts.has(profile.id))
+  const legacySubs = ((profilesRaw ?? []) as { id: string; email: string | null; primary_lat: number; primary_lon: number }[])
+    .filter((profile) => pietAccounts.has(profile.id) && !subscribedUserIds.has(profile.id))
     .map((profile) => ({ ...profile, email: profile.email ?? pietAccounts.get(profile.id) ?? null }));
 
-  if (!subs.length) return NextResponse.json({ sent: 0, reason: "Geen ontvangers" });
+  // 2. Verzendeenheden per unieke locatie: plaats-abonnementen per plaats,
+  //    fallback-accounts per ~1km-grid (bestaand gedrag).
+  interface Recipient { email: string; unsubUrl: string }
+  interface SendUnit { label: string | null; lat: number; lon: number; recipients: Recipient[] }
+  const units = new Map<string, SendUnit>();
 
-  // 2. Groepeer op locatie
-  type SubRow = { email: string; city: string | null; lat: number; lon: number };
-  const locGroups = new Map<string, SubRow[]>();
-  for (const sub of subs) {
+  for (const sub of placeSubs) {
     if (!sub.email) continue;
-    const key = gridKey(sub.primary_lat, sub.primary_lon);
-    if (!locGroups.has(key)) locGroups.set(key, []);
-    locGroups.get(key)!.push({ email: sub.email, city: null, lat: sub.primary_lat, lon: sub.primary_lon });
+    const place = findPlace(sub.province, sub.placeSlug);
+    if (!place) continue; // plaats bestaat niet meer (opschoning) — overslaan
+    const key = `place:${sub.province}/${sub.placeSlug}`;
+    if (!units.has(key)) units.set(key, { label: place.name, lat: place.lat, lon: place.lon, recipients: [] });
+    units.get(key)!.recipients.push({
+      email: sub.email,
+      unsubUrl: `https://weerzone.nl/api/agents/unsubscribe?id=${sub.subscriptionId}`,
+    });
   }
+
+  for (const sub of legacySubs) {
+    if (!sub.email) continue;
+    const key = `grid:${gridKey(sub.primary_lat, sub.primary_lon)}`;
+    if (!units.has(key)) units.set(key, { label: null, lat: sub.primary_lat, lon: sub.primary_lon, recipients: [] });
+    units.get(key)!.recipients.push({ email: sub.email, unsubUrl: "https://weerzone.nl/mijn-weerzone" });
+  }
+
+  const totalRecipients = [...units.values()].reduce((count, unit) => count + unit.recipients.length, 0);
+  if (!totalRecipients) return NextResponse.json({ sent: 0, reason: "Geen ontvangers" });
 
   let sent = 0;
   const errors: string[] = [];
 
+  // Regio-duiding per mesoschaalregio maar één keer laden (max 11 regio's).
+  const regionCache = new Map<string, Promise<RegionDuiding | null>>();
+  const regionDuiding = (lat: number, lon: number): Promise<RegionDuiding | null> => {
+    const slug = nearestTeslaRegion(lat, lon).slug;
+    if (!regionCache.has(slug)) regionCache.set(slug, loadRegionRow(slug).catch(() => null));
+    return regionCache.get(slug)!;
+  };
+
   const results = await Promise.allSettled(
-    Array.from(locGroups.entries()).map(async ([, group]) => {
-      const first = group[0];
-      const lat = first.lat;
-      const lon = first.lon;
+    Array.from(units.values()).map(async (unit) => {
+      const { lat, lon } = unit;
+      const [data, region] = await Promise.all([fetchWeather48h(lat, lon), regionDuiding(lat, lon)]);
 
-      const data = await fetchWeather48h(lat, lon);
-
-      // Stads-naam: gebruik opgeslagen city, daarna reverse-geocode, anders coördinaten
-      let cityLabel = first.city ?? `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
-      if (!first.city) {
+      // Plaats-abonnementen hebben hun plaatsnaam; fallback probeert geocode.
+      let cityLabel = unit.label ?? `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+      if (!unit.label) {
         try {
           const geo = await fetch(
             `https://geocoding-api.open-meteo.com/v1/search?latitude=${lat}&longitude=${lon}&count=1&language=nl`
@@ -345,41 +387,17 @@ export async function GET(req: Request) {
         } catch {}
       }
 
-      const weatherJson = JSON.stringify({
-        current: data.current,
-        hourly_sample: (data.hourly?.time || []).slice(0, 48).map((t: string, i: number) => ({
-          time: t,
-          temp: data.hourly.temperature_2m[i],
-          code: data.hourly.weather_code[i],
-          precip: data.hourly.precipitation[i],
-          wind: data.hourly.wind_speed_10m[i],
-          gusts: data.hourly.wind_gusts_10m[i],
-        })),
-        daily: data.daily,
-      });
-
-      let narrative = `Goedemorgen! Vandaag in ${cityLabel}: ${getWeatherDescription(data.current.weather_code).toLowerCase()}, ${Math.round(data.current.temperature_2m)}°. Prettige dag gewenst. — Piet, voor Weerzone`;
-      try {
-        narrative = await generateNarrative(cityLabel, weatherJson);
-      } catch (e) {
-        throw new Error(`AI error ${cityLabel}: ${e}`);
-      }
-
+      const narrative = buildNarrative(cityLabel, data, region);
       const subjectEmoji = getWeatherEmoji(data.current.weather_code, true);
       const subjectTemp = Math.round(data.current.temperature_2m);
       const subject = `${subjectEmoji} ${subjectTemp}° in ${cityLabel} — jouw 48-uurs update`;
 
-      return group.map(sub => {
-        // Account-gebruikers beheren hun agents op /mijn-weerzone (ingelogd).
-        const voorkeurenUrl = `https://weerzone.nl/mijn-weerzone`;
-        const personalHtml = buildMorningEmailHtml(cityLabel, narrative, data, voorkeurenUrl);
-        return {
-          from: "Piet van Weerzone <piet@weerzone.nl>",
-          to: sub.email,
-          subject,
-          html: personalHtml,
-        };
-      });
+      return unit.recipients.map((recipient) => ({
+        from: "Piet van Weerzone <piet@weerzone.nl>",
+        to: recipient.email,
+        subject,
+        html: buildMorningEmailHtml(cityLabel, narrative, data, recipient.unsubUrl),
+      }));
     })
   );
 
@@ -403,5 +421,11 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ sent, total: subs.length, errors: errors.slice(0, 10) });
+  return NextResponse.json({
+    sent,
+    total: totalRecipients,
+    perPlace: placeSubs.filter((sub) => sub.email).length,
+    fallback: legacySubs.filter((sub) => sub.email).length,
+    errors: errors.slice(0, 10),
+  });
 }

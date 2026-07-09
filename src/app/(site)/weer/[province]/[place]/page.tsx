@@ -13,7 +13,7 @@ import { ALL_AGENT_PREFERENCES } from "@/lib/agents/preferences";
 import { fetchAirQuality } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
-import Link from "next/link";
+import AgentSubscribeCard from "@/components/AgentSubscribeCard";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
 import { venueMetaTitle } from "@/lib/venue-content";
 import "../../../vandaag/vandaag-skin.css";
@@ -251,17 +251,8 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
                 <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
 
-                {/* CTA: persoonlijk Weerzone-account voor deze plaats */}
-                <Link
-                  href={`/app/signup?city=${encodeURIComponent(place.name)}`}
-                  className="group flex items-center justify-between gap-4 rounded-3xl bg-[var(--wz-sun)] p-6 text-slate-900 shadow-[0_18px_42px_-22px_rgba(180,140,0,0.7)] transition-transform hover:scale-[1.01]"
-                >
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] opacity-60">Elke ochtend, gratis voor {place.name}</p>
-                    <p className="mt-1 text-lg font-black leading-tight tracking-tight">Je persoonlijke weerbericht →</p>
-                  </div>
-                  <span className="text-3xl" aria-hidden>📬</span>
-                </Link>
+                {/* Inschrijfblok: Piets ochtendbericht voor déze plaats (abonnement = agent + plaats) */}
+                <AgentSubscribeCard placeName={place.name} province={province} placeSlug={slug} />
 
                 <ProvinceTopCities province={province} currentCity={place.name} />
                 <NearbyLinks currentCity={place.name} places={nearby} />
