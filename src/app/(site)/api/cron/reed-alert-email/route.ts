@@ -98,9 +98,9 @@ function estofexBlockHtml(est: EstofexBeneluxSummary | null): string {
   return `
     <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:18px 20px;margin-bottom:16px;">
       <p style="margin:0 0 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.5);">
-        Europees onweer-vooruitzicht · \${lvlBadge}
+        Europees onweer-vooruitzicht · ${lvlBadge}
       </p>
-      \${est.beneluxText ? \`<p style="margin:0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;">\${est.beneluxText}</p>\` : ""}
+      ${est.beneluxText ? `<p style="margin:0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;">${est.beneluxText}</p>` : ""}
     </div>`;
 }
 
@@ -111,7 +111,7 @@ function buildAlertEmailHtml(
   estofex: EstofexBeneluxSummary | null,
 ): string {
   const style = SEVERITY_STYLE[warning.severity];
-  const unsubUrl = `https://weerzone.nl/api/unsubscribe?email=\${encodeURIComponent(email)}`;
+  const unsubUrl = `https://weerzone.nl/api/unsubscribe?email=${encodeURIComponent(email)}`;
   const detailsUrl = "https://weerzone.nl/vandaag#reed";
   const window = formatWindowLabel(warning);
   const enriched = warning.enriched;
@@ -120,48 +120,48 @@ function buildAlertEmailHtml(
     <table style="width:100%;border-collapse:collapse;margin-top:16px;">
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">CAPE-piek</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.capeMaxJkg} J/kg</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.capeMaxJkg} J/kg</td>
       </tr>
-      \${enriched.cinMaxJkg !== undefined ? \`
+      ${enriched.cinMaxJkg !== undefined ? `
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">De Deksel (CIN)</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.cinMaxJkg} J/kg</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.cinMaxJkg} J/kg</td>
       </tr>
-      \` : ""}
-      \${enriched.dewPointMaxC !== undefined ? \`
+      ` : ""}
+      ${enriched.dewPointMaxC !== undefined ? `
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Dauwpunt max</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.dewPointMaxC} °C</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.dewPointMaxC} °C</td>
       </tr>
-      \` : ""}
-      \${enriched.windShearMaxKmh !== undefined ? \`
+      ` : ""}
+      ${enriched.windShearMaxKmh !== undefined ? `
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Windschering max</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.windShearMaxKmh} km/h</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.windShearMaxKmh} km/h</td>
       </tr>
-      \` : ""}
-      \${enriched.liftedIndexMinC !== undefined ? \`
+      ` : ""}
+      ${enriched.liftedIndexMinC !== undefined ? `
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Lifted Index min</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.liftedIndexMinC} °C</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.liftedIndexMinC} °C</td>
       </tr>
-      \` : ""}
+      ` : ""}
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Regen totaal</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.precipitationTotalMm} mm</td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.precipitationTotalMm} mm</td>
       </tr>
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Regen-piek</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.precipitationPeakMm} mm <span style="font-weight:500;color:#64748b;">(\${fmtDateTime(enriched.precipitationPeakHour)})</span></td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.precipitationPeakMm} mm <span style="font-weight:500;color:#64748b;">(${fmtDateTime(enriched.precipitationPeakHour)})</span></td>
       </tr>
       <tr>
         <td style="padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Wind-piek</td>
-        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">\${enriched.windPeakKmh} km/h <span style="font-weight:500;color:#64748b;">(\${fmtDateTime(enriched.windPeakHour)})</span></td>
+        <td style="padding:10px 12px;font-size:14px;color:#0f172a;font-weight:800;">${enriched.windPeakKmh} km/h <span style="font-weight:500;color:#64748b;">(${fmtDateTime(enriched.windPeakHour)})</span></td>
       </tr>
     </table>` : "";
 
   const adviceItems = adviceFor(warning.type)
-    .map((a) => `<p style="margin:0 0 10px;font-size:14px;color:rgba(255,255,255,0.85);line-height:1.5;">\${a}</p>`)
+    .map((a) => `<p style="margin:0 0 10px;font-size:14px;color:rgba(255,255,255,0.85);line-height:1.5;">${a}</p>`)
     .join("");
 
   return `<!DOCTYPE html>
@@ -169,7 +169,7 @@ function buildAlertEmailHtml(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>\${style.label} \${warning.type} — Reed | Weerzone</title>
+  <title>${style.label} ${warning.type} — Reed | Weerzone</title>
 </head>
 <body style="margin:0;padding:0;background:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:540px;margin:0 auto;padding:32px 20px 48px;">
@@ -178,34 +178,34 @@ function buildAlertEmailHtml(
       <p style="margin:8px 0 0;font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Reed · Officiële KNMI-waarschuwing</p>
     </div>
 
-    <div style="background:\${style.bg};border:2px solid \${style.border};border-radius:20px;overflow:hidden;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-      <div style="background:\${style.border};padding:20px 24px;">
-        <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:1px;">\${style.label} · \${warning.type}</p>
-        <h1 style="margin:0;font-size:22px;font-weight:900;color:#fff;line-height:1.2;">\${warning.province} — \${city}</h1>
-        \${window ? \`<p style="margin:8px 0 0;font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">\${window}</p>\` : ""}
+    <div style="background:${style.bg};border:2px solid ${style.border};border-radius:20px;overflow:hidden;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <div style="background:${style.border};padding:20px 24px;">
+        <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:1px;">${style.label} · ${warning.type}</p>
+        <h1 style="margin:0;font-size:22px;font-weight:900;color:#fff;line-height:1.2;">${warning.province} — ${city}</h1>
+        ${window ? `<p style="margin:8px 0 0;font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">${window}</p>` : ""}
       </div>
       <div style="padding:24px;">
-        <p style="margin:0;font-size:14px;color:#475569;line-height:1.6;white-space:pre-line;">\${warning.description}</p>
-        \${detailRows}
+        <p style="margin:0;font-size:14px;color:#475569;line-height:1.6;white-space:pre-line;">${warning.description}</p>
+        ${detailRows}
       </div>
     </div>
 
-    \${estofexBlockHtml(estofex)}
+    ${estofexBlockHtml(estofex)}
 
     <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px;margin-bottom:16px;">
       <p style="margin:0 0 16px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.5);">Reed adviseert</p>
-      \${adviceItems}
+      ${adviceItems}
     </div>
 
     <div style="text-align:center;padding:8px 0 24px;">
-      <a href="\${detailsUrl}" style="display:inline-block;padding:16px 40px;background:\${style.border};color:#fff;font-weight:800;font-size:14px;border-radius:14px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 4px 24px rgba(0,0,0,0.25);">
+      <a href="${detailsUrl}" style="display:inline-block;padding:16px 40px;background:${style.border};color:#fff;font-weight:800;font-size:14px;border-radius:14px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 4px 24px rgba(0,0,0,0.25);">
         Bekijk volledig dossier →
       </a>
     </div>
 
     <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.35);line-height:1.6;">
       Reed | Weerzone — Bron: KNMI · detail-data uit Open-Meteo.<br>
-      <a href="\${unsubUrl}" style="color:rgba(255,255,255,0.5);text-decoration:underline;">Afmelden voor weeralarmen</a>
+      <a href="${unsubUrl}" style="color:rgba(255,255,255,0.5);text-decoration:underline;">Afmelden voor weeralarmen</a>
     </p>
   </div>
 </body>
@@ -257,12 +257,12 @@ async function logSent(
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   try {
     const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/reverse?latitude=\${lat}&longitude=\${lon}&language=nl`,
+      `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=nl`,
     );
     const d = await res.json();
-    return d?.results?.[0]?.name ?? `\${lat.toFixed(2)}, \${lon.toFixed(2)}`;
+    return d?.results?.[0]?.name ?? `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
   } catch {
-    return `\${lat.toFixed(2)}, \${lon.toFixed(2)}`;
+    return `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
   }
 }
 
@@ -273,7 +273,7 @@ export async function GET(req: Request) {
     process.env.NODE_ENV === "production" &&
     !isVercelCron &&
     process.env.CRON_SECRET &&
-    authHeader !== `Bearer \${process.env.CRON_SECRET}`
+    authHeader !== `Bearer ${process.env.CRON_SECRET}`
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -333,7 +333,7 @@ export async function GET(req: Request) {
         const enriched = await enrichWarning(w, lat, lon);
         const style = SEVERITY_STYLE[enriched.severity];
         const html = buildAlertEmailHtml(cityLabel, enriched, email, estofex);
-        const subject = `\${style.emoji} \${SEVERITY_LABEL[enriched.severity]}: \${enriched.type} (\${cityLabel})`;
+        const subject = `${style.emoji} ${SEVERITY_LABEL[enriched.severity]}: ${enriched.type} (${cityLabel})`;
 
         generatedAlerts.push({
           payload: {
@@ -355,7 +355,7 @@ export async function GET(req: Request) {
     if (result.status === "fulfilled" && result.value) {
       pendingAlerts.push(...result.value);
     } else if (result.status === "rejected") {
-      errors.push(`Sub processing failed: \${result.reason}`);
+      errors.push(`Sub processing failed: ${result.reason}`);
     }
   }
 
@@ -366,7 +366,7 @@ export async function GET(req: Request) {
       const { data: mailData, error: sendErr } = await resend.batch.send(payloads);
       
       if (sendErr) {
-        errors.push(`Batch send error: \${sendErr.message}`);
+        errors.push(`Batch send error: ${sendErr.message}`);
         continue;
       }
 
@@ -378,7 +378,7 @@ export async function GET(req: Request) {
         sent++;
       }));
     } catch (e) {
-      errors.push(`Batch send exception: \${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`Batch send exception: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
