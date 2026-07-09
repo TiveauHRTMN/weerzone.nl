@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Manrope } from "next/font/google";
 import DayBriefing from "@/components/DayBriefing";
 import AgentSubscribeCard from "@/components/AgentSubscribeCard";
+import ReedPushCard from "@/components/ReedPushCard";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { nearestSettlement, placeRouteSlug } from "@/lib/places-data";
 import { DUTCH_CITIES } from "@/lib/types";
@@ -54,11 +55,18 @@ async function VandaagFlow({ name, lat, lon }: { name: string; lat: number; lon:
       airQuality={airQuality}
       appendedContent={
         subscribePlace ? (
-          <AgentSubscribeCard
-            placeName={subscribePlace.name}
-            province={subscribePlace.province}
-            placeSlug={placeRouteSlug(subscribePlace)}
-          />
+          <>
+            <AgentSubscribeCard
+              placeName={subscribePlace.name}
+              province={subscribePlace.province}
+              placeSlug={placeRouteSlug(subscribePlace)}
+            />
+            <ReedPushCard
+              placeName={subscribePlace.name}
+              province={subscribePlace.province}
+              placeSlug={placeRouteSlug(subscribePlace)}
+            />
+          </>
         ) : undefined
       }
     />

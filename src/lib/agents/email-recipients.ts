@@ -17,10 +17,13 @@ export interface AgentPlaceSubscription {
  * O(abonnees) — géén scan over alle users zoals enabledAgentAccounts).
  * Best-effort: zolang de agent_subscriptions-migratie nog niet live is, geeft
  * dit [] terug zodat de crons op de account-toggles-fallback blijven draaien.
+ *
+ * channel 'push' slaat het e-mail-opzoeken over (push gaat via push_devices).
  */
 export async function activeAgentPlaceSubscriptions(
   admin: SupabaseClient,
   agent: AgentPreferenceKey,
+  channel: "email" | "push" = "email",
 ): Promise<AgentPlaceSubscription[]> {
   const perPage = 1000;
   const rows: { id: string; user_id: string; province: string; place_slug: string }[] = [];
@@ -30,7 +33,7 @@ export async function activeAgentPlaceSubscriptions(
       .from(AGENT_SUBSCRIPTIONS_TABLE)
       .select("id, user_id, province, place_slug")
       .eq("agent", agent)
-      .eq("channel", "email")
+      .eq("channel", channel)
       .is("unsubscribed_at", null)
       .range(from, from + perPage - 1);
     if (error) {
@@ -41,6 +44,16 @@ export async function activeAgentPlaceSubscriptions(
     if ((data?.length ?? 0) < perPage) break;
   }
   if (!rows.length) return [];
+
+  if (channel === "push") {
+    return rows.map((row) => ({
+      subscriptionId: row.id,
+      userId: row.user_id,
+      email: null,
+      province: row.province,
+      placeSlug: row.place_slug,
+    }));
+  }
 
   // E-mail hoort bij het account (auth.users is source-of-truth, niet de
   // user_profile-spiegel) — per unieke abonnee ophalen, in kleine parallelle

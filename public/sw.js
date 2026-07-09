@@ -48,8 +48,39 @@ async function checkWeatherAlarm(cityName, lat, lon) {
   }
 }
 
+// Web push (Reed) — payload komt als JSON van de cron: { title, body, url, tag }
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch (e) {
+    payload = { body: event.data ? event.data.text() : "" };
+  }
+  const title = payload.title || "Weerzone";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: payload.body || "",
+      icon: "/weerzone-icon.png",
+      badge: "/weerzone-icon.png",
+      tag: payload.tag || "weerzone-alert",
+      renotify: false,
+      data: { url: payload.url || "https://weerzone.nl/vandaag#reed" },
+    })
+  );
+});
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification.data?.url || "https://weerzone.nl";
-  event.waitUntil(clients.openWindow(url));
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      for (const win of wins) {
+        if (win.url.startsWith("https://weerzone.nl") && "focus" in win) {
+          win.navigate(url);
+          return win.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });

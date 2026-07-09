@@ -14,6 +14,7 @@ import { fetchAirQuality } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import AgentSubscribeCard from "@/components/AgentSubscribeCard";
+import ReedPushCard from "@/components/ReedPushCard";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
 import { venueMetaTitle } from "@/lib/venue-content";
 import "../../../vandaag/vandaag-skin.css";
@@ -251,8 +252,9 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
                 <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
 
-                {/* Inschrijfblok: Piets ochtendbericht voor déze plaats (abonnement = agent + plaats) */}
+                {/* Inschrijfblokken: Piets ochtendbericht + Reeds weeralarm voor déze plaats */}
                 <AgentSubscribeCard placeName={place.name} province={province} placeSlug={slug} />
+                <ReedPushCard placeName={place.name} province={province} placeSlug={slug} />
 
                 <ProvinceTopCities province={province} currentCity={place.name} />
                 <NearbyLinks currentCity={place.name} places={nearby} />

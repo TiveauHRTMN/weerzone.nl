@@ -14,7 +14,9 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { enabledAgentAccounts } from "@/lib/agents/email-recipients";
+import { activeAgentPlaceSubscriptions, enabledAgentAccounts } from "@/lib/agents/email-recipients";
+import { findPlace } from "@/lib/places-data";
+import { activePushDevices, pushConfigured, sendPushToDevice } from "@/lib/push";
 import {
   fetchKNMIWarnings,
   warningsForProvince,
@@ -22,6 +24,7 @@ import {
   nearestProvinceSlug,
   formatWindowLabel,
   SEVERITY_LABEL,
+  type KNMIWarning,
   type KNMIWarningEnriched,
   type KNMISeverity,
 } from "@/lib/knmi-warnings";
@@ -213,22 +216,31 @@ async function alreadySent(
   admin: ReturnType<typeof createSupabaseAdminClient>,
   userId: string,
   warningKey: string,
+  channel: "email" | "push" = "email",
 ): Promise<boolean> {
-  const { data } = await admin
+  const { data, error } = await admin
     .from("reed_warning_alerts")
     .select("id")
     .eq("user_id", userId)
     .eq("warning_key", warningKey)
+    .eq("channel", channel)
     .limit(1);
+  if (error) {
+    // Fail-safe: liever een alert overslaan dan dezelfde uitgifte spammen
+    // (bv. zolang de channel-kolom-migratie nog niet live is).
+    console.error("[reed-alert] dedup-check faalde:", error.message);
+    return true;
+  }
   return !!(data && data.length);
 }
 
 async function logSent(
   admin: ReturnType<typeof createSupabaseAdminClient>,
   userId: string,
-  email: string,
-  warning: KNMIWarningEnriched,
+  email: string | null,
+  warning: Pick<KNMIWarning, "key" | "provinceSlug" | "severity" | "type">,
   resendId: string | null,
+  channel: "email" | "push" = "email",
 ): Promise<void> {
   await admin.from("reed_warning_alerts").insert({
     user_id: userId,
@@ -238,6 +250,7 @@ async function logSent(
     severity: warning.severity,
     type: warning.type,
     resend_id: resendId,
+    channel,
   });
 }
 
@@ -369,10 +382,53 @@ export async function GET(req: Request) {
     }
   }
 
+  // PUSH (blok b): reed-abonnees per plaats met channel='push'. Zelfde
+  // KNMI-delta, eigen dedup-kanaal — één mail én één push per uitgifte mag,
+  // dubbel binnen een kanaal nooit. De provincie komt direct uit het
+  // abonnement, dus geen reverse geocode nodig.
+  let pushSent = 0;
+  const pushSubs = await activeAgentPlaceSubscriptions(admin, "reed", "push");
+  if (pushSubs.length && pushConfigured()) {
+    const devicesByUser = await activePushDevices(admin, [...new Set(pushSubs.map((s) => s.userId))]);
+
+    for (const sub of pushSubs) {
+      const devices = devicesByUser.get(sub.userId) ?? [];
+      if (!devices.length) continue;
+
+      const subWarnings = warningsForProvince(allWarnings, sub.province);
+      for (const warning of subWarnings) {
+        if (await alreadySent(admin, sub.userId, warning.key, "push")) continue;
+
+        const place = findPlace(sub.province, sub.placeSlug);
+        const style = SEVERITY_STYLE[warning.severity];
+        const window = formatWindowLabel(warning);
+        const payload = {
+          title: `${style.emoji} ${SEVERITY_LABEL[warning.severity]}: ${warning.type}${place ? ` (${place.name})` : ""}`,
+          body: `${window ? `${window} · ` : ""}${warning.description.replace(/\s+/g, " ").slice(0, 160)}`,
+          url: "https://weerzone.nl/vandaag#reed",
+          tag: `reed-${warning.key}`,
+        };
+
+        let delivered = false;
+        for (const device of devices) {
+          const result = await sendPushToDevice(admin, device, payload);
+          if (result.ok) delivered = true;
+          else if (result.reason) errors.push(`push: ${result.reason}`);
+        }
+        if (delivered) {
+          await logSent(admin, sub.userId, null, warning, null, "push");
+          pushSent += 1;
+        }
+      }
+    }
+  }
+
   return NextResponse.json({
     sent,
+    pushSent,
     activeWarnings: allWarnings.length,
     reedSubs: validSubs.length,
+    reedPushSubs: pushSubs.length,
     errors: errors.slice(0, 10),
   });
 }
