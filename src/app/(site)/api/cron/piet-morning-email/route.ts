@@ -18,6 +18,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { activeAgentPlaceSubscriptions, enabledAgentAccounts } from "@/lib/agents/email-recipients";
+import { loadScoreDigest, gradenTekst, scoreVerdict, type PlaceScoreDigest } from "@/lib/agents/scorecard";
 import { findPlace } from "@/lib/places-data";
 import { nearestTeslaRegion } from "@/lib/mariana/regions/nearest-region";
 import { loadRegionRow } from "@/lib/mariana/regions/storage";
@@ -72,7 +73,12 @@ interface RegionDuiding {
  * dagelijkse Mariana Regions-run (al in Piets stem, jargonvrij); de lokale
  * openingszin is wiskunde over de plaats zelf.
  */
-function buildNarrative(city: string, data: Record<string, unknown>, region: RegionDuiding | null): string {
+function buildNarrative(
+  city: string,
+  data: Record<string, unknown>,
+  region: RegionDuiding | null,
+  score: PlaceScoreDigest | null,
+): string {
   const daily = data.daily as Record<string, number[]>;
   const maxToday = Math.round(daily.temperature_2m_max[0]);
   const rainToday = daily.precipitation_sum[0];
@@ -91,6 +97,18 @@ function buildNarrative(city: string, data: Record<string, unknown>, region: Reg
   if (regionText) parts.push(regionText);
   if (piet?.refer_to_reed && piet.referral_reason) {
     parts.push(`Nog even dit: ${piet.referral_reason}. Reed houdt het voor je in de gaten op weerzone.nl/reed.`);
+  }
+
+  // Gelijk-gehad: gisteren beloofd vs gemeten — de meting is ground truth.
+  if (score?.yesterday) {
+    const { predictedMax, measuredMax } = score.yesterday;
+    let zin =
+      `Gisteren beloofde ik maximaal ${gradenTekst(predictedMax)}° — het werd ${gradenTekst(measuredMax)}°. ` +
+      scoreVerdict(measuredMax - predictedMax);
+    if (score.stats.days >= 7) {
+      zin += ` Zo houd ik mezelf scherp: de afgelopen ${score.stats.days} dagen zat ik er ${score.stats.hits} keer hooguit één graad naast.`;
+    }
+    parts.push(zin);
   }
 
   if (!parts.some((part) => part.includes("— Piet"))) parts.push("— Piet, voor Weerzone");
@@ -314,6 +332,9 @@ export async function GET(req: Request) {
   const resend = new Resend(resendKey);
   const admin = createSupabaseAdminClient();
 
+  // Gelijk-gehad-scores: één query voor alle plaatsen (blok c).
+  const scoreDigest = await loadScoreDigest(admin).catch(() => new Map<string, PlaceScoreDigest>());
+
   // 1. Subscription-first: abonnementen-per-plaats uit agent_subscriptions.
   //    De account-toggles (user_profile/auth-metadata) blijven de fallback
   //    zonder plaats — die abonnees draaien op hun primary_lat/lon, behalve
@@ -334,7 +355,7 @@ export async function GET(req: Request) {
   // 2. Verzendeenheden per unieke locatie: plaats-abonnementen per plaats,
   //    fallback-accounts per ~1km-grid (bestaand gedrag).
   interface Recipient { email: string; unsubUrl: string }
-  interface SendUnit { label: string | null; lat: number; lon: number; recipients: Recipient[] }
+  interface SendUnit { label: string | null; lat: number; lon: number; scoreKey: string | null; recipients: Recipient[] }
   const units = new Map<string, SendUnit>();
 
   for (const sub of placeSubs) {
@@ -342,7 +363,7 @@ export async function GET(req: Request) {
     const place = findPlace(sub.province, sub.placeSlug);
     if (!place) continue; // plaats bestaat niet meer (opschoning) — overslaan
     const key = `place:${sub.province}/${sub.placeSlug}`;
-    if (!units.has(key)) units.set(key, { label: place.name, lat: place.lat, lon: place.lon, recipients: [] });
+    if (!units.has(key)) units.set(key, { label: place.name, lat: place.lat, lon: place.lon, scoreKey: `${sub.province}/${sub.placeSlug}`, recipients: [] });
     units.get(key)!.recipients.push({
       email: sub.email,
       unsubUrl: `https://weerzone.nl/api/agents/unsubscribe?id=${sub.subscriptionId}`,
@@ -352,7 +373,7 @@ export async function GET(req: Request) {
   for (const sub of legacySubs) {
     if (!sub.email) continue;
     const key = `grid:${gridKey(sub.primary_lat, sub.primary_lon)}`;
-    if (!units.has(key)) units.set(key, { label: null, lat: sub.primary_lat, lon: sub.primary_lon, recipients: [] });
+    if (!units.has(key)) units.set(key, { label: null, lat: sub.primary_lat, lon: sub.primary_lon, scoreKey: null, recipients: [] });
     units.get(key)!.recipients.push({ email: sub.email, unsubUrl: "https://weerzone.nl/mijn-weerzone" });
   }
 
@@ -387,7 +408,12 @@ export async function GET(req: Request) {
         } catch {}
       }
 
-      const narrative = buildNarrative(cityLabel, data, region);
+      const narrative = buildNarrative(
+        cityLabel,
+        data,
+        region,
+        unit.scoreKey ? scoreDigest.get(unit.scoreKey) ?? null : null,
+      );
       const subjectEmoji = getWeatherEmoji(data.current.weather_code, true);
       const subjectTemp = Math.round(data.current.temperature_2m);
       const subject = `${subjectEmoji} ${subjectTemp}° in ${cityLabel} — jouw 48-uurs update`;
