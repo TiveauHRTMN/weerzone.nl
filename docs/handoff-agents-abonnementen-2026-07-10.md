@@ -110,11 +110,14 @@ channel ('email'; push later), created_at, unsubscribed_at`
   `/api/cron/piet-scorecard?phase=predict|verify` (05:50/20:30 UTC in
   vercel.json), score-zin in de ochtendmail, `PietScoreCard` op /vandaag.
   Plan: `docs/superpowers/plans/2026-07-10-piet-gelijk-gehad-score.md`.
-  ⚠️ **Enige openstaande stap**: `supabase/migrations/20260710_piet_scorecard.sql`
-  draaien in de Supabase SQL editor (browser-extensie was offline; geen
-  DB-wachtwoord in env). Alles is fail-soft tot die tijd — predict-run gaf
-  netjes `ok:false, reason: tabel ontbreekt`. Na de migratie: predict + verify
-  handmatig triggeren, volgende ochtend mail checken op de gisteren-zin.
+  ✅ Migratie door Rowan gedraaid (2026-07-10 avond); end-to-end geverifieerd:
+  predict `ok:true saved:2` (Winkel + De Bilt), verify `measured:2`
+  (Winkel 25,3° voorspeld / 26,0° gemeten via station Berkhout; De Bilt
+  28,1°/27,2°), anon-key → 42501 permission denied. Zoutkamp-testrij
+  uitgeschreven — Rowan woont in Winkel. De gisteren-zin en de /vandaag-kaart
+  horen morgen (11 juli) te verschijnen op basis van de rij van 10 juli;
+  kanttekening: die eerste rij is 's avonds voorspeld (na de dagmax), de
+  eerste éérlijke cyclus start met de 05:50-cron van morgenochtend.
 - **(d)** Koos deelbaar (share-kaart van de weekend-keuze).
 
 ## Sleutelbestanden
