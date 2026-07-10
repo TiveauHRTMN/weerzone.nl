@@ -100,9 +100,21 @@ channel ('email'; push later), created_at, unsubscribed_at`
 ## Daarna (volgorde)
 
 - **(b)** Reed → web push (PWA; VAPID + service worker; zelfde delta-cron).
+  ✅ 2026-07-10 live (232b969 + fix add2706).
 - **(c)** Gelijk-gehad-score: dagelijkse job die Piets voorspelling per plaats
   opslaat + 's avonds vergelijkt met metingen (KNMI 10-min-data ligt er al
   van de kaart-temps); score in mail + /piet.
+  ✅ 2026-07-10 gebouwd & gedeployd: `piet_scorecard`-migratie,
+  `src/lib/agents/scorecard.ts` (wiskunde + persistentie),
+  `fetchStationDayMaxTemp` (KNMI EDR dagmax), cron
+  `/api/cron/piet-scorecard?phase=predict|verify` (05:50/20:30 UTC in
+  vercel.json), score-zin in de ochtendmail, `PietScoreCard` op /vandaag.
+  Plan: `docs/superpowers/plans/2026-07-10-piet-gelijk-gehad-score.md`.
+  ⚠️ **Enige openstaande stap**: `supabase/migrations/20260710_piet_scorecard.sql`
+  draaien in de Supabase SQL editor (browser-extensie was offline; geen
+  DB-wachtwoord in env). Alles is fail-soft tot die tijd — predict-run gaf
+  netjes `ok:false, reason: tabel ontbreekt`. Na de migratie: predict + verify
+  handmatig triggeren, volgende ochtend mail checken op de gisteren-zin.
 - **(d)** Koos deelbaar (share-kaart van de weekend-keuze).
 
 ## Sleutelbestanden
