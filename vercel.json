@@ -45,6 +45,14 @@
       "schedule": "0 7 * * 4"
     },
     {
+      "path": "/api/cron/piet-scorecard?phase=predict",
+      "schedule": "50 5 * * *"
+    },
+    {
+      "path": "/api/cron/piet-scorecard?phase=verify",
+      "schedule": "30 20 * * *"
+    },
+    {
       "path": "/api/cron/indexnow-ping",
       "schedule": "0 5 * * *"
     },
