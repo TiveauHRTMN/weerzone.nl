@@ -23,7 +23,9 @@ export type AgentHeadsUpCategory =
   | "thunderstorm_risk"
   | "better_place"
   | "going_out"
-  | "business_opportunity";
+  | "business_opportunity"
+  | "weather_shift"
+  | "dry_window";
 
 export type AgentHeadsUpSeverity = "info" | "useful" | "important" | "urgent";
 
