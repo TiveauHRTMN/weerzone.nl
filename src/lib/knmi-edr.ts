@@ -145,6 +145,45 @@ export async function fetchNearestStationObservation(
   }
 }
 
+/**
+ * Gemeten dagmax (ta) van het station dichtst bij (lat, lon), over de UTC-dag
+ * dayISO (YYYY-MM-DD). De dagmax valt vrijwel altijd midden op de dag, dus het
+ * UTC-venster dekt de NL-dagmax; de avond-cron draait na 20:00 UTC zodat de
+ * piek zeker binnen is. Minimaal 6 uur aan 10-min-waarden vereist, anders null
+ * (halve dagen leveren geen eerlijke max op).
+ */
+export async function fetchStationDayMaxTemp(
+  lat: number,
+  lon: number,
+  dayISO: string
+): Promise<{ stationId: string; stationName: string; maxTemp: number } | null> {
+  const station = await nearestKNMIStationId(lat, lon);
+  if (!station) return null;
+
+  const headers = edrHeaders();
+  const params = new URLSearchParams({
+    datetime: `${dayISO}T00:00:00Z/${dayISO}T23:59:59Z`,
+    "parameter-name": "ta",
+    f: "CoverageJSON",
+  });
+
+  try {
+    const res = await fetch(
+      `${EDR_BASE}/collections/10-minute-in-situ-meteorological-observations/locations/${encodeURIComponent(station.id)}?${params}`,
+      { headers, next: { revalidate: 0 } }
+    );
+    if (!res.ok) return null;
+    const cj = await res.json();
+    const coverage = cj?.type === "CoverageCollection" ? cj?.coverages?.[0] : cj;
+    const values: (number | null)[] = coverage?.ranges?.ta?.values ?? [];
+    const temps = values.filter((v): v is number => typeof v === "number");
+    if (temps.length < 36) return null; // < 6 uur aan metingen
+    return { stationId: station.id, stationName: station.name, maxTemp: Math.max(...temps) };
+  } catch {
+    return null;
+  }
+}
+
 // ─── EDR: nearest station ID ──────────────────────────────────────────────────
 
 interface LocationFeature {
