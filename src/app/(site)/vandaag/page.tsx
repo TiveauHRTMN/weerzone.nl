@@ -4,6 +4,7 @@ import { Manrope } from "next/font/google";
 import DayBriefing from "@/components/DayBriefing";
 import AgentSubscribeCard from "@/components/AgentSubscribeCard";
 import ReedPushCard from "@/components/ReedPushCard";
+import PietScoreCard from "@/components/PietScoreCard";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { nearestSettlement, placeRouteSlug } from "@/lib/places-data";
 import { DUTCH_CITIES } from "@/lib/types";
@@ -56,6 +57,11 @@ async function VandaagFlow({ name, lat, lon }: { name: string; lat: number; lon:
       appendedContent={
         subscribePlace ? (
           <>
+            <PietScoreCard
+              placeName={subscribePlace.name}
+              province={subscribePlace.province}
+              placeSlug={placeRouteSlug(subscribePlace)}
+            />
             <AgentSubscribeCard
               placeName={subscribePlace.name}
               province={subscribePlace.province}
