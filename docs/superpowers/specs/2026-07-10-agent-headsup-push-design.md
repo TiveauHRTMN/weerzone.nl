@@ -1,6 +1,6 @@
 # Agents die je opzoeken — heads-up-push, slim profiel & regiekamer
 
-**Datum:** 2026-07-10 · **Status:** ontwerp goedgekeurd in gesprek met Rowan
+**Datum:** 2026-07-10 · **Status:** plan 1 (de motor) LIVE 2026-07-11 — migratie gedraaid, cron geregistreerd, test-push e2e bevestigd op 2 apparaten, dry-run correct stil bij droog weer; open observaties: eerste echte omslag-push (dedup/budget in het wild) en Reed-all-clear bij een aflopende waarschuwing. Plan 2 (onboarding/PWA/regiekamer) nog te plannen.
 **Vervolg op:** `docs/handoff-agents-abonnementen-2026-07-10.md` (blok a/b/c live)
 
 ## 1. Doel
