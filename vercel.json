@@ -53,6 +53,10 @@
       "schedule": "30 20 * * *"
     },
     {
+      "path": "/api/cron/agent-headsup-push",
+      "schedule": "*/30 * * * *"
+    },
+    {
       "path": "/api/cron/indexnow-ping",
       "schedule": "0 5 * * *"
     },
