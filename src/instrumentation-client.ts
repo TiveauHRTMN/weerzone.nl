@@ -21,3 +21,13 @@ if (key && typeof window !== "undefined") {
     window.setTimeout(init, 1500);
   }
 }
+
+// PWA: het install-prompt-event vuurt vóór React mount; hier vangen zodat
+// PwaInstallCard hem later kan afvuren (spec agent-headsup §3D).
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    (window as unknown as { __wzInstallPrompt?: Event }).__wzInstallPrompt = e;
+    window.dispatchEvent(new CustomEvent("wz-install-ready"));
+  });
+}

@@ -7,6 +7,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://weerzone.nl"),
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "WEERZONE",
+    statusBarStyle: "default",
+  },
   title: {
     default: "WEERZONE | Weerkeuzes voor vandaag en morgen",
     template: "%s | WEERZONE",
