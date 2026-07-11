@@ -254,6 +254,69 @@ async function logSent(
   });
 }
 
+/**
+ * All-clear (spec 2026-07-10 §3G): wie een push kreeg voor een waarschuwing
+ * die niet meer actief is, krijgt één afmelding — Reed maakt af waar hij aan
+ * begint. Dedup via warning_key + "|clear" in dezelfde tabel.
+ */
+async function sendAllClearPushes(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  activeKeys: Set<string>,
+): Promise<{ cleared: number; errors: string[] }> {
+  const errors: string[] = [];
+  if (!pushConfigured()) return { cleared: 0, errors };
+
+  const since = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+  const { data, error } = await admin
+    .from("reed_warning_alerts")
+    .select("user_id, warning_key, province_slug, severity, type")
+    .eq("channel", "push")
+    .gte("sent_at", since);
+  if (error || !data?.length) return { cleared: 0, errors };
+
+  const rows = data as { user_id: string; warning_key: string; province_slug: string; severity: string; type: string }[];
+  const clearedAlready = new Set(
+    rows.filter((r) => r.warning_key.endsWith("|clear")).map((r) => `${r.user_id}|${r.warning_key}`),
+  );
+  const candidates = rows.filter(
+    (r) =>
+      !r.warning_key.endsWith("|clear") &&
+      !activeKeys.has(r.warning_key) &&
+      !clearedAlready.has(`${r.user_id}|${r.warning_key}|clear`),
+  );
+  if (!candidates.length) return { cleared: 0, errors };
+
+  const devicesByUser = await activePushDevices(admin, [...new Set(candidates.map((c) => c.user_id))]);
+  let cleared = 0;
+  for (const c of candidates) {
+    const devices = devicesByUser.get(c.user_id) ?? [];
+    if (!devices.length) continue;
+    let delivered = false;
+    for (const device of devices) {
+      const result = await sendPushToDevice(admin, device, {
+        title: `✅ Voorbij: ${c.type}`,
+        body: "De waarschuwing is afgelopen. Komende uren rustig weer.",
+        url: "https://weerzone.nl/vandaag#reed",
+        tag: `reed-${c.warning_key}-clear`,
+      });
+      if (result.ok) delivered = true;
+      else if (result.reason) errors.push(`all-clear: ${result.reason}`);
+    }
+    if (delivered) {
+      await logSent(
+        admin,
+        c.user_id,
+        null,
+        { key: `${c.warning_key}|clear`, provinceSlug: c.province_slug, severity: c.severity as KNMIWarning["severity"], type: c.type },
+        null,
+        "push",
+      );
+      cleared += 1;
+    }
+  }
+  return { cleared, errors };
+}
+
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   try {
     const res = await fetch(
@@ -289,8 +352,13 @@ export async function GET(req: Request) {
     fetchKNMIWarnings(),
     fetchEstofexBeneluxSummary(2).catch(() => null),
   ]);
+  // All-clear vóór de vroege return: juist als waarschuwingen verdwijnen
+  // moet Reed afmelden bij wie de oorspronkelijke push kreeg.
+  const activeKeys = new Set(allWarnings.map((w) => w.key));
+  const allClear = await sendAllClearPushes(admin, activeKeys);
+
   if (allWarnings.length === 0) {
-    return NextResponse.json({ sent: 0, reason: "Geen actieve KNMI-waarschuwingen" });
+    return NextResponse.json({ sent: 0, cleared: allClear.cleared, reason: "Geen actieve KNMI-waarschuwingen" });
   }
 
   // 2. Accountvoorkeuren staan in auth metadata; locatie blijft in user_profile.
@@ -426,9 +494,10 @@ export async function GET(req: Request) {
   return NextResponse.json({
     sent,
     pushSent,
+    cleared: allClear.cleared,
     activeWarnings: allWarnings.length,
     reedSubs: validSubs.length,
     reedPushSubs: pushSubs.length,
-    errors: errors.slice(0, 10),
+    errors: [...errors, ...allClear.errors].slice(0, 10),
   });
 }
