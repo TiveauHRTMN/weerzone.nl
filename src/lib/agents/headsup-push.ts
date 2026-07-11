@@ -238,8 +238,13 @@ export function selectWithinBudget(
   candidates: PushCandidate[],
   sentKeys: Set<string>,
   countsByAgent: Map<string, number>,
+  limitOverrides?: Partial<Record<string, number>>,
 ): PushCandidate[] {
-  const limits: Record<string, number> = { piet: PIET_MAX_PER_DAY, koos: KOOS_MAX_PER_DAY };
+  const limits: Record<string, number> = {
+    piet: PIET_MAX_PER_DAY,
+    koos: KOOS_MAX_PER_DAY,
+    ...limitOverrides,
+  };
   const counts = new Map(countsByAgent);
   const ordered = [...candidates].sort((a, b) => Number(b.matchedMoment) - Number(a.matchedMoment));
   const out: PushCandidate[] = [];

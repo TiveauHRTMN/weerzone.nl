@@ -76,3 +76,29 @@ export async function logPushed(
   );
   if (error) console.error("[headsup-log] loggen faalde:", error.message);
 }
+
+export type HeadsupBudget = "moments_only" | "standard" | "low";
+
+/** Persoonlijk budget per gebruiker (user_profile.headsup_budget).
+ *  Fail-soft: lege map ⇒ iedereen `standard`. */
+export async function loadHeadsupBudgets(
+  admin: SupabaseClient,
+  userIds: string[],
+): Promise<Map<string, HeadsupBudget>> {
+  const out = new Map<string, HeadsupBudget>();
+  if (!userIds.length) return out;
+  const { data, error } = await admin
+    .from("user_profile")
+    .select("id, headsup_budget")
+    .in("id", userIds);
+  if (error) {
+    console.error("[headsup-log] budget niet leesbaar:", error.message);
+    return out;
+  }
+  for (const row of (data ?? []) as { id: string; headsup_budget: string | null }[]) {
+    if (row.headsup_budget === "moments_only" || row.headsup_budget === "low") {
+      out.set(row.id, row.headsup_budget);
+    }
+  }
+  return out;
+}

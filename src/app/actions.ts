@@ -39,6 +39,7 @@ export async function updateProfile(args: {
   pietOn?: boolean;
   reedOn?: boolean;
   koosOn?: boolean;
+  headsupBudget?: "moments_only" | "standard" | "low";
 }) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -49,6 +50,7 @@ export async function updateProfile(args: {
   if (args.postcode !== undefined) updates.postcode = args.postcode;
   if (args.lat !== undefined) updates.primary_lat = args.lat;
   if (args.lon !== undefined) updates.primary_lon = args.lon;
+  if (args.headsupBudget !== undefined) updates.headsup_budget = args.headsupBudget;
   if (Object.keys(updates).length > 0) {
     const { error } = await supabase
       .from("user_profile")

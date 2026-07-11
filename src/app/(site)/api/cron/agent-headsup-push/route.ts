@@ -22,7 +22,8 @@ import {
   KOOS_DAYS,
   type PushCandidate,
 } from "@/lib/agents/headsup-push";
-import { loadPushState, logPushed, nlDayStart } from "@/lib/agents/headsup-log";
+import { loadPushState, logPushed, nlDayStart, loadHeadsupBudgets } from "@/lib/agents/headsup-log";
+import { captureServerEvent } from "@/lib/analytics-server";
 import { findPlace } from "@/lib/places-data";
 import { activePushDevices, pushConfigured, sendPushToDevice } from "@/lib/push";
 
@@ -84,10 +85,11 @@ export async function GET(req: Request) {
   for (const sub of koosSubs) addSub(sub, "koos");
 
   const allUserIds = [...new Set([...pietSubs, ...koosSubs].map((s) => s.userId))];
-  const [momentsByUser, stateByUser, devicesByUser] = await Promise.all([
+  const [momentsByUser, stateByUser, devicesByUser, budgetByUser] = await Promise.all([
     loadMomentsForUsers(admin, allUserIds),
     loadPushState(admin, allUserIds, nlDayStart(now)),
     dry ? Promise.resolve(new Map()) : activePushDevices(admin, allUserIds),
+    loadHeadsupBudgets(admin, allUserIds),
   ]);
 
   let sent = 0;
@@ -131,7 +133,17 @@ export async function GET(req: Request) {
           stateByUser.set(userId, { sentKeys: new Set<string>(), countsByAgent: new Map<string, number>() });
         }
         const state = stateByUser.get(userId)!;
-        const picked = selectWithinBudget(cands, state.sentKeys, state.countsByAgent);
+        const budget = budgetByUser.get(userId) ?? "standard";
+        const eligible =
+          budget === "moments_only"
+            ? cands.filter((c) => c.agent !== "piet" || c.matchedMoment)
+            : cands;
+        const picked = selectWithinBudget(
+          eligible,
+          state.sentKeys,
+          state.countsByAgent,
+          budget === "low" ? { piet: 1 } : undefined,
+        );
         if (picked.length) perUserTargets.set(userId, picked);
       }
 
@@ -162,6 +174,13 @@ export async function GET(req: Request) {
           }
           if (delivered) {
             sent += 1;
+            await captureServerEvent(userId, "push_sent", {
+              agent: candidate.agent,
+              category: candidate.category,
+              matched_moment: candidate.matchedMoment,
+              province: job.province,
+              place: job.placeSlug,
+            });
             // Direct loggen én de in-memory state bijwerken zodat dezelfde
             // gebruiker binnen deze run niet over budget gaat.
             await logPushed(admin, [{
