@@ -1,6 +1,15 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AgentMoment, MomentKind, MomentTransport } from "@/lib/agents/moments-shared";
+import { AGENT_MOMENTS_TABLE } from "@/lib/agents/moments-shared";
+
+export {
+  AGENT_MOMENTS_TABLE,
+  type MomentKind,
+  type MomentTransport,
+  type AgentMoment,
+} from "@/lib/agents/moments-shared";
 
 /**
  * Persoonlijke momenten (spec 2026-07-10 §3C): het ritme van de gebruiker —
@@ -8,23 +17,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Schema: supabase/migrations/20260711_agent_headsup_push.sql. Onboarding
  * (plan 2) schrijft deze rijen; de cron leest ze via de service role.
  */
-
-export const AGENT_MOMENTS_TABLE = "agent_moments";
-
-export type MomentKind = "commute" | "dog" | "outdoor" | "laundry" | "sport" | "custom";
-export type MomentTransport = "bike" | "ov" | "car" | "none";
-
-export interface AgentMoment {
-  id: string;
-  kind: MomentKind;
-  label: string;
-  /** ISO-weekdagen, 1=ma .. 7=zo. */
-  days: number[];
-  /** "HH:MM" of "HH:MM:SS" (Postgres time). */
-  windowStart: string;
-  windowEnd: string;
-  transport: MomentTransport | null;
-}
 
 export interface MomentWindow {
   moment: AgentMoment;
