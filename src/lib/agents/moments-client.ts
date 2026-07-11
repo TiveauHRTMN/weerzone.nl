@@ -96,17 +96,29 @@ export async function deleteMoment(supabase: SupabaseClient, id: string): Promis
   return { ok: !error };
 }
 
-/** Onboarding is de bron: bestaande rijen weg, nieuwe set erin. */
+/** Onboarding is de bron: nieuwe set erin, daarná de oude rijen weg —
+ *  zo blijft bij een mislukte insert de bestaande set staan. */
 export async function replaceOnboardingMoments(
   supabase: SupabaseClient,
   userId: string,
   moments: MomentInsert[],
 ): Promise<{ ok: boolean }> {
-  const { error: delError } = await supabase.from(AGENT_MOMENTS_TABLE).delete().eq("user_id", userId);
-  if (delError) return { ok: false };
-  if (!moments.length) return { ok: true };
-  const { error } = await supabase.from(AGENT_MOMENTS_TABLE).insert(moments.map((m) => toRow(userId, m)));
-  return { ok: !error };
+  const { data: existing, error: listError } = await supabase
+    .from(AGENT_MOMENTS_TABLE)
+    .select("id")
+    .eq("user_id", userId);
+  if (listError) return { ok: false };
+  if (moments.length) {
+    const { error } = await supabase.from(AGENT_MOMENTS_TABLE).insert(moments.map((m) => toRow(userId, m)));
+    if (error) return { ok: false };
+  }
+  const oldIds = ((existing ?? []) as { id: string }[]).map((r) => r.id);
+  if (oldIds.length) {
+    // Mislukt dit, dan staan er tijdelijk dubbelen — een volgende run ruimt op.
+    const { error: delError } = await supabase.from(AGENT_MOMENTS_TABLE).delete().in("id", oldIds);
+    if (delError) return { ok: false };
+  }
+  return { ok: true };
 }
 
 /** Onboarding-antwoorden (spec §3C) → momenten-rijen. Puur; smoketestbaar. */
