@@ -54,7 +54,7 @@ npm run build
 npm run test:e2e
 ```
 
-Playwright starts the development server automatically unless `PLAYWRIGHT_BASE_URL` targets an existing environment. Mobile Chromium is the first project; desktop Chromium is the second.
+Playwright builds and starts the production artifact automatically unless `PLAYWRIGHT_BASE_URL` targets an existing environment. Mobile Chromium is the first project; desktop Chromium is the second. Use `test:e2e:fast` only when a current production build/server is already available.
 
 ## Deployment
 
