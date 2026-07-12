@@ -18,6 +18,8 @@ export async function captureServerEvent(
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ api_key: key, event, distinct_id: distinctId, properties: properties ?? {} }),
+      // Trage PostHog mag de bezorg-lus van de cron niet ophouden.
+      signal: AbortSignal.timeout(1500),
     });
   } catch {
     // stil: analytics is bijzaak
