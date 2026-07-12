@@ -1,0 +1,600 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CoverageLevel {
+  FLAGSHIP
+  STANDARD
+  BASIC
+}
+
+enum IndoorOutdoor {
+  INDOOR
+  OUTDOOR
+  MIXED
+}
+
+enum SeasonWindowKind {
+  FIXED_PERIOD
+  ANNUAL_RECURRING
+  PEAK_SEASON
+  SHOULDER_SEASON
+  TEMPORARY_EVENT
+  WILDLIFE_PERIOD
+  WET_SEASON
+  DRY_SEASON
+  PUBLIC_HOLIDAY
+}
+
+enum SeasonStatus {
+  PEAK
+  AVAILABLE
+  LIMITED
+  UNAVAILABLE
+}
+
+enum SourceAuthority {
+  OFFICIAL
+  LOCAL_VERIFIED
+  CURRENT
+  HISTORICAL
+  INDICATIVE
+  AI_SUMMARY
+}
+
+enum ProviderFallbackStatus {
+  LIVE
+  CACHED
+  SEED_FALLBACK
+  UNAVAILABLE
+}
+
+enum TravelerKind {
+  ADULT
+  CHILD
+}
+
+enum RecommendationPlan {
+  BEST_TODAY
+  ALTERNATIVE
+  DEFER
+  DISCOVER
+}
+
+enum RecommendationOutcomeType {
+  IMPRESSION
+  OPENED
+  SAVED
+  DISMISSED
+  BOOKED
+  COMPLETED
+  SKIPPED
+  CANCELLED
+}
+
+enum AnalyticsEventName {
+  LANDING_VIEWED
+  TRIP_FORM_STARTED
+  TRIP_PREVIEW_VIEWED
+  ACCOUNT_CREATED
+  TRIP_SAVED
+  TRIP_REOPENED
+  RECOMMENDATION_IMPRESSION
+  RECOMMENDATION_OPENED
+  RECOMMENDATION_SAVED
+  RECOMMENDATION_DISMISSED
+  AFFILIATE_CLICKED
+  TRIP_PASS_VIEWED
+  TRIP_PASS_STARTED
+  TRIP_PASS_PURCHASED
+  ACTIVITY_COMPLETED
+  ACTIVITY_RATED
+}
+
+enum TripPassStatus {
+  FREE
+  PREVIEW
+  ACTIVE
+  EXPIRED
+}
+
+enum TravelImpact {
+  DIRECT_IMPACT
+  LOCAL_OPPORTUNITY
+  GOOD_TO_KNOW
+  GENERAL
+}
+
+model Country {
+  id              String   @id @default(cuid())
+  iso2            String   @unique @db.Char(2)
+  iso3            String   @unique @db.Char(3)
+  slug            String   @unique
+  name            String
+  officialName    String?
+  currencyCode    String   @db.Char(3)
+  defaultLocale   String   @default("nl-NL")
+  timezone        String
+  centerLatitude  Float?
+  centerLongitude Float?
+  nationalContext Json?
+  sourceCoverage  Json?
+  isActive        Boolean  @default(true)
+  isSeedData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  regions       Region[]
+  clusters      DestinationCluster[]
+  activities    Activity[]
+  sources       Source[]
+  trips         Trip[]
+  tripStops     TripStop[]
+  travelSignals TravelSignal[]
+
+  @@map("countries")
+}
+
+model Region {
+  id              String        @id @default(cuid())
+  countryId       String
+  slug            String
+  name            String
+  shortName       String?
+  aliases         String[]      @default([])
+  coverageLevel   CoverageLevel
+  summary         String?
+  timezone        String?
+  centerLatitude  Float?
+  centerLongitude Float?
+  sortOrder       Int           @default(0)
+  isActive        Boolean       @default(true)
+  isSeedData      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  country       Country              @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  clusters      DestinationCluster[]
+  activities    Activity[]
+  tripStops     TripStop[]
+  travelSignals TravelSignal[]
+
+  @@unique([countryId, slug])
+  @@index([countryId, coverageLevel, sortOrder])
+  @@map("regions")
+}
+
+model DestinationCluster {
+  id              String   @id @default(cuid())
+  countryId       String
+  regionId        String
+  slug            String
+  name            String
+  aliases         String[] @default([])
+  centerLatitude  Float?
+  centerLongitude Float?
+  summary         String?
+  isActive        Boolean  @default(true)
+  isSeedData      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  country    Country    @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  region     Region     @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  activities Activity[]
+  tripStops  TripStop[]
+
+  @@unique([regionId, slug])
+  @@index([countryId])
+  @@map("destination_clusters")
+}
+
+model Activity {
+  id                     String        @id @default(cuid())
+  countryId              String
+  regionId               String
+  destinationClusterId   String?
+  name                   String
+  slug                   String
+  latitude               Float
+  longitude              Float
+  shortDescription       String
+  longDescription        String?
+  categories             String[]      @default([])
+  tags                   String[]      @default([])
+  indoorOutdoor          IndoorOutdoor
+  minimumAge             Int?
+  recommendedAgeMin      Int?
+  recommendedAgeMax      Int?
+  durationMinutes        Int?
+  priceLevel             Int?
+  bookingRequired        Boolean       @default(false)
+  seasonal               Boolean       @default(false)
+  weatherSensitivity     Json
+  openingHours           Json?
+  familyFit              Int
+  uniquenessScore        Int
+  localAuthenticityScore Int
+  accessibilityNotes     String?
+  lastVerifiedAt         DateTime
+  confidence             Float
+  coverageLevel          CoverageLevel
+  isActive               Boolean       @default(true)
+  isSeedData             Boolean       @default(false)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  country            Country             @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  region             Region              @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  destinationCluster DestinationCluster? @relation(fields: [destinationClusterId], references: [id], onDelete: SetNull)
+  seasonWindows      SeasonWindow[]
+  sources            ActivitySource[]
+  recommendations    Recommendation[]
+  affiliateOffers    AffiliateOffer[]
+  savedByTrips       TripSavedActivity[]
+  affiliateClicks    AffiliateClick[]
+
+  @@unique([countryId, slug])
+  @@index([regionId, coverageLevel, isActive])
+  @@index([destinationClusterId])
+  @@index([categories], type: Gin)
+  @@index([tags], type: Gin)
+  @@map("activities")
+}
+
+model SeasonWindow {
+  id             String           @id @default(cuid())
+  activityId     String
+  sourceId       String?
+  kind           SeasonWindowKind @default(ANNUAL_RECURRING)
+  startMonth     Int?
+  startDay       Int?
+  endMonth       Int?
+  endDay         Int?
+  startsAt       DateTime?        @db.Date
+  endsAt         DateTime?        @db.Date
+  status         SeasonStatus
+  reason         String
+  recurring      Boolean          @default(true)
+  confidence     Float            @default(1)
+  lastVerifiedAt DateTime
+  isSeedData     Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  source   Source?  @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([activityId, status])
+  @@index([startsAt, endsAt])
+  @@map("season_windows")
+}
+
+model Source {
+  id             String                 @id @default(cuid())
+  countryId      String?
+  code           String                 @unique
+  name           String
+  provider       String
+  authority      SourceAuthority
+  url            String?
+  retrievedAt    DateTime
+  lastVerifiedAt DateTime
+  confidence     Float
+  rawReference   String?
+  fallbackStatus ProviderFallbackStatus @default(SEED_FALLBACK)
+  isSeedData     Boolean                @default(false)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  country         Country?         @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  activitySources ActivitySource[]
+  seasonWindows   SeasonWindow[]
+  travelSignals   TravelSignal[]
+
+  @@index([countryId, authority])
+  @@map("sources")
+}
+
+model ActivitySource {
+  activityId     String
+  sourceId       String
+  retrievedAt    DateTime
+  lastVerifiedAt DateTime
+  confidence     Float
+  rawReference   String?
+  fallbackStatus ProviderFallbackStatus @default(SEED_FALLBACK)
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  source   Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, sourceId])
+  @@map("activity_sources")
+}
+
+model Interest {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  labelNl   String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trips TripInterest[]
+
+  @@map("interests")
+}
+
+model Trip {
+  id                 String   @id @default(cuid())
+  userId             String?  @db.Uuid
+  countryId          String
+  title              String?
+  arrivalDate        DateTime @db.Date
+  departureDate      DateTime @db.Date
+  timezone           String
+  isPrivate          Boolean  @default(true)
+  createdFromPreview Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  country                Country                 @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  stops                  TripStop[]
+  travelers              Traveler[]
+  interests              TripInterest[]
+  recommendations        Recommendation[]
+  savedActivities        TripSavedActivity[]
+  analyticsEvents        AnalyticsEvent[]
+  affiliateClicks        AffiliateClick[]
+  recommendationOutcomes RecommendationOutcome[]
+  tripPass               TripPass?
+
+  @@index([userId, arrivalDate])
+  @@index([countryId, arrivalDate, departureDate])
+  @@map("trips")
+}
+
+model TripStop {
+  id                   String   @id @default(cuid())
+  tripId               String
+  countryId            String
+  regionId             String
+  destinationClusterId String?
+  position             Int
+  arrivalDate          DateTime @db.Date
+  departureDate        DateTime @db.Date
+  accommodationLabel   String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  trip               Trip                @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  country            Country             @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  region             Region              @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  destinationCluster DestinationCluster? @relation(fields: [destinationClusterId], references: [id], onDelete: SetNull)
+
+  @@unique([tripId, position])
+  @@index([regionId, arrivalDate, departureDate])
+  @@map("trip_stops")
+}
+
+model Traveler {
+  id             String       @id @default(cuid())
+  tripId         String
+  kind           TravelerKind
+  ageAtDeparture Int?
+  createdAt      DateTime     @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, kind])
+  @@map("travelers")
+}
+
+model TripInterest {
+  tripId     String
+  interestId String
+  priority   Int      @default(1)
+  createdAt  DateTime @default(now())
+
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  interest Interest @relation(fields: [interestId], references: [id], onDelete: Restrict)
+
+  @@id([tripId, interestId])
+  @@map("trip_interests")
+}
+
+model TripSavedActivity {
+  tripId     String
+  activityId String
+  savedAt    DateTime @default(now())
+  notes      String?
+
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@id([tripId, activityId])
+  @@map("trip_saved_activities")
+}
+
+model Recommendation {
+  id                 String             @id @default(cuid())
+  tripId             String
+  activityId         String
+  recommendedFor     DateTime           @db.Date
+  plan               RecommendationPlan @default(DISCOVER)
+  rank               Int
+  totalScore         Float
+  seasonScore        Float
+  weatherScore       Float
+  travelerFitScore   Float
+  logisticsScore     Float
+  interestScore      Float
+  availabilityScore  Float
+  uniquenessScore    Float
+  valueScore         Float
+  explanationFactors String[]           @default([])
+  weightSnapshot     Json
+  contextSnapshot    Json
+  rankingVersion     String
+  generatedAt        DateTime           @default(now())
+
+  trip     Trip                    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activity Activity                @relation(fields: [activityId], references: [id], onDelete: Restrict)
+  outcomes RecommendationOutcome[]
+
+  @@unique([tripId, recommendedFor, activityId])
+  @@index([tripId, recommendedFor, plan, rank])
+  @@map("recommendations")
+}
+
+model RecommendationOutcome {
+  id               String                    @id @default(cuid())
+  recommendationId String
+  tripId           String
+  userId           String?                   @db.Uuid
+  outcome          RecommendationOutcomeType
+  reasonCode       String?
+  reasonDetail     String?
+  rating           Int?
+  metadata         Json?
+  occurredAt       DateTime                  @default(now())
+
+  recommendation Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  trip           Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([recommendationId, occurredAt])
+  @@index([tripId, outcome, occurredAt])
+  @@map("recommendation_outcomes")
+}
+
+model AnalyticsEvent {
+  id                 String             @id @default(cuid())
+  eventName          AnalyticsEventName
+  tripId             String?
+  userId             String?            @db.Uuid
+  anonymousSessionId String?
+  properties         Json?
+  occurredAt         DateTime
+  receivedAt         DateTime           @default(now())
+
+  trip Trip? @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  @@index([eventName, occurredAt])
+  @@index([tripId, occurredAt])
+  @@index([anonymousSessionId, occurredAt])
+  @@map("analytics_events")
+}
+
+model AffiliateOffer {
+  id             String    @id @default(cuid())
+  activityId     String?
+  provider       String
+  externalUrl    String
+  trackingUrl    String?
+  price          Decimal?  @db.Decimal(12, 2)
+  currency       String?   @db.Char(3)
+  commissionType String?
+  sponsored      Boolean   @default(false)
+  lastVerifiedAt DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  activity Activity?        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  clicks   AffiliateClick[]
+
+  @@index([activityId, isActive])
+  @@map("affiliate_offers")
+}
+
+model AffiliateClick {
+  id                 String   @id @default(cuid())
+  offerId            String
+  activityId         String?
+  tripId             String?
+  userId             String?  @db.Uuid
+  anonymousSessionId String?
+  destinationUrl     String
+  occurredAt         DateTime @default(now())
+
+  offer    AffiliateOffer @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  activity Activity?      @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  trip     Trip?          @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  @@index([offerId, occurredAt])
+  @@index([tripId, occurredAt])
+  @@map("affiliate_clicks")
+}
+
+model TripPass {
+  id                String         @id @default(cuid())
+  tripId            String         @unique
+  status            TripPassStatus @default(FREE)
+  priceCents        Int?
+  currency          String?        @db.Char(3)
+  validFrom         DateTime?      @db.Date
+  validThrough      DateTime?      @db.Date
+  activatedAt       DateTime?
+  expiredAt         DateTime?
+  paymentProvider   String?
+  externalPaymentId String?        @unique
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([status, validThrough])
+  @@map("trip_passes")
+}
+
+model TripPassPriceTier {
+  id         String    @id @default(cuid())
+  minDays    Int
+  maxDays    Int
+  priceCents Int
+  currency   String    @default("EUR") @db.Char(3)
+  isActive   Boolean   @default(true)
+  validFrom  DateTime  @default(now())
+  validTo    DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([minDays, maxDays, currency, validFrom])
+  @@index([isActive, currency, minDays, maxDays])
+  @@map("trip_pass_price_tiers")
+}
+
+model TravelSignal {
+  id             String       @id @default(cuid())
+  countryId      String
+  regionId       String?
+  sourceId       String
+  impact         TravelImpact
+  title          String
+  summary        String
+  isOfficial     Boolean      @default(false)
+  publishedAt    DateTime
+  startsAt       DateTime?
+  endsAt         DateTime?
+  lastVerifiedAt DateTime
+  confidence     Float
+  externalUrl    String?
+  isSeedData     Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  country Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  region  Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  source  Source  @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+
+  @@index([countryId, impact, publishedAt])
+  @@index([regionId, startsAt, endsAt])
+  @@map("travel_signals")
+}
