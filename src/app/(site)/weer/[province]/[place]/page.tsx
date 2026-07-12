@@ -13,8 +13,7 @@ import { ALL_AGENT_PREFERENCES } from "@/lib/agents/preferences";
 import { fetchAirQuality } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
-import AgentSubscribeCard from "@/components/AgentSubscribeCard";
-import ReedPushCard from "@/components/ReedPushCard";
+import AgentsHubCard from "@/components/AgentsHubCard";
 import { getLocationWeatherProfile } from "@/lib/location-profile";
 import { venueMetaTitle } from "@/lib/venue-content";
 import "../../../vandaag/vandaag-skin.css";
@@ -252,9 +251,8 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
 
                 <CityGeoBlock block={geoBlock} inLanguage="nl-NL" />
 
-                {/* Inschrijfblokken: Piets ochtendbericht + Reeds weeralarm voor déze plaats */}
-                <AgentSubscribeCard placeName={place.name} province={province} placeSlug={slug} />
-                <ReedPushCard placeName={place.name} province={province} placeSlug={slug} />
+                {/* Jouw agents: Piet, Reed en Koos voor déze plaats */}
+                <AgentsHubCard placeName={place.name} province={province} placeSlug={slug} />
 
                 <ProvinceTopCities province={province} currentCity={place.name} />
                 <NearbyLinks currentCity={place.name} places={nearby} />

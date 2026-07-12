@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Manrope } from "next/font/google";
 import DayBriefing from "@/components/DayBriefing";
-import AgentSubscribeCard from "@/components/AgentSubscribeCard";
-import ReedPushCard from "@/components/ReedPushCard";
+import AgentsHubCard from "@/components/AgentsHubCard";
 import PietScoreCard from "@/components/PietScoreCard";
 import { getSavedLocationServer } from "@/lib/location-cookies";
 import { nearestSettlement, placeRouteSlug } from "@/lib/places-data";
@@ -62,12 +61,7 @@ async function VandaagFlow({ name, lat, lon }: { name: string; lat: number; lon:
               province={subscribePlace.province}
               placeSlug={placeRouteSlug(subscribePlace)}
             />
-            <AgentSubscribeCard
-              placeName={subscribePlace.name}
-              province={subscribePlace.province}
-              placeSlug={placeRouteSlug(subscribePlace)}
-            />
-            <ReedPushCard
+            <AgentsHubCard
               placeName={subscribePlace.name}
               province={subscribePlace.province}
               placeSlug={placeRouteSlug(subscribePlace)}
