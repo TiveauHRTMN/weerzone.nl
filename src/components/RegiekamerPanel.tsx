@@ -12,6 +12,7 @@ import {
   deleteMoment,
   type MomentInsert,
 } from "@/lib/agents/moments-client";
+import PwaInstallCard, { isIOS, isStandalone } from "@/components/PwaInstallCard";
 
 interface SubscriptionRow {
   id: string;
@@ -42,6 +43,14 @@ function fmtPlace(slug: string): string {
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
+function urlBase64ToUint8Array(base64: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const raw = atob((base64 + padding).replace(/-/g, "+").replace(/_/g, "/"));
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
+  return output;
+}
+
 /**
  * Regiekamer (spec agent-headsup §3F): abonnementen per plaats × kanaal,
  * de eigen momenten, gekoppelde apparaten + test-push, en het persoonlijke
@@ -58,6 +67,9 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
   const [testResult, setTestResult] = useState<string | null>(null);
   const [editing, setEditing] = useState<AgentMoment | null>(null);
   const [adding, setAdding] = useState(false);
+  const [subError, setSubError] = useState<string | null>(null);
+  const [momentError, setMomentError] = useState<string | null>(null);
+  const [budgetError, setBudgetError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,24 +98,76 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
     };
   }, [supabase]);
 
-  async function toggleSub(row: SubscriptionRow) {
-    setBusy(row.id);
-    const activate = row.unsubscribed_at !== null;
-    const res = await fetch("/api/agents/subscriptions/toggle", {
+  async function enablePush(row: SubscriptionRow) {
+    const registration = await navigator.serviceWorker.register("/sw.js");
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      throw new Error(
+        permission === "denied" ? "Meldingen zijn geblokkeerd in je browserinstellingen." : "Geen toestemming gegeven.",
+      );
+    }
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!vapidKey) throw new Error("Meldingen zijn even niet beschikbaar.");
+    const subscription =
+      (await registration.pushManager.getSubscription()) ??
+      (await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
+      }));
+    const res = await fetch("/api/agents/push/register", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ agent: row.agent, province: row.province, place: row.place_slug, channel: row.channel, active: activate }),
+      body: JSON.stringify({ agent: row.agent, province: row.province, place: row.place_slug, subscription: subscription.toJSON() }),
     });
-    if (res.ok) {
-      setSubs((s) => s.map((r) => (r.id === row.id ? { ...r, unsubscribed_at: activate ? null : new Date().toISOString() } : r)));
+    if (!res.ok) throw new Error("Dat lukte even niet.");
+  }
+
+  async function toggleSub(row: SubscriptionRow) {
+    const activate = row.unsubscribed_at !== null;
+    if (activate && row.channel === "push" && isIOS() && !isStandalone()) {
+      setSubError("Meldingen op iPhone werken pas als Weerzone op je beginscherm staat.");
+      return;
     }
-    setBusy(null);
+    setBusy(row.id);
+    setSubError(null);
+    try {
+      if (activate && row.channel === "push") {
+        await enablePush(row);
+      } else {
+        const res = await fetch("/api/agents/subscriptions/toggle", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ agent: row.agent, province: row.province, place: row.place_slug, channel: row.channel, active: activate }),
+        });
+        if (!res.ok) throw new Error("Dat lukte even niet.");
+      }
+      setSubs((s) => s.map((r) => (r.id === row.id ? { ...r, unsubscribed_at: activate ? null : new Date().toISOString() } : r)));
+    } catch (err) {
+      setSubError(err instanceof Error ? err.message : "Dat lukte even niet — probeer het zo nog eens.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function saveBudget(next: Budget) {
+    const previous = budget;
     setBudget(next);
-    await updateProfile({ headsupBudget: next });
-    trackEvent("regiekamer_budget", { budget: next });
+    setBudgetError(null);
+    setBusy("budget");
+    try {
+      const result = await updateProfile({ headsupBudget: next });
+      if (!result?.ok) {
+        setBudget(previous);
+        setBudgetError("Bewaren lukte even niet — probeer het zo nog eens.");
+        return;
+      }
+      trackEvent("regiekamer_budget", { budget: next });
+    } catch {
+      setBudget(previous);
+      setBudgetError("Bewaren lukte even niet — probeer het zo nog eens.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function sendTestPush() {
@@ -126,20 +190,34 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
 
   async function saveMoment(values: MomentInsert, id?: string) {
     if (!userId) return;
+    setMomentError(null);
     if (id) {
       const { ok } = await updateMoment(supabase, id, values);
-      if (ok) setMoments((m) => m.map((x) => (x.id === id ? { ...x, ...values, transport: values.transport ?? null } : x)));
+      if (!ok) {
+        setMomentError("Bewaren lukte even niet — probeer het zo nog eens.");
+        return;
+      }
+      setMoments((m) => m.map((x) => (x.id === id ? { ...x, ...values, transport: values.transport ?? null } : x)));
     } else {
       const { ok } = await insertMoment(supabase, userId, values);
-      if (ok) setMoments(await listMyMoments(supabase));
+      if (!ok) {
+        setMomentError("Bewaren lukte even niet — probeer het zo nog eens.");
+        return;
+      }
+      setMoments(await listMyMoments(supabase));
     }
     setEditing(null);
     setAdding(false);
   }
 
   async function removeMoment(id: string) {
+    setMomentError(null);
     const { ok } = await deleteMoment(supabase, id);
-    if (ok) setMoments((m) => m.filter((x) => x.id !== id));
+    if (!ok) {
+      setMomentError("Verwijderen lukte even niet — probeer het zo nog eens.");
+      return;
+    }
+    setMoments((m) => m.filter((x) => x.id !== id));
     setEditing(null);
   }
 
@@ -154,6 +232,7 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
           <div className="mt-2 grid gap-2">
             {subs.map((row) => {
               const active = row.unsubscribed_at === null;
+              const blocked = row.channel === "push" && !active && isIOS() && !isStandalone();
               return (
                 <div key={row.id} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3">
                   <div className="min-w-0 flex-1">
@@ -162,23 +241,31 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
                     </div>
                     <div className="text-xs text-slate-500">{CHANNEL_LABEL[row.channel] ?? row.channel}</div>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={active}
-                    aria-label={`${AGENT_LABEL[row.agent] ?? row.agent} voor ${fmtPlace(row.place_slug)} ${active ? "uitzetten" : "aanzetten"}`}
-                    onClick={() => void toggleSub(row)}
-                    disabled={busy !== null}
-                    className="relative h-7 w-12 flex-none rounded-full transition-colors disabled:opacity-60"
-                    style={{ background: active ? "#10b981" : "#e2e8f0" }}
-                  >
-                    <span className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all" style={{ left: active ? 22 : 2 }} />
-                  </button>
+                  {blocked ? (
+                    <span className="flex-none text-[11px] font-bold text-slate-400">op beginscherm eerst</span>
+                  ) : (
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={active}
+                      aria-label={`${AGENT_LABEL[row.agent] ?? row.agent} voor ${fmtPlace(row.place_slug)} ${active ? "uitzetten" : "aanzetten"}`}
+                      onClick={() => void toggleSub(row)}
+                      disabled={busy !== null}
+                      className="relative h-7 w-12 flex-none rounded-full transition-colors disabled:opacity-60"
+                      style={{ background: active ? "#10b981" : "#e2e8f0" }}
+                    >
+                      <span className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all" style={{ left: active ? 22 : 2 }} />
+                    </button>
+                  )}
                 </div>
               );
             })}
           </div>
         )}
+        {subs.some((row) => row.channel === "push" && row.unsubscribed_at !== null) && isIOS() && !isStandalone() && (
+          <PwaInstallCard compact />
+        )}
+        {subError && <p className="mt-2 text-sm font-semibold text-red-600">{subError}</p>}
       </div>
 
       {/* Momenten */}
@@ -213,12 +300,13 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
             ))}
           </div>
         )}
+        {momentError && <p className="mt-2 text-sm font-semibold text-red-600">{momentError}</p>}
         {(editing || adding) && (
           <MomentEditor
             initial={editing}
             onSave={(values) => void saveMoment(values, editing?.id)}
             onDelete={editing ? () => void removeMoment(editing.id) : undefined}
-            onCancel={() => { setEditing(null); setAdding(false); }}
+            onCancel={() => { setEditing(null); setAdding(false); setMomentError(null); }}
           />
         )}
       </div>
@@ -232,7 +320,8 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
               key={o.k}
               type="button"
               onClick={() => void saveBudget(o.k)}
-              className="rounded-full border px-4 py-2 text-[13px] font-bold transition-colors"
+              disabled={busy !== null}
+              className="rounded-full border px-4 py-2 text-[13px] font-bold transition-colors disabled:opacity-60"
               style={{
                 borderColor: budget === o.k ? "#0f172a" : "#e2e8f0",
                 background: budget === o.k ? "#0f172a" : "#fff",
@@ -243,6 +332,7 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
             </button>
           ))}
         </div>
+        {budgetError && <p className="mt-2 text-sm font-semibold text-red-600">{budgetError}</p>}
       </div>
 
       {/* Apparaten + test-push */}
