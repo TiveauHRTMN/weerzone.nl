@@ -6,6 +6,7 @@ import { getSavedLocationServer } from "@/lib/location-cookies";
 import { getDayContext } from "@/lib/agents/day-context";
 import ProfileEditForm from "@/components/wz/ProfileEditForm";
 import AgentTogglesForm from "@/components/wz/AgentTogglesForm";
+import RegiekamerPanel from "@/components/RegiekamerPanel";
 import LogoutButton from "@/components/LogoutButton";
 import { activeAgentKeys, preferencesFromProfile } from "@/lib/agents/preferences";
 import LocateButton from "@/components/LocateButton";
@@ -39,7 +40,7 @@ export default async function MijnWeerzonePage() {
   ]);
 
   const profile = profileRes.data as
-    | { full_name?: string; postcode?: string; piet_on?: boolean; reed_on?: boolean; koos_on?: boolean }
+    | { full_name?: string; postcode?: string; piet_on?: boolean; reed_on?: boolean; koos_on?: boolean; headsup_budget?: string }
     | null;
   const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? "";
   const displayLocation = accountLocationRes.data
@@ -71,17 +72,31 @@ export default async function MijnWeerzonePage() {
           <p className="text-sm text-white/75 capitalize">{dayLabel}</p>
         </header>
 
-        {/* Je agents — welke mogen je per e-mail een seintje geven */}
+        {/* Regiekamer — abonnementen, momenten, apparaten (spec §3F) */}
         <section className="space-y-3">
           <div className="flex items-baseline justify-between px-1">
             <h2 className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
-              Piet, Reed en Koos
+              Regiekamer — Piet, Reed en Koos
             </h2>
             <Link href="/vandaag" className="text-[11px] font-bold text-white/75 hover:text-white">
               Naar Vandaag →
             </Link>
           </div>
-          <AgentTogglesForm initial={agentPreferences} />
+          <RegiekamerPanel
+            initialBudget={
+              profile?.headsup_budget === "moments_only" || profile?.headsup_budget === "low"
+                ? profile.headsup_budget
+                : "standard"
+            }
+          />
+          <details className="rounded-2xl border border-white/15 bg-white/5 p-4">
+            <summary className="cursor-pointer text-xs font-bold text-white/70">
+              Landelijke instellingen (gelden als er geen plaats-abonnement is)
+            </summary>
+            <div className="mt-3">
+              <AgentTogglesForm initial={agentPreferences} />
+            </div>
+          </details>
         </section>
 
         {/* Mijn plek */}
