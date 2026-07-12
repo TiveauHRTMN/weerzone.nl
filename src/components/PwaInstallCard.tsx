@@ -33,7 +33,15 @@ export function isIOS(): boolean {
  * push allleen vanaf het beginscherm; op Android/Chrome tonen we de echte
  * install-prompt. Al standalone → niets tonen.
  */
-export default function PwaInstallCard({ compact = false, onDone }: { compact?: boolean; onDone?: () => void }) {
+export default function PwaInstallCard({
+  compact = false,
+  tone = "dark",
+  onDone,
+}: {
+  compact?: boolean;
+  tone?: "dark" | "light";
+  onDone?: () => void;
+}) {
   const [mode, setMode] = useState<"hidden" | "android" | "ios">("hidden");
   const [installed, setInstalled] = useState(false);
 
@@ -79,13 +87,34 @@ export default function PwaInstallCard({ compact = false, onDone }: { compact?: 
   if (mode === "hidden") return null;
 
   if (compact) {
+    const isLight = tone === "light";
     return (
-      <div className="mt-3 rounded-2xl border border-white/15 bg-white/5 p-3.5 text-[13px] font-semibold text-white/75">
+      <div
+        className={
+          isLight
+            ? "mt-3 rounded-2xl border p-3.5 text-[13px] font-semibold"
+            : "mt-3 rounded-2xl border border-white/15 bg-white/5 p-3.5 text-[13px] font-semibold text-white/75"
+        }
+        style={isLight ? { borderColor: "var(--wz-border)", color: "var(--wz-text-mute)" } : undefined}
+      >
         {mode === "ios" ? (
-          <>Meldingen op iPhone werken pas als Weerzone op je beginscherm staat: tik op de deelknop en kies <strong className="text-white">Zet op beginscherm</strong>. Open Weerzone daarna vanaf dat icoon.</>
+          <>
+            Meldingen op iPhone werken pas als Weerzone op je beginscherm staat: tik op de deelknop en kies{" "}
+            <strong className={isLight ? undefined : "text-white"} style={isLight ? { color: "var(--wz-text)" } : undefined}>
+              Zet op beginscherm
+            </strong>
+            . Open Weerzone daarna vanaf dat icoon.
+          </>
         ) : (
           <>Zet Weerzone op je telefoon voor meldingen die je overal bereiken.{" "}
-            <button type="button" onClick={() => void install()} className="font-black underline underline-offset-2">Installeer</button>
+            <button
+              type="button"
+              onClick={() => void install()}
+              className="font-black underline underline-offset-2"
+              style={isLight ? { color: "var(--wz-text)" } : undefined}
+            >
+              Installeer
+            </button>
           </>
         )}
       </div>

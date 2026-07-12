@@ -263,7 +263,7 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
           </div>
         )}
         {subs.some((row) => row.channel === "push" && row.unsubscribed_at !== null) && isIOS() && !isStandalone() && (
-          <PwaInstallCard compact />
+          <PwaInstallCard compact tone="light" />
         )}
         {subError && <p className="mt-2 text-sm font-semibold text-red-600">{subError}</p>}
       </div>
