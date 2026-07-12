@@ -9,6 +9,16 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import { WzTextField } from "@/components/wz/WzForm";
 import { updateProfile, geocodePostcode } from "@/app/actions";
+import { trackEvent } from "@/lib/analytics";
+import PwaInstallCard from "@/components/PwaInstallCard";
+import {
+  buildOnboardingMoments,
+  replaceOnboardingMoments,
+  type OnboardingTransport,
+  type OnboardingDepart,
+  type OnboardingHome,
+  type OnboardingOutdoor,
+} from "@/lib/agents/moments-client";
 
 type TopicKey = "rain" | "temp" | "wind" | "uv" | "snow";
 type TimeKey = "06:30" | "07:00" | "08:00" | "avond";
@@ -36,6 +46,40 @@ const TIMES: Array<{ k: TimeKey; t: string; d: string }> = [
   { k: "avond", t: "Avond vooruitblik", d: "19:00 — weer voor morgen, vanavond al" },
 ];
 
+type BudgetKey = "moments_only" | "standard" | "low";
+
+const TRANSPORTS: Array<{ k: OnboardingTransport; t: string; reward: string }> = [
+  { k: "bike", t: "Fiets", reward: "“Regenpak mee om 8:10 — je rijdt door een bui heen. Eerder weg scheelt.”" },
+  { k: "ov", t: "OV", reward: "“Paraplu mee naar de halte — rond 8:20 trekt er een bui over.”" },
+  { k: "car", t: "Auto", reward: "“Bij gladheid of storm hoor je het van Reed vóór je vertrekt.”" },
+  { k: "home", t: "Ik werk thuis", reward: "“Dan hou ik het droogste venster voor je lunchrondje in de gaten.”" },
+];
+
+const DEPARTS: Array<{ k: OnboardingDepart; t: string }> = [
+  { k: "voor8", t: "Vóór 8" },
+  { k: "8tot9", t: "Tussen 8 en 9" },
+  { k: "na9", t: "Na 9" },
+];
+
+const HOMES: Array<{ k: OnboardingHome; t: string }> = [
+  { k: "rond17", t: "Rond 17:00" },
+  { k: "rond18", t: "Rond 18:00" },
+  { k: "later", t: "Later" },
+];
+
+const OUTDOORS: Array<{ k: OnboardingOutdoor; t: string; reward: string }> = [
+  { k: "dog", t: "Hond uitlaten", reward: "“Laat 'm vóór 21:00 uit — daarna regent het tot middernacht.”" },
+  { k: "sport", t: "Hardlopen of sporten", reward: "“Tussen 18:00 en 19:30 is het droog — mooi venster voor je rondje.”" },
+  { k: "laundry", t: "Was buiten drogen", reward: "“Tussen 10:00 en 16:00 perfect droogweer. Daarna niet meer.”" },
+  { k: "garden", t: "Tuin", reward: "“Zaterdagochtend blijft het droog — de middag wordt nat.”" },
+];
+
+const BUDGETS: Array<{ k: BudgetKey; t: string; d: string; reward: string }> = [
+  { k: "moments_only", t: "Alleen als het mijn plannen raakt", d: "Piet zwijgt tenzij een bui jouw momenten kruist", reward: "“Afgesproken: alleen als het jouw dag raakt.”" },
+  { k: "standard", t: "Bij elke omslag", d: "Nooit meer dan drie seintjes per dag", reward: "“Bij elke omslag een seintje — en verder hou ik m'n mond.”" },
+  { k: "low", t: "Zo min mogelijk", d: "Hooguit één per dag", reward: "“Hooguit één per dag, alleen als het er echt toe doet.”" },
+];
+
 export default function OnboardingClient({ email }: { email: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,6 +102,11 @@ export default function OnboardingClient({ email }: { email: string }) {
     koos: false,
   });
   const [time, setTime] = useState<TimeKey>("07:00");
+  const [transport, setTransport] = useState<OnboardingTransport | null>(null);
+  const [depart, setDepart] = useState<OnboardingDepart>("8tot9");
+  const [home, setHome] = useState<OnboardingHome>("rond18");
+  const [outdoor, setOutdoor] = useState<OnboardingOutdoor[]>([]);
+  const [budget, setBudget] = useState<BudgetKey>("standard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,12 +126,28 @@ export default function OnboardingClient({ email }: { email: string }) {
       sub: "We gebruiken GPS om je thuislocatie eenmalig te bepalen. Later kun je meer plekken toevoegen.",
     },
     {
+      title: "Hoe beweeg jij je meestal?",
+      sub: "Piet: “Dan weet ik wanneer jij buiten bent — en wanneer ik m'n mond moet houden.”",
+    },
+    {
+      title: "Wat doe jij buiten?",
+      sub: "Piet: “Tik aan wat op jou slaat. Alles is later bij te stellen.”",
+    },
+    {
+      title: "Wanneer wil je Piet zeker horen?",
+      sub: "Piet: “Zeg het maar — ik ben er niet om je scherm te laten trillen.”",
+    },
+    {
       title: "Waar wil je op geattendeerd worden?",
       sub: "Kies de onderwerpen die jij belangrijk vindt. Je kunt dit altijd aanpassen.",
     },
     {
       title: "Wanneer wil je je bericht?",
       sub: "We sturen je één keer per dag een e-mail met Piet's Update, afgestemd op jouw voorkeuren.",
+    },
+    {
+      title: "Zet Weerzone op je telefoon",
+      sub: "Piet: “Dan bereiken mijn seintjes je ook onderweg — op iPhone kan het alleen zo.”",
     },
   ];
 
@@ -129,8 +194,8 @@ export default function OnboardingClient({ email }: { email: string }) {
 
   function canAdvance(): boolean {
     if (step === 0) return postcode.trim().length >= 4 || !!gpsCoords;
-    if (step === 1) return topics.length > 0;
-    return true;
+    if (step === 4) return topics.length > 0;
+    return true; // vragen 1-3 en de telefoon-stap mogen altijd door (overslaan is oké)
   }
 
   async function persistAndGo(nextHref: string) {
@@ -184,6 +249,22 @@ export default function OnboardingClient({ email }: { email: string }) {
       });
       if (!preferenceResult.ok) throw new Error(preferenceResult.error ?? "Voorkeuren opslaan mislukt.");
 
+      // Piets vragen (spec agent-headsup §3C): antwoorden zijn momenten-rijen +
+      // een persoonlijk budget. Fail-soft: mislukt dit, dan blokkeert het de
+      // onboarding niet (bijstellen kan altijd in de regiekamer).
+      const moments = buildOnboardingMoments(transport, depart, home, outdoor);
+      const momentsResult = await replaceOnboardingMoments(supabase, uid, moments);
+      const budgetResult = await updateProfile({ headsupBudget: budget });
+      if (!momentsResult.ok || !budgetResult.ok) {
+        console.error("[onboarding] momenten/budget opslaan mislukte (niet blokkerend)");
+      }
+      trackEvent("onboarding_profile", {
+        transport: transport ?? "geen",
+        outdoor: [...outdoor].sort().join(",") || "geen",
+        moments: moments.length,
+        budget,
+      });
+
       if (coords) {
         await supabase
           .from("user_locations")
@@ -231,6 +312,36 @@ export default function OnboardingClient({ email }: { email: string }) {
   }
 
   const s = stepTitles[step];
+
+  function Chip({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="cursor-pointer rounded-full border px-4 py-2.5 text-[14px] font-bold transition-colors"
+        style={{
+          borderColor: active ? "var(--wz-brand)" : "var(--wz-border)",
+          background: active ? "var(--wz-brand-soft)" : "#fff",
+          color: "var(--wz-text)",
+        }}
+      >
+        {label}
+      </button>
+    );
+  }
+
+  function Reward({ text }: { text: string | null }) {
+    if (!text) return null;
+    return (
+      <div
+        className="rounded-2xl p-3.5 text-[13px] font-semibold leading-relaxed"
+        style={{ background: "var(--wz-brand-soft)", color: "var(--wz-text)" }}
+      >
+        <span className="mr-1.5" aria-hidden>💬</span>
+        Piet zegt dan bijvoorbeeld: {text}
+      </div>
+    );
+  }
 
   return (
     <div className="wz-page min-h-screen flex flex-col">
@@ -394,6 +505,91 @@ export default function OnboardingClient({ email }: { email: string }) {
           )}
 
           {step === 1 && (
+            <div className="grid gap-4">
+              <div className="flex flex-wrap gap-2">
+                {TRANSPORTS.map((o) => (
+                  <Chip key={o.k} active={transport === o.k} label={o.t} onClick={() => setTransport(o.k)} />
+                ))}
+              </div>
+              {transport && transport !== "home" && (
+                <>
+                  <div className="wz-micro" style={{ color: "var(--wz-text-mute)" }}>Wanneer ga je meestal weg?</div>
+                  <div className="flex flex-wrap gap-2">
+                    {DEPARTS.map((o) => (
+                      <Chip key={o.k} active={depart === o.k} label={o.t} onClick={() => setDepart(o.k)} />
+                    ))}
+                  </div>
+                  <div className="wz-micro" style={{ color: "var(--wz-text-mute)" }}>En weer thuis?</div>
+                  <div className="flex flex-wrap gap-2">
+                    {HOMES.map((o) => (
+                      <Chip key={o.k} active={home === o.k} label={o.t} onClick={() => setHome(o.k)} />
+                    ))}
+                  </div>
+                </>
+              )}
+              <Reward text={TRANSPORTS.find((o) => o.k === transport)?.reward ?? null} />
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="grid gap-4">
+              <div className="flex flex-wrap gap-2">
+                {OUTDOORS.map((o) => (
+                  <Chip
+                    key={o.k}
+                    active={outdoor.includes(o.k)}
+                    label={o.t}
+                    onClick={() =>
+                      setOutdoor((prev) => (prev.includes(o.k) ? prev.filter((x) => x !== o.k) : [...prev, o.k]))
+                    }
+                  />
+                ))}
+                <Chip active={outdoor.length === 0} label="Weinig, eigenlijk" onClick={() => setOutdoor([])} />
+              </div>
+              <Reward
+                text={
+                  outdoor.length === 0
+                    ? "“Prima — dan hoor je me alleen als het echt uitmaakt.”"
+                    : OUTDOORS.find((o) => o.k === outdoor[outdoor.length - 1])?.reward ?? null
+                }
+              />
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="grid gap-2.5">
+              {BUDGETS.map((o) => {
+                const active = budget === o.k;
+                return (
+                  <label
+                    key={o.k}
+                    className="wz-card flex items-center gap-3 cursor-pointer transition-colors"
+                    style={{
+                      padding: 14,
+                      borderColor: active ? "var(--wz-brand)" : "var(--wz-border)",
+                      background: active ? "var(--wz-brand-soft)" : "#fff",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="wz-budget"
+                      checked={active}
+                      onChange={() => setBudget(o.k)}
+                      className="w-[18px] h-[18px]"
+                      style={{ accentColor: "var(--wz-brand)" }}
+                    />
+                    <div className="flex-1">
+                      <div className="font-bold text-[15px]" style={{ color: "var(--wz-text)" }}>{o.t}</div>
+                      <div className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>{o.d}</div>
+                    </div>
+                  </label>
+                );
+              })}
+              <Reward text={BUDGETS.find((o) => o.k === budget)?.reward ?? null} />
+            </div>
+          )}
+
+          {step === 4 && (
             <div className="grid gap-2.5">
               <p className="wz-micro" style={{ color: "var(--wz-text-mute)" }}>
                 Welke agents mogen je een seintje geven? (alleen e-mail — op de site zie je altijd alles)
@@ -494,7 +690,7 @@ export default function OnboardingClient({ email }: { email: string }) {
             </div>
           )}
 
-          {step === 2 && (
+          {step === 5 && (
             <div className="grid gap-2.5">
               {TIMES.map((o) => {
                 const active = time === o.k;
@@ -527,6 +723,15 @@ export default function OnboardingClient({ email }: { email: string }) {
                   </label>
                 );
               })}
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="grid gap-4">
+              <PwaInstallCard />
+              <p className="text-[13px]" style={{ color: "var(--wz-text-mute)" }}>
+                Al gebeurd of liever niet? Dan ben je nu klaar — je vindt alles terug in Mijn Weerzone.
+              </p>
             </div>
           )}
 
