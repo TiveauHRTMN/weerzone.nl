@@ -12,17 +12,26 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { activeAgentPlaceSubscriptions } from "@/lib/agents/email-recipients";
 import { buildAgentContext } from "@/lib/agents/context";
 import { koosAgent } from "@/lib/agents/koos-agent";
-import { loadMomentsForUsers, momentWindowsForDay } from "@/lib/agents/moments";
+import {
+  loadMomentsForUsers,
+  momentWindowsForDay,
+  effectiveMoments,
+  isPausedOn,
+  nlDateISO,
+  AGENT_MOMENTS_TABLE,
+} from "@/lib/agents/moments";
 import {
   pietPushCandidates,
   koosPushCandidates,
+  freedayCandidate,
+  inFreedayWindow,
   selectWithinBudget,
   inDeliveryWindow,
   nlWeekday,
   KOOS_DAYS,
   type PushCandidate,
 } from "@/lib/agents/headsup-push";
-import { loadPushState, logPushed, nlDayStart, loadHeadsupBudgets } from "@/lib/agents/headsup-log";
+import { loadPushState, logPushed, nlDayStart, loadHeadsupProfiles, DEFAULT_PROFILE } from "@/lib/agents/headsup-log";
 import { captureServerEvent } from "@/lib/analytics-server";
 import { findPlace } from "@/lib/places-data";
 import { activePushDevices, pushConfigured, sendPushToDevice } from "@/lib/push";
@@ -85,12 +94,31 @@ export async function GET(req: Request) {
   for (const sub of koosSubs) addSub(sub, "koos");
 
   const allUserIds = [...new Set([...pietSubs, ...koosSubs].map((s) => s.userId))];
-  const [momentsByUser, stateByUser, devicesByUser, budgetByUser] = await Promise.all([
+  const [momentsByUser, stateByUser, devicesByUser, profileByUser] = await Promise.all([
     loadMomentsForUsers(admin, allUserIds),
     loadPushState(admin, allUserIds, nlDayStart(now)),
     dry ? Promise.resolve(new Map()) : activePushDevices(admin, allUserIds),
-    loadHeadsupBudgets(admin, allUserIds),
+    loadHeadsupProfiles(admin, allUserIds),
   ]);
+
+  const todayISO = nlDateISO(now);
+
+  // Verlopen eendags-momenten zijn inert — ruim ze op (fail-soft).
+  if (!dry) {
+    const { error: cleanupError } = await admin.from(AGENT_MOMENTS_TABLE).delete().lt("date", todayISO);
+    if (cleanupError) console.error("[headsup-push] opruimen eendags-momenten faalde:", cleanupError.message);
+  }
+
+  // Bestemmings-jobs: een dagje-weg-moment mét plaats laat Piet ook dáár het
+  // weer bewaken voor die gebruiker (spec 2026-07-13 §3C).
+  const pietPushUsers = new Set(pietSubs.map((s) => s.userId));
+  for (const [userId, userMoments] of momentsByUser) {
+    if (!pietPushUsers.has(userId)) continue;
+    for (const m of userMoments) {
+      if (m.date !== todayISO || !m.province || !m.placeSlug) continue;
+      addSub({ province: m.province, placeSlug: m.placeSlug, userId }, "piet");
+    }
+  }
 
   let sent = 0;
   const errors: string[] = [];
@@ -121,10 +149,35 @@ export async function GET(req: Request) {
 
       const perUserTargets = new Map<string, PushCandidate[]>();
       for (const userId of new Set([...job.pietUsers, ...job.koosUsers])) {
-        const windows = momentWindowsForDay(momentsByUser.get(userId) ?? [], now);
+        const profile = profileByUser.get(userId) ?? DEFAULT_PROFILE;
+        // Vakantiestand / "vandaag vrij": Piet en Koos zwijgen (Reed niet — eigen cron).
+        if (isPausedOn(profile.pausedUntil, todayISO)) continue;
+
+        const allWindows = momentWindowsForDay(
+          effectiveMoments(momentsByUser.get(userId) ?? [], profile.routinePaused),
+          now,
+        );
+        // Momenten mét plaats gelden alleen voor de job van die plaats;
+        // momenten zonder plaats gelden voor de abonnements-plaatsen.
+        const windows = allWindows.filter((w) =>
+          w.moment.placeSlug
+            ? w.moment.province === job.province && w.moment.placeSlug === job.placeSlug
+            : true,
+        );
         const cands: PushCandidate[] = [];
         if (job.pietUsers.includes(userId)) {
           cands.push(...pietPushCandidates(job.placeName, ctx.weather.hourly, windows, now));
+          // Vrije-dag-heads-up: opt-in, nooit bij `low`, alleen als er vandaag
+          // geen enkel actief moment is, en alleen in het ochtendvenster.
+          if (
+            profile.freedayHeadsup &&
+            profile.budget !== "low" &&
+            allWindows.length === 0 &&
+            inFreedayWindow(now)
+          ) {
+            const freeday = freedayCandidate(job.placeName, ctx.weather.hourly, now);
+            if (freeday) cands.push(freeday);
+          }
         }
         if (job.koosUsers.includes(userId)) cands.push(...koosCands);
         // Default-state in de map zetten zodat het in-run-budget ook voor
@@ -133,16 +186,17 @@ export async function GET(req: Request) {
           stateByUser.set(userId, { sentKeys: new Set<string>(), countsByAgent: new Map<string, number>() });
         }
         const state = stateByUser.get(userId)!;
-        const budget = budgetByUser.get(userId) ?? "standard";
+        // moments_only: alleen momenten-treffers — behalve de vrije-dag-vraag,
+        // daar heeft de gebruiker expliciet om gevraagd (toggle).
         const eligible =
-          budget === "moments_only"
-            ? cands.filter((c) => c.agent !== "piet" || c.matchedMoment)
+          profile.budget === "moments_only"
+            ? cands.filter((c) => c.agent !== "piet" || c.matchedMoment || c.category === "freeday")
             : cands;
         const picked = selectWithinBudget(
           eligible,
           state.sentKeys,
           state.countsByAgent,
-          budget === "low" ? { piet: 1 } : undefined,
+          profile.budget === "low" ? { piet: 1 } : undefined,
         );
         if (picked.length) perUserTargets.set(userId, picked);
       }
@@ -166,7 +220,10 @@ export async function GET(req: Request) {
             const result = await sendPushToDevice(admin, device, {
               title: candidate.title,
               body: candidate.body,
-              url: `https://weerzone.nl/vandaag#${candidate.agent}`,
+              url:
+                candidate.category === "freeday"
+                  ? "https://weerzone.nl/vandaag?dagplan=1"
+                  : `https://weerzone.nl/vandaag#${candidate.agent}`,
               tag: `${candidate.agent}:${job.province}/${job.placeSlug}`,
             });
             if (result.ok) delivered = true;
