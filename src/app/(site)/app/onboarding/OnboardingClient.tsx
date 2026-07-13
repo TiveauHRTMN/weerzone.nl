@@ -18,6 +18,8 @@ import {
   type OnboardingDepart,
   type OnboardingHome,
   type OnboardingOutdoor,
+  type OnboardingDogMorning,
+  type OnboardingDogEvening,
 } from "@/lib/agents/moments-client";
 
 type TopicKey = "rain" | "temp" | "wind" | "uv" | "snow";
@@ -70,8 +72,19 @@ const HOMES: Array<{ k: OnboardingHome; t: string }> = [
 const OUTDOORS: Array<{ k: OnboardingOutdoor; t: string; reward: string }> = [
   { k: "dog", t: "Hond uitlaten", reward: "“Laat 'm vóór 21:00 uit — daarna regent het tot middernacht.”" },
   { k: "sport", t: "Hardlopen of sporten", reward: "“Tussen 18:00 en 19:30 is het droog — mooi venster voor je rondje.”" },
-  { k: "laundry", t: "Was buiten drogen", reward: "“Tussen 10:00 en 16:00 perfect droogweer. Daarna niet meer.”" },
   { k: "garden", t: "Tuin", reward: "“Zaterdagochtend blijft het droog — de middag wordt nat.”" },
+];
+
+const DOG_MORNINGS: Array<{ k: OnboardingDogMorning; t: string }> = [
+  { k: "6tot7", t: "Tussen 6 en 7" },
+  { k: "7tot8", t: "Tussen 7 en 8" },
+  { k: "8tot9", t: "Tussen 8 en 9" },
+];
+
+const DOG_EVENINGS: Array<{ k: OnboardingDogEvening; t: string }> = [
+  { k: "20tot21", t: "Tussen 20 en 21" },
+  { k: "21tot22", t: "Tussen 21 en 22" },
+  { k: "later", t: "Later" },
 ];
 
 const BUDGETS: Array<{ k: BudgetKey; t: string; d: string; reward: string }> = [
@@ -106,6 +119,8 @@ export default function OnboardingClient({ email }: { email: string }) {
   const [depart, setDepart] = useState<OnboardingDepart>("8tot9");
   const [home, setHome] = useState<OnboardingHome>("rond18");
   const [outdoor, setOutdoor] = useState<OnboardingOutdoor[]>([]);
+  const [dogMorning, setDogMorning] = useState<OnboardingDogMorning>("7tot8");
+  const [dogEvening, setDogEvening] = useState<OnboardingDogEvening>("21tot22");
   const [budget, setBudget] = useState<BudgetKey>("standard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -252,7 +267,7 @@ export default function OnboardingClient({ email }: { email: string }) {
       // Piets vragen (spec agent-headsup §3C): antwoorden zijn momenten-rijen +
       // een persoonlijk budget. Fail-soft: mislukt dit, dan blokkeert het de
       // onboarding niet (bijstellen kan altijd in de regiekamer).
-      const moments = buildOnboardingMoments(transport, depart, home, outdoor);
+      const moments = buildOnboardingMoments(transport, depart, home, outdoor, dogMorning, dogEvening);
       const momentsResult = await replaceOnboardingMoments(supabase, uid, moments);
       const budgetResult = await updateProfile({ headsupBudget: budget });
       if (!momentsResult.ok || !budgetResult.ok) {
@@ -546,6 +561,22 @@ export default function OnboardingClient({ email }: { email: string }) {
                 ))}
                 <Chip active={outdoor.length === 0} label="Weinig, eigenlijk" onClick={() => setOutdoor([])} />
               </div>
+              {outdoor.includes("dog") && (
+                <>
+                  <div className="wz-micro" style={{ color: "var(--wz-text-mute)" }}>Wanneer is de ochtendronde meestal?</div>
+                  <div className="flex flex-wrap gap-2">
+                    {DOG_MORNINGS.map((o) => (
+                      <Chip key={o.k} active={dogMorning === o.k} label={o.t} onClick={() => setDogMorning(o.k)} />
+                    ))}
+                  </div>
+                  <div className="wz-micro" style={{ color: "var(--wz-text-mute)" }}>En de avondronde?</div>
+                  <div className="flex flex-wrap gap-2">
+                    {DOG_EVENINGS.map((o) => (
+                      <Chip key={o.k} active={dogEvening === o.k} label={o.t} onClick={() => setDogEvening(o.k)} />
+                    ))}
+                  </div>
+                </>
+              )}
               <Reward
                 text={
                   outdoor.length === 0

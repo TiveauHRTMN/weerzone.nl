@@ -125,7 +125,9 @@ export async function replaceOnboardingMoments(
 export type OnboardingTransport = "bike" | "ov" | "car" | "home";
 export type OnboardingDepart = "voor8" | "8tot9" | "na9";
 export type OnboardingHome = "rond17" | "rond18" | "later";
-export type OnboardingOutdoor = "dog" | "sport" | "laundry" | "garden";
+export type OnboardingOutdoor = "dog" | "sport" | "garden";
+export type OnboardingDogMorning = "6tot7" | "7tot8" | "8tot9";
+export type OnboardingDogEvening = "20tot21" | "21tot22" | "later";
 
 const DEPART_WINDOW: Record<OnboardingDepart, [string, string]> = {
   voor8: ["07:00", "08:00"],
@@ -137,12 +139,24 @@ const HOME_WINDOW: Record<OnboardingHome, [string, string]> = {
   rond18: ["17:30", "18:30"],
   later: ["18:30", "20:00"],
 };
+const DOG_MORNING_WINDOW: Record<OnboardingDogMorning, [string, string]> = {
+  "6tot7": ["06:00", "07:00"],
+  "7tot8": ["07:00", "08:00"],
+  "8tot9": ["08:00", "09:00"],
+};
+const DOG_EVENING_WINDOW: Record<OnboardingDogEvening, [string, string]> = {
+  "20tot21": ["20:00", "21:00"],
+  "21tot22": ["21:00", "22:00"],
+  later: ["22:00", "23:00"],
+};
 
 export function buildOnboardingMoments(
   transport: OnboardingTransport | null,
   depart: OnboardingDepart,
   home: OnboardingHome,
   outdoor: OnboardingOutdoor[],
+  dogMorning: OnboardingDogMorning = "7tot8",
+  dogEvening: OnboardingDogEvening = "21tot22",
 ): MomentInsert[] {
   const out: MomentInsert[] = [];
   if (transport && transport !== "home") {
@@ -155,16 +169,15 @@ export function buildOnboardingMoments(
     );
   }
   if (outdoor.includes("dog")) {
+    const [ms, me] = DOG_MORNING_WINDOW[dogMorning];
+    const [es, ee] = DOG_EVENING_WINDOW[dogEvening];
     out.push(
-      { kind: "dog", label: "Ochtendronde", days: [1, 2, 3, 4, 5, 6, 7], windowStart: "07:00", windowEnd: "08:00" },
-      { kind: "dog", label: "Avondronde", days: [1, 2, 3, 4, 5, 6, 7], windowStart: "21:00", windowEnd: "22:00" },
+      { kind: "dog", label: "Ochtendronde", days: [1, 2, 3, 4, 5, 6, 7], windowStart: ms, windowEnd: me },
+      { kind: "dog", label: "Avondronde", days: [1, 2, 3, 4, 5, 6, 7], windowStart: es, windowEnd: ee },
     );
   }
   if (outdoor.includes("sport")) {
     out.push({ kind: "sport", label: "Sport of hardlopen", days: [1, 2, 3, 4, 5, 6, 7], windowStart: "17:00", windowEnd: "20:30" });
-  }
-  if (outdoor.includes("laundry")) {
-    out.push({ kind: "laundry", label: "Was buiten", days: [6, 7], windowStart: "10:00", windowEnd: "16:00" });
   }
   if (outdoor.includes("garden")) {
     out.push({ kind: "outdoor", label: "Tuin", days: [6, 7], windowStart: "10:00", windowEnd: "17:00" });
