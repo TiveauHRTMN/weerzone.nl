@@ -230,6 +230,51 @@ export function koosPushCandidates(
   ];
 }
 
+/** Vrije-dag-heads-up-venster in NL-uren (ochtendbericht-moment). */
+const FREEDAY_FROM = 7;
+const FREEDAY_TO = 9;
+
+export function inFreedayWindow(now: Date): boolean {
+  const hour = parseInt(
+    now.toLocaleTimeString("nl-NL", { hour: "2-digit", timeZone: "Europe/Amsterdam", hour12: false }),
+    10,
+  );
+  return hour >= FREEDAY_FROM && hour < FREEDAY_TO;
+}
+
+/**
+ * Vrije-dag-heads-up (spec 2026-07-13 §3B): waarde eerst — het dagbeeld ís de
+ * push, de dagplan-uitnodiging is de staart. Elke variant levert iets, dus er
+ * is altijd een kandidaat zodra er uurdata is.
+ */
+export function freedayCandidate(
+  placeName: string,
+  hourly: HourlyForecast[],
+  now: Date,
+): PushCandidate | null {
+  const dayISO = now.toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
+  const key = `piet|freeday|${dayISO}`;
+  const first = hourly
+    .map((h) => ({ at: new Date(h.time), wet: h.precipitation >= WET_MM_PER_HOUR }))
+    .find((h) => h.at >= new Date(now.getTime() - 3600_000));
+  if (!first) return null;
+  const transitions = rainTransitions(hourly, now);
+  const invite = "Plannen vandaag? Vertel het Piet — dan waak ik erover.";
+  const mk = (title: string, body: string): PushCandidate => ({
+    agent: "piet", category: "freeday", key, matchedMoment: false, title, body,
+  });
+  const t = transitions[0];
+  if (t?.kind === "dry_to_wet") {
+    return mk(`Vrije dag? Tot ${uurNL(t.at)} droog in ${placeName}`, `Daarna komt er regen. ${invite}`);
+  }
+  if (t?.kind === "wet_to_dry") {
+    return mk(`Vrije dag? Vanaf ${uurNL(t.at)} droog in ${placeName}`, `Tot die tijd is het nat. ${invite}`);
+  }
+  return first.wet
+    ? mk(`Vrije dag? Het blijft vandaag nat in ${placeName}`, `Binnenplannen dan maar — ga je toch, dan hoor je het van mij.`)
+    : mk(`Vrije dag? Heel de dag droog in ${placeName}`, invite);
+}
+
 /**
  * Budget + dedup, puur: momenten-treffers eerst, dan de rest; nooit boven
  * PIET_MAX_PER_DAY / KOOS_MAX_PER_DAY (dagtelling komt uit agent_headsup_log).
