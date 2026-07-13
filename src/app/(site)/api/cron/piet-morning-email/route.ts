@@ -299,6 +299,17 @@ function buildMorningEmailHtml(
       </a>
     </div>
 
+    <!-- DAGPLAN (spec 2026-07-13: mail-ingang naar de dagplan-invuller) -->
+    <div style="margin:0 0 22px;padding:16px 18px;background:rgba(255,255,255,0.92);border-radius:14px;text-align:center;">
+      <p style="margin:0 0 10px;font-size:14px;color:#1e293b;font-weight:600;">
+        Vandaag anders dan anders — vrij of een dagje weg?
+      </p>
+      <a href="https://weerzone.nl/vandaag?dagplan=1"
+         style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;">
+        Vertel het Piet →
+      </a>
+    </div>
+
     <!-- FOOTER -->
     <div style="text-align:center;padding-top:8px;">
       <p style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6;">

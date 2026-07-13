@@ -122,6 +122,7 @@ export default function OnboardingClient({ email }: { email: string }) {
   const [dogMorning, setDogMorning] = useState<OnboardingDogMorning>("7tot8");
   const [dogEvening, setDogEvening] = useState<OnboardingDogEvening>("21tot22");
   const [budget, setBudget] = useState<BudgetKey>("standard");
+  const [freeday, setFreeday] = useState(false); // opt-in ⇒ default uit
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -269,7 +270,7 @@ export default function OnboardingClient({ email }: { email: string }) {
       // onboarding niet (bijstellen kan altijd in de regiekamer).
       const moments = buildOnboardingMoments(transport, depart, home, outdoor, dogMorning, dogEvening);
       const momentsResult = await replaceOnboardingMoments(supabase, uid, moments);
-      const budgetResult = await updateProfile({ headsupBudget: budget });
+      const budgetResult = await updateProfile({ headsupBudget: budget, freedayHeadsup: freeday });
       if (!momentsResult.ok || !budgetResult.ok) {
         console.error("[onboarding] momenten/budget opslaan mislukte (niet blokkerend)");
       }
@@ -278,6 +279,7 @@ export default function OnboardingClient({ email }: { email: string }) {
         outdoor: [...outdoor].sort().join(",") || "geen",
         moments: moments.length,
         budget,
+        freeday,
       });
 
       if (coords) {
@@ -616,6 +618,13 @@ export default function OnboardingClient({ email }: { email: string }) {
                   </label>
                 );
               })}
+              <div className="wz-micro mt-2" style={{ color: "var(--wz-text-mute)" }}>
+                Mag Piet op een vrije dag &rsquo;s ochtends vragen wat je gaat doen?
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Chip active={freeday} label="Ja, handig" onClick={() => setFreeday(true)} />
+                <Chip active={!freeday} label="Nee, alleen mijn ritme" onClick={() => setFreeday(false)} />
+              </div>
               <Reward text={BUDGETS.find((o) => o.k === budget)?.reward ?? null} />
             </div>
           )}
