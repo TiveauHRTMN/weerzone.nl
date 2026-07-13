@@ -18,6 +18,11 @@ export interface AgentMoment {
   windowStart: string;
   windowEnd: string;
   transport: MomentTransport | null;
+  /** "YYYY-MM-DD": eendags-moment — geldt alléén die datum, `days` wordt genegeerd. */
+  date: string | null;
+  /** Optionele bestemming (dagje weg): de motor bewaakt dan óók dat weer. */
+  province: string | null;
+  placeSlug: string | null;
 }
 
 export const MOMENT_KIND_LABEL: Record<MomentKind, string> = {

@@ -79,26 +79,53 @@ export async function logPushed(
 
 export type HeadsupBudget = "moments_only" | "standard" | "low";
 
-/** Persoonlijk budget per gebruiker (user_profile.headsup_budget).
- *  Fail-soft: lege map ⇒ iedereen `standard`. */
-export async function loadHeadsupBudgets(
+export interface HeadsupProfile {
+  budget: HeadsupBudget;
+  routinePaused: boolean;
+  /** "YYYY-MM-DD" of null — stil t/m die datum (vakantiestand / vandaag vrij). */
+  pausedUntil: string | null;
+  freedayHeadsup: boolean;
+}
+
+export const DEFAULT_PROFILE: HeadsupProfile = {
+  budget: "standard",
+  routinePaused: false,
+  pausedUntil: null,
+  freedayHeadsup: false,
+};
+
+/** Heads-up-voorkeuren per gebruiker (user_profile). Fail-soft: lege map ⇒
+ *  defaults; pre-migratie (20260713) valt terug op alleen het budget. */
+export async function loadHeadsupProfiles(
   admin: SupabaseClient,
   userIds: string[],
-): Promise<Map<string, HeadsupBudget>> {
-  const out = new Map<string, HeadsupBudget>();
+): Promise<Map<string, HeadsupProfile>> {
+  const out = new Map<string, HeadsupProfile>();
   if (!userIds.length) return out;
-  const { data, error } = await admin
+  const full = await admin
     .from("user_profile")
-    .select("id, headsup_budget")
+    .select("id, headsup_budget, routine_paused, paused_until, freeday_headsup")
     .in("id", userIds);
-  if (error) {
-    console.error("[headsup-log] budget niet leesbaar:", error.message);
+  const res = full.error
+    ? await admin.from("user_profile").select("id, headsup_budget").in("id", userIds)
+    : full;
+  if (res.error) {
+    console.error("[headsup-log] profiel niet leesbaar:", res.error.message);
     return out;
   }
-  for (const row of (data ?? []) as { id: string; headsup_budget: string | null }[]) {
-    if (row.headsup_budget === "moments_only" || row.headsup_budget === "low") {
-      out.set(row.id, row.headsup_budget);
-    }
+  for (const row of (res.data ?? []) as {
+    id: string; headsup_budget: string | null;
+    routine_paused?: boolean | null; paused_until?: string | null; freeday_headsup?: boolean | null;
+  }[]) {
+    out.set(row.id, {
+      budget:
+        row.headsup_budget === "moments_only" || row.headsup_budget === "low"
+          ? row.headsup_budget
+          : "standard",
+      routinePaused: row.routine_paused ?? false,
+      pausedUntil: row.paused_until ?? null,
+      freedayHeadsup: row.freeday_headsup ?? false,
+    });
   }
   return out;
 }

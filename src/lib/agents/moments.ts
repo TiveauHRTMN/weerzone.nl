@@ -64,17 +64,25 @@ export async function loadMomentsForUsers(
 ): Promise<Map<string, AgentMoment[]>> {
   const out = new Map<string, AgentMoment[]>();
   if (!userIds.length) return out;
-  const { data, error } = await admin
+  const full = await admin
     .from(AGENT_MOMENTS_TABLE)
-    .select("id, user_id, kind, label, days, window_start, window_end, transport")
+    .select("id, user_id, kind, label, days, window_start, window_end, transport, date, province, place_slug")
     .in("user_id", userIds);
-  if (error) {
-    console.error("[moments] agent_moments niet leesbaar:", error.message);
+  // Pre-migratie-fallback (20260713): oude kolommenset, dagplan-velden null.
+  const res = full.error
+    ? await admin
+        .from(AGENT_MOMENTS_TABLE)
+        .select("id, user_id, kind, label, days, window_start, window_end, transport")
+        .in("user_id", userIds)
+    : full;
+  if (res.error) {
+    console.error("[moments] agent_moments niet leesbaar:", res.error.message);
     return out;
   }
-  for (const raw of (data ?? []) as {
+  for (const raw of (res.data ?? []) as {
     id: string; user_id: string; kind: MomentKind; label: string;
     days: number[]; window_start: string; window_end: string; transport: MomentTransport | null;
+    date?: string | null; province?: string | null; place_slug?: string | null;
   }[]) {
     if (!out.has(raw.user_id)) out.set(raw.user_id, []);
     out.get(raw.user_id)!.push({
@@ -85,6 +93,9 @@ export async function loadMomentsForUsers(
       windowStart: raw.window_start,
       windowEnd: raw.window_end,
       transport: raw.transport,
+      date: raw.date ?? null,
+      province: raw.province ?? null,
+      placeSlug: raw.place_slug ?? null,
     });
   }
   return out;

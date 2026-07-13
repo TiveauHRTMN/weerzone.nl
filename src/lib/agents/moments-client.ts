@@ -21,6 +21,9 @@ export interface MomentInsert {
   windowStart: string;
   windowEnd: string;
   transport?: MomentTransport | null;
+  date?: string | null;
+  province?: string | null;
+  placeSlug?: string | null;
 }
 
 interface MomentRow {
@@ -31,6 +34,9 @@ interface MomentRow {
   window_start: string;
   window_end: string;
   transport: MomentTransport | null;
+  date?: string | null;
+  province?: string | null;
+  place_slug?: string | null;
 }
 
 function fromRow(row: MomentRow): AgentMoment {
@@ -42,11 +48,14 @@ function fromRow(row: MomentRow): AgentMoment {
     windowStart: row.window_start,
     windowEnd: row.window_end,
     transport: row.transport,
+    date: row.date ?? null,
+    province: row.province ?? null,
+    placeSlug: row.place_slug ?? null,
   };
 }
 
 function toRow(userId: string, m: MomentInsert) {
-  return {
+  const row: Record<string, unknown> = {
     user_id: userId,
     kind: m.kind,
     label: m.label,
@@ -55,15 +64,28 @@ function toRow(userId: string, m: MomentInsert) {
     window_end: m.windowEnd,
     transport: m.transport ?? null,
   };
+  // Alleen meesturen als gezet: zo blijft een insert zonder dagplan-velden
+  // ook werken zolang de 20260713-migratie nog niet gedraaid is.
+  if (m.date != null) row.date = m.date;
+  if (m.province != null) row.province = m.province;
+  if (m.placeSlug != null) row.place_slug = m.placeSlug;
+  return row;
 }
 
 export async function listMyMoments(supabase: SupabaseClient): Promise<AgentMoment[]> {
-  const { data, error } = await supabase
+  const full = await supabase
     .from(AGENT_MOMENTS_TABLE)
-    .select("id, kind, label, days, window_start, window_end, transport")
+    .select("id, kind, label, days, window_start, window_end, transport, date, province, place_slug")
     .order("created_at", { ascending: true });
-  if (error) return [];
-  return ((data ?? []) as MomentRow[]).map(fromRow);
+  // Pre-migratie-fallback: oude kolommenset, nieuwe velden blijven null.
+  const res = full.error
+    ? await supabase
+        .from(AGENT_MOMENTS_TABLE)
+        .select("id, kind, label, days, window_start, window_end, transport")
+        .order("created_at", { ascending: true })
+    : full;
+  if (res.error) return [];
+  return ((res.data ?? []) as MomentRow[]).map(fromRow);
 }
 
 export async function insertMoment(
@@ -87,6 +109,9 @@ export async function updateMoment(
   if (patch.windowStart !== undefined) row.window_start = patch.windowStart;
   if (patch.windowEnd !== undefined) row.window_end = patch.windowEnd;
   if (patch.transport !== undefined) row.transport = patch.transport;
+  if (patch.date !== undefined) row.date = patch.date;
+  if (patch.province !== undefined) row.province = patch.province;
+  if (patch.placeSlug !== undefined) row.place_slug = patch.placeSlug;
   const { error } = await supabase.from(AGENT_MOMENTS_TABLE).update(row).eq("id", id);
   return { ok: !error };
 }
