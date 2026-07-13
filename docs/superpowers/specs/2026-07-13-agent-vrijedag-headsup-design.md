@@ -1,6 +1,11 @@
 # Vrije-dag heads-up & routine-schakelaar — dagplannen zonder dagelijks gezeur
 
-**Status: VOORSTEL (2026-07-13) — nog niet gebouwd. Rowan leest eerst.**
+**Status: GEBOUWD & LIVE 2026-07-13** (migratie gedraaid, deploy auto-gealiast
+naar weerzone.nl, rooktest + cron-dry-run groen). Open: Rowans geauthenticeerde
+e2e (regiekamer-pauzes, dagplan-invuller, eendags-moment) en de eerste echte
+vrije-dag-push in het wild. Bewuste afwijkingen: vast 07:00–09:00-venster
+i.p.v. notification_time; mail-CTA statisch; geen vervoer bij dagje weg — zie
+het implementatieplan (2026-07-13-agent-vrijedag-headsup.md).
 Ontstaan uit de e2e-review van plan 2 (heads-up gezicht): vaste momenten vangen
 de 90%-dagen, maar missen afwijkingen (dagje weg, vrije dag, vakantie) — en
 niemand vult die uit zichzelf vooraf in.
