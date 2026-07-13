@@ -40,17 +40,24 @@ export async function updateProfile(args: {
   reedOn?: boolean;
   koosOn?: boolean;
   headsupBudget?: "moments_only" | "standard" | "low";
+  routinePaused?: boolean;
+  /** "YYYY-MM-DD" of null om de pauze op te heffen. */
+  pausedUntil?: string | null;
+  freedayHeadsup?: boolean;
 }) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Niet ingelogd");
 
-  const updates: Record<string, string | number> = {};
+  const updates: Record<string, string | number | boolean | null> = {};
   if (args.fullName !== undefined) updates.full_name = args.fullName;
   if (args.postcode !== undefined) updates.postcode = args.postcode;
   if (args.lat !== undefined) updates.primary_lat = args.lat;
   if (args.lon !== undefined) updates.primary_lon = args.lon;
   if (args.headsupBudget !== undefined) updates.headsup_budget = args.headsupBudget;
+  if (args.routinePaused !== undefined) updates.routine_paused = args.routinePaused;
+  if (args.pausedUntil !== undefined) updates.paused_until = args.pausedUntil;
+  if (args.freedayHeadsup !== undefined) updates.freeday_headsup = args.freedayHeadsup;
   if (Object.keys(updates).length > 0) {
     const { error } = await supabase
       .from("user_profile")
