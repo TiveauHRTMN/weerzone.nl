@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { updateProfile } from "@/app/actions";
 import { trackEvent } from "@/lib/analytics";
-import { MOMENT_KIND_LABEL, type AgentMoment, type MomentKind } from "@/lib/agents/moments-shared";
+import { MOMENT_KIND_LABEL, nlDateISO, type AgentMoment, type MomentKind } from "@/lib/agents/moments-shared";
 import {
   listMyMoments,
   insertMoment,
@@ -56,12 +56,27 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
  * de eigen momenten, gekoppelde apparaten + test-push, en het persoonlijke
  * budget. Dit paneel is later letterlijk de Pro-bundelpagina.
  */
-export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budget }) {
+export default function RegiekamerPanel({
+  initialBudget,
+  initialRoutinePaused = false,
+  initialPausedUntil = null,
+  initialFreedayHeadsup = false,
+}: {
+  initialBudget: Budget;
+  initialRoutinePaused?: boolean;
+  initialPausedUntil?: string | null;
+  initialFreedayHeadsup?: boolean;
+}) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [subs, setSubs] = useState<SubscriptionRow[]>([]);
   const [moments, setMoments] = useState<AgentMoment[]>([]);
   const [devices, setDevices] = useState<number>(0);
   const [budget, setBudget] = useState<Budget>(initialBudget);
+  const [routinePaused, setRoutinePaused] = useState<boolean>(initialRoutinePaused);
+  const [pausedUntil, setPausedUntil] = useState<string | null>(initialPausedUntil);
+  const [freedayHeadsup, setFreedayHeadsup] = useState<boolean>(initialFreedayHeadsup);
+  const [vacationDate, setVacationDate] = useState("");
+  const [ritmeError, setRitmeError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -165,6 +180,27 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
     } catch {
       setBudget(previous);
       setBudgetError("Bewaren lukte even niet — probeer het zo nog eens.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function saveRitme(patch: { routinePaused?: boolean; pausedUntil?: string | null; freedayHeadsup?: boolean }) {
+    const prev = { routinePaused, pausedUntil, freedayHeadsup };
+    if (patch.routinePaused !== undefined) setRoutinePaused(patch.routinePaused);
+    if (patch.pausedUntil !== undefined) setPausedUntil(patch.pausedUntil);
+    if (patch.freedayHeadsup !== undefined) setFreedayHeadsup(patch.freedayHeadsup);
+    setRitmeError(null);
+    setBusy("ritme");
+    try {
+      const result = await updateProfile(patch);
+      if (!result?.ok) throw new Error();
+      trackEvent("regiekamer_ritme", patch as Record<string, unknown>);
+    } catch {
+      setRoutinePaused(prev.routinePaused);
+      setPausedUntil(prev.pausedUntil);
+      setFreedayHeadsup(prev.freedayHeadsup);
+      setRitmeError("Bewaren lukte even niet — probeer het zo nog eens.");
     } finally {
       setBusy(null);
     }
@@ -292,7 +328,7 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-bold text-slate-900">{m.label}</div>
                   <div className="text-xs text-slate-500">
-                    {MOMENT_KIND_LABEL[m.kind]} · {m.days.map((d) => DAY_LABELS[d - 1]).join(" ")} · {fmtTime(m.windowStart)}–{fmtTime(m.windowEnd)}
+                    {MOMENT_KIND_LABEL[m.kind]} · {m.date ? `eenmalig ${m.date}` : m.days.map((d) => DAY_LABELS[d - 1]).join(" ")} · {fmtTime(m.windowStart)}–{fmtTime(m.windowEnd)}
                   </div>
                 </div>
                 <span className="text-xs font-bold text-slate-400">Bewerk</span>
@@ -309,6 +345,88 @@ export default function RegiekamerPanel({ initialBudget }: { initialBudget: Budg
             onCancel={() => { setEditing(null); setAdding(false); setMomentError(null); }}
           />
         )}
+      </div>
+
+      {/* Ritme & vrije dagen (spec 2026-07-13 §3A/B) */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ritme &amp; vrije dagen</p>
+        <div className="mt-2 grid gap-2">
+          <div className="flex items-center gap-3 rounded-xl border border-slate-100 p-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-bold text-slate-900">Vaste routine</div>
+              <div className="text-xs text-slate-500">
+                {routinePaused ? "Gepauzeerd — je ritten tellen even niet mee." : "Piet bewaakt je vaste ritten."}
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!routinePaused}
+              aria-label={routinePaused ? "Vaste routine aanzetten" : "Vaste routine pauzeren"}
+              onClick={() => void saveRitme({ routinePaused: !routinePaused })}
+              disabled={busy !== null}
+              className="relative h-7 w-12 flex-none rounded-full transition-colors disabled:opacity-60"
+              style={{ background: !routinePaused ? "#10b981" : "#e2e8f0" }}
+            >
+              <span className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all" style={{ left: !routinePaused ? 22 : 2 }} />
+            </button>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl border border-slate-100 p-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-bold text-slate-900">Vrije-dag-vraag</div>
+              <div className="text-xs text-slate-500">Piet mag op vrije dagen &rsquo;s ochtends vragen wat ik ga doen.</div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={freedayHeadsup}
+              aria-label={freedayHeadsup ? "Vrije-dag-vraag uitzetten" : "Vrije-dag-vraag aanzetten"}
+              onClick={() => void saveRitme({ freedayHeadsup: !freedayHeadsup })}
+              disabled={busy !== null}
+              className="relative h-7 w-12 flex-none rounded-full transition-colors disabled:opacity-60"
+              style={{ background: freedayHeadsup ? "#10b981" : "#e2e8f0" }}
+            >
+              <span className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all" style={{ left: freedayHeadsup ? 22 : 2 }} />
+            </button>
+          </div>
+          <div className="rounded-xl border border-slate-100 p-3">
+            <div className="text-sm font-bold text-slate-900">Even weg</div>
+            {pausedUntil && pausedUntil >= nlDateISO(new Date()) ? (
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <p className="text-xs text-slate-500">
+                  Stil t/m {pausedUntil} — alleen bij echt noodweer hoor je Reed.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void saveRitme({ pausedUntil: null })}
+                  disabled={busy !== null}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-widest text-white disabled:opacity-60"
+                >
+                  Zet weer aan
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <input
+                  type="date"
+                  value={vacationDate}
+                  min={nlDateISO(new Date())}
+                  onChange={(e) => setVacationDate(e.target.value)}
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                />
+                <button
+                  type="button"
+                  onClick={() => void saveRitme({ pausedUntil: vacationDate })}
+                  disabled={busy !== null || !vacationDate}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-widest text-white disabled:opacity-40"
+                >
+                  Zet stil t/m die datum
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        {ritmeError && <p className="mt-2 text-sm font-semibold text-red-600">{ritmeError}</p>}
       </div>
 
       {/* Budget */}
@@ -375,12 +493,14 @@ function MomentEditor({
   const [days, setDays] = useState<number[]>(initial?.days ?? [1, 2, 3, 4, 5]);
   const [start, setStart] = useState(initial ? fmtTime(initial.windowStart) : "17:00");
   const [end, setEnd] = useState(initial ? fmtTime(initial.windowEnd) : "18:00");
+  // Eendags-moment (dagje weg): datum vast, geen weekdagen.
+  const isOneOff = !!initial?.date;
 
   function toggleDay(d: number) {
     setDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()));
   }
 
-  const valid = label.trim().length > 0 && days.length > 0 && start < end;
+  const valid = label.trim().length > 0 && (isOneOff || days.length > 0) && start < end;
 
   return (
     <div className="mt-3 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -408,23 +528,27 @@ function MomentEditor({
         placeholder="Bijvoorbeeld: Avondronde"
         className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-900"
       />
-      <div className="flex flex-wrap gap-1.5">
-        {DAY_LABELS.map((d, i) => (
-          <button
-            key={d}
-            type="button"
-            onClick={() => toggleDay(i + 1)}
-            className="rounded-full border px-3 py-1.5 text-xs font-bold"
-            style={{
-              borderColor: days.includes(i + 1) ? "#0f172a" : "#e2e8f0",
-              background: days.includes(i + 1) ? "#0f172a" : "#fff",
-              color: days.includes(i + 1) ? "#fff" : "#0f172a",
-            }}
-          >
-            {d}
-          </button>
-        ))}
-      </div>
+      {isOneOff ? (
+        <p className="text-xs font-semibold text-slate-500">Eenmalig op {initial!.date}</p>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {DAY_LABELS.map((d, i) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => toggleDay(i + 1)}
+              className="rounded-full border px-3 py-1.5 text-xs font-bold"
+              style={{
+                borderColor: days.includes(i + 1) ? "#0f172a" : "#e2e8f0",
+                background: days.includes(i + 1) ? "#0f172a" : "#fff",
+                color: days.includes(i + 1) ? "#fff" : "#0f172a",
+              }}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="flex items-center gap-2 text-sm text-slate-700">
         <input type="time" value={start} onChange={(e) => setStart(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2" />
         <span>tot</span>
@@ -435,7 +559,17 @@ function MomentEditor({
           <button
             type="button"
             disabled={!valid}
-            onClick={() => onSave({ kind, label: label.trim(), days, windowStart: start, windowEnd: end })}
+            onClick={() =>
+              onSave({
+                kind,
+                label: label.trim(),
+                windowStart: start,
+                windowEnd: end,
+                ...(isOneOff
+                  ? { days: [], date: initial!.date, province: initial!.province, placeSlug: initial!.placeSlug }
+                  : { days }),
+              })
+            }
             className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black uppercase tracking-widest text-white disabled:opacity-40"
           >
             Bewaar

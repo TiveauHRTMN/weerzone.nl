@@ -40,7 +40,10 @@ export default async function MijnWeerzonePage() {
   ]);
 
   const profile = profileRes.data as
-    | { full_name?: string; postcode?: string; piet_on?: boolean; reed_on?: boolean; koos_on?: boolean; headsup_budget?: string }
+    | {
+        full_name?: string; postcode?: string; piet_on?: boolean; reed_on?: boolean; koos_on?: boolean;
+        headsup_budget?: string; routine_paused?: boolean; paused_until?: string | null; freeday_headsup?: boolean;
+      }
     | null;
   const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? "";
   const displayLocation = accountLocationRes.data
@@ -88,6 +91,9 @@ export default async function MijnWeerzonePage() {
                 ? profile.headsup_budget
                 : "standard"
             }
+            initialRoutinePaused={profile?.routine_paused ?? false}
+            initialPausedUntil={profile?.paused_until ?? null}
+            initialFreedayHeadsup={profile?.freeday_headsup ?? false}
           />
           <details className="rounded-2xl border border-white/15 bg-white/5 p-4">
             <summary className="cursor-pointer text-xs font-bold text-white/70">
