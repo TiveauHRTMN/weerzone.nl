@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tripfit.travel"),
+  metadataBase: new URL("https://calortravel.nl"),
   title: {
     default: "Calor | Caribbean Live Travel Intelligence",
     template: "%s | Calor",

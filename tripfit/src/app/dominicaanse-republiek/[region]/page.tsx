@@ -78,7 +78,7 @@ export default async function DominicanRepublicRegionPage({
     .sort((left, right) => right.priority - left.priority)
     .slice(0, 8);
 
-  const canonicalUrl = `https://tripfit.travel/dominicaanse-republiek/${region.slug}`;
+  const canonicalUrl = `https://calortravel.nl/dominicaanse-republiek/${region.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -100,13 +100,13 @@ export default async function DominicanRepublicRegionPage({
             "@type": "ListItem",
             position: 1,
             name: "Home",
-            item: "https://tripfit.travel",
+            item: "https://calortravel.nl",
           },
           {
             "@type": "ListItem",
             position: 2,
             name: dominicanRepublicPack.country.name,
-            item: "https://tripfit.travel/dominicaanse-republiek",
+            item: "https://calortravel.nl/dominicaanse-republiek",
           },
           {
             "@type": "ListItem",

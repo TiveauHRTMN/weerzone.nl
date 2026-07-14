@@ -247,7 +247,7 @@ export default function HomePage() {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "Calor",
-            url: "https://tripfit.travel",
+            url: "https://calortravel.nl",
             description:
               "Caribbean Live Travel Intelligence voor een levende, persoonlijke reis.",
             inLanguage: "nl-NL",

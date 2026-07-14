@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const APP_URL = "https://tripfit.travel";
+const APP_URL = "https://calortravel.nl";
 
 export default function robots(): MetadataRoute.Robots {
   return {

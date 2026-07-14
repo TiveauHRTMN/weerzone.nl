@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { dominicanRepublicPack } from "@/domain/countries/packs/dominican-republic";
 
-const APP_URL = "https://tripfit.travel";
+const APP_URL = "https://calortravel.nl";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date(

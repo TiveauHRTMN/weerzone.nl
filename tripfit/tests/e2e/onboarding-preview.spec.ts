@@ -78,7 +78,7 @@ test.describe("anonymous living-trip flow", () => {
     );
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
-      "https://tripfit.travel/dominicaanse-republiek/samana",
+      "https://calortravel.nl/dominicaanse-republiek/samana",
     );
     await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1);
     const robots = await page.evaluate(
