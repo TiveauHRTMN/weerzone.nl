@@ -67,10 +67,10 @@ function RecommendationCard({
 }) {
   return (
     <article
-      className={`flex h-full flex-col rounded-[1.4rem] border p-5 shadow-[var(--shadow-card)] sm:p-6 ${
+      className={`flex h-full flex-col rounded-2xl border p-5 sm:p-6 ${
         featured
-          ? "border-moss-dark bg-moss-dark text-white"
-          : "border-line/80 bg-paper text-ink"
+          ? "vlamrand overflow-hidden border-ink bg-ink text-white shadow-[var(--shadow-live)]"
+          : "border-line bg-white text-ink"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -79,15 +79,15 @@ function RecommendationCard({
             featured
               ? "bg-white/10 text-sun"
               : recommendation.seasonStatus === "PEAK"
-                ? "bg-[#f4ded5] text-[#7e3f30]"
-                : "bg-sand text-moss-dark"
+                ? "bg-sun/20 text-ink"
+                : "bg-surface text-muted"
           }`}
         >
           {seasonLabels[recommendation.seasonStatus]}
         </span>
         <span
-          className={`text-right text-xs font-bold ${
-            featured ? "text-white/70" : "text-moss"
+          className={`text-right text-xs font-bold tabular ${
+            featured ? "text-white/70" : "text-muted"
           }`}
         >
           Relevantie {recommendation.score}
@@ -135,7 +135,7 @@ function RecommendationCard({
             >
               <CheckIcon
                 className={`mt-0.5 size-3.5 shrink-0 ${
-                  featured ? "text-sun" : "text-moss"
+                  featured ? "text-sun" : "text-ink"
                 }`}
                 aria-hidden="true"
               />
@@ -157,7 +157,7 @@ function RecommendationCard({
       {recommendation.bookingAdvice ? (
         <div
           className={`mt-4 flex gap-2 rounded-xl p-3 text-xs leading-5 ${
-            featured ? "bg-white/[0.07] text-white/65" : "bg-sand/55 text-muted"
+            featured ? "bg-white/[0.07] text-white/65" : "bg-surface text-muted"
           }`}
         >
           <InfoIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
@@ -174,11 +174,7 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-line/80 bg-paper">
-        <div
-          className="absolute -right-32 -top-36 size-[38rem] rounded-full bg-sun/10 blur-3xl"
-          aria-hidden="true"
-        />
+      <section className="relative border-b border-line bg-white">
         <div className="relative mx-auto w-full max-w-[90rem] px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10 lg:px-12">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <Link
@@ -188,8 +184,8 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
               <ArrowLeftIcon className="size-4" aria-hidden="true" />
               Reis aanpassen
             </Link>
-            <span className="inline-flex items-center gap-2 rounded-full border border-moss/20 bg-moss-soft/60 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.11em] text-moss-dark">
-              <span className="size-1.5 rounded-full bg-moss" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.11em] text-ink">
+              <span className="size-1.5 rounded-full bg-sun" />
               Anonieme preview
             </span>
           </div>
@@ -206,7 +202,7 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
             </div>
 
             <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line">
-              <div className="bg-canvas p-4 sm:p-5">
+              <div className="bg-white p-4 sm:p-5">
                 <dt className="flex items-center gap-2 text-xs font-semibold text-muted">
                   <CalendarIcon className="size-4" aria-hidden="true" />
                   Reisdata
@@ -220,7 +216,7 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
                   </span>
                 </dd>
               </div>
-              <div className="bg-canvas p-4 sm:p-5">
+              <div className="bg-white p-4 sm:p-5">
                 <dt className="flex items-center gap-2 text-xs font-semibold text-muted">
                   <UsersIcon className="size-4" aria-hidden="true" />
                   Gezelschap
@@ -232,14 +228,14 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
                   </span>
                 </dd>
               </div>
-              <div className="col-span-2 flex items-center justify-between gap-4 bg-canvas p-4 sm:p-5">
+              <div className="col-span-2 flex items-center justify-between gap-4 bg-white p-4 sm:p-5">
                 <div>
                   <dt className="text-xs font-semibold text-muted">Reisfase</dt>
                   <dd className="mt-1 text-sm font-bold text-ink">
                     {phaseLabels[preview.phase]}
                   </dd>
                 </div>
-                <span className="rounded-full bg-sand px-3 py-1.5 text-xs font-bold text-moss-dark">
+                <span className="rounded-full bg-surface px-3 py-1.5 text-xs font-bold text-ink">
                   {preview.route.length} {preview.route.length === 1 ? "regio" : "regio’s"}
                 </span>
               </div>
@@ -264,11 +260,11 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
           {preview.route.map((stop, index) => (
             <li
               key={`${stop.regionId}-${stop.arrivalDate}`}
-              className="relative rounded-2xl border border-line/80 bg-paper p-5 sm:p-6"
+              className="relative rounded-2xl border border-line bg-white p-5 sm:p-6"
             >
               <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
                 <div className="flex gap-4">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-moss-dark text-xs font-bold text-white">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-xs font-bold text-white">
                     {index + 1}
                   </span>
                   <div>
@@ -279,8 +275,8 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
                       <span
                         className={`rounded-full px-2 py-0.5 text-[0.63rem] font-bold uppercase tracking-[0.08em] ${
                           stop.timing === "CURRENT"
-                            ? "bg-[#f4ded5] text-[#7e3f30]"
-                            : "bg-sand text-muted"
+                            ? "bg-sun/20 text-ink"
+                            : "bg-surface text-muted"
                         }`}
                       >
                         {timingLabels[stop.timing]}
@@ -303,11 +299,11 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
               </div>
 
               {stop.highlights.length > 0 ? (
-                <div className="mt-5 flex flex-wrap gap-2 border-t border-line/75 pt-4 sm:ml-13">
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4 sm:ml-13">
                   {stop.highlights.slice(0, 3).map((highlight) => (
                     <span
                       key={highlight.id}
-                      className="rounded-full bg-canvas px-3 py-1.5 text-xs font-semibold text-moss-dark"
+                      className="rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-ink"
                     >
                       {highlight.title}
                     </span>
@@ -320,7 +316,7 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
       </section>
 
       {primaryHighlight ? (
-        <section className="border-y border-line/75 bg-white/55">
+        <section className="border-y border-line bg-white">
           <div className="mx-auto w-full max-w-[90rem] px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
             <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
               <div>
@@ -335,7 +331,7 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
               </p>
             </div>
 
-            <div className="mt-10 grid gap-4 lg:grid-cols-[1.02fr_0.98fr]">
+            <div className="mt-10 grid gap-4 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
               <RecommendationCard recommendation={primaryHighlight} featured />
               <div className="grid gap-4 sm:grid-cols-2">
                 {alternatives.map((recommendation) => (
@@ -351,9 +347,9 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
       ) : null}
 
       <section className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1fr_1fr] lg:gap-14 lg:px-12 lg:py-24">
-        <div className="rounded-[1.5rem] border border-line/80 bg-sand/45 p-6 sm:p-8">
-          <CompassIcon className="size-7 text-clay" aria-hidden="true" />
-          <p className="mt-6 text-xs font-bold uppercase tracking-[0.12em] text-clay">
+        <div className="rounded-2xl border border-line bg-surface p-6 sm:p-8">
+          <CompassIcon className="size-7 text-ink" aria-hidden="true" />
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.12em] text-muted">
             Country & culture
           </p>
           <h2 className="mt-3 text-2xl font-[760] tracking-[-0.04em]">
@@ -367,16 +363,16 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
           </p>
         </div>
 
-        <div className="flex flex-col rounded-[1.5rem] border border-moss/20 bg-moss-soft/55 p-6 sm:p-8">
-          <ShieldCheckIcon className="size-7 text-moss-dark" aria-hidden="true" />
-          <p className="mt-6 text-xs font-bold uppercase tracking-[0.12em] text-moss-dark">
+        <div className="flex flex-col rounded-2xl border border-line bg-surface p-6 sm:p-8">
+          <ShieldCheckIcon className="size-7 text-ink" aria-hidden="true" />
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.12em] text-muted">
             Herkomst en vertrouwen
           </p>
           <h2 className="mt-3 text-2xl font-[760] tracking-[-0.04em]">
             Zichtbaar wat deze preview weet.
           </h2>
           <p className="mt-4 text-sm leading-7 text-muted">{preview.trust.note}</p>
-          <dl className="mt-auto grid grid-cols-2 gap-5 border-t border-moss/15 pt-6">
+          <dl className="mt-auto grid grid-cols-2 gap-5 border-t border-line pt-6">
             <div>
               <dt className="text-xs text-muted">Status</dt>
               <dd className="mt-1 text-sm font-bold text-ink">
@@ -399,7 +395,7 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
         </div>
       </section>
 
-      <section className="bg-moss-dark text-white">
+      <section className="bg-ink text-white">
         <div className="mx-auto grid w-full max-w-[90rem] gap-8 px-5 py-14 sm:px-8 sm:py-16 lg:grid-cols-[1fr_auto] lg:items-center lg:px-12">
           <div>
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.13em] text-sun">
@@ -410,14 +406,14 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
               Bewaar deze living trip.
             </h2>
             <p id="save-note" className="mt-4 max-w-xl text-sm leading-6 text-white/60">
-              Met een account blijft je route privé opgeslagen en kan TripFit later
+              Met een account blijft je route privé opgeslagen en kan Calor later
               met je reisfase meebewegen. Opslaan wordt in de volgende product-slice
               geactiveerd.
             </p>
           </div>
           <button
             type="button"
-            className="primary-button !border-sun !bg-sun !text-ink lg:min-w-60"
+            className="primary-button lg:min-w-60"
             disabled
             aria-describedby="save-note"
           >

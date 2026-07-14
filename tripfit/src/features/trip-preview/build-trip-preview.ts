@@ -90,7 +90,7 @@ const PHASE_GUIDANCE: Record<TripPhase, TripPreview["phaseGuidance"]> = {
   PLANNING_LONG_RANGE: {
     eyebrow: "Vooruitkijken",
     title: "Bouw eerst de sterke route",
-    body: "Je reis ligt nog buiten de betrouwbare weersverwachting. TripFit gebruikt seizoen, regio en gezelschap en vermijdt schijnprecisie per dag.",
+    body: "Je reis ligt nog buiten de betrouwbare weersverwachting. Calor gebruikt seizoen, regio en gezelschap en vermijdt schijnprecisie per dag.",
   },
   PLANNING_SUBSEASONAL: {
     eyebrow: "De contouren worden zichtbaar",
@@ -105,7 +105,7 @@ const PHASE_GUIDANCE: Record<TripPhase, TripPreview["phaseGuidance"]> = {
   IN_TRIP: {
     eyebrow: "Je reis is live",
     title: "Kies op wat vandaag klopt",
-    body: "TripFit zet je huidige regio voorop en houdt rekening met wat later in je route nog beter past.",
+    body: "Calor zet je huidige regio voorop en houdt rekening met wat later in je route nog beter past.",
   },
   COMPLETED: {
     eyebrow: "Reisarchief",

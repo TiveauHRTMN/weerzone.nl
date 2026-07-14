@@ -4,7 +4,7 @@ import { BrandMark } from "@/components/brand/brand-mark";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto bg-moss-dark text-white">
+    <footer className="mt-auto bg-ink text-white">
       <div className="mx-auto grid w-full max-w-[90rem] gap-10 px-5 py-10 sm:px-8 md:grid-cols-[1fr_auto] md:items-end lg:px-12 lg:py-12">
         <div>
           <BrandMark inverse />
@@ -18,7 +18,7 @@ export function SiteFooter() {
             Dominicaanse Republiek
           </Link>
           <span>Privacy-first</span>
-          <span>© {new Date().getFullYear()} TripFit</span>
+          <span>© {new Date().getFullYear()} Calor</span>
         </div>
       </div>
     </footer>

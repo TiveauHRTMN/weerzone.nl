@@ -8,10 +8,10 @@ export default function PreviewError({ reset }: { reset: () => void }) {
   return (
     <section className="mx-auto grid min-h-[64vh] w-full max-w-3xl place-items-center px-5 py-16 sm:px-8">
       <div className="surface-card w-full p-6 text-center sm:p-10">
-        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-sand text-clay">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-surface text-flame">
           <CompassIcon className="size-6" aria-hidden="true" />
         </span>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.13em] text-clay">
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.13em] text-flame">
           Preview onderbroken
         </p>
         <h1 className="display-title mt-3 text-4xl leading-tight">

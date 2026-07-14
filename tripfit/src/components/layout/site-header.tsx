@@ -5,7 +5,7 @@ import { ArrowUpRightIcon } from "@/components/ui/icons";
 
 export function SiteHeader() {
   return (
-    <header className="relative z-40 border-b border-line/70 bg-canvas/90 backdrop-blur-md">
+    <header className="relative z-40 border-b border-line bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex min-h-17 w-full max-w-[90rem] items-center justify-between gap-6 px-5 sm:px-8 lg:px-12">
         <BrandMark />
         <nav aria-label="Hoofdnavigatie" className="flex items-center gap-1 sm:gap-3">

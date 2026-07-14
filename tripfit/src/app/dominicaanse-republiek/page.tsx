@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "Open een persoonlijke, levende reis voor Punta Cana, Santo Domingo, Samaná en de rest van de Dominicaanse Republiek.",
   alternates: { canonical: "/dominicaanse-republiek" },
   openGraph: {
-    title: "Dominicaanse Republiek | TripFit",
+    title: "Dominicaanse Republiek | Calor",
     description:
       "Landbrede live travel intelligence, verdiept voor de belangrijkste reisregio’s.",
     url: "/dominicaanse-republiek",
@@ -70,45 +70,37 @@ export default function DominicanRepublicPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-moss-dark text-white">
-        <div className="hairline-grid absolute inset-0 opacity-20" aria-hidden="true" />
-        <div
-          className="absolute -right-24 -top-20 size-[28rem] rounded-full bg-clay/15 blur-3xl"
-          aria-hidden="true"
-        />
+      <section className="relative border-b border-line bg-white">
         <div className="relative mx-auto w-full max-w-[90rem] px-5 pb-16 pt-8 sm:px-8 sm:pb-20 sm:pt-10 lg:px-12 lg:pb-24">
           <Breadcrumbs
-            inverse
             items={[{ label: "Home", href: "/" }, { label: country.name }]}
           />
           <div className="mt-14 grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-sun">
-                Volledig country pack
-              </p>
-              <h1 className="display-title mt-5 max-w-4xl text-5xl leading-[0.94] text-white sm:text-6xl lg:text-7xl">
+              <p className="eyebrow">Volledig country pack</p>
+              <h1 className="display-title mt-5 max-w-4xl text-5xl leading-[0.98] text-ink sm:text-6xl lg:text-7xl">
                 {nationalContext.headline}
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
+              <p className="mt-6 max-w-2xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
                 {nationalContext.introduction}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/12 bg-white/[0.07] p-5 backdrop-blur-sm sm:p-6">
-              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-sun">
+            <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
+              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-ink">
                 <SparkIcon className="size-4" aria-hidden="true" />
-                TripFit-dekking
+                Calor-dekking
               </p>
               <dl className="mt-5 grid grid-cols-2 gap-4">
                 <div>
-                  <dt className="text-xs text-white/50">Flagships</dt>
-                  <dd className="mt-1 text-2xl font-bold">{flagshipRegions.length}</dd>
+                  <dt className="text-xs text-muted">Flagships</dt>
+                  <dd className="mt-1 text-2xl font-bold tabular">{flagshipRegions.length}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-white/50">Reisregio’s</dt>
-                  <dd className="mt-1 text-2xl font-bold">{regions.length}</dd>
+                  <dt className="text-xs text-muted">Reisregio’s</dt>
+                  <dd className="mt-1 text-2xl font-bold tabular">{regions.length}</dd>
                 </div>
               </dl>
-              <Link className="primary-button mt-6 w-full !border-sun !bg-sun !text-ink" href="/#open-trip">
+              <Link className="primary-button mt-6 w-full" href="/#open-trip">
                 Open mijn reis
                 <ArrowRightIcon className="size-4" aria-hidden="true" />
               </Link>
@@ -124,7 +116,7 @@ export default function DominicanRepublicPage() {
             Drie regio’s als inhoudelijk kompas.
           </h2>
           <p className="mt-5 text-sm leading-7 text-muted sm:text-base">
-            Hier verbindt TripFit de meeste lokale context, tijdelijke kansen en
+            Hier verbindt Calor de meeste lokale context, tijdelijke kansen en
             route-informatie. De ranking blijft in elke regio aan dezelfde
             uitlegbare regels gebonden.
           </p>
@@ -136,7 +128,7 @@ export default function DominicanRepublicPage() {
         </div>
       </section>
 
-      <section className="border-y border-line/75 bg-paper/70">
+      <section className="border-y border-line bg-white">
         <div className="mx-auto w-full max-w-[90rem] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
           <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-14">
             <div>
@@ -169,7 +161,7 @@ export default function DominicanRepublicPage() {
           </p>
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             {nationalContext.practicalFacts.slice(0, 6).map((fact) => (
-              <div key={fact.id} className="rounded-xl border border-line/80 bg-paper p-4">
+              <div key={fact.id} className="rounded-xl border border-line bg-white p-4">
                 <p className="text-xs font-semibold text-muted">{fact.label}</p>
                 <p className="mt-1.5 text-sm font-bold text-ink">{fact.value}</p>
                 {fact.note ? (
@@ -179,8 +171,8 @@ export default function DominicanRepublicPage() {
             ))}
           </div>
         </div>
-        <div className="rounded-[1.7rem] border border-line/80 bg-sand/50 p-6 sm:p-8">
-          <CompassIcon className="size-7 text-clay" aria-hidden="true" />
+        <div className="rounded-2xl border border-line bg-surface p-6 sm:p-8">
+          <CompassIcon className="size-7 text-ink" aria-hidden="true" />
           <h2 className="mt-6 text-2xl font-[760] tracking-[-0.04em]">
             Niet één Dominicaanse ervaring
           </h2>
@@ -193,7 +185,7 @@ export default function DominicanRepublicPage() {
             ))}
           </div>
           <div className="mt-7 flex items-center gap-2 border-t border-line pt-5 text-xs font-semibold text-muted">
-            <MapPinIcon className="size-4 text-clay" aria-hidden="true" />
+            <MapPinIcon className="size-4" aria-hidden="true" />
             Context wordt straks automatisch op je route gefilterd.
           </div>
         </div>

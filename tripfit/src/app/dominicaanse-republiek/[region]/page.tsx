@@ -52,7 +52,7 @@ export async function generateMetadata({
     description: region.shortDescription,
     alternates: { canonical: `/dominicaanse-republiek/${region.slug}` },
     openGraph: {
-      title: `${region.name} | TripFit`,
+      title: `${region.name} | Calor`,
       description: region.shortDescription,
       url: `/dominicaanse-republiek/${region.slug}`,
       type: "website",
@@ -121,11 +121,7 @@ export default async function DominicanRepublicRegionPage({
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-line/80 bg-paper">
-        <div
-          className="absolute right-[-10rem] top-[-12rem] size-[38rem] rounded-full bg-clay/10 blur-3xl"
-          aria-hidden="true"
-        />
+      <section className="relative border-b border-line bg-white">
         <div className="relative mx-auto w-full max-w-[90rem] px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10 lg:px-12 lg:pb-24">
           <Breadcrumbs
             items={[
@@ -137,22 +133,22 @@ export default async function DominicanRepublicRegionPage({
           <div className="mt-14 grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:gap-16">
             <div>
               <CoverageBadge level={region.coverageLevel} />
-              <h1 className="display-title mt-5 max-w-4xl text-5xl leading-[0.94] sm:text-6xl lg:text-7xl">
+              <h1 className="display-title mt-5 max-w-4xl text-5xl leading-[0.98] sm:text-6xl lg:text-7xl">
                 {region.context.headline}
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
                 {region.shortDescription}
               </p>
             </div>
-            <aside className="rounded-2xl border border-line/80 bg-sand/45 p-5 sm:p-6">
-              <p className="text-xs font-bold uppercase tracking-[0.13em] text-clay">
+            <aside className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-[0.13em] text-muted">
                 Sterk voor
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {region.context.bestFor.map((item) => (
                   <span
                     key={item}
-                    className="rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-moss-dark"
+                    className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink"
                   >
                     {item}
                   </span>
@@ -178,23 +174,23 @@ export default async function DominicanRepublicRegionPage({
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <article className="rounded-2xl border border-line/80 bg-paper p-5 sm:p-6">
-            <CalendarIcon className="size-6 text-clay" aria-hidden="true" />
+          <article className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <CalendarIcon className="size-6 text-ink" aria-hidden="true" />
             <h3 className="mt-5 text-base font-bold">Seizoen en timing</h3>
             <p className="mt-3 text-sm leading-6 text-muted">
               {region.context.seasonalNote}
             </p>
           </article>
-          <article className="rounded-2xl border border-line/80 bg-paper p-5 sm:p-6">
-            <CompassIcon className="size-6 text-clay" aria-hidden="true" />
+          <article className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+            <CompassIcon className="size-6 text-ink" aria-hidden="true" />
             <h3 className="mt-5 text-base font-bold">Verplaatsen</h3>
             <p className="mt-3 text-sm leading-6 text-muted">
               {region.context.gettingAround}
             </p>
           </article>
           {region.context.localEtiquette ? (
-            <article className="rounded-2xl border border-line/80 bg-paper p-5 sm:col-span-2 sm:p-6">
-              <SparkIcon className="size-6 text-clay" aria-hidden="true" />
+            <article className="rounded-2xl border border-line bg-white p-5 sm:col-span-2 sm:p-6">
+              <SparkIcon className="size-6 text-ink" aria-hidden="true" />
               <h3 className="mt-5 text-base font-bold">Lokale omgang</h3>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {region.context.localEtiquette}
@@ -204,7 +200,7 @@ export default async function DominicanRepublicRegionPage({
         </div>
       </section>
 
-      <section className="border-y border-line/75 bg-paper/70">
+      <section className="border-y border-line bg-white">
         <div className="mx-auto w-full max-w-[90rem] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
           <div className="max-w-3xl">
             <p className="eyebrow">Relevante mogelijkheden</p>
@@ -221,10 +217,10 @@ export default async function DominicanRepublicRegionPage({
             {highlights.map((highlight) => (
               <article
                 key={highlight.id}
-                className="flex min-h-60 flex-col rounded-2xl border border-line/80 bg-white p-5 shadow-[var(--shadow-card)]"
+                className="flex min-h-60 flex-col rounded-2xl border border-line bg-white p-5"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-sand/70 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.1em] text-moss-dark">
+                  <span className="rounded-full bg-surface px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.1em] text-ink">
                     {highlightKindLabels[highlight.kind]}
                   </span>
                   <span className="text-[0.68rem] font-semibold text-muted">
@@ -257,7 +253,7 @@ export default async function DominicanRepublicRegionPage({
                 Je plek verandert je dag.
               </h2>
               <p className="mt-5 text-sm leading-7 text-muted">
-                TripFit gebruikt een verblijfcluster om reistijden en haalbaarheid
+                Calor gebruikt een verblijfcluster om reistijden en haalbaarheid
                 realistischer te maken, zonder je exacte adres te vragen.
               </p>
             </div>
@@ -265,9 +261,9 @@ export default async function DominicanRepublicRegionPage({
               {clusters.map((cluster) => (
                 <article
                   key={cluster.id}
-                  className="rounded-2xl border border-line/80 bg-paper p-5"
+                  className="rounded-2xl border border-line bg-white p-5"
                 >
-                  <MapPinIcon className="size-5 text-clay" aria-hidden="true" />
+                  <MapPinIcon className="size-5 text-ink" aria-hidden="true" />
                   <h3 className="mt-4 text-sm font-bold">{cluster.name}</h3>
                   <p className="mt-2 text-xs leading-5 text-muted">
                     {cluster.shortDescription}

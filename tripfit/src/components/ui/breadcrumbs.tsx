@@ -27,7 +27,7 @@ export function Breadcrumbs({
               <ChevronDownIcon
                 aria-hidden="true"
                 className={`size-3 -rotate-90 ${
-                  inverse ? "text-white/30" : "text-line-strong"
+                  inverse ? "text-white/30" : "text-line"
                 }`}
               />
             ) : null}

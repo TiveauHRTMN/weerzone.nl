@@ -55,7 +55,7 @@ type FieldErrors = Record<string, string>;
 const STEP_LABELS = ["Reis", "Gezelschap", "Interesses", "Route"] as const;
 
 const COVERAGE_LABELS: Record<OnboardingRegionOption["coverageLevel"], string> = {
-  FLAGSHIP: "TripFit flagship",
+  FLAGSHIP: "Calor flagship",
   STANDARD: "Ruime dekking",
   BASIC: "Basisdekking",
 };
@@ -328,13 +328,13 @@ export function TripOnboarding({
   return (
     <section
       id="open-trip"
-      className="scroll-mt-24 overflow-hidden rounded-[1.75rem] border border-line/80 bg-paper shadow-[var(--shadow-soft)]"
+      className="scroll-mt-24 overflow-hidden rounded-2xl border border-line bg-white"
       aria-labelledby="onboarding-title"
     >
-      <div className="border-b border-line/75 bg-white/55 px-5 pb-5 pt-6 sm:px-7 sm:pt-7">
+      <div className="border-b border-line bg-white px-5 pb-5 pt-6 sm:px-7 sm:pt-7">
         <div className="flex items-start justify-between gap-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-clay">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-muted">
               Open je living trip
             </p>
             <h2
@@ -344,7 +344,7 @@ export function TripOnboarding({
               {STEP_LABELS[step - 1]}
             </h2>
           </div>
-          <span className="rounded-full border border-line bg-canvas px-3 py-1.5 text-xs font-bold text-muted">
+          <span className="tabular rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-bold text-muted">
             {step} / 4
           </span>
         </div>
@@ -358,7 +358,7 @@ export function TripOnboarding({
               <li key={label} aria-current={isCurrent ? "step" : undefined}>
                 <div
                   className={`h-1.5 overflow-hidden rounded-full ${
-                    stepNumber <= step ? "bg-moss-dark" : "bg-line"
+                    stepNumber <= step ? "bg-ink" : "bg-line"
                   }`}
                 />
                 <span
@@ -407,7 +407,7 @@ export function TripOnboarding({
                     <option value={country.id}>{country.name}</option>
                   </select>
                   <p id="country-note" className="mt-2 text-xs leading-5 text-muted">
-                    De Dominicaanse Republiek is het eerste volledige TripFit country pack.
+                    De Dominicaanse Republiek is het eerste volledige Calor country pack.
                   </p>
                 </div>
 
@@ -508,7 +508,7 @@ export function TripOnboarding({
                       {errors.departureDate}
                     </p>
                   ) : tripNights > 0 ? (
-                    <p className="mt-2 text-xs font-semibold text-moss">
+                    <p className="tabular mt-2 text-xs font-semibold text-muted">
                       {tripNights} {tripNights === 1 ? "nacht" : "nachten"}
                     </p>
                   ) : null}
@@ -578,7 +578,7 @@ export function TripOnboarding({
               </div>
 
               {childAges.length > 0 ? (
-                <div className="mt-6 rounded-2xl border border-line bg-canvas/65 p-4 sm:p-5">
+                <div className="mt-6 rounded-2xl border border-line bg-surface p-4 sm:p-5">
                   <p className="text-sm font-bold text-ink">Leeftijden kinderen</p>
                   <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
                     {childAges.map((age, index) => (
@@ -613,7 +613,7 @@ export function TripOnboarding({
                   </div>
                 </div>
               ) : (
-                <div className="mt-6 flex gap-3 rounded-2xl border border-moss/20 bg-moss-soft/65 p-4 text-sm leading-6 text-moss-dark">
+                <div className="mt-6 flex gap-3 rounded-2xl border border-line bg-surface p-4 text-sm leading-6 text-ink">
                   <ShieldCheckIcon className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
                   <p>Gezelschapsdata blijft onderdeel van je privé-reisprofiel.</p>
                 </div>
@@ -625,7 +625,7 @@ export function TripOnboarding({
             <fieldset aria-describedby={errors.interests ? "interests-error" : undefined}>
               <legend className="sr-only">Interesses</legend>
               <p className="mb-5 max-w-lg text-sm leading-6 text-muted">
-                Kies wat bij jullie past. TripFit gebruikt dit als voorkeur, niet
+                Kies wat bij jullie past. Calor gebruikt dit als voorkeur, niet
                 als harde filter.
               </p>
 
@@ -637,8 +637,8 @@ export function TripOnboarding({
                       key={interest.value}
                       className={`interest-option relative flex min-h-13 cursor-pointer items-center justify-between gap-2 rounded-xl border px-3.5 py-3 text-sm font-semibold transition-colors ${
                         isSelected
-                          ? "border-moss-dark bg-moss-dark text-white"
-                          : "border-line-strong bg-white text-ink hover:border-moss"
+                          ? "border-ink bg-ink text-white"
+                          : "border-line bg-white text-ink hover:border-ink"
                       }`}
                     >
                       <input
@@ -676,7 +676,7 @@ export function TripOnboarding({
                   Verdeel je reis over één of meer regio’s. Zo worden reistijd en
                   lokale kansen per stop relevant.
                 </p>
-                <span className="hidden shrink-0 rounded-full bg-sand px-3 py-1.5 text-xs font-bold text-moss-dark sm:block">
+                <span className="tabular hidden shrink-0 rounded-full bg-surface px-3 py-1.5 text-xs font-bold text-ink sm:block">
                   {tripNights} nachten
                 </span>
               </div>
@@ -689,7 +689,7 @@ export function TripOnboarding({
                   >
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <p className="flex items-center gap-2 text-sm font-bold text-ink">
-                        <span className="grid size-7 place-items-center rounded-full bg-moss-soft text-xs text-moss-dark">
+                        <span className="grid size-7 place-items-center rounded-full bg-surface text-xs text-ink">
                           {index + 1}
                         </span>
                         Stop {index + 1}
@@ -697,7 +697,7 @@ export function TripOnboarding({
                       {stops.length > 1 ? (
                         <button
                           type="button"
-                          className="grid size-10 place-items-center rounded-full text-muted transition-colors hover:bg-canvas hover:text-ink"
+                          className="grid size-10 place-items-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink"
                           onClick={() => removeStop(index)}
                           aria-label={`Verwijder stop ${index + 1}`}
                         >
@@ -803,8 +803,8 @@ export function TripOnboarding({
                 Voeg verblijfslocatie toe
               </button>
 
-              <div className="mt-5 flex gap-3 rounded-2xl bg-sand/60 p-4 text-xs leading-5 text-muted">
-                <InfoIcon className="mt-0.5 size-4 shrink-0 text-moss" aria-hidden="true" />
+              <div className="mt-5 flex gap-3 rounded-2xl bg-surface p-4 text-xs leading-5 text-muted">
+                <InfoIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                 <p>
                   Alleen regio en reisdata gaan mee naar de anonieme preview. Een
                   exact hoteladres is niet nodig.
@@ -814,7 +814,7 @@ export function TripOnboarding({
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-line/75 bg-white/50 px-5 py-4 sm:px-7">
+        <div className="flex items-center justify-between gap-3 border-t border-line bg-white px-5 py-4 sm:px-7">
           {step > 1 ? (
             <button
               type="button"
@@ -827,7 +827,7 @@ export function TripOnboarding({
             </button>
           ) : (
             <div className="hidden items-center gap-2 text-xs font-semibold text-muted sm:flex">
-              <ShieldCheckIcon className="size-4 text-moss" aria-hidden="true" />
+              <ShieldCheckIcon className="size-4" aria-hidden="true" />
               Geen account nodig
             </div>
           )}

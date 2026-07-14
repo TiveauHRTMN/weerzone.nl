@@ -616,7 +616,7 @@ export const dominicanRepublicPack: CountryPack = {
     confidence: 0.72,
     note: "Redactionele seeddata voor een volledig werkende preview. Niet gebruiken als live operationele bevestiging.",
     sources: [
-      { id: SEED_SOURCE, name: "TripFit Dominican Republic editorial seed v1", type: "SEED_RESEARCH" },
+      { id: SEED_SOURCE, name: "Calor Dominican Republic editorial seed v1", type: "SEED_RESEARCH" },
       { id: "dr-tourism-official", name: "Ministerio de Turismo de República Dominicana", type: "OFFICIAL", url: "https://www.godominicanrepublic.com/" },
       { id: "unesco-santo-domingo", name: "UNESCO – Colonial City of Santo Domingo", type: "OFFICIAL", url: "https://whc.unesco.org/en/list/526/" },
     ],
