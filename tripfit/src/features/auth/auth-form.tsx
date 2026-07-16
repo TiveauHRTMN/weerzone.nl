@@ -4,12 +4,13 @@ import { useActionState } from "react";
 
 import { signInWithGoogle, signInWithMagicLink, type AuthActionState } from "@/app/auth/actions";
 
-export function AuthForm() {
+export function AuthForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState<AuthActionState, FormData>(signInWithMagicLink, undefined);
 
   return (
     <div className="mt-8">
       <form action={action} className="space-y-4">
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <label className="block text-sm font-bold" htmlFor="email">
           E-mailadres
           <input className="input mt-2 w-full" id="email" name="email" type="email" autoComplete="email" required />
@@ -22,9 +23,9 @@ export function AuthForm() {
       </form>
       <div className="my-5 flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-line" />of<span className="h-px flex-1 bg-line" /></div>
       <form action={signInWithGoogle}>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <button className="secondary-button w-full" type="submit">Doorgaan met Google</button>
       </form>
     </div>
   );
 }
-

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { serverEnvironment } from "@/config/env";
+import { sanitizeNextPath } from "@/lib/supabase/next-path";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const emailSchema = z.object({
@@ -12,6 +13,10 @@ const emailSchema = z.object({
 
 export type AuthActionState = { message?: string; error?: string } | undefined;
 
+function callbackUrl(next: string): string {
+  return `${serverEnvironment.appUrl}/auth/callback?next=${encodeURIComponent(next)}`;
+}
+
 export async function signInWithMagicLink(
   _state: AuthActionState,
   formData: FormData,
@@ -19,6 +24,7 @@ export async function signInWithMagicLink(
   const parsed = emailSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
+  const next = sanitizeNextPath(formData.get("next"));
   const supabase = await createSupabaseServerClient();
   if (!supabase || !serverEnvironment.supabase.url) {
     return { error: "Inloggen is lokaal nog niet geconfigureerd." };
@@ -26,7 +32,7 @@ export async function signInWithMagicLink(
 
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: `${serverEnvironment.appUrl}/auth/callback` },
+    options: { emailRedirectTo: callbackUrl(next) },
   });
 
   return error
@@ -34,13 +40,14 @@ export async function signInWithMagicLink(
     : { message: "Check je inbox voor de veilige inloglink." };
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
+  const next = sanitizeNextPath(formData.get("next"));
   const supabase = await createSupabaseServerClient();
   if (!supabase || !serverEnvironment.supabase.url) redirect("/auth?error=config");
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${serverEnvironment.appUrl}/auth/callback` },
+    options: { redirectTo: callbackUrl(next) },
   });
 
   if (error || !data.url) redirect("/auth?error=oauth");
