@@ -12,6 +12,7 @@ import {
   UsersIcon,
 } from "@/components/ui/icons";
 import type { TripPhase } from "@/domain/trips/model";
+import { SaveTripButton } from "@/features/trip-save/save-trip-button";
 
 import type {
   PreviewRecommendation,
@@ -168,7 +169,13 @@ function RecommendationCard({
   );
 }
 
-export function TripPreviewView({ preview }: { preview: TripPreview }) {
+export function TripPreviewView({
+  preview,
+  save,
+}: {
+  preview: TripPreview;
+  save: { enabled: boolean; previewQuery: string };
+}) {
   const primaryHighlight = preview.highlights[0];
   const alternatives = preview.highlights.slice(1, 5);
 
@@ -406,19 +413,23 @@ export function TripPreviewView({ preview }: { preview: TripPreview }) {
               Bewaar deze living trip.
             </h2>
             <p id="save-note" className="mt-4 max-w-xl text-sm leading-6 text-white/60">
-              Met een account blijft je route privé opgeslagen en kan Calor later
-              met je reisfase meebewegen. Opslaan wordt in de volgende product-slice
-              geactiveerd.
+              {save.enabled
+                ? "Met een account blijft je route privé opgeslagen en beweegt Calor mee met je reisfase."
+                : "Met een account blijft je route privé opgeslagen. Opslaan is in deze omgeving nog niet beschikbaar."}
             </p>
           </div>
-          <button
-            type="button"
-            className="primary-button lg:min-w-60"
-            disabled
-            aria-describedby="save-note"
-          >
-            Maak account & bewaar
-          </button>
+          {save.enabled ? (
+            <SaveTripButton previewQuery={save.previewQuery} />
+          ) : (
+            <button
+              type="button"
+              className="primary-button lg:min-w-60"
+              disabled
+              aria-describedby="save-note"
+            >
+              Maak account & bewaar
+            </button>
+          )}
         </div>
       </section>
     </>

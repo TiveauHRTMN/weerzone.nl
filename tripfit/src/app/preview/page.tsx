@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
+import { serverEnvironment } from "@/config/env";
 import { dominicanRepublicPack } from "@/domain/countries/packs/dominican-republic";
 import type { TripPreviewRequest } from "@/domain/trips/model";
-import { parseTripPreviewSearchParams } from "@/domain/trips/preview-request";
+import { encodeTripPreviewRequest, parseTripPreviewSearchParams } from "@/domain/trips/preview-request";
 import { buildTripPreview } from "@/features/trip-preview/build-trip-preview";
 import { PreviewInvalidState } from "@/features/trip-preview/preview-invalid-state";
 import { TripPreviewView } from "@/features/trip-preview/trip-preview-view";
@@ -51,5 +52,14 @@ export default async function PreviewPage({ searchParams }: PreviewPageProps) {
     return <PreviewInvalidState />;
   }
 
-  return <TripPreviewView preview={preview} />;
+  const saveEnabled = Boolean(
+    serverEnvironment.supabase.url && serverEnvironment.supabase.anonymousKey,
+  );
+
+  return (
+    <TripPreviewView
+      preview={preview}
+      save={{ enabled: saveEnabled, previewQuery: encodeTripPreviewRequest(request) }}
+    />
+  );
 }
