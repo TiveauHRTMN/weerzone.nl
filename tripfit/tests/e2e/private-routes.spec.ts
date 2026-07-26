@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("private routes and auth surface", () => {
   test("dashboard, account and trip detail require a session", async ({ page }) => {
-    for (const path of ["/dashboard", "/account", "/trips/some-trip-id"]) {
+    for (const path of ["/dashboard", "/account", "/live", "/trips/some-trip-id"]) {
       await page.goto(path);
       await expect(page, `${path} hoort naar /auth te sturen`).toHaveURL(/\/auth/);
     }

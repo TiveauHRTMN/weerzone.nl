@@ -12,6 +12,8 @@ import { encodeTripPreviewRequest } from "@/domain/trips/preview-request";
 import { getTripForUser, toTripPreviewRequest } from "@/features/trips/trip-queries";
 import { requireAuthenticatedUser } from "@/lib/supabase/auth";
 
+import { updateTripSettings } from "./actions";
+
 export const metadata: Metadata = {
   title: "Trip | Calor",
   robots: { index: false, follow: false },
@@ -32,9 +34,12 @@ const dateFormatter = new Intl.DateTimeFormat("nl-NL", {
   timeZone: "UTC",
 });
 
-type TripPageProps = { params: Promise<{ id: string }> };
+type TripPageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
+};
 
-export default async function TripPage({ params }: TripPageProps) {
+export default async function TripPage({ params, searchParams }: TripPageProps) {
   const { user } = await requireAuthenticatedUser();
   const { id } = await params;
 
@@ -50,6 +55,7 @@ export default async function TripPage({ params }: TripPageProps) {
   const phase = calculateTripPhase(request, isoDateFromDate(new Date()));
   const adults = request.travelers.adults;
   const children = request.travelers.childAges.length;
+  const saved = (await searchParams).saved;
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-8">
@@ -60,6 +66,7 @@ export default async function TripPage({ params }: TripPageProps) {
         {adults} volwassene{adults === 1 ? "" : "n"}
         {children > 0 ? ` · ${children} kind${children === 1 ? "" : "eren"}` : ""}
       </p>
+      {saved && <p className="mt-4 text-sm font-bold text-ink">Reisinstellingen opgeslagen.</p>}
 
       <section className="mt-10 rounded-2xl border border-line bg-white p-6 sm:p-8">
         <h2 className="text-xl font-[760] tracking-[-0.03em]">Route</h2>
@@ -86,9 +93,38 @@ export default async function TripPage({ params }: TripPageProps) {
         </p>
       </section>
 
+      <form action={updateTripSettings} className="mt-6 rounded-2xl border border-line bg-white p-6 sm:p-8">
+        <input name="tripId" type="hidden" value={trip.id} />
+        <h2 className="text-xl font-[760] tracking-[-0.03em]">Reisinstellingen</h2>
+        <label className="mt-5 block text-sm font-bold" htmlFor="title">Naam van de reis</label>
+        <input
+          className="mt-2 min-h-12 w-full rounded-xl border border-line px-4"
+          defaultValue={trip.title ?? "Living trip"}
+          id="title"
+          maxLength={120}
+          name="title"
+          required
+        />
+        <label className="mt-5 block text-sm font-bold" htmlFor="accommodationLabel">Verblijf</label>
+        <input
+          className="mt-2 min-h-12 w-full rounded-xl border border-line px-4"
+          defaultValue={trip.stops[0]?.accommodationLabel ?? ""}
+          id="accommodationLabel"
+          maxLength={160}
+          name="accommodationLabel"
+        />
+        <button className="primary-button mt-5" type="submit">Instellingen opslaan</button>
+      </form>
+
       <div className="mt-10">
+        <Link className="primary-button mr-3" href={`/live?trip=${trip.id}`}>
+          Open de dageditie
+        </Link>
         <Link className="primary-button" href={`/preview?${encodeTripPreviewRequest(request)}`}>
           Open de live preview
+        </Link>
+        <Link className="quiet-button ml-3" href={`/trips/${trip.id}/album`}>
+          Reisalbum
         </Link>
       </div>
     </main>

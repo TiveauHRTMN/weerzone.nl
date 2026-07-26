@@ -45,6 +45,13 @@ body {
   font-family: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
 }
 
+/* The immersive Live route owns its complete chrome. */
+body:has(.site-shell .calor-live-route) .site-shell > header,
+body:has(.site-shell .calor-live-route) .site-shell > footer,
+body:has(.site-shell .calor-live-route) .skip-link {
+  display: none;
+}
+
 ::selection {
   background: rgb(250 167 42 / 0.35);
   color: var(--black);

@@ -12,6 +12,7 @@ export interface StoredTripStop {
   arrivalDate: Date;
   departureDate: Date;
   countryId: string;
+  accommodationLabel?: string | null;
 }
 
 export interface StoredTraveler {
