@@ -1,0 +1,103 @@
+name: Tripfit Quality
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "tripfit/**"
+      - ".github/workflows/tripfit-quality.yml"
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "tripfit/**"
+      - ".github/workflows/tripfit-quality.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tripfit-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: tripfit
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_CALOR_PUBLIC_LAUNCH: "false"
+      CALOR_AFFILIATES_ENABLED: "false"
+      CALOR_PAYMENTS_ENABLED: "false"
+      CALOR_AI_RECOMMENDATIONS_ENABLED: "false"
+      CALOR_LIVE_MODE_ENABLED: "false"
+      CALOR_LOCAL_PARTNERS_ENABLED: "false"
+      CALOR_WEERZONE_REFERRAL_ENABLED: "false"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tripfit/package-lock.json
+
+      - name: Set up npm
+        run: npm install --global npm@11.12.1
+
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/tripfit/.next/cache
+          key: ${{ runner.os }}-tripfit-nextjs-${{ hashFiles('tripfit/package-lock.json') }}-${{ hashFiles('tripfit/src/**/*.[jt]s', 'tripfit/src/**/*.[jt]sx', 'tripfit/prisma/**', 'tripfit/next.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-tripfit-nextjs-${{ hashFiles('tripfit/package-lock.json') }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Validate Prisma schema
+        run: npm run db:validate
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm test -- --run
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run end-to-end tests
+        run: npm run test:e2e:fast
+
+      - name: Upload Playwright diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tripfit-playwright-diagnostics-${{ github.run_attempt }}
+          path: |
+            tripfit/playwright-report/
+            tripfit/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
