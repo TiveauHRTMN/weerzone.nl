@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+/*
+ * Calor design tokens — DESIGN_DIRECTION.md v2 (§2).
+ * Wit = wat vaststaat. Zwart = wat vandaag herberekend is. De vlam markeert wat nú geldt.
+ */
+:root {
+  --white: #ffffff;
+  --black: #0a0a0a;
+  --sun: #faa72a;
+  --deep: #e85d04;
+  --red: #ee2e2e;
+  --surface: #f6f6f6;
+  --line: #e8e8e8;
+  --muted: #6a6a6a;
+  --shadow-live: 0 24px 60px -36px rgb(10 10 10 / 0.45);
+}
+
+@theme inline {
+  --color-ink: var(--black);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-sun: var(--sun);
+  --color-deep: var(--deep);
+  --color-flame: var(--red);
+  --font-sans: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--font-inter), system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+/* The immersive Live route owns its complete chrome. */
+body:has(.site-shell .calor-live-route) .site-shell > header,
+body:has(.site-shell .calor-live-route) .site-shell > footer,
+body:has(.site-shell .calor-live-route) .skip-link {
+  display: none;
+}
+
+::selection {
+  background: rgb(250 167 42 / 0.35);
+  color: var(--black);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--deep);
+  outline-offset: 3px;
+}
+
+.site-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 0.75rem;
+  left: 0.75rem;
+  transform: translateY(-180%);
+  border-radius: 999px;
+  background: var(--black);
+  color: white;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.display-title {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * De vlamrand (§5.1): 3px rood→zon-oranje bovenrand op alles wat vandaag
+ * herberekend is. De enige gradient in het product.
+ */
+.vlamrand {
+  position: relative;
+}
+
+.vlamrand::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 1;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red), var(--sun));
+}
+
+.surface-card {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--white);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--black);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.field-control {
+  width: 100%;
+  min-height: 3.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--white);
+  color: var(--black);
+  padding: 0.78rem 0.9rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.field-control:hover {
+  border-color: var(--muted);
+}
+
+.field-control:focus {
+  border-color: var(--black);
+  box-shadow: 0 0 0 4px rgb(10 10 10 / 0.08);
+  outline: none;
+}
+
+.field-control[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+.field-control:disabled {
+  cursor: not-allowed;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.field-error {
+  margin-top: 0.45rem;
+  color: var(--red);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.interest-option:has(input:focus-visible) {
+  outline: 3px solid var(--deep);
+  outline-offset: 3px;
+}
+
+.primary-button,
+.secondary-button,
+.quiet-button {
+  display: inline-flex;
+  min-height: 3.1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  padding: 0.72rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 150ms ease, background 150ms ease, border-color 150ms ease,
+    color 150ms ease, box-shadow 150ms ease;
+}
+
+.primary-button {
+  border: 1px solid var(--deep);
+  background: var(--deep);
+  color: white;
+}
+
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #c94f03;
+  border-color: #c94f03;
+}
+
+.secondary-button {
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--black);
+}
+
+.secondary-button:hover:not(:disabled),
+.quiet-button:hover:not(:disabled) {
+  border-color: var(--black);
+  background: var(--white);
+}
+
+.quiet-button {
+  min-height: 2.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--black);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.quiet-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
