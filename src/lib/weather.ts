@@ -50,6 +50,29 @@ const BASE_URL_BY_LOCALE: Record<Locale, string> = {
   es: OPEN_METEO_BASE,
 };
 
+/**
+ * Snap coordinaten op een raster zodat naburige plaatsen dezelfde Open-Meteo-
+ * cache-key delen. De ~10k programmatische /weer-pagina's vroegen elk hun eigen
+ * exacte punt op; dat vrat het gratis Open-Meteo-quotum (10k calls/dag) op,
+ * leverde 429's en liet de ISR-revalidatie permanent falen — waardoor die
+ * pagina's dagenlang een oude verwachting bleven serveren (audit 2026-09-10).
+ *
+ * PROGRAMMATIC_GRID_STEP = 0.05 graden ≈ 5,6 x 3,4 km; maximale afwijking t.o.v.
+ * het echte punt is ~3,3 km. Dat brengt 13.775 pagina's terug tot ~1.900 unieke
+ * cellen. Alleen de programmatische SEO-pagina's gebruiken dit; /vandaag,
+ * /morgen en de persona-pagina's vragen het exacte punt op.
+ *
+ * Met een betaald Open-Meteo-abonnement mag deze stap omlaag (0.02 ≈ 1,3 km)
+ * of helemaal weg (gridStep 0 = exact punt).
+ */
+export const PROGRAMMATIC_GRID_STEP = 0.05;
+
+export function snapToGrid(lat: number, lon: number, step: number): { lat: number; lon: number } {
+  if (!step || step <= 0) return { lat, lon };
+  const snap = (v: number) => Number((Math.round(v / step) * step).toFixed(4));
+  return { lat: snap(lat), lon: snap(lon) };
+}
+
 const BASE_MODELS_BY_LOCALE: Record<Locale, string[]> = {
   nl: ["knmi_seamless"],
   de: ["dwd_icon_d2"],
@@ -122,7 +145,7 @@ async function fetchConvectiveHourly(lat: number, lon: number, timezone: string)
 
   try {
     const res = await fetch(`${OPEN_METEO_BASE}?${params}`, {
-      next: { revalidate: 600 },
+      next: { revalidate: 1800 },
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
@@ -147,8 +170,9 @@ async function fetchUvIndexMaxByDate(lat: number, lon: number, timezone: string)
     forecast_days: "4",
   });
   try {
+    // uv_index_max is een dagwaarde — één keer per uur verversen is ruim zat.
     const res = await fetch(`${OPEN_METEO_BASE}?${params}`, {
-      next: { revalidate: 600 },
+      next: { revalidate: 3600 },
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return new Map();
@@ -201,7 +225,7 @@ async function fetchMedianTemps(lat: number, lon: number, timezone: string): Pro
   });
   try {
     const res = await fetch(`${OPEN_METEO_BASE}?${params}`, {
-      next: { revalidate: 600 },
+      next: { revalidate: 1800 },
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return out;
@@ -261,7 +285,7 @@ async function fetchModel(
 
   try {
     const res = await fetch(`${url}?${params}`, {
-      next: { revalidate: 600 },
+      next: { revalidate: 1800 },
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
@@ -339,6 +363,9 @@ export async function fetchWeatherData(
       });
       if (!res.ok) {
         console.error("Open-Meteo non-ok", res.status, url.slice(0, 80));
+        // 429 = quotum op. Doorgaan naar het volgende model kost nóg een call
+        // en levert gegarandeerd weer een 429 — stop meteen.
+        if (res.status === 429) break;
         continue;
       }
       const data = await res.json();

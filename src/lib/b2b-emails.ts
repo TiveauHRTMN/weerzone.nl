@@ -2,8 +2,12 @@
 // B2B outreach email templates per branche
 // ============================================================
 
-const amazonProductUrl = () => "#";
-const amazonUrl = () => "#";
+// De affiliate-laag is er in de v2-relaunch uitgegaan (geen ads/affiliates meer).
+// Deze stubs houden de ~36 aanroepen hieronder compileerbaar; ze negeren hun
+// argument bewust en geven een dode link terug. Het argument staat er nog zodat
+// zichtbaar blijft wélk product de tekst bedoelt als deze mails ooit terugkomen.
+const amazonProductUrl = (_asin?: string) => "#";
+const amazonUrl = (_query?: string) => "#";
 
 type GearItem = { emoji: string; title: string; desc: string; href: string };
 

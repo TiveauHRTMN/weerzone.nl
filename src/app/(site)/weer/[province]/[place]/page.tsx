@@ -10,7 +10,7 @@ import LocalComparison from "@/components/LocalComparison";
 import { getLocationSEOContent } from "@/app/actions";
 import { buildAgentContext } from "@/lib/agents/context";
 import { ALL_AGENT_PREFERENCES } from "@/lib/agents/preferences";
-import { fetchAirQuality } from "@/lib/weather";
+import { fetchAirQuality, snapToGrid, PROGRAMMATIC_GRID_STEP } from "@/lib/weather";
 import { fetchKNMIWarnings, warningsForProvince } from "@/lib/knmi-warnings";
 import KnmiWarningBanner from "@/components/KnmiWarningBanner";
 import AgentsHubCard from "@/components/AgentsHubCard";
@@ -145,9 +145,20 @@ export default async function PlaceWeatherPage({ params }: PageProps) {
   // Bouw dezelfde premium agent-context als /vandaag, maar voor déze plaats.
   // buildAgentContext doet alleen cache/storage-reads met deadlines (geen LLM),
   // dus het is veilig voor de ~10k programmatische ISR-pagina's.
+  // Programmatisch profiel: basismodel op een ~5 km raster i.p.v. de zes-modellen-
+  // pluim op het exacte punt. De pluim kostte ~9 Open-Meteo-calls per render; over
+  // 13.775 pagina's ging dat 25x over het gratis dagquotum heen. Gevolg: 429's, een
+  // falende ISR-revalidatie en pagina's die dagenlang een oude verwachting bleven
+  // tonen (audit 2026-09-10). De deadline mag ruim: dit draait in de achtergrond-
+  // regeneratie, en een gemiste deadline betekent hier een throw + nóg een dag oud.
+  const grid = snapToGrid(place.lat, place.lon, PROGRAMMATIC_GRID_STEP);
   const [ctx, airQuality, allWarnings, hermesSEO, seoContent] = await Promise.all([
-    buildAgentContext({ name: place.name, lat: place.lat, lon: place.lon }).catch(() => null),
-    fetchAirQuality(place.lat, place.lon).catch(() => null),
+    buildAgentContext(
+      { name: place.name, lat: place.lat, lon: place.lon },
+      new Date(),
+      { highRes: false, gridStep: PROGRAMMATIC_GRID_STEP, weatherDeadlineMs: 8000 },
+    ).catch(() => null),
+    fetchAirQuality(grid.lat, grid.lon).catch(() => null),
     fetchKNMIWarnings().catch(() => []),
     getHermesSEO(place.name, province).catch(() => null),
     getLocationSEOContent(place.name, provLabel, place.character, place.venueType).catch(() => ""),

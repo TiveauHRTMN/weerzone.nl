@@ -15,7 +15,7 @@ import type { MarianaAgentData } from "@/lib/mariana/agent-context";
 import type { AgentHeadsUp, WeatherAgent } from "@/lib/agents/types";
 import { getDayContext, type DayContext } from "@/lib/agents/day-context";
 
-import { fetchWeatherData } from "@/lib/weather";
+import { fetchWeatherData, snapToGrid } from "@/lib/weather";
 import {
   fetchKNMIWarnings,
   warningsForProvince,
@@ -56,6 +56,21 @@ export interface AgentReport {
 
 interface BuildAgentContextOptions {
   fast?: boolean;
+  /**
+   * Haal alleen het basismodel op i.p.v. de zes-modellen-pluim. De pluim kost
+   * ~9 Open-Meteo-calls per render; op de ~10k programmatische /weer-pagina's
+   * blies dat het gratis quotum op (audit 2026-09-10). Default true = ongewijzigd
+   * gedrag voor /vandaag, /morgen en de persona-pagina's.
+   */
+  highRes?: boolean;
+  /**
+   * Rasterstap in graden voor de weer-fetch. > 0 laat naburige plaatsen dezelfde
+   * Open-Meteo-cache-key delen. De echte coördinaten blijven in `location` staan,
+   * dus afstanden, kaarten en schema.org veranderen niet.
+   */
+  gridStep?: number;
+  /** Deadline voor de weer-fetch in ms. */
+  weatherDeadlineMs?: number;
 }
 
 function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
@@ -97,14 +112,19 @@ export async function buildAgentContext(
   options: BuildAgentContextOptions = {},
 ): Promise<AgentContext | null> {
   const { lat, lon, name } = location;
+  // Weer-fetch mag op een raster; alles wat de gebruiker ziet (naam, afstanden,
+  // kaart, schema.org) blijft op de echte coördinaten staan.
+  const q = snapToGrid(lat, lon, options.gridStep ?? 0);
+  const highRes = options.highRes ?? true;
+  const deadline = options.weatherDeadlineMs ?? (options.fast ? 1800 : 3500);
   const weatherPromise = options.fast
-    ? withDeadline(fetchWeatherData(lat, lon, false, false), 1800, null as WeatherData | null)
+    ? withDeadline(fetchWeatherData(q.lat, q.lon, false, false), deadline, null as WeatherData | null)
     : withDeadline(
-        fetchWeatherData(lat, lon, false, true),
-        3500,
+        fetchWeatherData(q.lat, q.lon, false, highRes),
+        deadline,
         null as WeatherData | null,
       ).then((weather) => weather ?? withDeadline(
-        fetchWeatherData(lat, lon, false, false),
+        fetchWeatherData(q.lat, q.lon, false, false),
         1800,
         null as WeatherData | null,
       ));
