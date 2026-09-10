@@ -38,6 +38,18 @@ export async function GET() {
     return { status: res.status };
   });
 
+  const mem = await timed("loadMarianaMemory (supabase-js)", async () => {
+    const { loadMarianaMemory } = await import("@/lib/mariana/storage");
+    const { toMarianaLocation } = await import("@/lib/mariana/location");
+    const loc = toMarianaLocation({ lat: g.lat, lon: g.lon });
+    return { isNull: (await loadMarianaMemory(loc.locationId)) === null };
+  });
+
+  const feed = await timed("nearestRegionFeed (supabase-js)", async () => {
+    const { nearestRegionFeed } = await import("@/lib/mariana/regions/storage");
+    return { isNull: (await nearestRegionFeed(g.lat, g.lon)) === null };
+  });
+
   const full = await timed("fetchWeatherData(highRes=false)", async () => {
     const w = await fetchWeatherData(g.lat, g.lon, false, false);
     return { isNull: w === null, keys: w ? Object.keys(w).slice(0, 12) : null };
@@ -50,6 +62,6 @@ export async function GET() {
     nodeVersion: process.version,
     uvThreadpool: process.env.UV_THREADPOOL_SIZE ?? "(default 4)",
     grid: g,
-    steps: [rawBare, rawCached, supa, full],
+    steps: [rawBare, rawCached, supa, mem, feed, full],
   });
 }
