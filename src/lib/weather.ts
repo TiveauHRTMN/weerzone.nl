@@ -67,6 +67,30 @@ const BASE_URL_BY_LOCALE: Record<Locale, string> = {
  */
 export const PROGRAMMATIC_GRID_STEP = 0.05;
 
+/**
+ * Deadline voor de opgeslagen Mariana/Oracle-verrijking.
+ *
+ * `.catch(() => null)` vangt een fout op, maar niet een hang: als de
+ * opslag-backend onbereikbaar is blijft de fetch openstaan tot de
+ * connect-timeout. Op 10 september 2026 was het Supabase-project weg (NXDOMAIN)
+ * en duurde fetchWeatherData daardoor 15,6 s terwijl Open-Meteo zelf in 66 ms
+ * antwoordde. buildAgentContext kapt af op 3,5-8 s, gaf dus `null` terug, en
+ * elke /weer-pagina gooide "Weerdata tijdelijk niet beschikbaar" -- waarna ISR
+ * de oude versie liet staan. Zo serveerde de site dagenlang oude verwachtingen
+ * terwijl er niets mis was met de weerdata zelf.
+ *
+ * De verrijking is een bonus bovenop een compleet weerbericht; een trage of
+ * dode opslag hoort die niet mee te slepen.
+ */
+const ENRICHMENT_DEADLINE_MS = 1200;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise.catch(() => fallback),
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
+}
+
 export function snapToGrid(lat: number, lon: number, step: number): { lat: number; lon: number } {
   if (!step || step <= 0) return { lat, lon };
   const snap = (v: number) => Number((Math.round(v / step) * step).toFixed(4));
@@ -664,7 +688,11 @@ export async function fetchWeatherData(
         import("@/lib/mariana/storage"),
       ]);
       const location = toMarianaLocation(marianaLocation ?? { lat, lon });
-      const memory = await loadMarianaMemory(location.locationId).catch(() => null);
+      const memory = await withTimeout(
+        loadMarianaMemory(location.locationId),
+        ENRICHMENT_DEADLINE_MS,
+        null,
+      );
 
       // NL: Mariana Local wordt gevoed door de dagelijkse Regions-feed (regime +
       // per-dag modelgewichten + confidence + gevaar) i.p.v. statische defaults.
@@ -677,7 +705,7 @@ export async function fetchWeatherData(
             import("@/lib/mariana/regions/storage"),
             import("@/lib/mariana/local/feed"),
           ]);
-          const feed = await nearestRegionFeed(lat, lon).catch(() => null);
+          const feed = await withTimeout(nearestRegionFeed(lat, lon), ENRICHMENT_DEADLINE_MS, null);
           if (feed) tuning = tuningFromFeed(feed);
         } catch (err) {
           console.error("Mariana Local feed skipped:", err instanceof Error ? err.message : String(err));
