@@ -46,6 +46,7 @@ Open-Meteo was al die tijd gezond (86 ms). Dat was een dwaalspoor.
 | `7f0d618` | Kredietrem in `hermes.ts` sprong nooit aan (zie hieronder) + regressietest |
 | `ad26788` | **De echte fix**: deadline van 1,2 s om de Mariana/Oracle-verrijking |
 | `dde77e4` | Tijdelijke debug-route weer weg |
+| `1dd62db` | `loading` bleef eeuwig true bij onbereikbare auth → blanco site (zie hieronder) |
 
 Geverifieerd op de preview ná de fix:
 
@@ -67,6 +68,46 @@ mislukte round-trips. Dat is nu dicht, met een test die het afvangt.
 Dit raakte overigens niet de weerdata (`getLocationSEOContent` is `.catch()`'t) —
 alleen de SEO-tekst op de pagina's.
 
+## Tweede symptoom: de site is blanco (melding Rowan, 22:56)
+
+> "Weerzone laat totaal niks zien, enige wat ik krijg is een navbar met logo
+> maar zonder menupagina's, geen weerkaarten, helemaal niks."
+
+Gereproduceerd op productie: `https://weerzone.nl/` geeft HTTP 200 met
+`X-Vercel-Cache: MISS`, `Age: 0` — dus een verse render — maar de body bevat
+alleen de schil: *"Weer op jouw locatie. Vandaag en morgen. / Vandaag Morgen /
+Wat, hoe en waarom"*, negen interne links, nul temperatuurwaarden.
+
+**Oorzaak — dezelfde dode Supabase, maar nu aan de client-kant.**
+`src/lib/session-context.tsx`:
+
+```js
+async function hydrate() {
+  const { data: userData } = await supabase.auth.getUser();  // <- geen try/catch
+  ...
+  setLoading(false);   // wordt alleen op het gelukkige pad bereikt
+}
+```
+
+Geen `try`/`catch`, geen `finally`. Met het project weg gooit `getUser()` een
+netwerkfout, `hydrate()` klapt eruit, en `setLoading(false)` wordt nooit
+bereikt. `loading` blijft dus **eeuwig `true`** — en alles wat daarop wacht (de
+navigatie, `HomeOnboarding`, de weerkaarten) blijft in zijn lege staat hangen.
+Precies wat je ziet.
+
+Dit verklaart ook waarom de fix van vanavond het niet oploste: `ad26788` is een
+server-side deadline en de `/weer/...`-pagina's kwamen daardoor wél terug, maar
+de homepage en de navigatie zijn client-gated op een sessie die nooit rond komt.
+
+**Gefixt in `1dd62db`**: `hydrate()` zit nu in try/catch/finally, dus `loading`
+eindigt altijd op `false` en de site valt terug op "uitgelogd" in plaats van op
+niets.
+
+> **Nog niet in een browser geverifieerd.** Er was hier geen browserextensie
+> beschikbaar, dus dit is getest tot en met een groene build en een gelezen
+> codepad — niet tot en met een renderende pagina. Dat is de eerste check na het
+> promoten.
+
 ## Wat er nog moet gebeuren
 
 ### 1. Uitrollen naar productie — NIET gedaan
@@ -87,7 +128,8 @@ het afronden.
 ### 2. Supabase terug — alleen jij kan dit
 
 Het project is wég, niet gepauzeerd. Zolang dat zo is liggen accounts,
-abonnementen, push en de cron-mail plat (`[email-recipients] agent_subscriptions
+abonnementen, push en de cron-mail plat, en blijft de site in een uitgelogde
+noodstand draaien (`[email-recipients] agent_subscriptions
 niet leesbaar: TypeError: fetch failed`). De site rendert nu wel weer zelfstandig
 verder, maar dat is een pleister, geen herstel.
 
