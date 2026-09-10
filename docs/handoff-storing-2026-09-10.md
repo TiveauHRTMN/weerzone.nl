@@ -1,7 +1,7 @@
 # Handoff — storing weerzone.nl, 10 september 2026
 
 Branch: `feat/studio-tiktok-autopost` (gepusht)
-Laatste commit: `dde77e4`
+Laatste commit: `dc67b3e`
 
 ## Wat er aan de hand was
 
