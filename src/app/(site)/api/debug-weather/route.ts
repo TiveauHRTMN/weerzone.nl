@@ -32,6 +32,12 @@ export async function GET() {
     return { status: res.status, bodyHead: (await res.text()).slice(0, 200) };
   });
 
+  const supa = await timed("raw fetch naar de dode Supabase-host", async () => {
+    const url = `${process.env.SUPABASE_URL ?? "https://bhguergqkyiejyxsiwdu.supabase.co"}/rest/v1/`;
+    const res = await fetch(url, { cache: "no-store" });
+    return { status: res.status };
+  });
+
   const full = await timed("fetchWeatherData(highRes=false)", async () => {
     const w = await fetchWeatherData(g.lat, g.lon, false, false);
     return { isNull: w === null, keys: w ? Object.keys(w).slice(0, 12) : null };
@@ -44,6 +50,6 @@ export async function GET() {
     nodeVersion: process.version,
     uvThreadpool: process.env.UV_THREADPOOL_SIZE ?? "(default 4)",
     grid: g,
-    steps: [rawBare, rawCached, full],
+    steps: [rawBare, rawCached, supa, full],
   });
 }
