@@ -44,7 +44,34 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [primaryLocation, setPrimaryLocation] = useState<{ name: string; lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Belangrijk: `loading` moet ALTIJD op false eindigen, ook als de
+   * auth-backend onbereikbaar is. Stond dit er niet, dan gooide hydrate() bij
+   * een netwerkfout en werd `setLoading(false)` nooit bereikt — `loading` bleef
+   * dan eeuwig true en elk onderdeel dat daarop wacht (de navigatie, de
+   * homepage-onboarding, de weerkaarten) bleef in zijn lege staat hangen.
+   * Op 10 september 2026 was het Supabase-project weg en toonde weerzone.nl
+   * daardoor alleen nog een navbar met logo: verder een blanco pagina.
+   *
+   * Niet ingelogd kunnen vaststellen is een prima uitkomst; niets kunnen
+   * vaststellen mag nooit de hele UI gijzelen.
+   */
   async function hydrate() {
+    try {
+      await hydrateInner();
+    } catch (err) {
+      console.error("session hydrate mislukt, verder als uitgelogd:", err);
+      setUser(null);
+      setTier(null);
+      setIsFounder(false);
+      setAgentPreferences(ALL_AGENT_PREFERENCES);
+      setPrimaryLocation(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function hydrateInner() {
     const { data: userData } = await supabase.auth.getUser();
     const u = userData.user ?? null;
     setUser(u);
