@@ -62,6 +62,16 @@ export function hermesCreditPaused(): boolean {
   return Date.now() < creditExhaustedUntil;
 }
 
+function markCreditExhausted(): void {
+  creditExhaustedUntil = Date.now() + CREDIT_COOLDOWN_MS;
+  console.error("hermesChat: OpenRouter-saldo op — calls gepauzeerd voor 15 min");
+}
+
+/** Alleen voor tests: zet de kredietrem terug op nul. */
+export function resetHermesCreditBrake(): void {
+  creditExhaustedUntil = 0;
+}
+
 export async function hermesChat(
   messages: OpenAI.Chat.ChatCompletionMessageParam[],
   options: HermesOptions = {}
@@ -85,15 +95,24 @@ export async function hermesChat(
   } catch (err) {
     if (isOutOfCredit(err)) {
       // Saldo op: het fallback-model faalt op precies dezelfde rekening.
-      creditExhaustedUntil = Date.now() + CREDIT_COOLDOWN_MS;
-      console.error("hermesChat: OpenRouter-saldo op — calls gepauzeerd voor 15 min");
+      markCreditExhausted();
       throw err;
     }
     // persona already uses a fast model — don't retry with Pro
     if (requestedModel === "deepseek/deepseek-v4-flash") throw err;
     console.warn(`hermesChat: ${requestedModel} gefaald, fallback naar ${FALLBACK_MODEL}`);
-    const result = await client.chat.completions.create({ model: FALLBACK_MODEL, ...params });
-    const content = result.choices[0].message.content ?? "";
-    return options.nlGuard && !options.json ? nlCopyGuard(content) : content;
+    try {
+      const result = await client.chat.completions.create({ model: FALLBACK_MODEL, ...params });
+      const content = result.choices[0].message.content ?? "";
+      return options.nlGuard && !options.json ? nlCopyGuard(content) : content;
+    } catch (fallbackErr) {
+      // De 402 komt in de praktijk hier binnen, niet hierboven: het eerste model
+      // faalt om een andere reden (overbelast/uitgefaseerd) en pas het fallback-
+      // model loopt tegen het lege saldo aan. Zonder deze tak werd de kredietrem
+      // dus nooit gezet en betaalde elke render alsnog twee mislukte round-trips
+      // (~8 s) -- precies de deadline waarop de weer-fetch ernaast sneuvelde.
+      if (isOutOfCredit(fallbackErr)) markCreditExhausted();
+      throw fallbackErr;
+    }
   }
 }
