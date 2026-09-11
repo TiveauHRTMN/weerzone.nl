@@ -5,6 +5,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { fetchGoogleWeather, mapGoogleWeatherConditionToWMO } from "./google-weather";
 import type { Locale } from "@/config/locales";
 import { externalAiPointForTime, fetchExternalAiWeatherForecast } from "./external-ai-weather";
+import { isOpen, meldMisser, meldSucces } from "./backend-breaker";
 
 const OPEN_METEO_BASE = "https://api.open-meteo.com/v1/forecast";
 const DWD_ICON_BASE = "https://api.open-meteo.com/v1/dwd-icon";
@@ -98,12 +99,15 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T, label?: st
     promise
       .then((value) => {
         settled = true;
+        // Een leeg resultaat is een geldig antwoord, geen storing.
+        if (label) meldSucces(label);
         return value;
       })
       .catch((err) => {
         settled = true;
         if (label) {
           console.warn(`[enrichment] ${label} faalde: ${err instanceof Error ? err.message : String(err)}`);
+          meldMisser(label);
         }
         return fallback;
       }),
@@ -111,11 +115,27 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T, label?: st
       setTimeout(() => {
         if (label && !settled) {
           console.warn(`[enrichment] ${label} over de deadline van ${ms} ms — verrijking overgeslagen`);
+          meldMisser(label);
         }
         resolve(fallback);
       }, ms),
     ),
   ]);
+}
+
+/**
+ * Zelfde als withTimeout, maar slaat de call helemaal over zolang de zekering
+ * voor dit label openstaat. Scheelt de volle deadline per render op het moment
+ * dat we al weten dat de opslag er niet is.
+ */
+function withTimeoutBreaker<T>(
+  maakPromise: () => Promise<T>,
+  ms: number,
+  fallback: T,
+  label: string,
+): Promise<T> {
+  if (isOpen(label)) return Promise.resolve(fallback);
+  return withTimeout(maakPromise(), ms, fallback, label);
 }
 
 export function snapToGrid(lat: number, lon: number, step: number): { lat: number; lon: number } {
@@ -715,8 +735,8 @@ export async function fetchWeatherData(
         import("@/lib/mariana/storage"),
       ]);
       const location = toMarianaLocation(marianaLocation ?? { lat, lon });
-      const memory = await withTimeout(
-        loadMarianaMemory(location.locationId),
+      const memory = await withTimeoutBreaker(
+        () => loadMarianaMemory(location.locationId),
         ENRICHMENT_DEADLINE_MS,
         null,
         "loadMarianaMemory",
@@ -733,7 +753,7 @@ export async function fetchWeatherData(
             import("@/lib/mariana/regions/storage"),
             import("@/lib/mariana/local/feed"),
           ]);
-          const feed = await withTimeout(nearestRegionFeed(lat, lon), ENRICHMENT_DEADLINE_MS, null, "nearestRegionFeed");
+          const feed = await withTimeoutBreaker(() => nearestRegionFeed(lat, lon), ENRICHMENT_DEADLINE_MS, null, "nearestRegionFeed");
           if (feed) tuning = tuningFromFeed(feed);
         } catch (err) {
           console.error("Mariana Local feed skipped:", err instanceof Error ? err.message : String(err));
