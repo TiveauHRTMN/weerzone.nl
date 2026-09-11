@@ -5,7 +5,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { fetchGoogleWeather, mapGoogleWeatherConditionToWMO } from "./google-weather";
 import type { Locale } from "@/config/locales";
 import { externalAiPointForTime, fetchExternalAiWeatherForecast } from "./external-ai-weather";
-import { isOpen, meldMisser, meldSucces } from "./backend-breaker";
+import { isOpen, meldMisser } from "./backend-breaker";
 
 const OPEN_METEO_BASE = "https://api.open-meteo.com/v1/forecast";
 const DWD_ICON_BASE = "https://api.open-meteo.com/v1/dwd-icon";
@@ -99,8 +99,9 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T, label?: st
     promise
       .then((value) => {
         settled = true;
-        // Een leeg resultaat is een geldig antwoord, geen storing.
-        if (label) meldSucces(label);
+        // Bewust GEEN meldSucces hier: deze laag ziet alleen een waarde, en een
+        // `null` kan net zo goed een intern gevangen netwerkfout zijn. Alleen de
+        // bronfunctie weet of de opslag echt antwoordde, dus die meldt het.
         return value;
       })
       .catch((err) => {

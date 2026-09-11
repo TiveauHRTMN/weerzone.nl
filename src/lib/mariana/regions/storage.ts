@@ -17,6 +17,7 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { nearestTeslaRegion } from "./nearest-region";
 import type { MarianaRun, MarianaLocalFeed, MarianaSignal } from "./types";
+import { meldMisser, meldSucces } from "@/lib/backend-breaker";
 
 const TABLE = "mariana_regions";
 
@@ -91,10 +92,19 @@ export async function loadRegionFeed(regionSlug: string): Promise<MarianaLocalFe
       .order("run_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error || !data) return null;
+    if (error) {
+      console.warn(`[enrichment] loadRegionFeed gaf een fout voor ${regionSlug}: ${error.message}`);
+      meldMisser("nearestRegionFeed");
+      return null;
+    }
+    // Antwoord binnen -- of de regio nu een feed had of niet.
+    meldSucces("nearestRegionFeed");
+    if (!data) return null;
     const feed = (data as { local_feed?: unknown }).local_feed;
     return feed ? (feed as MarianaLocalFeed) : null;
-  } catch {
+  } catch (err) {
+    console.warn(`[enrichment] loadRegionFeed faalde voor ${regionSlug}: ${err instanceof Error ? err.message : String(err)}`);
+    meldMisser("nearestRegionFeed");
     return null;
   }
 }

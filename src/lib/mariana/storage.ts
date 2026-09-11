@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { meldMisser, meldSucces } from "@/lib/backend-breaker";
 import type {
   MarianaActualInput,
   MarianaConfidenceResult,
@@ -154,8 +155,11 @@ export async function loadMarianaMemory(locationId: string): Promise<MarianaLoca
   // fouttak apart. Het lege geval blijft stil; dat is normaal.
   if (error) {
     console.warn(`[enrichment] loadMarianaMemory gaf een fout voor ${locationId}: ${error.message}`);
+    meldMisser("loadMarianaMemory");
     return null;
   }
+  // Wél een antwoord van de opslag, ook als er niets opgeslagen stond.
+  meldSucces("loadMarianaMemory");
   if (!data) return null;
   return {
     locationId: data.location_id,
