@@ -256,3 +256,69 @@ Ongewijzigd t.o.v. gisteren — items 2, 3 en 4 hierboven:
    dat dat goedkoop faalt.
 3. **Open-Meteo-quotum.** ~4 calls per render, 1.977 rastercellen. Houd het in de
    gaten; de knoppen staan in item 4 hierboven.
+
+---
+
+# Vervolg 2 — 11 september, "tergend traag"
+
+Melding Rowan: *"Alles doet het op zich wel, maar inloggen oa en laden is
+tergend traag."* Supabase lag op dat moment nog steeds plat.
+
+## Gemeten (weerzone.nl, Playwright)
+
+| | vóór | ná |
+|---|---|---|
+| `/` TTFB | 9993 ms | 153 ms |
+| `/` sessie bruikbaar | 12450 ms | 414 ms |
+| `/vandaag` DOM klaar | 9882 ms | ~900–4000 ms |
+| `/vandaag` sessie bruikbaar | 9943 ms | ~1000–4000 ms |
+
+## Waar het in zat
+
+Vier lagen, allemaal dezelfde fout: een `try/catch` om een supabase-js-call
+zonder deadline. Die client doet eigen retries, dus een onbereikbare backend
+geeft geen snelle fout maar ~8 s stilte.
+
+1. `getAgentPreferences()` — zonder deadline in de `Promise.all` van /vandaag,
+   bepaalde daarmee de rendertijd van de pagina. (`a9g8lx5af`)
+2. `session-context` `hydrate()` — wachtte dezelfde 8 s uit aan de clientkant.
+   De fix van `1dd62db` haalde de site uit "eeuwig blanco", maar liet 'm in
+   "8 seconden leeg" staan.
+3. `PietScoreCard` — servercomponent die `loadScoreDigest()` zonder deadline
+   aanriep en zo de hele /vandaag-stream ophield. Dit was veruit de grootste.
+4. `AgentsHubCard`, `DagplanSheet`, `RegiekamerPanel` — drie client-side
+   `getUser()`-calls die elk hun eigen 8 s openhielden en het load-event
+   vertraagden.
+
+Nieuw: `src/lib/auth-deadline.ts` (`AUTH_DEADLINE_MS` = 2500) en
+`src/lib/backend-breaker.ts`.
+
+## De zekering
+
+Een deadline beschermt één render maar onthoudt niets: élke volgende render
+betaalde 'm opnieuw om hetzelfde te ontdekken. De logs lieten dat letterlijk
+zien — `[enrichment] ... over de deadline van 1200 ms` bij iedere weergave,
+2,4 s per pagina, bij ~5.500 renders per dag.
+
+`backend-breaker.ts` onthoudt het wel: 3 missers op rij → 60 s overslaan → één
+nieuwe poging. De site herstelt dus vanzelf zodra Supabase terugkomt, zonder
+deploy.
+
+**Eén valkuil, en ik ben er zelf ingetrapt.** Eerste versie meldde "succes"
+zodra `withTimeout` een waarde terugkreeg. Maar `loadMarianaMemory` en
+`loadRegionFeed` vangen hun netwerkfout intern af en geven `null` — dus zag die
+laag een geslaagde call en reset de zekering bij elke render. In de logs:
+`[breaker] nearestRegionFeed antwoordt weer — zekering dicht`, terwijl Supabase
+aantoonbaar plat lag. Alleen de bronfunctie kent het verschil tussen "niets
+opgeslagen" en "fout opgevangen", dus melden die het nu zelf. Zonder de logging
+uit `9a49c35` was dit onzichtbaar gebleven.
+
+## Nog open
+
+- De 402's van OpenRouter staan nog in de logs (`getLocationSEOContent`). Raakt
+  alleen de SEO-tekst, faalt goedkoop dankzij de kredietrem, maar kost nog wel
+  een round-trip per render.
+- Supabase-project is definitief weg: Rowan ziet in beide organisaties geen
+  project met ref `bhguergqkyiejyxsiwdu`. Nieuw project aanmaken dus — en let
+  op dat `NEXT_PUBLIC_*` pas na een nieuwe build meekomt. Check daarna met
+  `npx tsx scripts/check-supabase-herstel.ts`.
