@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { meldMisser, meldSucces } from "@/lib/backend-breaker";
 
 /**
  * Piets gelijk-gehad-score (handoff 2026-07-10, blok c): voorspelde dagmax per
@@ -159,8 +160,11 @@ export async function loadScoreDigest(
     .not("measured_max", "is", null);
   if (error) {
     console.error("[scorecard] loadScoreDigest:", error.message);
+    meldMisser("loadScoreDigest");
     return out;
   }
+  // De opslag antwoordde -- of er nu rijen waren of niet.
+  meldSucces("loadScoreDigest");
   const grouped = new Map<string, { forecastDate: string; predictedMax: number; measuredMax: number }[]>();
   for (const raw of (data ?? []) as { forecast_date: string; province: string; place_slug: string; predicted_max: number; measured_max: number }[]) {
     const key = `${raw.province}/${raw.place_slug}`;

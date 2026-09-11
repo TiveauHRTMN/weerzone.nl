@@ -73,3 +73,43 @@ export function meldSucces(naam: string): void {
  * kerngezond is. Daarom melden de aanroepers zelf wat er gebeurde, in plaats
  * van dat deze module naar de waarde raadt.
  */
+
+/**
+ * Deadline + zekering in één, voor aanroepers buiten weather.ts.
+ *
+ * Staat de zekering open, dan wordt `maakPromise` niet eens aangeroepen. Anders
+ * racet hij tegen de deadline; een overschrijding of een worp telt als misser.
+ * Succes meldt hij bewust NIET — of de backend echt antwoordde weet alleen de
+ * bronfunctie, die dat zelf met `meldSucces` doet.
+ */
+export function metDeadline<T>(
+  label: string,
+  maakPromise: () => Promise<T>,
+  ms: number,
+  fallback: T,
+): Promise<T> {
+  if (isOpen(label)) return Promise.resolve(fallback);
+  let settled = false;
+  return Promise.race([
+    maakPromise()
+      .then((waarde) => {
+        settled = true;
+        return waarde;
+      })
+      .catch((err) => {
+        settled = true;
+        console.warn(`[breaker] ${label} faalde: ${err instanceof Error ? err.message : String(err)}`);
+        meldMisser(label);
+        return fallback;
+      }),
+    new Promise<T>((resolve) =>
+      setTimeout(() => {
+        if (!settled) {
+          console.warn(`[breaker] ${label} over de deadline van ${ms} ms — overgeslagen`);
+          meldMisser(label);
+        }
+        resolve(fallback);
+      }, ms),
+    ),
+  ]);
+}

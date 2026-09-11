@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { metDeadline } from "@/lib/backend-breaker";
 import { loadScoreDigest, gradenTekst, type PlaceScoreDigest } from "@/lib/agents/scorecard";
 import { nearestSettlement, placeRouteSlug } from "@/lib/places-data";
 
@@ -27,7 +28,15 @@ export default async function PietScoreCard({ province, placeSlug, placeName }: 
   let label = placeName;
   try {
     const admin = createSupabaseAdminClient();
-    const all = await loadScoreDigest(admin);
+    // Deze kaart is een leuke bonus, geen reden om de hele /vandaag-stream op
+    // te houden. Zonder deadline kostte hij bij een onbereikbare opslag ~8 s,
+    // en omdat dit een servercomponent is bleef de pagina al die tijd hangen.
+    const all = await metDeadline(
+      "loadScoreDigest",
+      () => loadScoreDigest(admin),
+      1200,
+      new Map<string, PlaceScoreDigest>(),
+    );
     digest = all.get(`${province}/${placeSlug}`) ?? null;
     if (!digest) {
       const deBilt = nearestSettlement(52.1017, 5.1783);
