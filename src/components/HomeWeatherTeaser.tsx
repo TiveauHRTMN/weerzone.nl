@@ -21,9 +21,13 @@ export default async function HomeWeatherTeaser() {
   const saved = await getSavedLocationServer().catch(() => null);
   const location = saved || DUTCH_CITIES.find((city) => city.name === "De Bilt") || DUTCH_CITIES[0];
 
+  // 3500 ms, gelijk aan wat /vandaag dezelfde fetch geeft. Op 1500 ms haalde
+  // deze call het op productie nooit (~2,5 s in fra1), dus viel de teaser altijd
+  // stil terug op null en stond de homepage zonder weerkaart. Dit blok streamt
+  // binnen een Suspense-boundary, dus de hero wacht er niet op.
   const weather = await withDeadline(
     fetchWeatherData(location.lat, location.lon, false, false),
-    1500,
+    3500,
     null as WeatherData | null,
   );
   const today = weather?.daily?.[0];
