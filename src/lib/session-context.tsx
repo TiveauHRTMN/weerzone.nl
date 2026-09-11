@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getUserWithDeadline } from "@/lib/auth-deadline";
 import { PERSONA_ORDER, type PersonaTier } from "@/lib/personas";
 import { isFounderEmail, FOUNDER_TIER } from "@/lib/founders";
 import {
@@ -55,6 +56,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
    *
    * Niet ingelogd kunnen vaststellen is een prima uitkomst; niets kunnen
    * vaststellen mag nooit de hele UI gijzelen.
+   *
+   * De try/catch alleen was niet genoeg: een `catch` vangt de fout, maar niet
+   * de tijd. supabase-js doet eigen retries, dus bij een onbereikbare backend
+   * bleef `loading` niet eeuwig true maar wel ~8 seconden true -- de site was
+   * daardoor niet blanco meer, maar wel tergend traag (melding 11 september).
+   * De deadline hieronder maakt van die 8 seconden 2,5.
    */
   async function hydrate() {
     try {
@@ -72,8 +79,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function hydrateInner() {
-    const { data: userData } = await supabase.auth.getUser();
-    const u = userData.user ?? null;
+    const u = await getUserWithDeadline<User>(supabase, "session-context hydrate");
     setUser(u);
     if (!u) {
       setTier(null);

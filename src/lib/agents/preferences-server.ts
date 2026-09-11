@@ -2,6 +2,8 @@ import "server-only";
 
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { User } from "@supabase/supabase-js";
+import { getUserWithDeadline } from "@/lib/auth-deadline";
 import {
   ALL_AGENT_PREFERENCES,
   preferencesFromProfile,
@@ -10,9 +12,9 @@ import {
 
 export const getAgentPreferences = cache(async (): Promise<AgentPreferences> => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Zonder deadline bepaalt deze call de rendertijd van /vandaag: hij zit in de
+  // Promise.all van de pagina, en een onbereikbare auth-backend kost ~8 s.
+  const user = await getUserWithDeadline<User>(supabase, "getAgentPreferences");
 
   if (!user) return ALL_AGENT_PREFERENCES;
 
