@@ -148,7 +148,15 @@ export async function loadMarianaMemory(locationId: string): Promise<MarianaLoca
     .eq("location_id", locationId)
     .maybeSingle();
 
-  if (error || !data) return null;
+  // NL: `null` betekende hier twee dingen tegelijk -- "nog geen geheugen voor
+  // deze locatie" en "de opslag antwoordde met een fout". Bij het herstel na de
+  // septemberstoring is precies dat verschil wat je wilt zien, dus loggen we de
+  // fouttak apart. Het lege geval blijft stil; dat is normaal.
+  if (error) {
+    console.warn(`[enrichment] loadMarianaMemory gaf een fout voor ${locationId}: ${error.message}`);
+    return null;
+  }
+  if (!data) return null;
   return {
     locationId: data.location_id,
     locationName: data.location_name ?? undefined,

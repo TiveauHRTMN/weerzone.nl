@@ -84,10 +84,37 @@ export const PROGRAMMATIC_GRID_STEP = 0.05;
  */
 const ENRICHMENT_DEADLINE_MS = 1200;
 
-function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+/**
+ * NL: het label is geen luxe. Deze race valt stil terug op `fallback`, dus als
+ * de opslag traag is verdwijnt de verrijking zonder spoor en zie je een pagina
+ * die 200 geeft met onverrijkte cijfers. Precies dat maakte de storing van
+ * september onzichtbaar. Daarom loggen we apart waaróm we terugvallen: een
+ * afgekapte deadline is iets anders dan een fout, en alleen het eerste betekent
+ * "zet die 1200 ms hoger".
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T, label?: string): Promise<T> {
+  let settled = false;
   return Promise.race([
-    promise.catch(() => fallback),
-    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+    promise
+      .then((value) => {
+        settled = true;
+        return value;
+      })
+      .catch((err) => {
+        settled = true;
+        if (label) {
+          console.warn(`[enrichment] ${label} faalde: ${err instanceof Error ? err.message : String(err)}`);
+        }
+        return fallback;
+      }),
+    new Promise<T>((resolve) =>
+      setTimeout(() => {
+        if (label && !settled) {
+          console.warn(`[enrichment] ${label} over de deadline van ${ms} ms — verrijking overgeslagen`);
+        }
+        resolve(fallback);
+      }, ms),
+    ),
   ]);
 }
 
@@ -692,6 +719,7 @@ export async function fetchWeatherData(
         loadMarianaMemory(location.locationId),
         ENRICHMENT_DEADLINE_MS,
         null,
+        "loadMarianaMemory",
       );
 
       // NL: Mariana Local wordt gevoed door de dagelijkse Regions-feed (regime +
@@ -705,7 +733,7 @@ export async function fetchWeatherData(
             import("@/lib/mariana/regions/storage"),
             import("@/lib/mariana/local/feed"),
           ]);
-          const feed = await withTimeout(nearestRegionFeed(lat, lon), ENRICHMENT_DEADLINE_MS, null);
+          const feed = await withTimeout(nearestRegionFeed(lat, lon), ENRICHMENT_DEADLINE_MS, null, "nearestRegionFeed");
           if (feed) tuning = tuningFromFeed(feed);
         } catch (err) {
           console.error("Mariana Local feed skipped:", err instanceof Error ? err.message : String(err));
