@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getUserWithDeadline } from "@/lib/auth-deadline";
 import { updateProfile } from "@/app/actions";
 import { trackEvent } from "@/lib/analytics";
 import { insertMoment } from "@/lib/agents/moments-client";
@@ -42,7 +43,7 @@ export default function DagplanSheet() {
   const searchSeq = useRef(0);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    getUserWithDeadline<{ id: string }>(supabase, "DagplanSheet").then((user) => setUserId(user?.id ?? null));
   }, [supabase]);
 
   useEffect(() => {

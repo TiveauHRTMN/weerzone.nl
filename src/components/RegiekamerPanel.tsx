@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getUserWithDeadline } from "@/lib/auth-deadline";
 import { updateProfile } from "@/app/actions";
 import { trackEvent } from "@/lib/analytics";
 import { MOMENT_KIND_LABEL, nlDateISO, type AgentMoment, type MomentKind } from "@/lib/agents/moments-shared";
@@ -89,9 +90,7 @@ export default function RegiekamerPanel({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getUserWithDeadline<{ id: string }>(supabase, "RegiekamerPanel");
       if (!user || cancelled) return;
       setUserId(user.id);
       const [subsRes, momentRows, devicesRes] = await Promise.all([

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getUserWithDeadline } from "@/lib/auth-deadline";
 import { trackEvent } from "@/lib/analytics";
 import PwaInstallCard, { isIOS, isStandalone } from "@/components/PwaInstallCard";
 
@@ -73,9 +74,7 @@ export default function AgentsHubCard({ placeName, province, placeSlug }: Agents
 
     let cancelled = false;
     (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getUserWithDeadline<{ id: string }>(supabase, "AgentsHubCard");
       if (cancelled) return;
       if (!user) {
         setSession("anon");
