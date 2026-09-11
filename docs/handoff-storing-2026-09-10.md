@@ -180,3 +180,79 @@ is ongevaarlijk; een client die er beleefd 8 s over doet, sloopt je ISR.
 faalt, niet dat de cache verkeerd staat. En pas op met "first seen" in de
 Vercel-runtime-errors: die logs gaan maar 7 dagen terug, dus het leek alsof alles
 op 3 september tegelijk omviel terwijl dat gewoon de rand van het venster was.
+
+---
+
+# Vervolg — 11 september 2026, uitgerold
+
+Laatste commit: `c9a1935`. Productie draait nu op `weerzone-d2q6vqzxk`
+(`dpl_AGm4AVni2STDpKptL598246aU7Qo`).
+
+## Wat er is gebeurd
+
+**Item 1 hierboven is afgerond.** De begintoestand was ongewijzigd: prod draaide
+nog op de deploy van 14 juli, `/weer/utrecht/utrecht` gaf `Age: 700959`
+(8,1 dag) met `X-Vercel-Cache: STALE` en `dateModified 2026-09-03`, en het
+Supabase-project resolvet nog steeds niet (NXDOMAIN).
+
+Na de deploy, gemeten op `weerzone.nl`:
+
+| Route | Voor | Na |
+|---|---|---|
+| `/weer/utrecht/utrecht` | STALE, `Age: 700959`, 3 sept | 200, `Age: 0`, `dateModified` = lopend uur |
+| `/weer/limburg/heerlen` | — | 200, lopend uur |
+| `/vandaag` | "niet beschikbaar" | 200, 12 temperatuurwaarden |
+| `/` | alleen de schil | hero + weerteaser |
+
+Steekproef van 8 koude provincie-pagina's (Haarlem, Apeldoorn, Leeuwarden,
+Middelburg, Assen, Zwolle, Groningen, Lelystad): 8× 200.
+
+De `--prod`-deploy heeft dit keer **vanzelf gealiast** — `vercel promote` gaf
+daarna `409: already the current production deployment`. Blijf de output dus
+lezen in plaats van blind promoten (staat ook zo in memory).
+
+Let op: `vercel deploy` brak beide keren af met `deploy_failed / fetch failed`
+ná "Build Completed". Dat is de CLI die zijn polling verliest, niet de deploy.
+Beide deploys stonden gewoon op `● Ready` in `vercel list`. Niet opnieuw
+deployen op die melding — eerst `vercel list` checken.
+
+## Nieuwe bevinding: de homepage was nog steeds leeg
+
+De sessie-fix van gisteren (`1dd62db`) is nu wél in een browser geverifieerd
+(Playwright, want er was opnieuw geen browserextensie): `loading` eindigt netjes
+op `false`, de nav vult zich, nul page errors. Maar de homepage bleef daarmee
+alsnog zonder weerkaart — precies het symptoom dat Rowan beschreef.
+
+Dat lag niet aan de sessie. `src/components/HomeWeatherTeaser.tsx` gaf
+`fetchWeatherData` een deadline van **1500 ms**. Die call doet er op productie
+~2,5 s over — ook ná `ad26788`. De race viel dus altijd terug op `null`, en de
+component rendert bij `null` bewust niets ("dan blijft de hero heel"). Resultaat:
+een homepage die technisch klopt en visueel leeg is, zonder één foutmelding.
+
+Gemeten, 4 achtereenvolgende renders op de kandidaat vóór de fix: 0 van de 4
+toonden de teaser. Lokaal duurt dezelfde call 1253 ms — net binnen de 1500 —
+wat verklaart waarom dit lokaal nooit opviel.
+
+`/vandaag` geeft exact dezelfde call 3500 ms (`src/lib/agents/context.ts`) en
+rendeerde wél. `c9a1935` trekt de teaser daarop gelijk. Na de fix: 3 van de 3
+renders met teaser, en live "15° in De Bilt · Motregen · 13° tot 19°".
+
+De component zit in een `Suspense`-boundary met een skeleton, dus de hero wacht
+niet op die 3,5 s. De volledige body van `/` gaat wel van ~1,65 s naar ~2,7 s.
+
+Dit is dezelfde les als gisteren, maar één laag hoger: **een deadline die
+strakker staat dan de call ooit haalt, is geen vangnet maar een uit-knop.** En
+omdat de fallback hier stilletjes niets rendert, ziet je monitoring 200 OK.
+
+## Wat er nog steeds op jou wacht
+
+Ongewijzigd t.o.v. gisteren — items 2, 3 en 4 hierboven:
+
+1. **Supabase terug.** Nog steeds NXDOMAIN. Accounts, abonnementen, push en de
+   cron-mail liggen plat; de site draait in uitgelogde noodstand. Dat is nu een
+   bewuste, werkende noodstand in plaats van een blanco pagina, maar het blijft
+   een noodstand.
+2. **OpenRouter-credits.** Zonder saldo blijven de SEO-teksten leeg. De rem zorgt
+   dat dat goedkoop faalt.
+3. **Open-Meteo-quotum.** ~4 calls per render, 1.977 rastercellen. Houd het in de
+   gaten; de knoppen staan in item 4 hierboven.
